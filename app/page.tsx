@@ -1,12 +1,14 @@
 import { CSSProperties } from "react";
 import Image from "next/image";
 import BPLogo from "@/assets/images/bp-logo.png";
+import UserGroupsPage from "@/app/user_groups/page"
 
 export default function Home() {
   return (
     <main style={mainStyles}>
       <Image style={imageStyles} src={BPLogo} alt="Blueprint Logo" />
       <p>Open up app/page.tsx to get started!</p>
+      <UserGroupsPage/>
     </main>
   );
 }
