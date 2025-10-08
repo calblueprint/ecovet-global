@@ -1,7 +1,4 @@
 import { createClient } from "@supabase/supabase-js";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 if (
   !process.env.NEXT_PUBLIC_SUPABASE_URL ||
