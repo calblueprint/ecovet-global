@@ -62,27 +62,29 @@ export default function NewTemplatePage() {
     // go to add roles
     return
   }
+  const components = [<ScenarioStep/>, <RolesStep/>, <PhasesStep/>];
+  const [index, setIndex] = useState(0);
 
-//   const TABS = [
-//   { id: "intro",       label: "Introduction",  component: IntroTab },
-//   { id: "experience",  label: "Work Experience", component: ExperienceTab },
-//   { id: "education",   label: "Education",     component: EducationTab },
-//   { id: "review",      label: "Review & Submit", component: ReviewTab },
-// ];
+  const next = () => {
+    setIndex((prev) => (prev + 1) % components.length);
+  };
+
   return(
     <>
       <h1>New Template Page</h1>
       {/* scenario title */}
       {/* scenario description */}
-      <ScenarioStep/>
+      {components[index]}
+      <button onClick={next}>Next Component</button>
+      {/* <ScenarioStep/> */}
       {/* next --------> */}
-      <RolesStep/>
+      {/* <RolesStep/> */}
       {/* add roles */}
         {/* role name */}
         {/* role description */}
         {/* OPTIONAL: role requirements? */}
       {/* next --------> */}
-      <PhasesStep/>
+      {/* <PhasesStep/> */}
       {/* add phases */}
         {/* phase title */}
         {/* phase description */}
