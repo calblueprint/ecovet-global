@@ -3,9 +3,10 @@
 import { NewRole, NewPhase } from "./components/components";
 import { useState } from "react";
 
-function ScenarioStep() {
+function ScenarioStep({next} : {next: () => void}) {
   return (
-    <form>
+    <>
+      <form>
         <label>
           Scenario Title:
           <input type="text" name="scenario_title" placeholder="" />
@@ -14,16 +15,17 @@ function ScenarioStep() {
           Scenario Description:
           <input type="text" name="scenario_description" placeholder="" />
         </label>
-        <input type="submit" value="Add Roles" />
       </form>
+      <button onClick={next}>Add Roles</button>
+    </>
   )
 }
 
-function RolesStep() {
-  const [roles, SetRoles] = useState([<NewRole/>]);
+function RolesStep({next} : {next: () => void}) {
+  const [roles, setRoles] = useState([<NewRole key={0}/>]);
 
   const newRole = () => {
-    SetRoles([...roles, <NewRole/>])
+    setRoles([...roles, <NewRole key={roles.length}/>])
   }
   return (
     <>
@@ -31,18 +33,18 @@ function RolesStep() {
         role
       ))}
       <button onClick={newRole}>New Role</button>
-      <button>Add Phases</button>
+      <button onClick={next}>Add Phases</button>
     </>
   )
 }
 
 function PhasesStep() {
-  let roles = ['role1', 'role2', 'role3']
+  let roles = ['role1', 'role2', 'role3'];
 
-  const [phases, SetPhases] = useState([<NewPhase roles={roles}/>]);
+  const [phases, setPhases] = useState([<NewPhase roles={roles} key={0}/>]);
 
   const newPhase = () => {
-    SetPhases([...phases, <NewPhase roles={roles}/>])
+    setPhases([...phases, <NewPhase roles={roles} key={phases.length}/>])
   }
   return (
     <>
@@ -56,40 +58,18 @@ function PhasesStep() {
 }
 
 
-
 export default function NewTemplatePage() {
-  const submitScenario = () => {
-    // go to add roles
-    return
-  }
-  const components = [<ScenarioStep/>, <RolesStep/>, <PhasesStep/>];
-  const [index, setIndex] = useState(0);
-
   const next = () => {
-    setIndex((prev) => (prev + 1) % components.length);
+    setIndex((prev) => (prev + 1));
   };
+
+  const components = [<ScenarioStep next={next}/>, <RolesStep next={next}/>, <PhasesStep/>];
+  const [index, setIndex] = useState(0);
 
   return(
     <>
       <h1>New Template Page</h1>
-      {/* scenario title */}
-      {/* scenario description */}
       {components[index]}
-      <button onClick={next}>Next Component</button>
-      {/* <ScenarioStep/> */}
-      {/* next --------> */}
-      {/* <RolesStep/> */}
-      {/* add roles */}
-        {/* role name */}
-        {/* role description */}
-        {/* OPTIONAL: role requirements? */}
-      {/* next --------> */}
-      {/* <PhasesStep/> */}
-      {/* add phases */}
-        {/* phase title */}
-        {/* phase description */}
-        {/* for each role */}
-          {/* question input */}
     </>
   )
 }
