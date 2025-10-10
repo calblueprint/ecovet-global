@@ -17,9 +17,6 @@ importers:
       next:
         specifier: ^15.5.2
         version: 15.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
-      pnpm:
-        specifier: ^10.17.1
-        version: 10.17.1
       react:
         specifier: ^19.1.1
         version: 19.1.1
@@ -1575,11 +1572,6 @@ packages:
   picomatch@2.3.1:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
-
-  pnpm@10.17.1:
-    resolution: {integrity: sha512-F8Vg/KSGeulHOjiZrYSogzSRTzeb5G1FXL+S5c9LOdNJhdRS0lg7rxmWf6dstcF7yeJFUp0LmHRXIapyAOyveg==}
-    engines: {node: '>=18.12'}
-    hasBin: true
 
   possible-typed-array-names@1.0.0:
     resolution: {integrity: sha512-d7Uw+eZoloe0EHDIYoe+bQ5WXnGMOpmiZFTuMWCwpjzzkL2nTjcKiAk4hh8TjnGye2TwWOk3UXucZ+3rbmBa8Q==}
@@ -3830,8 +3822,6 @@ snapshots:
   picocolors@1.1.1: {}
 
   picomatch@2.3.1: {}
-
-  pnpm@10.17.1: {}
 
   possible-typed-array-names@1.0.0: {}
 
