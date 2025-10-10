@@ -1,7 +1,7 @@
 import { CSSProperties } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import BPLogo from "@/assets/images/bp-logo.png";
-import Link from 'next/link';
 
 export default function Home() {
   return (
