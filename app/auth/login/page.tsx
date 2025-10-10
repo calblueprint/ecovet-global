@@ -14,7 +14,12 @@ export default function Login() {
       password,
     });
     if (error) {
-      throw new Error('An error occurred during sign up: ' + error.message);
+      throw new Error(
+        "An error occurred during sign up: " +
+          error.message +
+          "with email" +
+          data,
+      );
     }
   };
 
@@ -24,17 +29,21 @@ export default function Login() {
       password,
     });
     if (error) {
-      throw new Error('An error occurred during sign up: ' + error.message);
+      throw new Error(
+        "An error occurred during sign up: " +
+          error.message +
+          "with email" +
+          data,
+      );
     }
   };
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
-      throw new Error('An error occurred during sign up: ' + error.message);
+      throw new Error("An error occurred during sign up: " + error.message);
     }
   };
-  
 
   return (
     <>
