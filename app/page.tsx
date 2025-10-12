@@ -1,5 +1,6 @@
 import { CSSProperties } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import BPLogo from "@/assets/images/bp-logo.png";
 
 export default function Home() {
@@ -7,6 +8,9 @@ export default function Home() {
     <main style={mainStyles}>
       <Image style={imageStyles} src={BPLogo} alt="Blueprint Logo" />
       <p>Open up app/page.tsx to get started!</p>
+      <Link href="/auth/login">
+        <button>Log In</button>
+      </Link>
     </main>
   );
 }
