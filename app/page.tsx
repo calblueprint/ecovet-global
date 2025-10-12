@@ -8,8 +8,8 @@ export default function Home() {
     <main style={mainStyles}>
       <Image style={imageStyles} src={BPLogo} alt="Blueprint Logo" />
       <p>Open up app/page.tsx to get started!</p>
-      <Link href="/onboarding">
-        <button>Go to Onboarding</button>
+      <Link href="/auth/login">
+        <button>Log In</button>
       </Link>
     </main>
   );

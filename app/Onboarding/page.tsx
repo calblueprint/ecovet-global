@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import supabase from "../../actions/supabase/client";
-import { inputButton } from "./styles";
 
 function OnboardingPage() {
   const [firstName, setFirstName] = useState("");
@@ -35,10 +34,12 @@ function OnboardingPage() {
       return;
     }
 
+    await supabase.auth.getSession();
+
     const { error } = await supabase
       .from("profile")
       .upsert({
-        user_id: user.id,
+        id: user.id,
         first_name: firstName,
         last_name: lastName,
         country: country,
@@ -68,6 +69,7 @@ function OnboardingPage() {
             type="text"
             value={firstName}
             onChange={e => setFirstName(e.target.value)}
+            required
           />
         </div>
         <br />
@@ -78,6 +80,7 @@ function OnboardingPage() {
             type="text"
             value={lastName}
             onChange={e => setLastName(e.target.value)}
+            required
           />
         </div>
         <br />
@@ -88,6 +91,7 @@ function OnboardingPage() {
             type="text"
             value={country}
             onChange={e => setCountry(e.target.value)}
+            required
           />
         </div>
         <br />
@@ -98,10 +102,11 @@ function OnboardingPage() {
             type="text"
             value={role}
             onChange={e => setRole(e.target.value)}
+            required
           />
         </div>
         <br />
-        <button type="submit" className={inputButton} disabled={loading}>
+        <button type="submit" disabled={loading}>
           {loading ? "Saving" : "Submit Profile"}
         </button>
       </form>
