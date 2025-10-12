@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import supabase from "../actions/supabase/client";
 
 type Profile = {
-  user_id: string;
+  id: string;
   first_name: string | null;
   last_name: string | null;
   country: string | null;
