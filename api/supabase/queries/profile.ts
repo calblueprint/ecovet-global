@@ -23,12 +23,12 @@ export async function fetchExpandedProfileByUserId(user_id: UUID) {
 
   const expandedProfile = {
     id: profile.id,
-    user_group_schema: fetchUserGroupById(profile.user_group_id),
-    phase_schema: fetchPhaseById(profile.phase_id),
-    role_schema: fetchRoleById(profile.role_id),
+    user_group_schema: await fetchUserGroupById(profile.user_group_id),
+    phase_schema: await fetchPhaseById(profile.phase_id),
+    role_schema: await fetchRoleById(profile.role_id),
     user_type: profile.user_type,
     is_finished: profile.is_finished,
-    first_name: profile.last_name,
+    first_name: profile.first_name,
     last_name: profile.last_name,
     country: profile.country,
     org_role: profile.org_role,
@@ -67,7 +67,7 @@ export async function fetchPhaseById(phase_id: UUID) {
 
 export async function fetchRoleById(role_id: UUID) {
   const { data, error } = await supabase
-    .from("roles")
+    .from("role")
     .select("*")
     .eq("role_id", role_id)
     .single();

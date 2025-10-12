@@ -40,7 +40,7 @@ export interface Profile {
 export interface Role {
   role_id: UUID; // role_id
   role_name: string;
-  role_description?: string;
+  role_description: string | null;
   template_id: UUID;
 }
 
@@ -48,7 +48,11 @@ export interface Template {
   template_id: UUID; // template_id
   template_name: string;
   accessible_to_all: boolean;
-  user_group_id?: UUID;
+  user_group_id: UUID | null;
+  objective: string;
+  summary: string;
+  setting: string;
+  current_activity: string;
 }
 
 export interface Session {
@@ -64,8 +68,15 @@ export interface Phase {
   phase_id: UUID; // phase_id
   session_id: UUID;
   phase_name: string;
-  phase_description: string;
+  phase_description: string | null;
   is_finished: boolean;
+}
+
+export interface RolePhase {
+  role_phase_id: UUID; 
+  phase_id: UUID;
+  role_id: UUID;
+  description: string;
 }
 
 export interface Prompt {
