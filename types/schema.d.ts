@@ -73,7 +73,7 @@ export interface Phase {
 }
 
 export interface RolePhase {
-  role_phase_id: UUID; 
+  role_phase_id: UUID;
   phase_id: UUID;
   role_id: UUID;
   description: string;
