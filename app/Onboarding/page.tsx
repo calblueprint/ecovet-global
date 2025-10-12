@@ -92,7 +92,7 @@ function OnboardingPage() {
         </div>
         <br />
         <div>
-          <label htmlFor="role">Role: </label>
+          <label htmlFor="orgRole">Role: </label>
           <input
             id="orgRole"
             type="text"
