@@ -30,7 +30,7 @@ export default function Login() {
     });
     if (error) {
       throw new Error(
-        "An error occurred during sign up: " +
+        "An error occurred during sign in: " +
           error.message +
           "with email" +
           data,
@@ -41,7 +41,7 @@ export default function Login() {
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
-      throw new Error("An error occurred during sign up: " + error.message);
+      throw new Error("An error occurred during sign out: " + error.message);
     }
   };
 
