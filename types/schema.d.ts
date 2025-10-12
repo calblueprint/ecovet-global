@@ -82,7 +82,7 @@ export interface RolePhase {
 export interface Prompt {
   prompt_id: UUID; // prompt_id
   phase_id: UUID;
-  role_id: UUID;
+  role_phase_id: UUID;
   prompt_text: string;
 }
 
