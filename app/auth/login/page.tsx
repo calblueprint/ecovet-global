@@ -48,11 +48,16 @@ export default function Login() {
   return (
     <>
       <div className={styles.main}>
-        <h1>Login Page</h1>
-        Type your email here:
-        <div className={styles.inputFields}>
+        <div className={styles.welcomeTag}>Welcome!</div>
+        <div className={styles.instructionTag}>
+          {" "}
+          Already have an account? Sign in.
+        </div>
+        Email address
+        <div>
           <input
             name="email"
+            className={styles.emailField}
             onChange={e => setEmail(e.target.value)}
             value={email}
           />
@@ -64,6 +69,7 @@ export default function Login() {
             name="password"
             onChange={e => setPassword(e.target.value)}
             value={password}
+            className={styles.passwordField}
           />
         </div>
         <div className={styles.buttonStyles}>
