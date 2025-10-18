@@ -3,8 +3,11 @@ import type { UUID } from "crypto";
 // ENUM for Emails.user_email
 export type EmailType = "PLACEHOLDER";
 
-// ENUM for Profiles.user_group
+// ENUM for user_type / user_group
 export type UserType = "Admin" | "Facilitator" | "Participant";
+
+// ENUM for status
+export type StatusType = "Pending" | "Accepted";
 
 /* SCHEMA */
 //org_id --> user_group_id
@@ -91,4 +94,13 @@ export interface PromptAnswer {
   user_id: UUID;
   prompt_id: UUID;
   prompt_answer: string;
+}
+
+export interface Invite {
+  invite_id: UUID;
+  email: string;
+  user_group_id: UUID;
+  invited_by_user_id: UUID;
+  user_type: UserType;
+  status: StatusType;
 }
