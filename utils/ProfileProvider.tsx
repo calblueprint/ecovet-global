@@ -5,10 +5,15 @@ import supabase from "../actions/supabase/client";
 
 type Profile = {
   id: string;
+  user_type: string | null;
+  user_group_id: string | null;
+  role_id: string | null;
   first_name: string | null;
   last_name: string | null;
   country: string | null;
   org_role: string | null;
+  is_finished: boolean | null;
+  phase_id: string | null;
 };
 
 type Context = {
