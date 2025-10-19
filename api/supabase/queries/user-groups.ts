@@ -7,15 +7,7 @@ export async function fetchUserGroups() {
 
     if (error) throw error;
 
-    // Process data
-    if (data) {
-      const mapped = data.map(usergrp => ({
-        id: usergrp.user_group_id,
-        user_group_name: usergrp.user_group_name,
-      }));
-
-      return mapped;
-    }
+    return data;
   } catch (error) {
     console.log("Error fetching orgs data from supabase API: ", error);
   }
