@@ -1,14 +1,14 @@
 "use client";
 
-import { AuthResponse, Session } from '@supabase/supabase-js';
 import React, {
   createContext,
   useContext,
   useEffect,
   useMemo,
   useState,
-} from 'react';
-import supabase from '../actions/supabase/client';
+} from "react";
+import { AuthResponse, Session } from "@supabase/supabase-js";
+import supabase from "../actions/supabase/client";
 
 export interface AuthState {
   session: Session | null;
@@ -22,10 +22,10 @@ const AuthContext = createContext({} as AuthState);
 
 export function useSession() {
   const value = useContext(AuthContext);
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== "production") {
     if (!value) {
       throw new Error(
-        'useSession must be wrapped in a <AuthContextProvider />',
+        "useSession must be wrapped in a <AuthContextProvider />",
       );
     }
   }
@@ -33,7 +33,11 @@ export function useSession() {
   return value;
 }
 
-export function AuthContextProvider({ children }: { children: React.ReactNode }) {
+export function AuthContextProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
@@ -60,7 +64,7 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
     supabase.auth.signInWithPassword({
       email,
       password,
-    }); 
+    });
 
   const signOut = () => {
     supabase.auth.signOut();
@@ -81,6 +85,6 @@ export function AuthContextProvider({ children }: { children: React.ReactNode })
   return React.createElement(
     AuthContext.Provider,
     { value: authContextValue },
-    children
+    children,
   );
 }

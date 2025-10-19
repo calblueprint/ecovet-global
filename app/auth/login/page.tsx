@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import supabase from "@/actions/supabase/client";
-import styles from "./styles.module.css";
 import { useSession } from "@/utils/AuthProvider";
+import styles from "./styles.module.css";
 
 export default function Login() {
   const router = useRouter();
@@ -13,7 +12,7 @@ export default function Login() {
   const sessionHandler = useSession();
 
   const handleSignUp = async () => {
-    const { error } = await sessionHandler.signUp(email, password)
+    const { error } = await sessionHandler.signUp(email, password);
     if (error) {
       throw new Error(
         "An error occurred during sign up: " +
@@ -25,7 +24,7 @@ export default function Login() {
   };
 
   const signInWithEmail = async () => {
-    const { error } = await sessionHandler.signInWithEmail(email, password)
+    const { error } = await sessionHandler.signInWithEmail(email, password);
     if (error) {
       throw new Error(
         "An error occurred during sign in: " +
@@ -41,8 +40,7 @@ export default function Login() {
   const signOut = async () => {
     try {
       await sessionHandler.signOut();
-    }
-    catch (error) {
+    } catch (error) {
       throw new Error("An error occurred during sign out: " + error);
     }
   };
