@@ -1,8 +1,8 @@
 import { UUID } from "crypto"
 import supabase from "../createClient"
 
-export async function createTemplates(template_name: string, accessible_to_all: boolean, objective:string, summary:string, setting:string, current_activity:string, user_group_id: UUID|null=null): Promise<void> {
-    const { error } = await supabase
+export async function createTemplates(template_name: string, accessible_to_all: boolean, objective:string, summary:string, setting:string, current_activity:string, user_group_id: UUID|null=null): Promise<UUID|void> {
+    const { data, error } = await supabase
     .from('template')
     .insert({ 
         template_name: template_name,
@@ -12,7 +12,14 @@ export async function createTemplates(template_name: string, accessible_to_all: 
         summary: summary,
         setting: setting,
         current_activity: current_activity, })
-    return;
+    .select("template_id")
+    .single(); 
+    
+    if (error) {
+        console.error("Error inserting template:", error);
+        return;
+    }
+    return data.template_id;
 }
 
 export async function createPhases(session_id: UUID, phase_name: string, is_finished: boolean, phase_description: string|null=null): Promise<void> {
@@ -23,7 +30,7 @@ export async function createPhases(session_id: UUID, phase_name: string, is_fini
         phase_name: phase_name,
         phase_description: phase_description,
         is_finished: is_finished,
-    })
+    });
     return;
 }
 
