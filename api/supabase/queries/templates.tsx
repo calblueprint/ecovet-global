@@ -19,7 +19,8 @@ export async function createTemplates(template_name: string, accessible_to_all: 
     return data.template_id;
 }
 
-export async function createPhases(session_id: UUID|null, phase_name: string, is_finished: boolean, phase_description: string|null=null): Promise<UUID> {
+export async function createPhases(session_id: UUID|null, phase_name: string, is_finished: boolean, 
+    phase_description: string|null=null): Promise<UUID> {
     const { data, error } = await supabase
     .from('phase')
     .insert({ 
@@ -66,11 +67,11 @@ export async function createRolePhases(phase_id: UUID, role_id: UUID, descriptio
     return data.role_phase_id;
 }
 
-export async function createPrompts(phase_id: UUID, role_phase_id: UUID, prompt_text: string): Promise<UUID> {
+export async function createPrompts(user_id: UUID|null, role_phase_id: UUID, prompt_text: string): Promise<UUID> {
     const { data, error } = await supabase
     .from('prompt')
     .insert({ 
-        phase_id: phase_id,
+        user_id: user_id,
         role_phase_id: role_phase_id,
         prompt_text: prompt_text,
     })
