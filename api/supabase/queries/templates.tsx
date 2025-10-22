@@ -1,7 +1,7 @@
 import { UUID } from "crypto"
 import supabase from "../createClient"
 
-export async function createTemplates(template_name: string, accessible_to_all: boolean, objective:string, summary:string, setting:string, current_activity:string, user_group_id: UUID|null=null): Promise<UUID|void> {
+export async function createTemplates(template_name: string, accessible_to_all: boolean, objective:string, summary:string, setting:string, current_activity:string, user_group_id: UUID|null=null): Promise<UUID> {
     const { data, error } = await supabase
     .from('template')
     .insert({ 
@@ -15,34 +15,39 @@ export async function createTemplates(template_name: string, accessible_to_all: 
     .select("template_id")
     .single(); 
     
-    if (error) {
-        console.error("Error inserting template:", error);
-        return;
-    }
+    if (error) throw error;
     return data.template_id;
 }
 
-export async function createPhases(session_id: UUID, phase_name: string, is_finished: boolean, phase_description: string|null=null): Promise<void> {
-    const { error } = await supabase
+export async function createPhases(session_id: UUID|null, phase_name: string, is_finished: boolean, phase_description: string|null=null): Promise<UUID> {
+    const { data, error } = await supabase
     .from('phase')
     .insert({ 
         session_id: session_id,
         phase_name: phase_name,
         phase_description: phase_description,
         is_finished: is_finished,
-    });
-    return;
+    })
+    .select('phase_id')
+    .single();
+
+    if (error) throw error;
+    return data.phase_id;
 }
 
-export async function createRoles(role_name: string, template_id: UUID, role_description: string|null=null): Promise<void> {
-    const { error } = await supabase
+export async function createRoles(role_name: string, template_id: UUID, role_description: string|null=null): Promise<UUID> {
+    const { data, error } = await supabase
     .from('role')
     .insert({ 
         role_name: role_name,
         role_description: role_description,
         template_id: template_id,
     })
-    return;
+    .select('role_id')
+    .single();
+    if (error) throw error;
+    return data.role_id;
+
 }
 
 export async function createRolePhases(phase_id: UUID, role_id: UUID, description: string): Promise<void> {

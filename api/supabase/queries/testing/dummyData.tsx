@@ -10,8 +10,20 @@ export const defaultTemplates = [
     }
 ] as const;
 
-
-
+export const defaultPhases = [
+    {
+        session_id: null,
+        phase_name: 'My First Phase',
+        phase_description: "The phase that is my first.",
+        is_finished: true,
+    },
+    {
+        session_id: null,
+        phase_name: 'My Second Phase',
+        phase_description: "This is the phase that came second.",
+        is_finished: false,
+    },
+] as const;
 
 export const defaultRoles = [
   {

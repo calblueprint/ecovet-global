@@ -66,7 +66,7 @@ export interface Session {
 
 export interface Phase {
   phase_id: UUID; // phase_id
-  session_id: UUID;
+  session_id: UUID | null;
   phase_name: string;
   phase_description: string | null;
   is_finished: boolean;
