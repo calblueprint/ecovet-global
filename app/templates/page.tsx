@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { NewPhase, NewRole } from "./components/components";
+import insertTemplateFlow from "@/api/supabase/queries/testing/templates";
 
-function ScenarioStep({ next }: { next: () => void }) {
+async function ScenarioStep({ next }: { next: () => void }) {
   return (
     <>
       <form>
@@ -17,6 +18,7 @@ function ScenarioStep({ next }: { next: () => void }) {
         </label>
       </form>
       <button onClick={next}>Add Roles</button>
+      <button onClick={await insertTemplateFlow}>Test insertTemplateFlow</button>
     </>
   );
 }

@@ -1,5 +1,5 @@
 import styled, { css } from "styled-components";
-import { P2 } from "@/styles/text";
+import { B2 } from "@/styles/text";
 
 interface ButtonProps {
   $primaryColor?: string;
@@ -52,7 +52,7 @@ const ButtonStyles = css<ButtonProps>`
   }
 `;
 
-export const Button = styled(P2).attrs({ as: "button" })<ButtonProps>`
+export const Button = styled(B2).attrs({ as: "button" })<ButtonProps>`
   ${ButtonStyles}
 
   width: ${({ $width }) => $width || "156px"};
