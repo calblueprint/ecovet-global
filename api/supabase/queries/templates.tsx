@@ -45,29 +45,38 @@ export async function createRoles(role_name: string, template_id: UUID, role_des
     })
     .select('role_id')
     .single();
+
     if (error) throw error;
     return data.role_id;
 
 }
 
-export async function createRolePhases(phase_id: UUID, role_id: UUID, description: string): Promise<void> {
-    const { error } = await supabase
+export async function createRolePhases(phase_id: UUID, role_id: UUID, description: string): Promise<UUID> {
+    const { data, error } = await supabase
     .from('role_phase')
     .insert({ 
         phase_id: phase_id,
         role_id: role_id,
         description: description,
     })
-    return;
+    .select('role_phase_id')
+    .single();
+    
+    if (error) throw error;
+    return data.role_phase_id;
 }
 
-export async function createPrompts(phase_id: UUID, role_phase_id: UUID, prompt_text: string): Promise<void> {
-    const { error } = await supabase
+export async function createPrompts(phase_id: UUID, role_phase_id: UUID, prompt_text: string): Promise<UUID> {
+    const { data, error } = await supabase
     .from('prompt')
     .insert({ 
         phase_id: phase_id,
         role_phase_id: role_phase_id,
         prompt_text: prompt_text,
     })
-    return;
+    .select('prompt_id')
+    .single();
+
+    if (error) throw error;
+    return data.prompt_id;
 }

@@ -35,3 +35,33 @@ export const defaultRoles = [
     role_description: "Learns from teacher.",
   },
 ] as const;
+
+export const defaultRolePhases = [
+  {
+    description: "I lowk have no idea what this is for",
+  },
+  {
+    description: "For a second time, I have no clue",
+  },
+  {
+    description: "Hm maybe this third one will come to me",
+  },
+  {
+    description: "Nvm I don't get this fourth",
+  },
+] as const;
+
+export const defaultPrompts = [
+  {
+    prompt_text: "prompt text 1",
+  },
+  {
+    prompt_text: "prompt text 2",
+  },
+  {
+    prompt_text: "prompt text 3",
+  },
+  {
+    prompt_text: "prompt text 4",
+  },
+] as const;
