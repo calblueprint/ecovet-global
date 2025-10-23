@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import supabase from "@/actions/supabase/client";
 import styles from "./styles.module.css";
@@ -93,6 +94,9 @@ export default function Login() {
             Sign out{" "}
           </button>
         </div>
+        I apologize for this styling. But please click{" "}
+        <Link href="/auth/reset-password"> here </Link> if you forgot your
+        password.
       </div>
     </>
   );
