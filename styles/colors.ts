@@ -1,7 +1,10 @@
 const COLORS = {
-  // Add colors here as needed
   black: "#000000",
-  white: "#FBFBFB",
+  teal: "#476C77",
+  orange: "#ED953B",
+  oat_medium: "#EEEDE9",
+  oat_light: "#F9F7F4",
+  white: "#FFFFFF",
 };
 
 export default COLORS;
