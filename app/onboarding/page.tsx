@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useProfile } from "@/utils/ProfileProvider";
-import supabase from "../../actions/supabase/client";
+import { handleProfileSubmit } from "@/actions/supabase/queries/profiles";
+
 
 function OnboardingPage() {
   const { userId, profile, loading: profileLoading } = useProfile();
@@ -25,32 +26,31 @@ function OnboardingPage() {
   }, [profile]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setFormMessage("");
-    setSave(true);
+  event.preventDefault();
+  setFormMessage("");
+  setSave(true);
 
-    await supabase.auth.getSession();
+  if (!userId) {
+    setFormMessage("Missing user ID.");
+    return;
+  }
 
-    const { error } = await supabase
-      .from("profile")
-      .upsert({
-        id: userId,
-        first_name: firstName,
-        last_name: lastName,
-        country: country,
-        org_role: role,
-      })
-      .select();
+  const { success, error } = await handleProfileSubmit({
+    id: userId,
+    first_name: firstName,
+    last_name: lastName,
+    country,
+    org_role: role,
+  });
 
-    if (error) {
-      setSave(false);
-      setFormMessage(`Error: ${error.message}`);
-      return;
-    }
-
-    setSave(false);
+  if (!success) {
+    setFormMessage(`Error: ${error}`);
+  } else {
     setFormMessage("Profile saved");
-  };
+  }
+
+  setSave(false);
+};
 
   if (profileLoading) {
     return <p>Loading your profile…</p>;

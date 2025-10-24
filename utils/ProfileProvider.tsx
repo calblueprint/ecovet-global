@@ -7,13 +7,10 @@ type Profile = {
   id: string;
   user_type: string | null;
   user_group_id: string | null;
-  role_id: string | null;
   first_name: string | null;
   last_name: string | null;
   country: string | null;
   org_role: string | null;
-  is_finished: boolean | null;
-  phase_id: string | null;
 };
 
 type Context = {
@@ -32,7 +29,8 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const { data } = await supabase.auth.getUser();
+      const { data, error } = await supabase.auth.getUser();
+      if (error) console.error("Auth error:", error);
       const uid = data?.user?.id ?? null;
       setUserId(uid);
 
@@ -47,6 +45,8 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
           row ?? {
             id: uid,
             first_name: null,
+            user_type: null,
+            user_group_id: null,
             last_name: null,
             country: null,
             org_role: null,
