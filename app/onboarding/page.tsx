@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useProfile } from "@/utils/ProfileProvider";
 import { handleProfileSubmit } from "@/actions/supabase/queries/profiles";
-
+import { useProfile } from "@/utils/ProfileProvider";
 
 function OnboardingPage() {
   const { userId, profile, loading: profileLoading } = useProfile();
@@ -26,31 +25,31 @@ function OnboardingPage() {
   }, [profile]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-  event.preventDefault();
-  setFormMessage("");
-  setSave(true);
+    event.preventDefault();
+    setFormMessage("");
+    setSave(true);
 
-  if (!userId) {
-    setFormMessage("Missing user ID.");
-    return;
-  }
+    if (!userId) {
+      setFormMessage("Missing user ID.");
+      return;
+    }
 
-  const { success, error } = await handleProfileSubmit({
-    id: userId,
-    first_name: firstName,
-    last_name: lastName,
-    country,
-    org_role: role,
-  });
+    const { success, error } = await handleProfileSubmit({
+      id: userId,
+      first_name: firstName,
+      last_name: lastName,
+      country,
+      org_role: role,
+    });
 
-  if (!success) {
-    setFormMessage(`Error: ${error}`);
-  } else {
-    setFormMessage("Profile saved");
-  }
+    if (!success) {
+      setFormMessage(`Error: ${error}`);
+    } else {
+      setFormMessage("Profile saved");
+    }
 
-  setSave(false);
-};
+    setSave(false);
+  };
 
   if (profileLoading) {
     return <p>Loading your profile…</p>;
