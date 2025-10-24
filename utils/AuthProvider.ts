@@ -12,7 +12,6 @@ import supabase from "../actions/supabase/client";
 
 export interface AuthState {
   session: Session | null;
-  signIn: (newSession: Session | null) => void;
   signUp: (email: string, password: string) => Promise<AuthResponse>;
   signInWithEmail: (email: string, password: string) => Promise<AuthResponse>;
   signOut: () => void;
@@ -45,9 +44,11 @@ export function AuthContextProvider({
       setSession(newSession);
     });
 
-    supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
     });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const signUp = async (email: string, password: string) =>
@@ -56,17 +57,13 @@ export function AuthContextProvider({
       password,
     });
 
-  const signIn = (newSession: Session | null) => {
-    setSession(newSession);
-  };
-
   const signInWithEmail = async (email: string, password: string) =>
     supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-  const signOut = () => {
+  const signOut = async () => {
     supabase.auth.signOut();
     setSession(null);
   };
@@ -75,7 +72,6 @@ export function AuthContextProvider({
     () => ({
       session,
       signUp,
-      signIn,
       signInWithEmail,
       signOut,
     }),
