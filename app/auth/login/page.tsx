@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import supabase from "@/actions/supabase/client";
+import { checkProfileExists } from "@/actions/supabase/queries/profile";
 import styles from "./styles.module.css";
 
 export default function Login() {
@@ -42,7 +43,11 @@ export default function Login() {
     await supabase.auth.getSession();
     await supabase.auth.getUser();
 
-    router.push("/onboarding");
+    if (await checkProfileExists(data.user.id)) {
+      router.push("/onboarding");
+    } else {
+      router.push("/edit-profile");
+    }
   };
 
   const signOut = async () => {
