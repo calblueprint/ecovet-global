@@ -4,7 +4,23 @@ import { useState } from "react";
 import { FiCheck, FiEye, FiEyeOff, FiX } from "react-icons/fi";
 import Link from "next/link";
 import supabase from "@/actions/supabase/client";
-import * as S from "./styledComponents";
+import {
+  Container,
+  EmailAddressDiv,
+  Heading2,
+  Input,
+  InputFields,
+  IntroText,
+  Main,
+  PasswordCheckBox,
+  PasswordConfirmDiv,
+  PasswordDiv,
+  PasswordRule,
+  SignInTag,
+  SignUpButton,
+  VisibilityToggle,
+  WelcomeTag,
+} from "./styledComponents";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -12,6 +28,7 @@ export default function Login() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const rules = {
     length: password.length >= 12,
@@ -45,29 +62,29 @@ export default function Login() {
   };
 
   return (
-    <S.Main>
-      <S.Container>
-        <S.IntroText>
-          <S.WelcomeTag>
-            <h2> Welcome! </h2>
-          </S.WelcomeTag>
-          <S.SignInTag>
+    <Main>
+      <Container>
+        <IntroText>
+          <WelcomeTag>
+            <Heading2> Welcome! </Heading2>
+          </WelcomeTag>
+          <SignInTag>
             {" "}
             Already have an account? <Link href="/auth/login"> Sign in. </Link>
-          </S.SignInTag>
-        </S.IntroText>
-        <S.InputFields>
-          <S.EmailAddressDiv>
-            <S.Input
+          </SignInTag>
+        </IntroText>
+        <InputFields>
+          <EmailAddressDiv>
+            <Input
               name="email"
               placeholder="Email Address"
               onChange={e => setEmail(e.target.value)}
               value={email}
             />{" "}
-          </S.EmailAddressDiv>
-          <S.PasswordDiv>
+          </EmailAddressDiv>
+          <PasswordDiv>
             <div style={{ position: "relative", width: "100%" }}>
-              <S.Input
+              <Input
                 name="password"
                 placeholder="Password"
                 type={showPassword ? "text" : "password"}
@@ -77,41 +94,43 @@ export default function Login() {
                 )}
                 value={password}
               />{" "}
-              <S.VisibilityToggle
+              <VisibilityToggle
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-              </S.VisibilityToggle>
+                {showPassword ? <FiEye size={18} /> : <FiEyeOff size={18} />}
+              </VisibilityToggle>
             </div>
-          </S.PasswordDiv>
-          <S.PasswordConfirmDiv>
+          </PasswordDiv>
+          <PasswordConfirmDiv>
             <div style={{ position: "relative", width: "100%" }}>
-              <S.Input
-                type={showPassword ? "text" : "password"}
+              <Input
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
                 placeholder="Password Confirmation"
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
               />
-              <S.VisibilityToggle
+              <VisibilityToggle
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
-                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-              </S.VisibilityToggle>
+                {showConfirmPassword ? (
+                  <FiEye size={18} />
+                ) : (
+                  <FiEyeOff size={18} />
+                )}
+              </VisibilityToggle>
             </div>
-          </S.PasswordConfirmDiv>
-          <S.PasswordCheckBox>
+          </PasswordConfirmDiv>
+          <PasswordCheckBox>
             Your password must contain:
             <ul>
-              <S.PasswordRule $touched={passwordTouched} $valid={rules.length}>
+              <PasswordRule $touched={passwordTouched} $valid={rules.length}>
                 {passwordTouched ? rules.length ? <FiCheck /> : <FiX /> : "•"}
                 <span>12 or more characters</span>
-              </S.PasswordRule>
-              <S.PasswordRule
-                $touched={passwordTouched}
-                $valid={rules.uppercase}
-              >
+              </PasswordRule>
+              <PasswordRule $touched={passwordTouched} $valid={rules.uppercase}>
                 {passwordTouched ? (
                   rules.uppercase ? (
                     <FiCheck />
@@ -122,12 +141,12 @@ export default function Login() {
                   "•"
                 )}
                 <span> A capital letter (A-Z)</span>
-              </S.PasswordRule>
-              <S.PasswordRule $touched={passwordTouched} $valid={rules.number}>
+              </PasswordRule>
+              <PasswordRule $touched={passwordTouched} $valid={rules.number}>
                 {passwordTouched ? rules.number ? <FiCheck /> : <FiX /> : "•"}
                 <span> A number</span>
-              </S.PasswordRule>
-              <S.PasswordRule
+              </PasswordRule>
+              <PasswordRule
                 $touched={passwordTouched}
                 $valid={rules.specialChar}
               >
@@ -141,17 +160,17 @@ export default function Login() {
                   "•"
                 )}
                 <span>A special symbol</span>
-              </S.PasswordRule>
+              </PasswordRule>
             </ul>
-          </S.PasswordCheckBox>
-        </S.InputFields>
-        <S.SignUpButton
+          </PasswordCheckBox>
+        </InputFields>
+        <SignUpButton
           onClick={handleSignUp}
           disabled={!isPasswordValid || password !== confirmPassword}
         >
           Continue
-        </S.SignUpButton>
-      </S.Container>
-    </S.Main>
+        </SignUpButton>
+      </Container>
+    </Main>
   );
 }

@@ -3,13 +3,28 @@
 import { useState } from "react";
 import { FiCheck, FiEye, FiEyeOff, FiX } from "react-icons/fi";
 import supabase from "@/actions/supabase/client";
-import * as Styled from "./styledComponents";
+import {
+  Container,
+  Heading2,
+  Input,
+  InputFields,
+  IntroText,
+  Main,
+  PasswordCheckBox,
+  PasswordConfirmDiv,
+  PasswordDiv,
+  PasswordRule,
+  SignUpButton,
+  VisibilityToggle,
+  WelcomeTag,
+} from "./styledComponents";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const rules = {
     length: password.length >= 12,
@@ -41,18 +56,18 @@ export default function ResetPassword() {
 
   return (
     <>
-      <Styled.Main>
-        <Styled.Container>
-          <Styled.IntroText>
-            <Styled.WelcomeTag>
+      <Main>
+        <Container>
+          <IntroText>
+            <WelcomeTag>
               {" "}
-              <h2> Reset Password </h2>
-            </Styled.WelcomeTag>
-          </Styled.IntroText>
-          <Styled.InputFields>
-            <Styled.PasswordDiv>
+              <Heading2> Reset Password </Heading2>
+            </WelcomeTag>
+          </IntroText>
+          <InputFields>
+            <PasswordDiv>
               <div style={{ position: "relative", width: "100%" }}>
-                <Styled.Input
+                <Input
                   name="password"
                   placeholder="New Password"
                   onChange={e => (
@@ -62,41 +77,43 @@ export default function ResetPassword() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                 />
-                <Styled.VisibilityToggle
+                <VisibilityToggle
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-                </Styled.VisibilityToggle>
+                  {showPassword ? <FiEye size={18} /> : <FiEyeOff size={18} />}
+                </VisibilityToggle>
               </div>
-            </Styled.PasswordDiv>
-            <Styled.PasswordConfirmDiv>
+            </PasswordDiv>
+            <PasswordConfirmDiv>
               <div style={{ position: "relative", width: "100%" }}>
-                <Styled.Input
+                <Input
+                  name="confirmPassword"
                   placeholder="Password Confirmation"
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
-                  type={showPassword ? "text" : "confirmPassword"}
+                  type={showConfirmPassword ? "text" : "Password"}
                 />
-                <Styled.VisibilityToggle
+                <VisibilityToggle
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
-                  {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-                </Styled.VisibilityToggle>
+                  {showConfirmPassword ? (
+                    <FiEye size={18} />
+                  ) : (
+                    <FiEyeOff size={18} />
+                  )}
+                </VisibilityToggle>
               </div>
-            </Styled.PasswordConfirmDiv>
-            <Styled.PasswordCheckBox>
+            </PasswordConfirmDiv>
+            <PasswordCheckBox>
               Your password must contain:
               <ul>
-                <Styled.PasswordRule
-                  $touched={passwordTouched}
-                  $valid={rules.length}
-                >
+                <PasswordRule $touched={passwordTouched} $valid={rules.length}>
                   {passwordTouched ? rules.length ? <FiCheck /> : <FiX /> : "•"}
                   <span>12 or more characters</span>
-                </Styled.PasswordRule>
-                <Styled.PasswordRule
+                </PasswordRule>
+                <PasswordRule
                   $touched={passwordTouched}
                   $valid={rules.uppercase}
                 >
@@ -110,15 +127,12 @@ export default function ResetPassword() {
                     "•"
                   )}
                   <span> A capital letter (A-Z)</span>
-                </Styled.PasswordRule>
-                <Styled.PasswordRule
-                  $touched={passwordTouched}
-                  $valid={rules.number}
-                >
+                </PasswordRule>
+                <PasswordRule $touched={passwordTouched} $valid={rules.number}>
                   {passwordTouched ? rules.number ? <FiCheck /> : <FiX /> : "•"}
                   <span> A number</span>
-                </Styled.PasswordRule>
-                <Styled.PasswordRule
+                </PasswordRule>
+                <PasswordRule
                   $touched={passwordTouched}
                   $valid={rules.specialChar}
                 >
@@ -132,18 +146,18 @@ export default function ResetPassword() {
                     "•"
                   )}
                   <span>A special symbol</span>
-                </Styled.PasswordRule>
+                </PasswordRule>
               </ul>
-            </Styled.PasswordCheckBox>
-          </Styled.InputFields>
-          <Styled.SignUpButton
+            </PasswordCheckBox>
+          </InputFields>
+          <SignUpButton
             onClick={handleUpdateUser}
             disabled={!isPasswordValid || password !== confirmPassword}
           >
             Continue
-          </Styled.SignUpButton>
-        </Styled.Container>
-      </Styled.Main>
+          </SignUpButton>
+        </Container>
+      </Main>
     </>
   );
 }

@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
+import { Sans } from "@/styles/fonts";
 
 export const Main = styled.main`
   display: flex;
@@ -10,12 +11,12 @@ export const Main = styled.main`
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  background-color: white;
-  background: white;
+  background-color: ${COLORS.white};
+  background: ${COLORS.white};
 `;
 
 export const Container = styled.div`
-  background-color: white;
+  background-color: ${COLORS.white};
   border-radius: 12px;
   padding: 2rem 2.5rem;
   width: min(100%, 400px);
@@ -23,7 +24,7 @@ export const Container = styled.div`
 `;
 
 export const Heading2 = styled.h2`
-  font-family: var(--font-public-sans);
+  font-family: ${Sans.style.fontFamily};
   font-size: 32px;
   font-style: normal;
   font-weight: 700;
@@ -37,8 +38,8 @@ export const WelcomeTag = styled.div`
 `;
 
 export const SignInTag = styled.div`
-  color: var(--Black-70, rgba(0, 0, 0, 0.7));
-  font-family: {Public_Sans};
+  color: ${COLORS.black100};
+  font-family: ${Sans.style.fontFamily};
   font-size: 12px;
   font-style: normal;
   font-weight: 500;
@@ -78,15 +79,15 @@ export const Input = styled.input`
   padding: 0.66rem;
   border: 1px solid ${COLORS.black20};
   border-radius: 8px;
-  background-color: var(--White-100, #ffffff);
-  font-family: var(--font-public-sans);
-  font-size: 14px;
+  background-color: ${COLORS.white};
+  font-family: ${Sans.style.fontFamily};
+  font-size: 12px;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
   color: ${COLORS.black100};
   &::placeholder {
-    color: var(--Black-40, rgba(0, 0, 0, 0.4));
+    color: ${COLORS.black100};
     opacity: 1;
   }
   &:focus {
@@ -99,7 +100,7 @@ export const EmailAddressDiv = styled.div`
   width: 100%;
   height: fit-content;
   padding-bottom: 0.5rem;
-  font-family: var(--font-public-sans);
+  font-family: ${Sans.style.fontFamily};
   font-size: 14px;
   font-style: normal;
   font-weight: 600;
@@ -111,7 +112,7 @@ export const PasswordDiv = styled.div`
   height: fit-content;
   padding-top: 1rem;
   padding-bottom: 0.5rem;
-  font-family: var(--font-public-sans);
+  font-family: ${Sans.style.fontFamily};
   font-size: 14px;
   font-style: normal;
   font-weight: 600;
@@ -123,7 +124,7 @@ export const PasswordConfirmDiv = styled.div`
   height: fit-content;
   padding-top: 1rem;
   padding-bottom: 0.5rem;
-  font-family: var(--font-public-sans);
+  font-family: ${Sans.style.fontFamily};
   font-size: 14px;
   font-style: normal;
   font-weight: 600;
@@ -139,14 +140,14 @@ export const VisibilityToggle = styled.button`
   border: none;
   cursor: pointer;
   font-size: 18px;
-  color: #c7c6c3;
+  color: ${COLORS.black20};
 `;
 
 export const PasswordCheckBox = styled.div`
   width: 100%;
   height: fit-content;
   padding-top: 1rem;
-  font-family: var(--font-public-sans);
+  font-family: ${Sans.style.fontFamily};
   font-size: 12px;
   font-style: normal;
   font-weight: 500;
@@ -201,7 +202,7 @@ export const SignUpButton = styled.button`
   align-self: stretch;
   gap: clamp(0, 5rem, 1vw, 1rem);
   background-color: ${COLORS.darkElectricBlue};
-  font-family: var(--font-public-sans);
+  font-family: ${Sans.style.fontFamily};
   font-size: 12px;
   font-style: normal;
   font-weight: 700;
@@ -211,8 +212,8 @@ export const SignUpButton = styled.button`
   &:hover {
     background-color: ${COLORS.darkElectricBlue};
   }
+  border: 0px ${COLORS.darkElectricBlue};
   border-radius: 4px;
-  radius-color: ${COLORS.darkElectricBlue};
   opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 `;
