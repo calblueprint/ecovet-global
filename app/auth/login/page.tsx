@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import supabase from "@/actions/supabase/client";
 import styles from "./styles.module.css";
 
 export default function Login() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -36,6 +38,11 @@ export default function Login() {
           data,
       );
     }
+
+    await supabase.auth.getSession();
+    await supabase.auth.getUser();
+
+    router.push("/onboarding");
   };
 
   const signOut = async () => {
