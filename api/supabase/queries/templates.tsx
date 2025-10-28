@@ -36,7 +36,7 @@ export async function createPhases(session_id: UUID|null, phase_name: string, is
     return data.phase_id;
 }
 
-export async function createRoles(role_name: string, template_id: UUID, role_description: string|null=null): Promise<UUID> {
+export async function createRoles(role_name: string, template_id: UUID|null, role_description: string|null=null): Promise<UUID> {
     const { data, error } = await supabase
     .from('role')
     .insert({ 
