@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import StyledComponentsRegistry from "@/lib/registry";
 import "@/styles/global.css";
 import { AuthContextProvider } from "../utils/AuthProvider";
+import { ProfileProvider } from "@/utils/ProfileProvider";
 
 // font definitions
 const sans = Inter({
@@ -24,9 +25,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={sans.className}>
-        <StyledComponentsRegistry>
-          <AuthContextProvider>{children}</AuthContextProvider>
-        </StyledComponentsRegistry>
+        <AuthContextProvider>
+          <ProfileProvider>
+            <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
+          </ProfileProvider>
+        </AuthContextProvider>
       </body>
     </html>
   );

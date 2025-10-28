@@ -80,9 +80,9 @@ export function AuthContextProvider({
     [session],
   );
 
-  return React.createElement(
-    AuthContext.Provider,
-    { value: authContextValue },
-    children,
+  return (
+    <AuthContext.Provider value={authContextValue}>
+      {children}
+    </AuthContext.Provider>
   );
 }
