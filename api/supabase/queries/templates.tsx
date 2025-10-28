@@ -1,7 +1,8 @@
 import { UUID } from "crypto"
 import supabase from "../createClient"
+import { TemplateUpdatable } from "@/types/schema";
 
-export async function createTemplates(template_name: string, accessible_to_all: boolean, objective:string, summary:string, setting:string, current_activity:string, user_group_id: UUID|null=null): Promise<UUID> {
+export async function createTemplates(template_name: string|null=null, accessible_to_all: boolean|null=null, objective: string|null=null, summary: string|null=null, setting: string|null=null, current_activity: string|null=null, user_group_id: UUID|null=null): Promise<UUID> {
     const { data, error } = await supabase
     .from('template')
     .insert({ 
@@ -13,10 +14,28 @@ export async function createTemplates(template_name: string, accessible_to_all: 
         setting: setting,
         current_activity: current_activity, })
     .select("template_id")
-    .single(); 
+    .single();
     
     if (error) throw error;
     return data.template_id;
+}
+
+export async function updateTemplates(template_id: UUID, updates: Partial<TemplateUpdatable>): Promise<void> {
+    const { error } = await supabase
+    .from('template')
+    .update(updates)
+    .eq('template_id', template_id);
+
+    if (error) throw error;
+}
+
+export async function deleteTemplates(template_id: UUID): Promise<void> {
+    const { error } = await supabase
+    .from('template')
+    .delete()
+    .eq('template_id', template_id);
+
+    if (error) throw error;
 }
 
 export async function createPhases(session_id: UUID|null, phase_name: string, is_finished: boolean, 

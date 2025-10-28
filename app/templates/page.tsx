@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import React from "react";
-import supabase from "@/api/supabase/createClient";
 import { UUID } from "crypto";
 import { createTemplates, createPhases, createRoles } from "@/api/supabase/queries/templates";
 import { NewPhase, NewRole } from "./components/components";
@@ -27,7 +26,7 @@ async function ScenarioStep({ next }: { next: () => void }) {
   const [loading, setLoading] = useState(false);
  
   async function newTemplate() {
-    const newTemplateID = await createTemplates(defaults.tempName, true, "Template Objective", defaults.tempSummary, defaults.tempSetting, defaults.tempCurrActivity, null);
+    const newTemplateID = await createTemplates();
     setTemplateID(newTemplateID);
   }
 
@@ -59,18 +58,12 @@ async function ScenarioStep({ next }: { next: () => void }) {
   //   });
   // }
 
-  async function renameTab(id: string, newLabel: string) {
-    setErr(null);
-    const { error } = await supabase.from("tabs").update({ label: newLabel }).eq("id", id);
-    if (error) {
-      setErr(error.message);
-      return;
-    }
-    setTabs(prev => prev.map(t => (t.id === id ? { ...t, label: newLabel } : t)));
+  async function renameTab(id: UUID, newLabel: string) {
+    // setTabs(prev => prev.map(t => (t.id === id ? { ...t, label: newLabel } : t)));
   }
   return (
     <>
-      <button onClick={next}>New Template</button>
+      <button onClick={newTemplate}>New Template</button>
       <form>
         <input type="text" name="scenario_title" placeholder="New Scenario Title" />
       </form>

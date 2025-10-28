@@ -54,6 +54,7 @@ export interface Template {
   setting: string;
   current_activity: string;
 }
+type TemplateUpdatable = Omit<Template, "template_id">;
 
 export interface Session {
   session_id: UUID; // session_id
