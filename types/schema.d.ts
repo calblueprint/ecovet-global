@@ -39,10 +39,11 @@ export interface Profile {
 
 export interface Role {
   role_id: UUID; // role_id
-  role_name: string;
+  role_name: string | null;
   role_description: string | null;
   template_id: UUID;
 }
+type RoleUpdatable = Omit<Role, "template_id", "role_id">;
 
 export interface Template {
   template_id: UUID; // template_id
@@ -68,24 +69,27 @@ export interface Session {
 export interface Phase {
   phase_id: UUID; // phase_id
   session_id: UUID | null;
-  phase_name: string;
+  phase_name: string | null;
   phase_description: string | null;
-  is_finished: boolean;
+  is_finished: boolean | null;
 }
+type PhaseUpdatable = Omit<Phase, "phase_id">;
 
 export interface RolePhase {
   role_phase_id: UUID;
   phase_id: UUID;
   role_id: UUID;
-  description: string;
+  description: string | null;
 }
+type RolePhaseUpdatable = Omit<RolePhase, "role_phase_id", "phase_id", "role_id">;
 
 export interface Prompt {
   prompt_id: UUID; // prompt_id
   user_id: UUID | null;
   role_phase_id: UUID;
-  prompt_text: string;
+  prompt_text: string | null;
 }
+type PromptUpdatable = Omit<Prompt, "prompt_id", "role_phase_id">;
 
 export interface PromptAnswer {
   prompt_response_id: UUID; // prompt_answer_id
