@@ -20,6 +20,7 @@ export async function handleProfileSubmit(profile: {
   }
 }
 
+// returns True is the Profile does NOT exist, and False if it does
 export async function checkProfileExists(id: string) {
   try {
     const { error } = await supabase
