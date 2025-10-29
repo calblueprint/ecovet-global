@@ -1,139 +1,36 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { UUID } from "crypto";
-import { createTemplates, createPhases, createRoles, deleteRoles } from "@/api/supabase/queries/templates";
-import TemplateOverviewForm from "./components/TemplateOverviewForm";
-import RoleForm from "./components/RoleForm";
+import { createTemplates } from "@/api/supabase/queries/templates";
+import TemplateBuilder from "./components/TemplateBuilder";
 
-type Tab = { label: string; id: UUID | null };
-
-const defaults = {
-  tempName: "New Template",
-  tempSummary: "New Template Summary",
-  tempSetting: "New Template Setting",
-  tempCurrActivity: "New Template Current Activity",
-  roleName: "New Role",
-  roleDescription: "Role Description",
-};
-
-function ScenarioStep({ next }: { next: () => void }) {
-  const [tabs, setTabs] = useState<Tab[]>([{ label: "Scenario Overview", id: null }]);
-  const [templateID, setTemplateID] = useState<UUID | null>(null);
-  const [activeId, setActiveId] = useState<UUID | null>(null);
+export default function NewTemplatePage() {
   const [loading, setLoading] = useState(false);
+  const [isNew, setIsNew] = useState(false);
+  const [templateID, setTemplateID] = useState<UUID|null>(null);
 
   async function newTemplate() {
     setLoading(true);
     try {
       const newTemplateID = await createTemplates();
       setTemplateID(newTemplateID);
-      if (activeId === null) setActiveId(tabs[0]?.id ?? null);
     } finally {
       setLoading(false);
+      setIsNew(true);
     }
   }
-
-  async function addTab() {
-    if (!templateID) {
-      return;
-    }
-
-    const newRoleID = await createRoles(templateID, defaults.roleName);
-    setTabs((prev) => [...prev, { label: defaults.roleName, id: newRoleID }]);
-    setActiveId(newRoleID);
-  }
-
-  async function removeTab(role_id: UUID | null): Promise<void> {
-    if (role_id == null) return;
-
-    const idx = tabs.findIndex((t) => t.id === role_id);
-    await deleteRoles(role_id);
-
-    setTabs((prev) => {
-      const nextTabs = prev.filter((t) => t.id !== role_id);
-      if (activeId === role_id) {
-        if (nextTabs.length > 0) {
-          const fallback = Math.min(idx, nextTabs.length - 1);
-          setActiveId(nextTabs[fallback].id);
-        } else {
-          setActiveId(null);
-        }
-      }
-      return nextTabs;
-    });
-  }
-
-  function renameTab(id: UUID | null, newLabel: string) {
-    setTabs((prev) => prev.map((t) => (t.id === id ? { ...t, label: newLabel } : t)));
-  }
-
-  return (
-    <div>
-      <button onClick={newTemplate} disabled={loading}>
-        {loading ? "Creating..." : "New Template"}
-      </button>
-
-      <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-        {tabs.map((t) => (
-          <button
-            key={String(t.id ?? t.label)}
-            onClick={() => setActiveId(t.id)}
-            style={{
-              padding: "6px 10px",
-              border: "1px solid #ccc",
-              borderBottom: activeId === t.id ? "2px solid transparent" : "1px solid #ccc",
-              background: activeId === t.id ? "#fff" : "#f8f8f8",
-              fontWeight: activeId === t.id ? 600 : 400,
-            }}
-          >
-            {t.label}
-          </button>
-        ))}
-        <button onClick={addTab}>+ New</button>
-      </div>
-
-      {tabs.map((t) =>
-        t.id === activeId ? (
-          <div key={`panel-${String(t.id ?? t.label)}`} style={{ border: "1px solid #ccc", padding: 12 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-              {/* <input
-                value={t.label}
-                onChange={(e) => renameTab(t.id, e.target.value)}
-                style={{ padding: 6, border: "1px solid #ccc" }}
-              /> */}
-              {activeId && (
-                <button onClick={() => removeTab(t.id)} style={{ border: "1px solid #ccc", padding: 6 }}>
-                  Remove
-                </button>
-              )}
-            </div>
-            {!activeId ? (
-              <TemplateOverviewForm/>
-            ) : (
-              <RoleForm/>
-            )}
-          </div>
-        ) : null
-      )}
-
-      <button>Submit Template</button>
-    </div>
-  );
-}
-
-export default function NewTemplatePage() {
-  const [index, setIndex] = useState(0);
-  const next = () => setIndex((i) => i + 1);
-
-  const components = [
-    <ScenarioStep next={next} key="scenario" />,
-  ];
 
   return (
     <>
       <h1>New Template Page</h1>
-      {components[index]}
+      {isNew ? 
+        <TemplateBuilder template_id={templateID}/>
+      :
+        <button onClick={newTemplate} disabled={loading}>
+          {loading ? "Creating..." : "New Template"}
+        </button> 
+      }
     </>
   );
 }
