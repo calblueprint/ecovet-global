@@ -17,9 +17,9 @@ export const AddFacilitatorButton = styled.button`
   height: 1.5rem;
 `;
 
-export const FacilitatorEmailDiv = styled.div<{ $addButtonPressed: boolean }>`
+export const FacilitatorEmailDiv = styled.div`
   flex-direction: row;
-  display: ${({ $addButtonPressed }) => ($addButtonPressed ? "flex" : "none")};
+  display: flex;
   gap: 0.3rem;
 `;
 

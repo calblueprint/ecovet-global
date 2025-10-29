@@ -1,6 +1,6 @@
 "use client";
 
-import { SetStateAction, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { submitNewFacilitator } from "@/api/supabase/queries/invites";
 import {
@@ -12,58 +12,57 @@ import {
   SubmitButton,
 } from "./styles";
 
+const isEmailValid = (email: string) => {
+  const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
+  return emailRegex.test(email);
+};
+
 export default function AddFacilitators() {
   const searchParams = useSearchParams();
-  const userId = searchParams.get("userId");
   const userGroupId = searchParams.get("userGroupId");
-  const [addFacilitator, setAddFacilitator] = useState(false);
-  const [facilitatorEmail, setFacilitatorEmail] = useState("");
+  const [facilitatorEmails, setFacilitatorEmails] = useState<string[]>([""]);
 
-  const handleInputChange = (event: {
-    target: { value: SetStateAction<string> };
-  }) => {
-    setFacilitatorEmail(event.target.value);
-  };
-
-  const onAddFacilitatorButtonClick = (
-    event: React.MouseEvent<HTMLButtonElement>,
+  const handleInputChange = (
+    event: ChangeEvent<HTMLInputElement>,
+    index: number,
   ) => {
-    setAddFacilitator(true);
+    const updated = [...facilitatorEmails];
+    updated[index] = event.target.value;
+    setFacilitatorEmails(updated);
   };
 
-  const onSubmitButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (isEmailValid(facilitatorEmail)) {
-      submitNewFacilitator(
-        facilitatorEmail,
-        String(userId),
-        String(userGroupId),
-      );
-      setAddFacilitator(false);
-    } else {
-      console.error("invalid email format");
-    }
+  const onAddFacilitatorButtonClick = () => {
+    setFacilitatorEmails([...facilitatorEmails, ""]);
+  };
+
+  const onSubmitButtonClick = () => {
+    facilitatorEmails.map(email => {
+      if (isEmailValid(email)) {
+        submitNewFacilitator(email, String(userGroupId), "", true);
+      } else {
+        console.error("invalid email format");
+      }
+    });
   };
 
   return (
     <AddFacilitatorsMain>
       <AddFacilitatorFormDiv>
+        <FacilitatorEmailDiv>
+          {facilitatorEmails.map((email, index) => (
+            <FacilitatorEmailInput
+              key={index}
+              value={email}
+              onChange={e => handleInputChange(e, index)}
+              placeholder="Enter facilitator email"
+            ></FacilitatorEmailInput>
+          ))}
+        </FacilitatorEmailDiv>
         <AddFacilitatorButton onClick={onAddFacilitatorButtonClick}>
           Add Facilitator
         </AddFacilitatorButton>
-        <FacilitatorEmailDiv $addButtonPressed={addFacilitator}>
-          <p>Enter Facilitator Email:</p>
-          <FacilitatorEmailInput
-            value={facilitatorEmail}
-            onChange={handleInputChange}
-          ></FacilitatorEmailInput>
-        </FacilitatorEmailDiv>
         <SubmitButton onClick={onSubmitButtonClick}>Submit</SubmitButton>
       </AddFacilitatorFormDiv>
     </AddFacilitatorsMain>
   );
 }
-
-const isEmailValid = (email: string) => {
-  const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
-  return emailRegex.test(email);
-};

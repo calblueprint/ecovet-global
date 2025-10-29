@@ -22,3 +22,8 @@ export const SubmitButton = styled.button`
   width: 5rem;
   height: 1.5rem;
 `;
+
+export const ErrorBanner = styled.h2<{ $isError: boolean }>`
+  color: red;
+  display: ${props => (props.$isError ? "flex" : "none")};
+`;

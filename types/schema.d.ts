@@ -7,7 +7,7 @@ export type EmailType = "PLACEHOLDER";
 export type UserType = "Admin" | "Facilitator" | "Participant";
 
 // ENUM for status
-export type StatusType = "Pending" | "Accepted";
+export type StatusType = "Pending" | "Accepted" | "Cancelled";
 
 /* SCHEMA */
 //org_id --> user_group_id

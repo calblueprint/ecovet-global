@@ -2,7 +2,7 @@ import supabase from "@/api/supabase/createClient";
 
 export async function submitNewUserGroup(user_group: string) {
   const id = crypto.randomUUID();
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("user_group")
     .upsert(
       { user_group_id: id, user_group_name: user_group },

@@ -3,16 +3,17 @@ import supabase from "@/api/supabase/createClient";
 export async function submitNewFacilitator(
   email: string,
   user_group_id: string,
-  invited_by_user_id: string,
+  user_id: string,
+  isFacilitator: boolean,
 ): Promise<void> {
   const id = crypto.randomUUID();
-  const { data, error } = await supabase.from("invite").upsert(
+  const { error } = await supabase.from("invite").upsert(
     {
       invite_id: id,
       user_group_id: user_group_id,
-      //invited_by_user_id: invited_by_user_id,
+      //invited_by_user_id: user_id,
       email: email,
-      user_type: "Facilitator",
+      user_type: isFacilitator ? "Facilitator" : "",
       status: "Pending",
     },
     { onConflict: "invite_id" },

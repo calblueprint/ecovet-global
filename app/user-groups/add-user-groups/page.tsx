@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { submitNewUserGroup } from "@/api/supabase/queries/usergroup";
 import {
   AddUserGroupsMain,
+  ErrorBanner,
   SubmitButton,
   UserGroupInputDiv,
   UserGroupNameInput,
@@ -12,24 +13,27 @@ import {
 
 export default function AddUserGroups() {
   const [userGroupInput, setUserGroupInput] = useState("");
+  const [isError, setIsError] = useState(false);
   const router = useRouter();
-  const userId = "";
   const handleInputChange = (event: {
     target: { value: SetStateAction<string> };
   }) => {
     setUserGroupInput(event.target.value);
   };
-  const onSubmitButtonClick = async (
-    event: React.MouseEvent<HTMLButtonElement>,
-  ) => {
-    const userGroupId = await submitNewUserGroup(userGroupInput);
-    router.push(
-      `/user-groups/add-facilitators?userId=${userId}&userGroupId=${userGroupId}`,
-    );
+  const onSubmitButtonClick = async () => {
+    if (userGroupInput.length == 0) {
+      setIsError(true);
+    } else {
+      const userGroupId = await submitNewUserGroup(userGroupInput);
+      router.push(`/user-groups/add-facilitators?&userGroupId=${userGroupId}`);
+    }
   };
 
   return (
     <AddUserGroupsMain>
+      <ErrorBanner $isError={isError}>
+        Error: Please enter a user group name
+      </ErrorBanner>
       <UserGroupInputDiv>
         <p>Enter User Group:</p>
         <UserGroupNameInput
