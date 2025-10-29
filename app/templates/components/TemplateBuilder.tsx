@@ -1,95 +1,85 @@
 import { useState } from "react";
 import { UUID } from "crypto";
-import { createPhases, createRoles, deleteRoles } from "@/api/supabase/queries/templates";
 import TemplateOverviewForm from "./TemplateOverviewForm";
 import RoleForm from "./RoleForm";
+import { localStore, Role } from "@/types/schema";
 
-type Tab = { label: string; id: UUID | null };
+export default function TemplateBuilder({localStore} : {localStore: localStore|null} ) {
+  const [activeId, setActiveId] = useState<UUID|number>(1);
+  const [phaseCount, setPhaseCount] = useState<number>(0);
 
-const defaults = {
-  tempName: "New Template",
-  tempSummary: "New Template Summary",
-  tempSetting: "New Template Setting",
-  tempCurrActivity: "New Template Current Activity",
-  roleName: "New Role",
-  roleDescription: "Role Description",
-};
-
-export default function TemplateBuilder({template_id} : {template_id: UUID|null} ) {
-  const [tabs, setTabs] = useState<Tab[]>([{ label: "Scenario Overview", id: null }]);
-  const [activeId, setActiveId] = useState<UUID | null>(null);
-
-  async function addTab() {
-    if (!template_id) {
+  function addTab(): void {
+    if (!localStore?.templateID) {
       return;
     }
-
-    const newRoleID = await createRoles(template_id, defaults.roleName);
-    setTabs((prev) => [...prev, { label: defaults.roleName, id: newRoleID }]);
+    const newRoleID = crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;;
+    localStore.rolesById[newRoleID] = { role_id: newRoleID, role_name: "New Role", role_description: "New Role Description", template_id: localStore.templateID };
+    localStore.roleIds.push(newRoleID);
+    
     setActiveId(newRoleID);
   }
 
-  async function removeTab(role_id: UUID | null): Promise<void> {
-    if (role_id == null) return;
+  function removeTab(role_id: UUID | number): void {
+    if (localStore == null) return;
 
-    const idx = tabs.findIndex((t) => t.id === role_id);
-    await deleteRoles(role_id);
-
-    setTabs((prev) => {
-      const nextTabs = prev.filter((t) => t.id !== role_id);
-      if (activeId === role_id) {
-        if (nextTabs.length > 0) {
-          const fallback = Math.min(idx, nextTabs.length - 1);
-          setActiveId(nextTabs[fallback].id);
-        } else {
-          setActiveId(null);
-        }
-      }
-      return nextTabs;
-    });
+    delete localStore.rolesById[role_id];
+    localStore.roleIds = localStore.roleIds.filter((x) => x !== role_id);
+    setActiveId(localStore.roleIds.at(-1)!);
   }
 
-  function renameTab(id: UUID | null, newLabel: string) {
-    setTabs((prev) => prev.map((t) => (t.id === id ? { ...t, label: newLabel } : t)));
+  function renameTab(role_id: UUID | number, newLabel: string) {
+    if (localStore == null) return;
+
+    (localStore.rolesById[role_id] as Role).role_name = newLabel;
   }
 
   return (
     <div>
-        <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-            {tabs.map((t) => (
-            <button
-                key={String(t.id ?? t.label)}
-                onClick={() => setActiveId(t.id)}
-                style={{
-                padding: "6px 10px",
-                border: "1px solid #ccc",
-                borderBottom: activeId === t.id ? "2px solid transparent" : "1px solid #ccc",
-                background: activeId === t.id ? "#fff" : "#f8f8f8",
-                fontWeight: activeId === t.id ? 600 : 400,
-                }}
-            >
-                {t.label}
-            </button>
-            ))}
-            <button onClick={addTab}>+ New</button>
+        <div style={{ display: "flex", justifyContent: "space-between"}}>
+            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+                {localStore?.roleIds.map((t) => (
+                <button
+                    key={String(t)}
+                    onClick={() => setActiveId(t)}
+                    style={{
+                    padding: "6px 10px",
+                    border: "1px solid #ccc",
+                    borderBottom: activeId === t ? "2px solid transparent" : "1px solid #ccc",
+                    background: activeId === t ? "#fff" : "#f8f8f8",
+                    fontWeight: activeId === t ? 600 : 400,
+                    }}
+                >
+                    { localStore.rolesById[t] && 'role_name' in localStore.rolesById[t]
+                        ? localStore.rolesById[t].role_name
+                        : "Scenario Overview"
+                    }
+                </button>
+                ))}
+                <button onClick={addTab}>+ New</button>
+            </div>
+            <div style={{ display: "flex", alignItems: 'center' }}>
+                <p>Phases: {phaseCount}</p>
+                <button onClick={() => setPhaseCount(prev => prev + 1)}>UP</button>
+                <button onClick={() => setPhaseCount(prev => Math.max(prev - 1, 0))}>DOWN</button>
+            </div>
         </div>
 
-        {tabs.map((t) =>
-            t.id === activeId ? (
-            <div key={`panel-${String(t.id ?? t.label)}`} style={{ border: "1px solid #ccc", padding: 12 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                {/* <input
-                    value={t.label}
-                    onChange={(e) => renameTab(t.id, e.target.value)}
-                    style={{ padding: 6, border: "1px solid #ccc" }}
-                /> */}
-                {activeId && (
-                    <button onClick={() => removeTab(t.id)} style={{ border: "1px solid #ccc", padding: 6 }}>
-                    Remove
-                    </button>
+        {localStore?.roleIds.map((t) =>
+            t === activeId ? (
+            <div key={`panel-${String(t)}`} style={{ border: "1px solid #ccc", padding: 12 }}>
+                {activeId !== 1 && (
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                        <input
+                            value={(localStore.rolesById[t] as Role).role_name}
+                            onChange={(e) => renameTab(t, e.target.value)}
+                            style={{ padding: 6, border: "1px solid #ccc" }}
+                        />
+                        <button onClick={() => removeTab(t)} style={{ border: "1px solid #ccc", padding: 6 }}>
+                            Remove
+                        </button>
+                    </div>
                 )}
-                </div>
-                {!activeId ? (
+                {activeId === 1 ? (
                 <TemplateOverviewForm/>
                 ) : (
                 <RoleForm/>

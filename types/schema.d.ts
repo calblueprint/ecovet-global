@@ -39,7 +39,7 @@ export interface Profile {
 
 export interface Role {
   role_id: UUID; // role_id
-  role_name: string | null;
+  role_name: string;
   role_description: string | null;
   template_id: UUID;
 }
@@ -47,13 +47,13 @@ type RoleUpdatable = Omit<Role, "template_id", "role_id">;
 
 export interface Template {
   template_id: UUID; // template_id
-  template_name: string;
-  accessible_to_all: boolean;
+  template_name: string | null;
+  accessible_to_all: boolean | null;
   user_group_id: UUID | null;
-  objective: string;
-  summary: string;
-  setting: string;
-  current_activity: string;
+  objective: string | null;
+  summary: string | null;
+  setting: string | null;
+  current_activity: string | null;
 }
 type TemplateUpdatable = Omit<Template, "template_id">;
 
@@ -97,3 +97,13 @@ export interface PromptAnswer {
   prompt_id: UUID;
   prompt_answer: string;
 }
+
+export type localStore = {
+  templateID: UUID;
+  rolesById: Record<(number|UUID), (Role|Template)>;
+  roleIds: (number|UUID)[];
+  phasesById: Record<UUID, Phase>;
+  phaseIds: UUID[];
+  rolePhasesById: Record<UUID, RolePhase>;
+  rolePhaseIndex: Record<UUID, Record<UUID, UUID>>; // first UUID is role id, second is phase id, and third is rolephase id
+};

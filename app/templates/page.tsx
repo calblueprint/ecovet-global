@@ -1,34 +1,48 @@
 "use client";
 
 import { useState } from "react";
-import { UUID } from "crypto";
-import { createTemplates } from "@/api/supabase/queries/templates";
 import TemplateBuilder from "./components/TemplateBuilder";
+import { localStore } from "@/types/schema";
+
+export const createInitialStore = (): localStore => {
+  const templateID = crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;  //some crazy fix bc this crypto returns as a string but technically isnt UUID like in schema
+
+  return {
+  templateID: templateID,
+  rolesById: {1: {
+    template_id: templateID, 
+    template_name: "New Template",
+    accessible_to_all: null,
+    user_group_id: null,
+    objective: "New Template Objective",
+    summary: "New Template Summary",
+    setting: "New Template Setting",
+    current_activity: "New Template Current Activity"
+  }},
+  roleIds: [1],
+  phasesById: {},
+  phaseIds: [],
+  rolePhasesById: {},
+  rolePhaseIndex: {},
+}};
 
 export default function NewTemplatePage() {
-  const [loading, setLoading] = useState(false);
   const [isNew, setIsNew] = useState(false);
-  const [templateID, setTemplateID] = useState<UUID|null>(null);
+  const [newTemp, setNewTemp] = useState<localStore|null>(null);
 
   async function newTemplate() {
-    setLoading(true);
-    try {
-      const newTemplateID = await createTemplates();
-      setTemplateID(newTemplateID);
-    } finally {
-      setLoading(false);
+      setNewTemp(createInitialStore());
       setIsNew(true);
-    }
   }
 
   return (
     <>
       <h1>New Template Page</h1>
       {isNew ? 
-        <TemplateBuilder template_id={templateID}/>
+        <TemplateBuilder localStore={newTemp}/>
       :
-        <button onClick={newTemplate} disabled={loading}>
-          {loading ? "Creating..." : "New Template"}
+        <button onClick={newTemplate}>
+          New Template
         </button> 
       }
     </>
