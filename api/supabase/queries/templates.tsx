@@ -73,7 +73,7 @@ export async function deletePhases(phase_id: UUID): Promise<void> {
     if (error) throw error;
 }
 
-export async function createRoles(role_name: string, template_id: UUID|null, role_description: string|null=null): Promise<UUID> {
+export async function createRoles(template_id: UUID, role_name: string|null=null, role_description: string|null=null): Promise<UUID> {
     const { data, error } = await supabase
     .from('role')
     .insert({ 
