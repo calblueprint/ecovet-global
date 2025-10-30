@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useReducer, useState } from "react";
 import { UUID } from "crypto";
 import TemplateOverviewForm from "./TemplateOverviewForm";
 import RoleForm from "./RoleForm";
@@ -7,6 +7,11 @@ import { localStore, Role } from "@/types/schema";
 export default function TemplateBuilder({localStore} : {localStore: localStore|null} ) {
   const [activeId, setActiveId] = useState<UUID|number>(1);
   const [phaseCount, setPhaseCount] = useState<number>(0);
+  const [, setTick] = useState(0);
+
+  function useForceUpdate() {
+    setTick((tick) => (tick + 1) % 10);
+  }
 
   function addTab(): void {
     if (!localStore?.templateID) {
@@ -31,6 +36,46 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
     if (localStore == null) return;
 
     (localStore.rolesById[role_id] as Role).role_name = newLabel;
+    useForceUpdate();
+  }
+
+  function addPhase(): void {
+    if (localStore == null) return;
+    setPhaseCount(prev => prev + 1)
+
+    const newPhaseID = crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
+    localStore.phasesById[newPhaseID] = { phase_id: newPhaseID, session_id: null, phase_name: String(phaseCount), phase_description: null, is_finished: null };
+    localStore.phaseIds.push(newPhaseID);
+    
+    for (const role of localStore.roleIds) {
+        if (typeof role === "number") {
+            continue;
+        }
+        const newRolePhaseID = crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
+        localStore.rolePhasesById[newRolePhaseID] = { role_phase_id: newRolePhaseID, phase_id: newPhaseID, role_id: role, description: null };
+        if (!(role in localStore.rolePhaseIndex)) {
+            localStore.rolePhaseIndex[role] = {};
+        }
+        localStore.rolePhaseIndex[role][newPhaseID] = newRolePhaseID;
+    }
+  }
+
+  function removePhase(): void {
+    if (phaseCount == 0  || localStore == null) {
+        return
+    }
+    setPhaseCount(prev => prev - 1);
+
+    const removedPhaseID = localStore.phaseIds.pop() as UUID;
+    delete localStore.phasesById[removedPhaseID];
+
+    for (const [roleID, obj] of Object.entries(localStore.rolePhaseIndex)) {
+        const rolePhaseID = obj[removedPhaseID];
+        if (rolePhaseID) {
+            delete localStore.rolePhasesById[rolePhaseID];
+            delete obj[removedPhaseID];
+        }
+    }
   }
 
   return (
@@ -59,8 +104,8 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
             </div>
             <div style={{ display: "flex", alignItems: 'center' }}>
                 <p>Phases: {phaseCount}</p>
-                <button onClick={() => setPhaseCount(prev => prev + 1)}>UP</button>
-                <button onClick={() => setPhaseCount(prev => Math.max(prev - 1, 0))}>DOWN</button>
+                <button onClick={addPhase}>UP</button>
+                <button onClick={removePhase}>DOWN</button>
             </div>
         </div>
 
