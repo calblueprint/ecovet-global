@@ -5,7 +5,7 @@ export default function RoleForm({
     onChange,
   }: {
     value: roleFormInput;
-    onChange: (v: string) => void;
+    onChange: (field: string, v: string) => void;
   }) {
   
   const rolePhases: RolePhase[] = [];
@@ -13,8 +13,6 @@ export default function RoleForm({
     rolePhases.push(value.rolePhases[rolePhaseID]);
   }
 
-  // changed function (what value was changed, and what 
-  // was the change; i.e. description and "my description")
   return (
     <div>
         <fieldset>
@@ -24,14 +22,30 @@ export default function RoleForm({
               name="role_description" 
               placeholder="da descrition"
               value={value.role.role_description ?? ""}
-              onChange={(e) => onChange(e.target.value)}
+              onChange={(e) => onChange('role_description', e.target.value)}
             />
         </fieldset>
         {rolePhases.map((rolePhase, i) => (
           <fieldset key={rolePhase.role_phase_id}>
             <legend>Phase {i + 1}</legend>
-            <p>Prompt 1</p>
-            <p>Prompt 2</p>
+            
+            <div key={'div' + rolePhase.role_phase_id} style={{ display: "flex", flexDirection: "column", width: '25%' }}>
+              {value.promptIndex[rolePhase.role_phase_id].map((promptID, i) => (
+                <div key={'div' + promptID}>
+                  <input
+                    key={promptID}
+                    type="text" 
+                    name="prompt" 
+                    placeholder="da prompt"
+                    value={value.promptById[promptID].prompt_text ?? ""}
+                    onChange={(e) => onChange(promptID, e.target.value)}
+                  />
+                  <button onClick={(e) => onChange('remove_prompt', promptID)}>- Remove</button>
+                </div>
+            ))}
+            </div>
+
+            <button onClick={(e) => onChange('add_prompt', rolePhase.role_phase_id)}>+ New Prompt</button>
           </fieldset>
         ))}
     </div>

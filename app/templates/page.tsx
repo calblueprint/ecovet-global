@@ -24,6 +24,8 @@ export const createInitialStore = (): localStore => {
   phaseIds: [],
   rolePhasesById: {},
   rolePhaseIndex: {},
+  promptById: {},
+  promptIndex: {},
 }};
 
 export default function NewTemplatePage() {

@@ -2,7 +2,7 @@ import { useReducer, useState } from "react";
 import { UUID } from "crypto";
 import TemplateOverviewForm from "./TemplateOverviewForm";
 import RoleForm from "./RoleForm";
-import { localStore, Role } from "@/types/schema";
+import { localStore, Role, Template } from "@/types/schema";
 
 export default function TemplateBuilder({localStore} : {localStore: localStore|null} ) {
   const [activeId, setActiveId] = useState<UUID|number>(1);
@@ -13,7 +13,7 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
     setTick((tick) => (tick + 1) % 10);
   }
 
-  function addTab(): void {
+  function addRole(): void {
     if (!localStore?.templateID) {
       return;
     }
@@ -25,26 +25,33 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
         const newRolePhaseID = crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
         localStore.rolePhaseIndex[newRoleID][phaseID] = newRolePhaseID;
         localStore.rolePhasesById[newRolePhaseID] = { role_phase_id: newRolePhaseID, phase_id: phaseID, role_id: newRoleID, description: null };
+
+        localStore.promptIndex[newRolePhaseID] = [];
     }
     
     setActiveId(newRoleID);
   }
 
-  function removeTab(role_id: UUID | number): void {
+  function removeRole(role_id: UUID | number): void {
     if (localStore == null || typeof role_id == "number") return;
 
     delete localStore.rolesById[role_id];
-    localStore.roleIds = localStore.roleIds.filter((x) => x !== role_id);
+    const i = localStore.roleIds.indexOf(role_id);
+    localStore.roleIds.splice(i, 1);
     const deletedRolePhases = localStore.rolePhaseIndex[role_id];
     for (const [, rolePhaseID] of Object.entries(deletedRolePhases)) {
         delete localStore.rolePhasesById[rolePhaseID];
+        for (const prompt of localStore.promptIndex[rolePhaseID]) {
+            delete localStore.promptById[prompt];
+        }
+        delete localStore.promptIndex[rolePhaseID];
     }
     delete localStore.rolePhaseIndex[role_id];
 
     setActiveId(localStore.roleIds.at(-1)!);
   }
 
-  function renameTab(role_id: UUID | number, newLabel: string) {
+  function renameRole(role_id: UUID | number, newLabel: string) {
     if (localStore == null) return;
 
     (localStore.rolesById[role_id] as Role).role_name = newLabel;
@@ -66,6 +73,7 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
         const newRolePhaseID = crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
         localStore.rolePhasesById[newRolePhaseID] = { role_phase_id: newRolePhaseID, phase_id: newPhaseID, role_id: role, description: null };
         localStore.rolePhaseIndex[role][newPhaseID] = newRolePhaseID;
+        localStore.promptIndex[newRolePhaseID] = [];
     }
   }
 
@@ -84,16 +92,55 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
             delete localStore.rolePhasesById[rolePhaseID];
             delete obj[removedPhaseID];
         }
+        for (const prompt of localStore.promptIndex[rolePhaseID]) {
+            delete localStore.promptById[prompt];
+        }
+        delete localStore.promptIndex[rolePhaseID];
     }
   }
 
-  function setActiveRoleDescription(next: string) {
-  if (!localStore || typeof activeId === "number") return;
+  function addPrompt(rolePhaseID: UUID): void {
+    if (localStore == null) return;
 
-  // mutate the normalized store
-  (localStore.rolesById[activeId] as Role).role_description = next;
+    const newPromptID = crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
+    localStore.promptById[newPromptID] = { prompt_id: newPromptID, user_id: null, role_phase_id: rolePhaseID, prompt_text: "New Prompt" };
+    localStore.promptIndex[rolePhaseID].push(newPromptID);
+  }
 
-  // force a re-render since you're mutating an object outside React state
+  function removePrompt(rolePhaseID: UUID, promptID: UUID): void {
+    if (localStore == null) return;
+
+    const i = localStore.promptIndex[rolePhaseID].indexOf(promptID);
+    localStore.promptIndex[rolePhaseID].splice(i, 1);
+
+    delete localStore.promptById[promptID];
+  }
+
+  function setActiveUpdate(field: string, next: string) {
+  if (!localStore) return;
+
+  if (typeof activeId === "number") {
+    const key = field as keyof Template;
+    (localStore.rolesById[activeId] as unknown as Record<string, unknown>)[field] = next; // sets the field of template equal to next
+;
+  } else {
+    if (field == 'add_prompt') {
+        addPrompt((next as UUID));
+    } else if (field == 'remove_prompt') {
+        for (const [rolePhaseID, promptIDs] of Object.entries(localStore.promptIndex)) {
+            if (next in promptIDs) {
+                removePrompt((rolePhaseID as UUID), (next as UUID));
+                return;
+            }
+        }  
+    } else if (field == 'role_description') {
+        (localStore.rolesById[activeId] as Role).role_description = next;
+    }
+    else{
+        localStore.promptById[(field as UUID)].prompt_text = next;
+    }
+  }
+
   useForceUpdate();
 }
 
@@ -119,7 +166,7 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
                     }
                 </button>
                 ))}
-                <button onClick={addTab}>+ New</button>
+                <button onClick={addRole}>+ New</button>
             </div>
             <div style={{ display: "flex", alignItems: 'center' }}>
                 <p>Phases: {phaseCount}</p>
@@ -135,20 +182,29 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
                         <input
                             value={(localStore.rolesById[t] as Role).role_name}
-                            onChange={(e) => renameTab(t, e.target.value)}
+                            onChange={(e) => renameRole(t, e.target.value)}
                             style={{ padding: 6, border: "1px solid #ccc" }}
                         />
-                        <button onClick={() => removeTab(t)} style={{ border: "1px solid #ccc", padding: 6 }}>
+                        <button onClick={() => removeRole(t)} style={{ border: "1px solid #ccc", padding: 6 }}>
                             Remove
                         </button>
                     </div>
                 )}
                 {typeof activeId === "number" ? (
-                <TemplateOverviewForm/>
+                <TemplateOverviewForm
+                    value={(localStore.rolesById[activeId] as Template)}
+                    onChange={setActiveUpdate}
+                />
                 ) : (
                 <RoleForm
-                    value={{role: (localStore.rolesById[activeId] as Role), rolePhases: localStore.rolePhasesById, rolePhaseIndex: localStore.rolePhaseIndex[activeId]}}
-                    onChange={setActiveRoleDescription}
+                    value={{
+                        role: (localStore.rolesById[activeId] as Role), 
+                        rolePhases: localStore.rolePhasesById, 
+                        rolePhaseIndex: localStore.rolePhaseIndex[activeId],
+                        promptById: localStore.promptById,
+                        promptIndex: localStore.promptIndex,
+                    }}
+                    onChange={setActiveUpdate}
                 />
                 )}
             </div>
