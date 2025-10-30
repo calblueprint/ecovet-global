@@ -1,4 +1,4 @@
-import { useReducer, useState } from "react";
+import { useState } from "react";
 import { UUID } from "crypto";
 import TemplateOverviewForm from "./TemplateOverviewForm";
 import RoleForm from "./RoleForm";
@@ -111,38 +111,42 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
     if (localStore == null) return;
 
     const i = localStore.promptIndex[rolePhaseID].indexOf(promptID);
-    localStore.promptIndex[rolePhaseID].splice(i, 1);
+    if (i  !== -1) localStore.promptIndex[rolePhaseID].splice(i, 1);
 
     delete localStore.promptById[promptID];
+    useForceUpdate();
   }
 
   function setActiveUpdate(field: string, next: string) {
-  if (!localStore) return;
+    if (!localStore) return;
 
-  if (typeof activeId === "number") {
-    const key = field as keyof Template;
-    (localStore.rolesById[activeId] as unknown as Record<string, unknown>)[field] = next; // sets the field of template equal to next
-;
-  } else {
-    if (field == 'add_prompt') {
-        addPrompt((next as UUID));
-    } else if (field == 'remove_prompt') {
-        for (const [rolePhaseID, promptIDs] of Object.entries(localStore.promptIndex)) {
-            if (next in promptIDs) {
-                removePrompt((rolePhaseID as UUID), (next as UUID));
-                return;
-            }
-        }  
-    } else if (field == 'role_description') {
-        (localStore.rolesById[activeId] as Role).role_description = next;
+    if (typeof activeId === "number") {
+        const key = field as keyof Template;
+        (localStore.rolesById[activeId] as unknown as Record<string, unknown>)[field] = next; // sets the field of template equal to next
+    
+    } else {
+        if (field == 'add_prompt') {
+            addPrompt((next as UUID));
+        } else if (field == 'remove_prompt') {
+            for (const [rolePhaseID, promptIDs] of Object.entries(localStore.promptIndex)) {
+                if (promptIDs.includes(next as UUID)) {
+                    removePrompt(rolePhaseID as UUID, next as UUID);
+                    break;
+                }
+            }  
+        } else if (field == 'role_description') {
+            (localStore.rolesById[activeId] as Role).role_description = next;
+        }
+        else{
+            localStore.promptById[(field as UUID)].prompt_text = next;
+        }
     }
-    else{
-        localStore.promptById[(field as UUID)].prompt_text = next;
-    }
+    useForceUpdate();
   }
 
-  useForceUpdate();
-}
+  function saveTemplate(): void {
+    return
+  }
 
   return (
     <div>
@@ -210,7 +214,7 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
             </div>
             ) : null
         )}
-        <button>Submit Template</button>
+        <button onClick={saveTemplate}>Submit Template</button>
     </div>
   );
 }
