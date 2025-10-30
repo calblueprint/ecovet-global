@@ -88,8 +88,7 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
   }
 
   function setActiveRoleDescription(next: string) {
-  if (!localStore) return;
-  if (typeof activeId === "number") return; // guard against the overview tab
+  if (!localStore || typeof activeId === "number") return;
 
   // mutate the normalized store
   (localStore.rolesById[activeId] as Role).role_description = next;
