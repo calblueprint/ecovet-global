@@ -17,18 +17,30 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
     if (!localStore?.templateID) {
       return;
     }
-    const newRoleID = crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;;
+    const newRoleID = crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
     localStore.rolesById[newRoleID] = { role_id: newRoleID, role_name: "New Role", role_description: "New Role Description", template_id: localStore.templateID };
     localStore.roleIds.push(newRoleID);
+    localStore.rolePhaseIndex[newRoleID] = {};
+    for (const phaseID of localStore.phaseIds) {
+        const newRolePhaseID = crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
+        localStore.rolePhaseIndex[newRoleID][phaseID] = newRolePhaseID;
+        localStore.rolePhasesById[newRolePhaseID] = { role_phase_id: newRolePhaseID, phase_id: phaseID, role_id: newRoleID, description: null };
+    }
     
     setActiveId(newRoleID);
   }
 
   function removeTab(role_id: UUID | number): void {
-    if (localStore == null) return;
+    if (localStore == null || typeof role_id == "number") return;
 
     delete localStore.rolesById[role_id];
     localStore.roleIds = localStore.roleIds.filter((x) => x !== role_id);
+    const deletedRolePhases = localStore.rolePhaseIndex[role_id];
+    for (const [, rolePhaseID] of Object.entries(deletedRolePhases)) {
+        delete localStore.rolePhasesById[rolePhaseID];
+    }
+    delete localStore.rolePhaseIndex[role_id];
+
     setActiveId(localStore.roleIds.at(-1)!);
   }
 
@@ -53,9 +65,6 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
         }
         const newRolePhaseID = crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
         localStore.rolePhasesById[newRolePhaseID] = { role_phase_id: newRolePhaseID, phase_id: newPhaseID, role_id: role, description: null };
-        if (!(role in localStore.rolePhaseIndex)) {
-            localStore.rolePhaseIndex[role] = {};
-        }
         localStore.rolePhaseIndex[role][newPhaseID] = newRolePhaseID;
     }
   }
@@ -77,6 +86,17 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
         }
     }
   }
+
+  function setActiveRoleDescription(next: string) {
+  if (!localStore) return;
+  if (typeof activeId === "number") return; // guard against the overview tab
+
+  // mutate the normalized store
+  (localStore.rolesById[activeId] as Role).role_description = next;
+
+  // force a re-render since you're mutating an object outside React state
+  useForceUpdate();
+}
 
   return (
     <div>
@@ -124,10 +144,13 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
                         </button>
                     </div>
                 )}
-                {activeId === 1 ? (
+                {typeof activeId === "number" ? (
                 <TemplateOverviewForm/>
                 ) : (
-                <RoleForm/>
+                <RoleForm
+                    value={{role: (localStore.rolesById[activeId] as Role), rolePhases: localStore.rolePhasesById, rolePhaseIndex: localStore.rolePhaseIndex[activeId]}}
+                    onChange={setActiveRoleDescription}
+                />
                 )}
             </div>
             ) : null

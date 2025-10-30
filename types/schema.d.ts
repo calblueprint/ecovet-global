@@ -107,3 +107,15 @@ export type localStore = {
   rolePhasesById: Record<UUID, RolePhase>;
   rolePhaseIndex: Record<UUID, Record<UUID, UUID>>; // first UUID is role id, second is phase id, and third is rolephase id
 };
+
+export type roleFormInput = {
+  role: Role,
+  rolePhases: Record<UUID, RolePhase>,
+  rolePhaseIndex: Record<UUID, UUID>,
+}
+
+export type templateOverviewFormInput = {
+  summary: string,
+  setting: string,
+  currentActivity: string,
+}
