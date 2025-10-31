@@ -4,6 +4,7 @@ import { useState } from "react";
 import { FiCheck, FiEye, FiEyeOff, FiX } from "react-icons/fi";
 import Link from "next/link";
 import supabase from "@/actions/supabase/client";
+import { useSession } from "@/utils/AuthProvider";
 import {
   Button,
   Container,
@@ -29,6 +30,7 @@ export default function Login() {
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const sessionHandler = useSession();
 
   const rules = {
     length: password.length >= 12,
@@ -47,10 +49,7 @@ export default function Login() {
     if (password !== confirmPassword) {
       throw new Error("Passwords do not match");
     }
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    const { data, error } = await sessionHandler.signUp(email, password);
     if (error) {
       throw new Error(
         "An error occurred during sign up: " +

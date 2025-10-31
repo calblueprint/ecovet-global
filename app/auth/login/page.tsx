@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import supabase from "@/actions/supabase/client";
+import { useSession } from "@/utils/AuthProvider";
 import {
   Button,
   EmailAddressDiv,
