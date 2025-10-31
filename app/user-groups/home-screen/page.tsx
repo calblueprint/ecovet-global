@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { fetchUserGroups } from "@/api/supabase/queries/user-groups";
 import { UserGroup } from "@/types/schema";
+import Link from "next/link";
 
 const UserGroupsPage = () => {
   const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
@@ -13,7 +14,8 @@ const UserGroupsPage = () => {
       if (fetchedUserGrps) {
         setUserGroups(fetchedUserGrps);
       }
-    }
+      console.log(fetchedUserGrps);
+    } 
 
     loadUserGroups();
   }, []);
@@ -21,9 +23,22 @@ const UserGroupsPage = () => {
   return (
     <div>
       <h1>User Groups</h1>
-      {userGroups.map((usergrp, index) => (
-        <div key={index}>{usergrp.user_group_name}</div>
-      ))}
+      <ul>
+        {userGroups.map((group) => (
+          <li key={group.user_group_id}>
+            <Link href={`/user-groups/${group.user_group_id}`}>
+              {group.user_group_name}
+            </Link>
+
+            <span>100</span>
+
+            {/* To be added when num_users is added as a column */}
+            {/* <span>{group.num_users}</span> */}
+          </li>
+        ))}
+      </ul>
+
+      <Link href={'/'}><button>Invite</button></Link>
     </div>
   );
 };

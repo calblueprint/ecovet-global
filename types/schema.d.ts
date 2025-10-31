@@ -92,3 +92,12 @@ export interface PromptAnswer {
   prompt_id: UUID;
   prompt_answer: string;
 }
+
+export interface Invite {
+  invite_id: UUID,
+  user_group_id: UUID,
+  invited_by_user_id: UUID,
+  email: string,
+  user_type: string,
+  status: string,
+}
