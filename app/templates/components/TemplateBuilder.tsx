@@ -116,28 +116,24 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
     useForceUpdate();
   }
 
-  function setActiveUpdate(field: string, next: string) {
+  function setActiveUpdate(id: UUID|number, field: string, next: string) {
     if (!localStore) return;
 
-    if (typeof activeId === "number") {
+    if (typeof id === "number") {
         const key = field as keyof Template;
-        (localStore.rolesById[activeId] as unknown as Record<string, unknown>)[field] = next; // sets the field of template equal to next
+        (localStore.rolesById[id] as unknown as Record<string, unknown>)[field] = next;
     
     } else {
         if (field == 'add_prompt') {
-            addPrompt((next as UUID));
+            addPrompt((id as UUID));
         } else if (field == 'remove_prompt') {
-            for (const [rolePhaseID, promptIDs] of Object.entries(localStore.promptIndex)) {
-                if (promptIDs.includes(next as UUID)) {
-                    removePrompt(rolePhaseID as UUID, next as UUID);
-                    break;
-                }
-            }  
+            removePrompt((next as UUID), (id as UUID));
         } else if (field == 'role_description') {
-            (localStore.rolesById[activeId] as Role).role_description = next;
-        }
-        else{
-            localStore.promptById[(field as UUID)].prompt_text = next;
+            (localStore.rolesById[(id as UUID)] as Role).role_description = next;
+        } else if (field == 'description') {
+            localStore.rolePhasesById[(id as UUID)].description = next;
+        } else if (field == 'prompt_text') {
+            localStore.promptById[(id as UUID)].prompt_text = next;
         }
     }
     useForceUpdate();

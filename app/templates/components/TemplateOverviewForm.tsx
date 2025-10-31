@@ -5,7 +5,7 @@ export default function TemplteOverviewForm({
     onChange,
   }: {
     value: Template;
-    onChange: (field: string, val: string) => void;
+    onChange: (id: number, field: string, val: string) => void;
   }) {
   return (
     <div>
@@ -16,7 +16,7 @@ export default function TemplteOverviewForm({
               name="template_summary" 
               placeholder="da summary"
               value={value.summary ?? ""}
-              onChange={(e) => onChange('summary', e.target.value)}
+              onChange={(e) => onChange(1, 'summary', e.target.value)}
             />
         </fieldset>
         <fieldset>
@@ -26,7 +26,7 @@ export default function TemplteOverviewForm({
               name="template_setting" 
               placeholder="da setting"
               value={value.setting ?? ""}
-              onChange={(e) => onChange('setting', e.target.value)}
+              onChange={(e) => onChange(1, 'setting', e.target.value)}
             />
         </fieldset>
         <fieldset>
@@ -36,7 +36,7 @@ export default function TemplteOverviewForm({
               name="template_activity" 
               placeholder="da current activity"
               value={value.current_activity ?? ""}
-              onChange={(e) => onChange('current_activity', e.target.value)}
+              onChange={(e) => onChange(1, 'current_activity', e.target.value)}
             />
         </fieldset>
     </div>

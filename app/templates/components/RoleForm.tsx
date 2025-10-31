@@ -1,11 +1,12 @@
 import { roleFormInput, RolePhase } from "@/types/schema";
+import { UUID } from "crypto";
 
 export default function RoleForm({
     value,
     onChange,
   }: {
     value: roleFormInput;
-    onChange: (field: string, v: string) => void;
+    onChange: (id: UUID, field: string, v: string) => void;
   }) {
   
   const rolePhases: RolePhase[] = [];
@@ -22,13 +23,19 @@ export default function RoleForm({
               name="role_description" 
               placeholder="da descrition"
               value={value.role.role_description ?? ""}
-              onChange={(e) => onChange('role_description', e.target.value)}
+              onChange={(e) => onChange(value.role.role_id, 'role_description', e.target.value)}
             />
         </fieldset>
         {rolePhases.map((rolePhase, i) => (
           <fieldset key={rolePhase.role_phase_id}>
             <legend>Phase {i + 1}</legend>
-            
+            <input 
+              type="text" 
+              name="role_phase_description" 
+              placeholder="da descrition"
+              value={rolePhase.description ?? ""}
+              onChange={(e) => onChange(rolePhase.role_phase_id, 'description', e.target.value)}
+            />
             <div key={'div' + rolePhase.role_phase_id} style={{ display: "flex", flexDirection: "column", width: '25%' }}>
               {value.promptIndex[rolePhase.role_phase_id].map((promptID, i) => (
                 <div key={'div' + promptID}>
@@ -38,14 +45,14 @@ export default function RoleForm({
                     name="prompt" 
                     placeholder="da prompt"
                     value={value.promptById[promptID].prompt_text ?? ""}
-                    onChange={(e) => onChange(promptID, e.target.value)}
+                    onChange={(e) => onChange(promptID, 'prompt_text', e.target.value)}
                   />
-                  <button onClick={(e) => onChange('remove_prompt', promptID)}>- Remove</button>
+                  <button onClick={(e) => onChange(promptID, 'remove_prompt', rolePhase.role_phase_id)}>- Remove</button>
                 </div>
             ))}
             </div>
 
-            <button onClick={(e) => onChange('add_prompt', rolePhase.role_phase_id)}>+ New Prompt</button>
+            <button onClick={(e) => onChange(rolePhase.role_phase_id, 'add_prompt', rolePhase.role_phase_id)}>+ New Prompt</button>
           </fieldset>
         ))}
     </div>
