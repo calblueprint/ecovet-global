@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { FiCheck, FiEye, FiEyeOff, FiX } from "react-icons/fi";
 import Link from "next/link";
-import supabase from "@/actions/supabase/client";
 import { useSession } from "@/utils/AuthProvider";
 import {
   Button,
