@@ -1,5 +1,6 @@
 import localFont from "next/font/local";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 fonts: "use client";
 
 const Sans = localFont({
