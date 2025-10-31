@@ -115,5 +115,5 @@ export type roleFormInput = {
   rolePhases: Record<UUID, RolePhase>,
   rolePhaseIndex: Record<UUID, UUID>,
   promptById: Record<UUID, Prompt>,
-  promptIndex: Record<UUID, UUID[]>,
+  promptIndex: Record<UUID, UUID[]>,  // rolephase uuid mapping to a list of prompt uuids
 }

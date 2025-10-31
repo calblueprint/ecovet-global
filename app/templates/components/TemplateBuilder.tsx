@@ -2,7 +2,8 @@ import { useState } from "react";
 import { UUID } from "crypto";
 import TemplateOverviewForm from "./TemplateOverviewForm";
 import RoleForm from "./RoleForm";
-import { localStore, Role, Template } from "@/types/schema";
+import { localStore, Prompt, Role, Template } from "@/types/schema";
+import { createPhases, createPrompts, createRolePhases, createRoles, createTemplates } from "@/api/supabase/queries/templates";
 
 export default function TemplateBuilder({localStore} : {localStore: localStore|null} ) {
   const [activeId, setActiveId] = useState<UUID|number>(1);
@@ -14,9 +15,7 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
   }
 
   function addRole(): void {
-    if (!localStore?.templateID) {
-      return;
-    }
+    if (localStore == null) return;
     const newRoleID = crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
     localStore.rolesById[newRoleID] = { role_id: newRoleID, role_name: "New Role", role_description: "New Role Description", template_id: localStore.templateID };
     localStore.roleIds.push(newRoleID);
@@ -144,8 +143,57 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
     useForceUpdate();
   }
 
-  function saveTemplate(): void {
-    return
+  async function saveTemplate(): Promise<void> {
+    if (localStore == null) return;
+    const realtemplateID = await createTemplates(
+        localStore.templateID,
+        'erm name tbd', 
+        null, 
+        (localStore.rolesById[1] as Template).objective, 
+        (localStore.rolesById[1] as Template).summary, 
+        (localStore.rolesById[1] as Template).setting, 
+        (localStore.rolesById[1] as Template).current_activity
+    );
+
+    for (let roleID of localStore.roleIds) {
+        if (!(typeof roleID == "number")) {
+            await createRoles(
+                roleID,
+                realtemplateID, 
+                (localStore.rolesById[roleID] as Role).role_name, 
+                (localStore.rolesById[roleID] as Role).role_description,
+            );            
+        }
+    }
+
+    for (let phaseID of localStore.phaseIds) {
+        await createPhases(
+            phaseID,
+            localStore.phasesById[phaseID].session_id,
+            localStore.phasesById[phaseID].phase_name,
+            localStore.phasesById[phaseID].is_finished,
+            localStore.phasesById[phaseID].phase_description,
+        )
+    }
+
+    for (let [roleID, obj] of Object.entries(localStore.rolePhaseIndex) as [UUID, Record<UUID, UUID>][]) {
+        for (let [phaseID, rolePhaseID] of Object.entries(obj) as [UUID, UUID][]) {
+            await createRolePhases(
+                rolePhaseID,
+                phaseID,
+                roleID,
+                localStore.rolePhasesById[rolePhaseID].description,
+            )
+        }
+    }
+
+    for (let [promptID, prompt] of Object.entries(localStore.promptById) as [UUID, Prompt][]) {
+        await createPrompts(
+            null,
+            prompt.role_phase_id,
+            prompt.prompt_text,
+        )
+    }
   }
 
   return (

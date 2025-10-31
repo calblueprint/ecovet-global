@@ -2,10 +2,11 @@ import { UUID } from "crypto"
 import supabase from "../createClient"
 import { PhaseUpdatable, PromptUpdatable, RolePhaseUpdatable, RoleUpdatable, TemplateUpdatable } from "@/types/schema";
 
-export async function createTemplates(template_name: string|null=null, accessible_to_all: boolean|null=null, objective: string|null=null, summary: string|null=null, setting: string|null=null, current_activity: string|null=null, user_group_id: UUID|null=null): Promise<UUID> {
+export async function createTemplates(templateID: UUID, template_name: string|null=null, accessible_to_all: boolean|null=null, objective: string|null=null, summary: string|null=null, setting: string|null=null, current_activity: string|null=null, user_group_id: UUID|null=null): Promise<UUID> {
     const { data, error } = await supabase
     .from('template')
     .insert({ 
+        template_id: templateID,
         template_name: template_name,
         accessible_to_all: accessible_to_all,
         user_group_id: user_group_id,
@@ -38,11 +39,12 @@ export async function deleteTemplates(template_id: UUID): Promise<void> {
     if (error) throw error;
 }
 
-export async function createPhases(session_id: UUID|null, phase_name: string|null, is_finished: boolean|null, 
+export async function createPhases(phase_id: UUID, session_id: UUID|null, phase_name: string|null, is_finished: boolean|null, 
     phase_description: string|null=null): Promise<UUID> {
     const { data, error } = await supabase
     .from('phase')
     .insert({ 
+        phase_id: phase_id,
         session_id: session_id,
         phase_name: phase_name,
         phase_description: phase_description,
@@ -73,10 +75,11 @@ export async function deletePhases(phase_id: UUID): Promise<void> {
     if (error) throw error;
 }
 
-export async function createRoles(template_id: UUID, role_name: string|null=null, role_description: string|null=null): Promise<UUID> {
+export async function createRoles(role_id: UUID, template_id: UUID, role_name: string|null=null, role_description: string|null=null): Promise<UUID> {
     const { data, error } = await supabase
     .from('role')
     .insert({ 
+        role_id: role_id,
         role_name: role_name,
         role_description: role_description,
         template_id: template_id,
@@ -106,10 +109,11 @@ export async function deleteRoles(role_id: UUID): Promise<void> {
     if (error) throw error;
 }
 
-export async function createRolePhases(phase_id: UUID, role_id: UUID, description: string): Promise<UUID> {
+export async function createRolePhases(role_phase_id: UUID, phase_id: UUID, role_id: UUID, description: string|null): Promise<UUID> {
     const { data, error } = await supabase
     .from('role_phase')
     .insert({ 
+        role_phase_id: role_phase_id,
         phase_id: phase_id,
         role_id: role_id,
         description: description,
@@ -139,7 +143,7 @@ export async function deleteRolePhase(role_phase_id: UUID): Promise<void> {
     if (error) throw error;
 }
 
-export async function createPrompts(user_id: UUID|null, role_phase_id: UUID, prompt_text: string): Promise<UUID> {
+export async function createPrompts(user_id: UUID|null, role_phase_id: UUID, prompt_text: string|null): Promise<UUID> {
     const { data, error } = await supabase
     .from('prompt')
     .insert({ 
