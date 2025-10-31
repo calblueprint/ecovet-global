@@ -5,10 +5,11 @@ import RoleForm from "./RoleForm";
 import { localStore, Prompt, Role, Template } from "@/types/schema";
 import { createPhases, createPrompts, createRolePhases, createRoles, createTemplates } from "@/api/supabase/queries/templates";
 
-export default function TemplateBuilder({localStore} : {localStore: localStore|null} ) {
+export default function TemplateBuilder({localStore, onFinish} : {localStore: localStore|null; onFinish: () => void;} ) {
   const [activeId, setActiveId] = useState<UUID|number>(1);
   const [phaseCount, setPhaseCount] = useState<number>(0);
   const [, setTick] = useState(0);
+  const [saving, setSaving] = useState(false);
 
   function useForceUpdate() {
     setTick((tick) => (tick + 1) % 10);
@@ -140,6 +141,7 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
   }
 
   async function saveTemplate(): Promise<void> {
+    setSaving(true);
     if (localStore == null) return;
     const realtemplateID = await createTemplates(
         localStore.templateID,
@@ -185,11 +187,14 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
 
     for (let [promptID, prompt] of Object.entries(localStore.promptById) as [UUID, Prompt][]) {
         await createPrompts(
+            promptID,
             null,
             prompt.role_phase_id,
             prompt.prompt_text,
         )
     }
+    setSaving(false);
+    onFinish();
   }
 
   return (
@@ -258,7 +263,9 @@ export default function TemplateBuilder({localStore} : {localStore: localStore|n
             </div>
             ) : null
         )}
-        <button onClick={saveTemplate}>Submit Template</button>
+        <button onClick={saveTemplate} disabled={saving}>
+        {saving ? "Saving..." : "Submit Template"}
+        </button>
     </div>
   );
 }

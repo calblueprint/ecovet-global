@@ -143,10 +143,11 @@ export async function deleteRolePhase(role_phase_id: UUID): Promise<void> {
     if (error) throw error;
 }
 
-export async function createPrompts(user_id: UUID|null, role_phase_id: UUID, prompt_text: string|null): Promise<UUID> {
+export async function createPrompts(prompt_id: UUID, user_id: UUID|null, role_phase_id: UUID, prompt_text: string|null): Promise<UUID> {
     const { data, error } = await supabase
     .from('prompt')
     .insert({ 
+        prompt_id: prompt_id,
         user_id: user_id,
         role_phase_id: role_phase_id,
         prompt_text: prompt_text,

@@ -37,11 +37,16 @@ export default function NewTemplatePage() {
       setIsNew(true);
   }
 
+  function resetTemplate() {
+    setIsNew(false);
+    setNewTemp(null);
+  }
+
   return (
     <>
       <h1>New Template Page</h1>
       {isNew ? 
-        <TemplateBuilder localStore={newTemp}/>
+        <TemplateBuilder localStore={newTemp} onFinish={resetTemplate}/>
       :
         <button onClick={newTemplate}>
           New Template
