@@ -18,46 +18,39 @@ export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const sessionHandler = useSession();
 
   const handleSignUp = async () => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    const { error } = await sessionHandler.signUp(email, password);
     if (error) {
       throw new Error(
         "An error occurred during sign up: " +
           error.message +
           "with email" +
-          data,
+          email,
       );
     }
   };
 
   const signInWithEmail = async () => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { error } = await sessionHandler.signInWithEmail(email, password);
     if (error) {
       throw new Error(
         "An error occurred during sign in: " +
           error.message +
           "with email" +
-          data,
+          email,
       );
     }
-
-    await supabase.auth.getSession();
-    await supabase.auth.getUser();
 
     router.push("/onboarding");
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      throw new Error("An error occurred during sign out: " + error.message);
+    try {
+      await sessionHandler.signOut();
+    } catch (error) {
+      throw new Error("An error occurred during sign out: " + error);
     }
   };
 
