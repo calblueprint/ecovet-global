@@ -4,44 +4,44 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import supabase from "@/actions/supabase/client";
 import { checkProfileExists } from "@/actions/supabase/queries/profile";
+import { useSession } from "@/utils/AuthProvider";
 import styles from "./styles.module.css";
 
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const sessionHandler = useSession();
 
   const handleSignUp = async () => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    const { error } = await sessionHandler.signUp(email, password);
     if (error) {
       throw new Error(
         "An error occurred during sign up: " +
           error.message +
           "with email" +
-          data,
+          email,
       );
     }
   };
 
   const signInWithEmail = async () => {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await sessionHandler.signInWithEmail(
       email,
       password,
-    });
+    );
     if (error) {
       throw new Error(
         "An error occurred during sign in: " +
           error.message +
           "with email" +
-          data,
+          email,
       );
     }
 
-    await supabase.auth.getSession();
-    await supabase.auth.getUser();
+    if (!data.user) {
+      throw new Error("User not found after sign in");
+    }
 
     if (await checkProfileExists(data.user.id)) {
       router.push("/onboarding");
@@ -51,9 +51,10 @@ export default function Login() {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      throw new Error("An error occurred during sign out: " + error.message);
+    try {
+      await sessionHandler.signOut();
+    } catch (error) {
+      throw new Error("An error occurred during sign out: " + error);
     }
   };
 
