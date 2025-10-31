@@ -25,9 +25,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={sans.className}>
+        <AuthContextProvider>
           <ProfileProvider>
             <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
           </ProfileProvider>
+        </AuthContextProvider>
       </body>
     </html>
   );

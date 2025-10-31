@@ -36,7 +36,6 @@ export interface Profile {
   country: string;
   org_role: string;
 }
-
 export interface Role {
   role_id: UUID; // role_id
   role_name: string;
@@ -94,10 +93,10 @@ export interface PromptAnswer {
 }
 
 export interface Invite {
-  invite_id: UUID,
-  user_group_id: UUID,
-  invited_by_user_id: UUID,
-  email: string,
-  user_type: string,
-  status: string,
+  invite_id: UUID;
+  user_group_id: UUID;
+  invited_by_user_id: UUID;
+  email: string;
+  user_type: string;
+  status: string;
 }

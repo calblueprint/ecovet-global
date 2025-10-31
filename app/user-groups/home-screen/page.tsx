@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { fetchUserGroups } from "@/api/supabase/queries/user-groups";
 import { UserGroup } from "@/types/schema";
-import Link from "next/link";
 
 const UserGroupsPage = () => {
   const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
@@ -15,7 +15,7 @@ const UserGroupsPage = () => {
         setUserGroups(fetchedUserGrps);
       }
       console.log(fetchedUserGrps);
-    } 
+    }
 
     loadUserGroups();
   }, []);
@@ -24,7 +24,7 @@ const UserGroupsPage = () => {
     <div>
       <h1>User Groups</h1>
       <ul>
-        {userGroups.map((group) => (
+        {userGroups.map(group => (
           <li key={group.user_group_id}>
             <Link href={`/user-groups/${group.user_group_id}`}>
               {group.user_group_name}
@@ -38,7 +38,9 @@ const UserGroupsPage = () => {
         ))}
       </ul>
 
-      <Link href={'/'}><button>Invite</button></Link>
+      <Link href={"/"}>
+        <button>Invite</button>
+      </Link>
     </div>
   );
 };

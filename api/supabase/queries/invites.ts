@@ -1,13 +1,13 @@
-import supabase from "../createClient";
 import { UUID } from "crypto";
+import supabase from "../createClient";
 
 export async function fetchInvites(user_group_id: UUID) {
   try {
     // Pull data
     const { data, error } = await supabase
-    .from("invite")
-    .select("*")
-    .eq("user_group_id", user_group_id);
+      .from("invite")
+      .select("*")
+      .eq("user_group_id", user_group_id);
 
     if (error) throw error;
 
