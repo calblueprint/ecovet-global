@@ -87,7 +87,7 @@ export const Input = styled.input`
   line-height: normal;
   color: ${COLORS.black100};
   &::placeholder {
-    color: ${COLORS.black100};
+    color: ${COLORS.black20};
     opacity: 1;
   }
   &:focus {
@@ -117,6 +117,7 @@ export const PasswordDiv = styled.div`
   font-style: normal;
   font-weight: 600;
   line-height: normal;
+  color: ${COLORS.black20};
 `;
 
 export const PasswordConfirmDiv = styled.div`
@@ -129,6 +130,7 @@ export const PasswordConfirmDiv = styled.div`
   font-style: normal;
   font-weight: 600;
   line-height: normal;
+  color: ${COLORS.black20};
 `;
 
 export const VisibilityToggle = styled.button`
@@ -191,7 +193,7 @@ export const PasswordRule = styled.li<{ $touched: boolean; $valid: boolean }>`
   }
 `;
 
-export const SignUpButton = styled.button`
+export const Button = styled.button`
   width: 100%;
   height: 45px;
   padding: 1rem 0rem;

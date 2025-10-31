@@ -4,7 +4,15 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import supabase from "@/actions/supabase/client";
-import styles from "./styles.module.css";
+import {
+  Button,
+  EmailAddressDiv,
+  Input,
+  InputFields,
+  Main,
+  SignInTag,
+  WelcomeTag,
+} from "../styles";
 
 export default function Login() {
   const router = useRouter();
@@ -55,49 +63,44 @@ export default function Login() {
 
   return (
     <>
-      <div className={styles.main}>
-        <div className={styles.welcomeTag}>Welcome!</div>
-        <div className={styles.instructionTag}>
-          {" "}
-          Already have an account? Sign in.
-        </div>
+      <Main>
+        <WelcomeTag>Welcome!</WelcomeTag>
+        <SignInTag> Already have an account? Sign in.</SignInTag>
         Email address
-        <div>
-          <input
+        <EmailAddressDiv>
+          <Input
             name="email"
-            className={styles.emailField}
+            placeholder="Email Address"
             onChange={e => setEmail(e.target.value)}
             value={email}
           />
-        </div>
+        </EmailAddressDiv>
         Type your password here:
-        <div className={styles.inputFields}>
-          <input
+        <InputFields>
+          <Input
             type="password"
             name="password"
             onChange={e => setPassword(e.target.value)}
             value={password}
-            className={styles.passwordField}
+            placeholder="password"
           />
-        </div>
-        <div className={styles.buttonStyles}>
-          <button type="button" onClick={handleSignUp}>
-            {" "}
-            Sign up{" "}
-          </button>
-          <button type="button" onClick={signInWithEmail}>
-            {" "}
-            Sign in{" "}
-          </button>
-          <button type="button" onClick={signOut}>
-            {" "}
-            Sign out{" "}
-          </button>
-        </div>
+        </InputFields>
+        <Button type="button" onClick={handleSignUp}>
+          {" "}
+          Sign up{" "}
+        </Button>
+        <Button type="button" onClick={signInWithEmail}>
+          {" "}
+          Sign in{" "}
+        </Button>
+        <Button type="button" onClick={signOut}>
+          {" "}
+          Sign out{" "}
+        </Button>
         I apologize for this styling. But please click{" "}
         <Link href="/auth/reset-password"> here </Link> if you forgot your
         password.
-      </div>
+      </Main>
     </>
   );
 }

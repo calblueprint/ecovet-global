@@ -1,10 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Container, Heading2, Main, RedirectButton } from "./styledComponents";
+import { Button, Container, Heading2, Main } from "../styles";
 
-export default function redirect() {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+export default function Redirect() {
   const router = useRouter();
 
   const handleRedirect = () => {
@@ -15,9 +14,7 @@ export default function redirect() {
     <Main>
       <Container>
         <Heading2> Your password has been reset.</Heading2>
-        <RedirectButton onClick={handleRedirect}>
-          Return to Sign in
-        </RedirectButton>
+        <Button onClick={handleRedirect}>Return to Sign in</Button>
       </Container>
     </Main>
   );

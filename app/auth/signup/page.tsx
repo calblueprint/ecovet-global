@@ -5,6 +5,7 @@ import { FiCheck, FiEye, FiEyeOff, FiX } from "react-icons/fi";
 import Link from "next/link";
 import supabase from "@/actions/supabase/client";
 import {
+  Button,
   Container,
   EmailAddressDiv,
   Heading2,
@@ -17,10 +18,9 @@ import {
   PasswordDiv,
   PasswordRule,
   SignInTag,
-  SignUpButton,
   VisibilityToggle,
   WelcomeTag,
-} from "./styledComponents";
+} from "../styles";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -41,16 +41,16 @@ export default function Login() {
     rules.length && rules.uppercase && rules.number && rules.specialChar;
 
   const handleSignUp = async () => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
     if (!isPasswordValid) {
       throw new Error("Password does not meet the required criteria");
     }
     if (password !== confirmPassword) {
       throw new Error("Passwords do not match");
     }
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
     if (error) {
       throw new Error(
         "An error occurred during sign up: " +
@@ -59,6 +59,7 @@ export default function Login() {
           data,
       );
     }
+    alert("Password successfully updated!");
   };
 
   return (
@@ -164,12 +165,12 @@ export default function Login() {
             </ul>
           </PasswordCheckBox>
         </InputFields>
-        <SignUpButton
+        <Button
           onClick={handleSignUp}
           disabled={!isPasswordValid || password !== confirmPassword}
         >
           Continue
-        </SignUpButton>
+        </Button>
       </Container>
     </Main>
   );

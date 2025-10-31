@@ -4,6 +4,7 @@ import { useState } from "react";
 import { FiCheck, FiEye, FiEyeOff, FiX } from "react-icons/fi";
 import supabase from "@/actions/supabase/client";
 import {
+  Button,
   Container,
   Heading2,
   Input,
@@ -14,10 +15,9 @@ import {
   PasswordConfirmDiv,
   PasswordDiv,
   PasswordRule,
-  SignUpButton,
   VisibilityToggle,
   WelcomeTag,
-} from "./styledComponents";
+} from "../styles";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
@@ -37,21 +37,20 @@ export default function ResetPassword() {
     rules.length && rules.uppercase && rules.number && rules.specialChar;
 
   const handleUpdateUser = async () => {
-    const { data, error } = await supabase.auth.updateUser({
-      password: "new_password",
-    });
     if (!isPasswordValid) {
       throw new Error("Password does not meet the required criteria");
     }
     if (password !== confirmPassword) {
       throw new Error("Passwords do not match");
     }
-
+    const { error } = await supabase.auth.updateUser({
+      password: password,
+    });
     if (error) {
-      throw new Error(
-        "An error occurred during password reset: " + error.message + data,
-      );
+      alert("An error occurred: " + error.message);
+      return;
     }
+    alert("Password successfully updated!");
   };
 
   return (
@@ -92,7 +91,7 @@ export default function ResetPassword() {
                   placeholder="Password Confirmation"
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
-                  type={showConfirmPassword ? "text" : "Password"}
+                  type={showConfirmPassword ? "text" : "password"}
                 />
                 <VisibilityToggle
                   type="button"
@@ -150,12 +149,12 @@ export default function ResetPassword() {
               </ul>
             </PasswordCheckBox>
           </InputFields>
-          <SignUpButton
+          <Button
             onClick={handleUpdateUser}
             disabled={!isPasswordValid || password !== confirmPassword}
           >
             Continue
-          </SignUpButton>
+          </Button>
         </Container>
       </Main>
     </>
