@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import supabase from "@/actions/supabase/client";
+import { checkProfileExists } from "@/actions/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
 import styles from "./styles.module.css";
 
@@ -24,7 +26,10 @@ export default function Login() {
   };
 
   const signInWithEmail = async () => {
-    const { error } = await sessionHandler.signInWithEmail(email, password);
+    const { data, error } = await sessionHandler.signInWithEmail(
+      email,
+      password,
+    );
     if (error) {
       throw new Error(
         "An error occurred during sign in: " +
@@ -34,7 +39,15 @@ export default function Login() {
       );
     }
 
-    router.push("/onboarding");
+    if (!data.user) {
+      throw new Error("User not found after sign in");
+    }
+
+    if (await checkProfileExists(data.user.id)) {
+      router.push("/onboarding");
+    } else {
+      router.push("/edit-profile");
+    }
   };
 
   const signOut = async () => {
