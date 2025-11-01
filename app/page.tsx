@@ -14,6 +14,9 @@ export default function Home() {
       <Link href="/onboarding">
         <button>Onboarding</button>
       </Link>
+      <Link href="/sessions/role-selection">
+        <button>Sessions</button>
+      </Link>
     </main>
   );
 }
