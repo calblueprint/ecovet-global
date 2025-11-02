@@ -1,93 +1,112 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import supabase from "@/actions/supabase/client";
-import styles from "./styles.module.css";
+import { checkProfileExists } from "@/actions/supabase/queries/profile";
+import { useSession } from "@/utils/AuthProvider";
+import {
+  Button,
+  EmailAddressDiv,
+  Input,
+  InputFields,
+  Main,
+  SignInTag,
+  WelcomeTag,
+} from "../styles";
 
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const sessionHandler = useSession();
 
   const handleSignUp = async () => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    const { error } = await sessionHandler.signUp(email, password);
     if (error) {
       throw new Error(
         "An error occurred during sign up: " +
           error.message +
           "with email" +
-          data,
+          email,
       );
     }
   };
 
   const signInWithEmail = async () => {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await sessionHandler.signInWithEmail(
       email,
       password,
-    });
+    );
     if (error) {
       throw new Error(
         "An error occurred during sign in: " +
           error.message +
           "with email" +
-          data,
+          email,
       );
     }
 
-    await supabase.auth.getSession();
-    await supabase.auth.getUser();
+    if (!data.user) {
+      throw new Error("User not found after sign in");
+    }
 
-    router.push("/onboarding");
+    if (await checkProfileExists(data.user.id)) {
+      router.push("/onboarding");
+    } else {
+      router.push("/edit-profile");
+    }
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      throw new Error("An error occurred during sign out: " + error.message);
+    try {
+      await sessionHandler.signOut();
+    } catch (error) {
+      throw new Error("An error occurred during sign out: " + error);
     }
   };
 
   return (
     <>
-      <div className={styles.main}>
-        <h1>Login Page</h1>
-        Type your email here:
-        <div className={styles.inputFields}>
-          <input
+      <Main>
+        <WelcomeTag>Welcome!</WelcomeTag>
+        <SignInTag> Already have an account? Sign in.</SignInTag>
+        Email address
+        <EmailAddressDiv>
+          <Input
             name="email"
+            placeholder="Email Address"
             onChange={e => setEmail(e.target.value)}
             value={email}
           />
-        </div>
+        </EmailAddressDiv>
         Type your password here:
-        <div className={styles.inputFields}>
-          <input
+        <InputFields>
+          <Input
             type="password"
             name="password"
             onChange={e => setPassword(e.target.value)}
             value={password}
+            placeholder="password"
           />
-        </div>
-        <div className={styles.buttonStyles}>
-          <button type="button" onClick={handleSignUp}>
-            {" "}
-            Sign up{" "}
-          </button>
-          <button type="button" onClick={signInWithEmail}>
-            {" "}
-            Sign in{" "}
-          </button>
-          <button type="button" onClick={signOut}>
-            {" "}
-            Sign out{" "}
-          </button>
-        </div>
-      </div>
+        </InputFields>
+        <Button type="button" onClick={handleSignUp}>
+          {" "}
+          Sign up{" "}
+        </Button>
+        <Button type="button" onClick={signInWithEmail}>
+          {" "}
+          Sign in{" "}
+        </Button>
+        <Button type="button" onClick={signOut}>
+          {" "}
+          Sign out{" "}
+        </Button>
+        I apologize for this styling. But please click{" "}
+        <Link href="/auth/reset-password"> here </Link> if you forgot your
+        password.
+      </Main>
     </>
   );
 }
