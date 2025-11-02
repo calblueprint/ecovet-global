@@ -1,34 +1,58 @@
 import { useState } from "react";
 import { UUID } from "crypto";
-import TemplateOverviewForm from "./TemplateOverviewForm";
-import RoleForm from "./RoleForm";
+import {
+  createPhases,
+  createPrompts,
+  createRolePhases,
+  createRoles,
+  createTemplates,
+} from "@/api/supabase/queries/templates";
 import { localStore, Prompt, Role, Template } from "@/types/schema";
-import { createPhases, createPrompts, createRolePhases, createRoles, createTemplates } from "@/api/supabase/queries/templates";
+import RoleForm from "./RoleForm";
+import TemplateOverviewForm from "./TemplateOverviewForm";
 
-export default function TemplateBuilder({localStore, onFinish} : {localStore: localStore|null; onFinish: () => void;} ) {
-  const [activeId, setActiveId] = useState<UUID|number>(1);
+export default function TemplateBuilder({
+  localStore,
+  onFinish,
+}: {
+  localStore: localStore | null;
+  onFinish: () => void;
+}) {
+  const [activeId, setActiveId] = useState<UUID | number>(1);
   const [phaseCount, setPhaseCount] = useState<number>(0);
   const [, setTick] = useState(0);
   const [saving, setSaving] = useState(false);
 
   function useForceUpdate() {
-    setTick((tick) => (tick + 1) % 10);
+    setTick(tick => (tick + 1) % 10);
   }
 
   function addRole(): void {
     if (localStore == null) return;
-    const newRoleID = crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
-    localStore.rolesById[newRoleID] = { role_id: newRoleID, role_name: "New Role", role_description: "New Role Description", template_id: localStore.templateID };
+    const newRoleID =
+      crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
+    localStore.rolesById[newRoleID] = {
+      role_id: newRoleID,
+      role_name: "New Role",
+      role_description: "New Role Description",
+      template_id: localStore.templateID,
+    };
     localStore.roleIds.push(newRoleID);
     localStore.rolePhaseIndex[newRoleID] = {};
     for (const phaseID of localStore.phaseIds) {
-        const newRolePhaseID = crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
-        localStore.rolePhaseIndex[newRoleID][phaseID] = newRolePhaseID;
-        localStore.rolePhasesById[newRolePhaseID] = { role_phase_id: newRolePhaseID, phase_id: phaseID, role_id: newRoleID, description: null };
+      const newRolePhaseID =
+        crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
+      localStore.rolePhaseIndex[newRoleID][phaseID] = newRolePhaseID;
+      localStore.rolePhasesById[newRolePhaseID] = {
+        role_phase_id: newRolePhaseID,
+        phase_id: phaseID,
+        role_id: newRoleID,
+        description: null,
+      };
 
-        localStore.promptIndex[newRolePhaseID] = [];
+      localStore.promptIndex[newRolePhaseID] = [];
     }
-    
+
     setActiveId(newRoleID);
   }
 
@@ -40,11 +64,11 @@ export default function TemplateBuilder({localStore, onFinish} : {localStore: lo
     localStore.roleIds.splice(i, 1);
     const deletedRolePhases = localStore.rolePhaseIndex[role_id];
     for (const [, rolePhaseID] of Object.entries(deletedRolePhases)) {
-        delete localStore.rolePhasesById[rolePhaseID];
-        for (const prompt of localStore.promptIndex[rolePhaseID]) {
-            delete localStore.promptById[prompt];
-        }
-        delete localStore.promptIndex[rolePhaseID];
+      delete localStore.rolePhasesById[rolePhaseID];
+      for (const prompt of localStore.promptIndex[rolePhaseID]) {
+        delete localStore.promptById[prompt];
+      }
+      delete localStore.promptIndex[rolePhaseID];
     }
     delete localStore.rolePhaseIndex[role_id];
 
@@ -60,51 +84,64 @@ export default function TemplateBuilder({localStore, onFinish} : {localStore: lo
 
   function addPhase(): void {
     if (localStore == null) return;
-    setPhaseCount(prev => prev + 1)
+    setPhaseCount(prev => prev + 1);
 
-    const newPhaseID = crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
-    localStore.phasesById[newPhaseID] = { phase_id: newPhaseID, session_id: null, phase_name: String(phaseCount), phase_description: null, is_finished: null };
+    const newPhaseID =
+      crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
+    localStore.phasesById[newPhaseID] = {
+      phase_id: newPhaseID,
+      session_id: null,
+      phase_name: String(phaseCount),
+      phase_description: null,
+      is_finished: null,
+    };
     localStore.phaseIds.push(newPhaseID);
-    
+
     for (const role of localStore.roleIds) {
-        if (typeof role === "number") {
-            continue;
-        }
-        const newRolePhaseID = crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
-        localStore.rolePhasesById[newRolePhaseID] = { role_phase_id: newRolePhaseID, phase_id: newPhaseID, role_id: role, description: null };
-        localStore.rolePhaseIndex[role][newPhaseID] = newRolePhaseID;
-        localStore.promptIndex[newRolePhaseID] = [];
+      if (typeof role === "number") {
+        continue;
+      }
+      const newRolePhaseID =
+        crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
+      localStore.rolePhasesById[newRolePhaseID] = {
+        role_phase_id: newRolePhaseID,
+        phase_id: newPhaseID,
+        role_id: role,
+        description: null,
+      };
+      localStore.rolePhaseIndex[role][newPhaseID] = newRolePhaseID;
+      localStore.promptIndex[newRolePhaseID] = [];
     }
   }
 
-  function removePhase(phase_id:UUID|null=null): void {
-    if (phaseCount == 0  || localStore == null) {
-        return
+  function removePhase(phase_id: UUID | null = null): void {
+    if (phaseCount == 0 || localStore == null) {
+      return;
     }
     setPhaseCount(prev => prev - 1);
 
-    let removedPhaseID: UUID|undefined;
+    let removedPhaseID: UUID | undefined;
 
     if (phase_id) {
-        const i = localStore.phaseIds.indexOf(phase_id);
-        [removedPhaseID] = localStore.phaseIds.splice(i, 1); 
+      const i = localStore.phaseIds.indexOf(phase_id);
+      [removedPhaseID] = localStore.phaseIds.splice(i, 1);
     } else {
-        removedPhaseID = localStore.phaseIds.pop() as UUID;
+      removedPhaseID = localStore.phaseIds.pop() as UUID;
     }
     if (removedPhaseID) {
-        delete localStore.phasesById[removedPhaseID];
+      delete localStore.phasesById[removedPhaseID];
 
-        for (const [roleID, obj] of Object.entries(localStore.rolePhaseIndex)) {
-            const rolePhaseID = obj[removedPhaseID];
-            if (rolePhaseID) {
-                delete localStore.rolePhasesById[rolePhaseID];
-                delete obj[removedPhaseID];
-            }
-            for (const prompt of localStore.promptIndex[rolePhaseID]) {
-                delete localStore.promptById[prompt];
-            }
-            delete localStore.promptIndex[rolePhaseID];
+      for (const [roleID, obj] of Object.entries(localStore.rolePhaseIndex)) {
+        const rolePhaseID = obj[removedPhaseID];
+        if (rolePhaseID) {
+          delete localStore.rolePhasesById[rolePhaseID];
+          delete obj[removedPhaseID];
         }
+        for (const prompt of localStore.promptIndex[rolePhaseID]) {
+          delete localStore.promptById[prompt];
+        }
+        delete localStore.promptIndex[rolePhaseID];
+      }
     }
     useForceUpdate();
   }
@@ -112,8 +149,14 @@ export default function TemplateBuilder({localStore, onFinish} : {localStore: lo
   function addPrompt(rolePhaseID: UUID): void {
     if (localStore == null) return;
 
-    const newPromptID = crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
-    localStore.promptById[newPromptID] = { prompt_id: newPromptID, user_id: null, role_phase_id: rolePhaseID, prompt_text: "New Prompt" };
+    const newPromptID =
+      crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
+    localStore.promptById[newPromptID] = {
+      prompt_id: newPromptID,
+      user_id: null,
+      role_phase_id: rolePhaseID,
+      prompt_text: "New Prompt",
+    };
     localStore.promptIndex[rolePhaseID].push(newPromptID);
   }
 
@@ -121,33 +164,33 @@ export default function TemplateBuilder({localStore, onFinish} : {localStore: lo
     if (localStore == null) return;
 
     const i = localStore.promptIndex[rolePhaseID].indexOf(promptID);
-    if (i  !== -1) localStore.promptIndex[rolePhaseID].splice(i, 1);
+    if (i !== -1) localStore.promptIndex[rolePhaseID].splice(i, 1);
 
     delete localStore.promptById[promptID];
     useForceUpdate();
   }
 
-  function setActiveUpdate(id: UUID|number, field: string, next: string) {
+  function setActiveUpdate(id: UUID | number, field: string, next: string) {
     if (!localStore) return;
 
     if (typeof id === "number") {
-        const key = field as keyof Template;
-        (localStore.rolesById[id] as unknown as Record<string, unknown>)[field] = next;
-    
+      const key = field as keyof Template;
+      (localStore.rolesById[id] as unknown as Record<string, unknown>)[field] =
+        next;
     } else {
-        if (field == 'add_prompt') {
-            addPrompt((id as UUID));
-        } else if (field == 'remove_prompt') {
-            removePrompt((next as UUID), (id as UUID));
-        } else if (field == 'role_description') {
-            (localStore.rolesById[(id as UUID)] as Role).role_description = next;
-        } else if (field == 'description') {
-            localStore.rolePhasesById[(id as UUID)].description = next;
-        } else if (field == 'prompt_text') {
-            localStore.promptById[(id as UUID)].prompt_text = next;
-        } else if (field == 'remove_phase') {
-            removePhase(id);
-        }
+      if (field == "add_prompt") {
+        addPrompt(id as UUID);
+      } else if (field == "remove_prompt") {
+        removePrompt(next as UUID, id as UUID);
+      } else if (field == "role_description") {
+        (localStore.rolesById[id as UUID] as Role).role_description = next;
+      } else if (field == "description") {
+        localStore.rolePhasesById[id as UUID].description = next;
+      } else if (field == "prompt_text") {
+        localStore.promptById[id as UUID].prompt_text = next;
+      } else if (field == "remove_phase") {
+        removePhase(id);
+      }
     }
     useForceUpdate();
   }
@@ -156,54 +199,63 @@ export default function TemplateBuilder({localStore, onFinish} : {localStore: lo
     setSaving(true);
     if (localStore == null) return;
     const realtemplateID = await createTemplates(
-        localStore.templateID,
-        'erm name tbd', 
-        null, 
-        (localStore.rolesById[1] as Template).objective, 
-        (localStore.rolesById[1] as Template).summary, 
-        (localStore.rolesById[1] as Template).setting, 
-        (localStore.rolesById[1] as Template).current_activity
+      localStore.templateID,
+      "erm name tbd",
+      null,
+      (localStore.rolesById[1] as Template).objective,
+      (localStore.rolesById[1] as Template).summary,
+      (localStore.rolesById[1] as Template).setting,
+      (localStore.rolesById[1] as Template).current_activity,
     );
 
     for (let roleID of localStore.roleIds) {
-        if (!(typeof roleID == "number")) {
-            await createRoles(
-                roleID,
-                realtemplateID, 
-                (localStore.rolesById[roleID] as Role).role_name, 
-                (localStore.rolesById[roleID] as Role).role_description,
-            );            
-        }
+      if (!(typeof roleID == "number")) {
+        await createRoles(
+          roleID,
+          realtemplateID,
+          (localStore.rolesById[roleID] as Role).role_name,
+          (localStore.rolesById[roleID] as Role).role_description,
+        );
+      }
     }
 
     for (let phaseID of localStore.phaseIds) {
-        await createPhases(
-            phaseID,
-            localStore.phasesById[phaseID].session_id,
-            localStore.phasesById[phaseID].phase_name,
-            localStore.phasesById[phaseID].is_finished,
-            localStore.phasesById[phaseID].phase_description,
-        )
+      await createPhases(
+        phaseID,
+        localStore.phasesById[phaseID].session_id,
+        localStore.phasesById[phaseID].phase_name,
+        localStore.phasesById[phaseID].is_finished,
+        localStore.phasesById[phaseID].phase_description,
+      );
     }
 
-    for (let [roleID, obj] of Object.entries(localStore.rolePhaseIndex) as [UUID, Record<UUID, UUID>][]) {
-        for (let [phaseID, rolePhaseID] of Object.entries(obj) as [UUID, UUID][]) {
-            await createRolePhases(
-                rolePhaseID,
-                phaseID,
-                roleID,
-                localStore.rolePhasesById[rolePhaseID].description,
-            )
-        }
+    for (let [roleID, obj] of Object.entries(localStore.rolePhaseIndex) as [
+      UUID,
+      Record<UUID, UUID>,
+    ][]) {
+      for (let [phaseID, rolePhaseID] of Object.entries(obj) as [
+        UUID,
+        UUID,
+      ][]) {
+        await createRolePhases(
+          rolePhaseID,
+          phaseID,
+          roleID,
+          localStore.rolePhasesById[rolePhaseID].description,
+        );
+      }
     }
 
-    for (let [promptID, prompt] of Object.entries(localStore.promptById) as [UUID, Prompt][]) {
-        await createPrompts(
-            promptID,
-            null,
-            prompt.role_phase_id,
-            prompt.prompt_text,
-        )
+    for (let [promptID, prompt] of Object.entries(localStore.promptById) as [
+      UUID,
+      Prompt,
+    ][]) {
+      await createPrompts(
+        promptID,
+        null,
+        prompt.role_phase_id,
+        prompt.prompt_text,
+      );
     }
     setSaving(false);
     onFinish();
@@ -211,73 +263,85 @@ export default function TemplateBuilder({localStore, onFinish} : {localStore: lo
 
   return (
     <div>
-        <div style={{ display: "flex", justifyContent: "space-between"}}>
-            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-                {localStore?.roleIds.map((t) => (
-                <button
-                    key={String(t)}
-                    onClick={() => setActiveId(t)}
-                    style={{
-                    padding: "6px 10px",
-                    border: "1px solid #ccc",
-                    borderBottom: activeId === t ? "2px solid transparent" : "1px solid #ccc",
-                    background: activeId === t ? "#fff" : "#f8f8f8",
-                    fontWeight: activeId === t ? 600 : 400,
-                    }}
-                >
-                    { localStore.rolesById[t] && 'role_name' in localStore.rolesById[t]
-                        ? localStore.rolesById[t].role_name
-                        : "Scenario Overview"
-                    }
-                </button>
-                ))}
-                <button onClick={addRole}>+ New</button>
-            </div>
-            <div style={{ display: "flex", alignItems: 'center' }}>
-                <p>Phases: {phaseCount}</p>
-                <button onClick={addPhase}>UP</button>
-                <button onClick={() => removePhase()}>DOWN</button>
-            </div>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+          {localStore?.roleIds.map(t => (
+            <button
+              key={String(t)}
+              onClick={() => setActiveId(t)}
+              style={{
+                padding: "6px 10px",
+                border: "1px solid #ccc",
+                borderBottom:
+                  activeId === t ? "2px solid transparent" : "1px solid #ccc",
+                background: activeId === t ? "#fff" : "#f8f8f8",
+                fontWeight: activeId === t ? 600 : 400,
+              }}
+            >
+              {localStore.rolesById[t] && "role_name" in localStore.rolesById[t]
+                ? localStore.rolesById[t].role_name
+                : "Scenario Overview"}
+            </button>
+          ))}
+          <button onClick={addRole}>+ New</button>
         </div>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <p>Phases: {phaseCount}</p>
+          <button onClick={addPhase}>UP</button>
+          <button onClick={() => removePhase()}>DOWN</button>
+        </div>
+      </div>
 
-        {localStore?.roleIds.map((t) =>
-            t === activeId ? (
-            <div key={`panel-${String(t)}`} style={{ border: "1px solid #ccc", padding: 12 }}>
-                {activeId !== 1 && (
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                        <input
-                            value={(localStore.rolesById[t] as Role).role_name}
-                            onChange={(e) => renameRole(t, e.target.value)}
-                            style={{ padding: 6, border: "1px solid #ccc" }}
-                        />
-                        <button onClick={() => removeRole(t)} style={{ border: "1px solid #ccc", padding: 6 }}>
-                            Remove
-                        </button>
-                    </div>
-                )}
-                {typeof activeId === "number" ? (
-                <TemplateOverviewForm
-                    value={(localStore.rolesById[activeId] as Template)}
-                    onChange={setActiveUpdate}
+      {localStore?.roleIds.map(t =>
+        t === activeId ? (
+          <div
+            key={`panel-${String(t)}`}
+            style={{ border: "1px solid #ccc", padding: 12 }}
+          >
+            {activeId !== 1 && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 8,
+                }}
+              >
+                <input
+                  value={(localStore.rolesById[t] as Role).role_name}
+                  onChange={e => renameRole(t, e.target.value)}
+                  style={{ padding: 6, border: "1px solid #ccc" }}
                 />
-                ) : (
-                <RoleForm
-                    value={{
-                        role: (localStore.rolesById[activeId] as Role), 
-                        rolePhases: localStore.rolePhasesById, 
-                        rolePhaseIndex: localStore.rolePhaseIndex[activeId],
-                        promptById: localStore.promptById,
-                        promptIndex: localStore.promptIndex,
-                    }}
-                    onChange={setActiveUpdate}
-                />
-                )}
-            </div>
-            ) : null
-        )}
-        <button onClick={saveTemplate} disabled={saving}>
+                <button
+                  onClick={() => removeRole(t)}
+                  style={{ border: "1px solid #ccc", padding: 6 }}
+                >
+                  Remove
+                </button>
+              </div>
+            )}
+            {typeof activeId === "number" ? (
+              <TemplateOverviewForm
+                value={localStore.rolesById[activeId] as Template}
+                onChange={setActiveUpdate}
+              />
+            ) : (
+              <RoleForm
+                value={{
+                  role: localStore.rolesById[activeId] as Role,
+                  rolePhases: localStore.rolePhasesById,
+                  rolePhaseIndex: localStore.rolePhaseIndex[activeId],
+                  promptById: localStore.promptById,
+                  promptIndex: localStore.promptIndex,
+                }}
+                onChange={setActiveUpdate}
+              />
+            )}
+          </div>
+        ) : null,
+      )}
+      <button onClick={saveTemplate} disabled={saving}>
         {saving ? "Saving..." : "Submit Template"}
-        </button>
+      </button>
     </div>
   );
 }

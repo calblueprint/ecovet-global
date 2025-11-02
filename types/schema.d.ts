@@ -81,7 +81,12 @@ export interface RolePhase {
   role_id: UUID;
   description: string | null;
 }
-type RolePhaseUpdatable = Omit<RolePhase, "role_phase_id", "phase_id", "role_id">;
+type RolePhaseUpdatable = Omit<
+  RolePhase,
+  "role_phase_id",
+  "phase_id",
+  "role_id"
+>;
 
 export interface Prompt {
   prompt_id: UUID; // prompt_id
@@ -100,20 +105,20 @@ export interface PromptAnswer {
 
 export type localStore = {
   templateID: UUID;
-  rolesById: Record<(number|UUID), (Role|Template)>;
-  roleIds: (number|UUID)[];
+  rolesById: Record<number | UUID, Role | Template>;
+  roleIds: (number | UUID)[];
   phasesById: Record<UUID, Phase>;
   phaseIds: UUID[];
   rolePhasesById: Record<UUID, RolePhase>;
   rolePhaseIndex: Record<UUID, Record<UUID, UUID>>; // first UUID is role id, second is phase id, and third is rolephase id
-  promptById: Record<UUID, Prompt>,
-  promptIndex: Record<UUID, UUID[]>,
+  promptById: Record<UUID, Prompt>;
+  promptIndex: Record<UUID, UUID[]>;
 };
 
 export type roleFormInput = {
-  role: Role,
-  rolePhases: Record<UUID, RolePhase>,
-  rolePhaseIndex: Record<UUID, UUID>,
-  promptById: Record<UUID, Prompt>,
-  promptIndex: Record<UUID, UUID[]>,  // rolephase uuid mapping to a list of prompt uuids
-}
+  role: Role;
+  rolePhases: Record<UUID, RolePhase>;
+  rolePhaseIndex: Record<UUID, UUID>;
+  promptById: Record<UUID, Prompt>;
+  promptIndex: Record<UUID, UUID[]>; // rolephase uuid mapping to a list of prompt uuids
+};
