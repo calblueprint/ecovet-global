@@ -77,26 +77,36 @@ export default function TemplateBuilder({localStore, onFinish} : {localStore: lo
     }
   }
 
-  function removePhase(): void {
+  function removePhase(phase_id:UUID|null=null): void {
     if (phaseCount == 0  || localStore == null) {
         return
     }
     setPhaseCount(prev => prev - 1);
 
-    const removedPhaseID = localStore.phaseIds.pop() as UUID;
-    delete localStore.phasesById[removedPhaseID];
+    let removedPhaseID: UUID|undefined;
 
-    for (const [roleID, obj] of Object.entries(localStore.rolePhaseIndex)) {
-        const rolePhaseID = obj[removedPhaseID];
-        if (rolePhaseID) {
-            delete localStore.rolePhasesById[rolePhaseID];
-            delete obj[removedPhaseID];
-        }
-        for (const prompt of localStore.promptIndex[rolePhaseID]) {
-            delete localStore.promptById[prompt];
-        }
-        delete localStore.promptIndex[rolePhaseID];
+    if (phase_id) {
+        const i = localStore.phaseIds.indexOf(phase_id);
+        [removedPhaseID] = localStore.phaseIds.splice(i, 1); 
+    } else {
+        removedPhaseID = localStore.phaseIds.pop() as UUID;
     }
+    if (removedPhaseID) {
+        delete localStore.phasesById[removedPhaseID];
+
+        for (const [roleID, obj] of Object.entries(localStore.rolePhaseIndex)) {
+            const rolePhaseID = obj[removedPhaseID];
+            if (rolePhaseID) {
+                delete localStore.rolePhasesById[rolePhaseID];
+                delete obj[removedPhaseID];
+            }
+            for (const prompt of localStore.promptIndex[rolePhaseID]) {
+                delete localStore.promptById[prompt];
+            }
+            delete localStore.promptIndex[rolePhaseID];
+        }
+    }
+    useForceUpdate();
   }
 
   function addPrompt(rolePhaseID: UUID): void {
@@ -135,6 +145,8 @@ export default function TemplateBuilder({localStore, onFinish} : {localStore: lo
             localStore.rolePhasesById[(id as UUID)].description = next;
         } else if (field == 'prompt_text') {
             localStore.promptById[(id as UUID)].prompt_text = next;
+        } else if (field == 'remove_phase') {
+            removePhase(id);
         }
     }
     useForceUpdate();
@@ -224,7 +236,7 @@ export default function TemplateBuilder({localStore, onFinish} : {localStore: lo
             <div style={{ display: "flex", alignItems: 'center' }}>
                 <p>Phases: {phaseCount}</p>
                 <button onClick={addPhase}>UP</button>
-                <button onClick={removePhase}>DOWN</button>
+                <button onClick={() => removePhase()}>DOWN</button>
             </div>
         </div>
 
