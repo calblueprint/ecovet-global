@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { handleProfileSubmit } from "@/actions/supabase/queries/profiles";
+import { handleProfileSubmit } from "@/api/supabase/queries/profile";
 import { useProfile } from "@/utils/ProfileProvider";
 
 export default function EditProfilePage() {

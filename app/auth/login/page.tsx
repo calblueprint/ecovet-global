@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { checkProfileExists } from "@/actions/supabase/queries/profiles";
+import { checkProfileExists } from "@/api/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
 import styles from "./styles.module.css";
 

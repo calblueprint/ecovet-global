@@ -3,6 +3,7 @@
 import { useCallback, useId, useMemo } from "react";
 import Select, { MultiValue, SingleValue } from "react-select";
 import { DropdownOption } from "@/types/dropdown";
+import { selectStyles } from "./styles";
 
 // for map: key is actual data stored, value is displayed
 interface CommonProps {
@@ -73,6 +74,7 @@ export default function InputDropdown({
       placeholder={placeholder}
       isMulti={multi}
       onChange={handleChange}
+      styles={selectStyles}
     />
   );
 }

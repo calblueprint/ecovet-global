@@ -1,11 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-  fetchParticipants,
-  fetchRoles,
-} from "@/actions/supabase/queries/sessions";
-import InputDropdown from "@/components/InputDropdown";
+import { fetchParticipants, fetchRoles } from "@/api/supabase/queries/sessions";
+import InputDropdown from "@/components/InputDropdown/InputDropdown";
 
 export default function RoleSelectionPage() {
   const [roles, setRoles] = useState<string[]>([]);
