@@ -1,7 +1,7 @@
 import { UUID } from "crypto";
+import { Dict } from "styled-components/dist/types";
 import { Tag, Template } from "@/types/schema";
 import supabase from "../client";
-import { Dict } from "styled-components/dist/types";
 
 export async function createTag(
   name: string,

@@ -32,7 +32,7 @@ const UserGroupsPage = () => {
         // Test getting all tags
         const tags = await getAllTags(user_group_id);
         console.log("Tag fetched:", tags);
-         console.log(`Found ${tags.length} tags`);
+        console.log(`Found ${tags.length} tags`);
 
         // Test 3: Assign tag to template
         console.log("\n Assigning tag to template...");
@@ -53,9 +53,8 @@ const UserGroupsPage = () => {
         console.log("\nRemoving tag from template...");
         const removed = await removeTagFromTemplate(testTemplateId, tagId);
         console.log("Tag removed:", removed);
-
       } catch (error) {
-         console.log(`Error: ${error}`);
+        console.log(`Error: ${error}`);
       }
     }
 
