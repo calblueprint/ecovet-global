@@ -27,9 +27,8 @@ export default function RoleSelectionPage() {
   ]);
 
   useEffect(() => {
-    //if (loading || !profile?.user_group_id)
-    //return;
-    const userGroupId = "0b73ed2d-61c3-472e-b361-edaa88f27622";
+    if (loading || !profile?.user_group_id) return;
+    const userGroupId = profile.user_group_id;
 
     async function loadData() {
       try {
