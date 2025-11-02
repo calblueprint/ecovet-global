@@ -18,19 +18,23 @@ export default function TemplateBuilder({
   localStore: localStore | null;
   onFinish: () => void;
 }) {
-  const [activeId, setActiveId] = useState<UUID | number>(1);
-  const [phaseCount, setPhaseCount] = useState<number>(0);
-  const [, setTick] = useState(0);
-  const [saving, setSaving] = useState(false);
+  const [activeId, setActiveId] = useState<UUID | number>(1); // current 'tab' or role
+  const [, setTick] = useState(0); //some boofed way to force a rerender by calling a random usestate lmao
+  const [saving, setSaving] = useState(false); //nice 'saving' to let user know supabase push is still happening and when finished
 
-  function useForceUpdate() {
+  function useForceUpdate(): void {
+    // call whenever my screen isn't updating :)
     setTick(tick => (tick + 1) % 10);
+  }
+
+  function createUUID(): UUID {
+    //helper function to create new UUIDs
+    return crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
   }
 
   function addRole(): void {
     if (localStore == null) return;
-    const newRoleID =
-      crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
+    const newRoleID = createUUID();
     localStore.rolesById[newRoleID] = {
       role_id: newRoleID,
       role_name: "New Role",
@@ -38,10 +42,10 @@ export default function TemplateBuilder({
       template_id: localStore.templateID,
     };
     localStore.roleIds.push(newRoleID);
-    localStore.rolePhaseIndex[newRoleID] = {};
+    localStore.rolePhaseIndex[newRoleID] = {}; //initialize rolePhaseIndex dict for this role
     for (const phaseID of localStore.phaseIds) {
-      const newRolePhaseID =
-        crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
+      //when creating roles when phases already exist, automatically add rolePhases for role
+      const newRolePhaseID = createUUID();
       localStore.rolePhaseIndex[newRoleID][phaseID] = newRolePhaseID;
       localStore.rolePhasesById[newRolePhaseID] = {
         role_phase_id: newRolePhaseID,
@@ -49,15 +53,14 @@ export default function TemplateBuilder({
         role_id: newRoleID,
         description: null,
       };
-
-      localStore.promptIndex[newRolePhaseID] = [];
+      localStore.promptIndex[newRolePhaseID] = []; //similiar to rolePhaseIndex dict but for prompts
     }
 
     setActiveId(newRoleID);
   }
 
   function removeRole(role_id: UUID | number): void {
-    if (localStore == null || typeof role_id == "number") return;
+    if (localStore == null || typeof role_id == "number") return; //if role_id is '1', the current tab is Scenario Overivew and therefore should not be removed
 
     delete localStore.rolesById[role_id];
     const i = localStore.roleIds.indexOf(role_id);
@@ -72,7 +75,7 @@ export default function TemplateBuilder({
     }
     delete localStore.rolePhaseIndex[role_id];
 
-    setActiveId(localStore.roleIds.at(-1)!);
+    setActiveId(localStore.roleIds.at(-1)!); //go to the last tab
   }
 
   function renameRole(role_id: UUID | number, newLabel: string) {
@@ -84,14 +87,11 @@ export default function TemplateBuilder({
 
   function addPhase(): void {
     if (localStore == null) return;
-    setPhaseCount(prev => prev + 1);
-
-    const newPhaseID =
-      crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
+    const newPhaseID = createUUID();
     localStore.phasesById[newPhaseID] = {
       phase_id: newPhaseID,
       session_id: null,
-      phase_name: String(phaseCount),
+      phase_name: String(localStore.phaseIds.length),
       phase_description: null,
       is_finished: null,
     };
@@ -101,8 +101,7 @@ export default function TemplateBuilder({
       if (typeof role === "number") {
         continue;
       }
-      const newRolePhaseID =
-        crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
+      const newRolePhaseID = createUUID();
       localStore.rolePhasesById[newRolePhaseID] = {
         role_phase_id: newRolePhaseID,
         phase_id: newPhaseID,
@@ -115,10 +114,9 @@ export default function TemplateBuilder({
   }
 
   function removePhase(phase_id: UUID | null = null): void {
-    if (phaseCount == 0 || localStore == null) {
+    if (localStore?.phaseIds.length == 0 || localStore == null) {
       return;
     }
-    setPhaseCount(prev => prev - 1);
 
     let removedPhaseID: UUID | undefined;
 
@@ -149,8 +147,7 @@ export default function TemplateBuilder({
   function addPrompt(rolePhaseID: UUID): void {
     if (localStore == null) return;
 
-    const newPromptID =
-      crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
+    const newPromptID = createUUID();
     localStore.promptById[newPromptID] = {
       prompt_id: newPromptID,
       user_id: null,
@@ -286,7 +283,7 @@ export default function TemplateBuilder({
           <button onClick={addRole}>+ New</button>
         </div>
         <div style={{ display: "flex", alignItems: "center" }}>
-          <p>Phases: {phaseCount}</p>
+          <p>Phases: {localStore?.phaseIds.length}</p>
           <button onClick={addPhase}>UP</button>
           <button onClick={() => removePhase()}>DOWN</button>
         </div>

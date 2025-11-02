@@ -8,7 +8,7 @@ import {
 } from "@/types/schema";
 import supabase from "../createClient";
 
-export async function createTemplates(
+export async function createTemplates( // create templates with inputs, but lowk most can be null as well
   templateID: UUID,
   template_name: string | null = null,
   accessible_to_all: boolean | null = null,
@@ -37,7 +37,7 @@ export async function createTemplates(
   return data.template_id;
 }
 
-export async function updateTemplates(
+export async function updateTemplates( // NOTE: not using anymore but didn't want to remove in case needed in future
   template_id: UUID,
   updates: Partial<TemplateUpdatable>,
 ): Promise<void> {
@@ -50,6 +50,7 @@ export async function updateTemplates(
 }
 
 export async function deleteTemplates(template_id: UUID): Promise<void> {
+  // NOTE: not using anymore but didn't want to remove in case needed in future
   const { error } = await supabase
     .from("template")
     .delete()
@@ -81,7 +82,7 @@ export async function createPhases(
   return data.phase_id;
 }
 
-export async function updatePhases(
+export async function updatePhases( // NOTE: not using anymore but didn't want to remove in case needed in future
   phase_id: UUID,
   updates: Partial<PhaseUpdatable>,
 ): Promise<void> {
@@ -94,6 +95,7 @@ export async function updatePhases(
 }
 
 export async function deletePhases(phase_id: UUID): Promise<void> {
+  // NOTE: not using anymore but didn't want to remove in case needed in future
   const { error } = await supabase
     .from("phase")
     .delete()
@@ -123,7 +125,7 @@ export async function createRoles(
   return data.role_id;
 }
 
-export async function updateRoles(
+export async function updateRoles( // NOTE: not using anymore but didn't want to remove in case needed in future
   role_id: UUID,
   updates: Partial<RoleUpdatable>,
 ): Promise<void> {
@@ -136,6 +138,7 @@ export async function updateRoles(
 }
 
 export async function deleteRoles(role_id: UUID): Promise<void> {
+  // NOTE: not using anymore but didn't want to remove in case needed in future
   const { error } = await supabase.from("role").delete().eq("role_id", role_id);
 
   if (error) throw error;
@@ -162,7 +165,7 @@ export async function createRolePhases(
   return data.role_phase_id;
 }
 
-export async function updateRolePhases(
+export async function updateRolePhases( // NOTE: not using anymore but didn't want to remove in case needed in future
   role_phase_id: UUID,
   updates: Partial<RolePhaseUpdatable>,
 ): Promise<void> {
@@ -175,6 +178,7 @@ export async function updateRolePhases(
 }
 
 export async function deleteRolePhase(role_phase_id: UUID): Promise<void> {
+  // NOTE: not using anymore but didn't want to remove in case needed in future
   const { error } = await supabase
     .from("role_phase")
     .delete()
@@ -204,7 +208,7 @@ export async function createPrompts(
   return data.prompt_id;
 }
 
-export async function updatePrompts(
+export async function updatePrompts( // NOTE: not using anymore but didn't want to remove in case needed in future
   prompt_id: UUID,
   updates: Partial<PromptUpdatable>,
 ): Promise<void> {
@@ -217,6 +221,7 @@ export async function updatePrompts(
 }
 
 export async function deletePrompts(prompt_id: UUID): Promise<void> {
+  // NOTE: not using anymore but didn't want to remove in case needed in future
   const { error } = await supabase
     .from("prompt")
     .delete()

@@ -1,3 +1,5 @@
+// some dummy data when i was first using/testing my template queries
+
 export const defaultTemplates = [
   {
     template_name: "My Template",
