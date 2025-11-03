@@ -100,7 +100,6 @@ export interface Invite {
   invite_id: UUID;
   email: string;
   user_group_id: UUID;
-  invited_by_user_id: UUID;
   user_type: UserType;
   status: StatusType;
 }

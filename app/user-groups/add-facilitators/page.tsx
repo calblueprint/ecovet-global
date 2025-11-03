@@ -38,7 +38,7 @@ export default function AddFacilitators() {
   const onSubmitButtonClick = () => {
     facilitatorEmails.map(email => {
       if (isEmailValid(email)) {
-        submitNewFacilitator(email, String(userGroupId), "", true);
+        submitNewFacilitator(email, String(userGroupId), true);
       } else {
         console.error("invalid email format");
       }
@@ -55,6 +55,7 @@ export default function AddFacilitators() {
               value={email}
               onChange={e => handleInputChange(e, index)}
               placeholder="Enter facilitator email"
+              required
             ></FacilitatorEmailInput>
           ))}
         </FacilitatorEmailDiv>

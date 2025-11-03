@@ -18,7 +18,7 @@ export const AddFacilitatorButton = styled.button`
 `;
 
 export const FacilitatorEmailDiv = styled.div`
-  flex-direction: row;
+  flex-direction: column;
   display: flex;
   gap: 0.3rem;
 `;

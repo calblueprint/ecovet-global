@@ -39,6 +39,7 @@ export default function AddUserGroups() {
         <UserGroupNameInput
           value={userGroupInput}
           onChange={handleInputChange}
+          required
         ></UserGroupNameInput>
       </UserGroupInputDiv>
       <SubmitButton onClick={onSubmitButtonClick}>Submit</SubmitButton>
