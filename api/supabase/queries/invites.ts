@@ -1,4 +1,5 @@
 import supabase from "@/api/supabase/createClient";
+import { signInWithEmail } from "./auth";
 
 export async function submitNewFacilitator(
   email: string,
@@ -20,4 +21,6 @@ export async function submitNewFacilitator(
   if (error) {
     console.error("Error inserting new facilitator:", error.message);
   }
+
+  await signInWithEmail(email);
 }
