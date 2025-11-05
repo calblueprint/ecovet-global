@@ -17,8 +17,6 @@ const UserGroupsPage = () => {
 
   useEffect(() => {
     async function runTests() {
-      const results: string[] = [];
-
       const testTemplateId = "e470268b-6074-435c-b647-85a1c7fff244"; // Replace with actual UUID
       const user_group_id = "0b73ed2d-61c3-472e-b361-edaa88f27622";
       const testTagId = "517108e6-99a5-41bc-977e-799f192685c1";

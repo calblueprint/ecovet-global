@@ -1,5 +1,4 @@
 import { UUID } from "crypto";
-import { Dict } from "styled-components/dist/types";
 import { Tag, Template } from "@/types/schema";
 import supabase from "../client";
 
@@ -97,7 +96,7 @@ export async function getTagsForTemplate(templateId: string): Promise<Tag[]> {
   }
 
   // Extract the tag objects from the wrapper
-  return data.map((item: templateTag) => item.tag)
+  return data.map((item: templateTag) => item.tag);
 }
 
 type tagTemplate = { template: Template };
