@@ -3,8 +3,11 @@ import type { UUID } from "crypto";
 // ENUM for Emails.user_email
 export type EmailType = "PLACEHOLDER";
 
-// ENUM for Profiles.user_group
+// ENUM for user_type / user_group
 export type UserType = "Admin" | "Facilitator" | "Participant";
+
+// ENUM for status
+export type StatusType = "Pending" | "Accepted" | "Cancelled";
 
 /* SCHEMA */
 //org_id --> user_group_id
