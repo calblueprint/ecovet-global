@@ -1,5 +1,5 @@
-import supabase from "@/api/supabase/createClient";
 import { UUID } from "crypto";
+import supabase from "@/api/supabase/createClient";
 
 export async function submitNewFacilitator(
   email: string,

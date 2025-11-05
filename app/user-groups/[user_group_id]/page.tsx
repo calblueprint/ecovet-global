@@ -15,10 +15,8 @@ export default function UserGroupDetailPage() {
   const { user_group_id } = useParams();
   const [userGroup, setUserGroup] = useState<UserGroup | null>(null);
   const [invites, setInvites] = useState<Invite[]>([]);
-  const [allMembers, setAllMembers] = useState<any[]>([]);
-  const [allAdmins, setAllAdmins] = useState<any[]>([]);
-  const [allFacilitators, setAllFacilitators] = useState<any[]>([]);
-  const [allParticipants, setAllParticipants] = useState<any[]>([]);
+  const [allFacilitators, setAllFacilitators] = useState<Profile[]>([]);
+  const [allParticipants, setAllParticipants] = useState<Profile[]>([]);
 
   async function loadData() {
     const [userGroupDetails, groupMembers, groupInvites] = await Promise.all([
@@ -27,7 +25,6 @@ export default function UserGroupDetailPage() {
       fetchInvites(user_group_id as UUID),
     ]);
     setUserGroup(userGroupDetails || null);
-    setAllMembers(groupMembers || []);
     setInvites(groupInvites || []);
 
     categorizeMembers(groupMembers || []);
@@ -36,25 +33,18 @@ export default function UserGroupDetailPage() {
     console.log(groupInvites);
   }
 
-  function categorizeMembers(members: any[]) {
-    const admins = members.filter(m => m.user_group === "Admin");
-    const facilitators = members.filter(m => m.user_group === "Facilitator");
-    const participants = members.filter(m => m.user_group === "Participant");
+  function categorizeMembers(members: Profile[]) {
+    const facilitators = members.filter(m => m.user_type === "Facilitator");
+    const participants = members.filter(m => m.user_type === "Participant");
 
-    setAllAdmins(admins);
     setAllFacilitators(facilitators);
     setAllParticipants(participants);
   }
 
   useEffect(() => {
-    if (!user_group_id) {
-      console.log("No user_group_id!");
-      return;
+    if (user_group_id) {
+      loadData();
     }
-
-    console.log(user_group_id);
-
-    loadData();
   }, [user_group_id]);
 
   return (
@@ -92,7 +82,7 @@ export default function UserGroupDetailPage() {
         </ul>
       </section>
 
-      <Link href={"/user-groups/home-screen"}>Back to Organisations</Link>
+      <Link href={"/user-groups/home-screen"}>Back to Organizations</Link>
     </div>
   );
 }

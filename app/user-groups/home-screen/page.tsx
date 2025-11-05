@@ -30,10 +30,7 @@ const UserGroupsPage = () => {
               {group.user_group_name}
             </Link>
 
-            <span>100</span>
-
-            {/* To be added when num_users is added as a column */}
-            {/* <span>{group.num_users}</span> */}
+            <span>{group.num_users}</span>
           </li>
         ))}
       </ul>

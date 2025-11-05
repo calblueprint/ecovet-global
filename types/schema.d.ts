@@ -14,6 +14,7 @@ export type StatusType = "Pending" | "Accepted" | "Cancelled";
 export interface UserGroup {
   user_group_id: UUID; // user_group_id
   user_group_name: string;
+  num_users: number;
 }
 
 export interface User {
