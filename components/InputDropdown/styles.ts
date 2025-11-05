@@ -10,6 +10,10 @@ export const selectStyles: StylesConfig<
 > = {
   control: base => ({
     ...base,
-    border: `1px solid ${COLORS.oat_medium}`,
+    border: `1px solid ${COLORS.black}`,
+  }),
+  menu: base => ({
+    ...base,
+    border: `1px solid ${COLORS.black}`,
   }),
 };

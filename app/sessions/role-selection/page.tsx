@@ -7,7 +7,9 @@ import InputDropdown from "@/components/InputDropdown/InputDropdown";
 export default function RoleSelectionPage() {
   const [roles, setRoles] = useState<string[]>([]);
   const [participants, setParticipants] = useState<string[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedParticipant, setSelectedParticipant] = useState<string | null>(
     null,
   );
