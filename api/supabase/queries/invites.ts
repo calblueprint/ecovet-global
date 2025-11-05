@@ -11,7 +11,7 @@ export async function submitNewFacilitator(
       invite_id: id,
       user_group_id: user_group_id,
       email: email,
-      user_type: isFacilitator ? "Facilitator" : "",
+      user_type: isFacilitator ? "Facilitator" : "Participant",
       status: "Pending",
     },
     { onConflict: "invite_id" },
