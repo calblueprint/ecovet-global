@@ -75,6 +75,8 @@ export async function removeTagFromTemplate(
   return true;
 }
 
+type templateTag = { tag: Tag };
+
 export async function getTagsForTemplate(templateId: string): Promise<Tag[]> {
   const { data, error } = await supabase
     .from("template_tag")
@@ -83,7 +85,8 @@ export async function getTagsForTemplate(templateId: string): Promise<Tag[]> {
       tag:tag_id (*)
     `,
     )
-    .eq("template_id", templateId);
+    .eq("template_id", templateId)
+    .overrideTypes<templateTag[], { merge: false }>(); // Add this bc data pulled from supabase has type Dict{tag: any[]}[], need to force it to Dict{tag: Tag[]}[]
 
   if (error) {
     throw new Error(`Error fetching tags for template: ${error.message}`);
@@ -94,8 +97,10 @@ export async function getTagsForTemplate(templateId: string): Promise<Tag[]> {
   }
 
   // Extract the tag objects from the wrapper
-  return data.map((item: Dict) => item.tag);
+  return data.map((item: templateTag) => item.tag)
 }
+
+type tagTemplate = { template: Template };
 
 export async function getTemplatesforTag(tagId: UUID): Promise<Template[]> {
   // Returns all template names associated with a specific tag
@@ -106,12 +111,13 @@ export async function getTemplatesforTag(tagId: UUID): Promise<Template[]> {
             template:template_id (*)
         `,
     )
-    .eq("tag_id", tagId);
+    .eq("tag_id", tagId)
+    .overrideTypes<tagTemplate[], { merge: false }>(); // Add this bc data pulled from supabase has type Dict{template: any[]}[], need to force it to Dict{tag: Template[]}[];
 
   if (error) {
     throw new Error(`Error fetching templates for tag: ${error.message}`);
   }
 
   // List of dicts, one for each template
-  return data.map((item: Dict) => item.template);
+  return data.map((item: tagTemplate) => item.template);
 }
