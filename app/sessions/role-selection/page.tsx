@@ -109,7 +109,7 @@ export default function RoleSelectionPage() {
           .filter((p, i) => p && i !== index);
 
         const availableParticipants = participants.filter(
-          p => !selectedParticipants.includes(p.id),
+          p => !selectedParticipants.includes(p.id) && p.id !== profile?.id,
         );
 
         return (
