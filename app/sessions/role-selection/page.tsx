@@ -6,7 +6,7 @@ import {
   fetchParticipants,
   fetchRoles,
 } from "@/api/supabase/queries/sessions";
-import InputDropdown from "@/components/InputDropdown";
+import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import { useProfile } from "@/utils/ProfileProvider";
 
 interface ParticipantRole {
