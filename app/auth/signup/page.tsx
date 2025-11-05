@@ -88,8 +88,7 @@ export default function Login() {
                 placeholder="Password"
                 type={showPassword ? "text" : "password"}
                 onChange={e => (
-                  setPassword(e.target.value),
-                  setPasswordTouched(true)
+                  setPassword(e.target.value), setPasswordTouched(true)
                 )}
                 value={password}
               />{" "}

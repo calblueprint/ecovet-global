@@ -14,9 +14,7 @@ export default function Redirect() {
     <Main>
       <Container>
         <Heading2> Your password has been reset.</Heading2>
-        <Button onClick={handleRedirect} style={{ margin: "2.25rem 0rem" }}>
-          Return to Sign in
-        </Button>
+        <Button onClick={handleRedirect}>Return to Sign in</Button>
       </Container>
     </Main>
   );

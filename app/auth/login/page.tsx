@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { checkProfileExists } from "@/api/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
 import {
   Button,
@@ -33,7 +34,10 @@ export default function Login() {
   };
 
   const signInWithEmail = async () => {
-    const { error } = await sessionHandler.signInWithEmail(email, password);
+    const { data, error } = await sessionHandler.signInWithEmail(
+      email,
+      password,
+    );
     if (error) {
       throw new Error(
         "An error occurred during sign in: " +
@@ -43,7 +47,15 @@ export default function Login() {
       );
     }
 
-    router.push("/onboarding");
+    if (!data.user) {
+      throw new Error("User not found after sign in");
+    }
+
+    if (await checkProfileExists(data.user.id)) {
+      router.push("/onboarding");
+    } else {
+      router.push("/edit-profile");
+    }
   };
 
   const signOut = async () => {
