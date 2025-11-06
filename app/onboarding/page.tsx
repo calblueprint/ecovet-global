@@ -1,60 +1,75 @@
 "use client";
 
-import React, { useState } from "react";
-import supabase from "../../actions/supabase/client";
+import React, { useEffect, useState } from "react";
+import supabase from "@/actions/supabase/client";
+import { handleProfileSubmit } from "@/api/supabase/queries/profile";
+import { useProfile } from "@/utils/ProfileProvider";
 
 function OnboardingPage() {
+  const { userId, profile, loading: profileLoading } = useProfile();
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [country, setCountry] = useState("");
   const [role, setRole] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [save, setSave] = useState(false);
   const [formMessage, setFormMessage] = useState("");
+
+  //to be able to change fields on onboarding screen? for testing?
+  useEffect(() => {
+    if (profile) {
+      setFirstName(profile.first_name ?? "");
+      setLastName(profile.last_name ?? "");
+      setCountry(profile.country ?? "");
+      setRole(profile.org_role ?? "");
+    }
+  }, [profile]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    setLoading(true);
     setFormMessage("");
+    setSave(true);
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError) {
-      setLoading(false);
-      setFormMessage(`Auth error: ${userError.message}`);
+    if (!userId) {
+      setFormMessage("Missing user ID.");
       return;
     }
 
-    if (user == null) {
-      setLoading(false);
-      setFormMessage("Sign in.");
-      return;
-    }
+    const { success, error } = await handleProfileSubmit({
+      id: userId,
+      first_name: firstName,
+      last_name: lastName,
+      country,
+      org_role: role,
+    });
 
-    await supabase.auth.getSession();
-
-    const { error } = await supabase
-      .from("profile")
-      .upsert({
-        id: user.id,
-        first_name: firstName,
-        last_name: lastName,
-        country: country,
-        org_role: role,
-      })
-      .select();
-
-    setLoading(false);
-
-    if (error) {
-      setFormMessage(`Error: ${error.message}`);
+    if (!success) {
+      setFormMessage(`Error: ${error}`);
     } else {
       setFormMessage("Profile saved");
+      try {
+        const { data } = await supabase
+          .from("user_group")
+          .select("num_users")
+          .eq("user_group_id", profile?.user_group_id)
+          .single();
+
+        if (data) {
+          await supabase
+            .from("user_group")
+            .update({ num_users: (data.num_users ?? 0) + 1 })
+            .eq("user_group_id", profile?.user_group_id);
+        }
+      } catch (err) {
+        console.error("Error incrementing num_users:", err);
+      }
     }
+    setSave(false);
   };
+
+  if (profileLoading) {
+    return <p>Loading your profile…</p>;
+  }
 
   return (
     <div>
@@ -106,8 +121,8 @@ function OnboardingPage() {
           />
         </div>
         <br />
-        <button type="submit" disabled={loading}>
-          {loading ? "Saving" : "Submit Profile"}
+        <button type="submit" disabled={save}>
+          {save ? "Saving" : "Submit Profile"}
         </button>
       </form>
 

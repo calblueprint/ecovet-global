@@ -11,6 +11,12 @@ export default function Home() {
       <Link href="/auth/login">
         <button>Log In</button>
       </Link>
+      <Link href="/onboarding">
+        <button>Onboarding</button>
+      </Link>
+      <Link href="/sessions/role-selection">
+        <button>Sessions</button>
+      </Link>
     </main>
   );
 }
