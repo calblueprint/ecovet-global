@@ -1,6 +1,6 @@
+import { UUID } from "crypto";
 import supabase from "@/api/supabase/createClient";
 import { Invite, UserType } from "@/types/schema";
-import { UUID } from "crypto";
 
 export async function submitNewInvite(
   email: string,
@@ -41,9 +41,9 @@ export async function cancelInvite(invite_id: UUID): Promise<void> {
     return;
   }
   var { error } = await supabase
-  .from("invite")
-  .update({ status: "Cancelled" })
-  .match({ invite_id:  invite_id})
+    .from("invite")
+    .update({ status: "Cancelled" })
+    .match({ invite_id: invite_id });
 
   if (error) {
     console.error("Error updating invite status to cancelled:", error.message);
@@ -52,7 +52,9 @@ export async function cancelInvite(invite_id: UUID): Promise<void> {
   return;
 }
 /* in progress*/
-export async function validateFacilitatorInvite(email: string): Promise<boolean> {
+export async function validateFacilitatorInvite(
+  email: string,
+): Promise<boolean> {
   var { data, error } = await supabase
     .from("invite")
     .select("user_type")
@@ -75,23 +77,28 @@ export async function validateInvite(email: string): Promise<boolean> {
 
 export async function changeToParticipant(user_id: UUID): Promise<void> {
   const { error } = await supabase
-  .from("profile")
-  .update({ user_type: "Participant" })
-  .match({ id:  user_id})
+    .from("profile")
+    .update({ user_type: "Participant" })
+    .match({ id: user_id });
 
   if (error) {
-    console.error("Error updating profile user_type to Participant:", error.message);
+    console.error(
+      "Error updating profile user_type to Participant:",
+      error.message,
+    );
   }
 }
 
 export async function changeToFacilitator(user_id: UUID): Promise<void> {
   const { error } = await supabase
-  .from("profile")
-  .update({ user_type: "Facilitator" })
-  .match({ id:  user_id})
+    .from("profile")
+    .update({ user_type: "Facilitator" })
+    .match({ id: user_id });
 
   if (error) {
-    console.error("Error updating profile user_type to Facilitator:", error.message);
+    console.error(
+      "Error updating profile user_type to Facilitator:",
+      error.message,
+    );
   }
 }
-
