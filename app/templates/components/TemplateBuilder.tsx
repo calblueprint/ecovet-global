@@ -10,7 +10,7 @@ import {
 import { localStore, Prompt, Role, Template } from "@/types/schema";
 import RoleForm from "./RoleForm";
 import TemplateOverviewForm from "./TemplateOverviewForm";
-import { NewTabButton, PhasesControl, PhasesCount, PhasesLabel, PhasesStepper, StepButton, TabButton, TabsHeader, TabsLeft, TabsRight } from "./styles";
+import { GhostButton, NameInput, NewTabButton, PanelCard, PanelHeaderRow, PhasesControl, PhasesCount, PhasesLabel, PhasesStepper, StepButton, TabButton, TabsHeader, TabsLeft, TabsRight } from "./styles";
 
 export default function TemplateBuilder({
   localStore,
@@ -303,56 +303,93 @@ export default function TemplateBuilder({
         </TabsRight>
       </TabsHeader>
 
-      {localStore?.roleIds.map(t =>
-        t === activeId ? (
-          <div
-            key={`panel-${String(t)}`}
-            style={{ border: "1px solid #ccc", padding: 12 }}
-          >
-            {activeId !== 1 && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: 8,
-                }}
-              >
-                <input
-                  value={(localStore.rolesById[t] as Role).role_name}
-                  onChange={e => renameRole(t, e.target.value)}
-                  style={{ padding: 6, border: "1px solid #ccc" }}
-                />
-                <button
-                  onClick={() => removeRole(t)}
-                  style={{ border: "1px solid #ccc", padding: 6 }}
+      <div>
+        {/* {localStore?.roleIds.map(t =>
+          t === activeId ? (
+            <div
+              key={`panel-${String(t)}`}
+              style={{ border: "1px solid #ccc", padding: 12 }}
+            >
+              {activeId !== 1 && (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginBottom: 8,
+                  }}
                 >
-                  Remove
-                </button>
-              </div>
-            )}
-            {typeof activeId === "number" ? (
-              <TemplateOverviewForm
-                value={localStore.rolesById[activeId] as Template}
-                onChange={setActiveUpdate}
-              />
-            ) : (
-              <RoleForm
-                value={{
-                  role: localStore.rolesById[activeId] as Role,
-                  rolePhases: localStore.rolePhasesById,
-                  rolePhaseIndex: localStore.rolePhaseIndex[activeId],
-                  promptById: localStore.promptById,
-                  promptIndex: localStore.promptIndex,
-                }}
-                onChange={setActiveUpdate}
-              />
-            )}
-          </div>
-        ) : null,
-      )}
-      <button onClick={saveTemplate} disabled={saving}>
+                  <input
+                    value={(localStore.rolesById[t] as Role).role_name}
+                    onChange={e => renameRole(t, e.target.value)}
+                    style={{ padding: 6, border: "1px solid #ccc" }}
+                  />
+                  <button
+                    onClick={() => removeRole(t)}
+                    style={{ border: "1px solid #ccc", padding: 6 }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+              {typeof activeId === "number" ? (
+                <TemplateOverviewForm
+                  value={localStore.rolesById[activeId] as Template}
+                  onChange={setActiveUpdate}
+                />
+              ) : (
+                <RoleForm
+                  value={{
+                    role: localStore.rolesById[activeId] as Role,
+                    rolePhases: localStore.rolePhasesById,
+                    rolePhaseIndex: localStore.rolePhaseIndex[activeId],
+                    promptById: localStore.promptById,
+                    promptIndex: localStore.promptIndex,
+                  }}
+                  onChange={setActiveUpdate}
+                />
+              )}
+            </div>
+          ) : null,
+        )} */}
+
+        {localStore?.roleIds.map((t, idx) =>
+          t === activeId ? (
+            <PanelCard key={`panel-${String(t)}`}>
+              {activeId !== 1 && (
+                <PanelHeaderRow>
+                  <NameInput
+                    value={(localStore.rolesById[t] as Role).role_name}
+                    onChange={(e) => renameRole(t, e.target.value)}
+                  />
+                  <GhostButton onClick={() => removeRole(t)}>Remove</GhostButton>
+                </PanelHeaderRow>
+              )}
+
+              {typeof activeId === "number" ? (
+                <TemplateOverviewForm
+                  value={localStore.rolesById[activeId] as Template}
+                  onChange={setActiveUpdate}
+                />
+              ) : (
+                <RoleForm
+                  value={{
+                    role: localStore.rolesById[activeId] as Role,
+                    rolePhases: localStore.rolePhasesById,
+                    rolePhaseIndex: localStore.rolePhaseIndex[activeId],
+                    promptById: localStore.promptById,
+                    promptIndex: localStore.promptIndex,
+                  }}
+                  onChange={setActiveUpdate}
+                />
+              )}
+            </PanelCard>
+          ) : null
+        )}
+
+        <button onClick={saveTemplate} disabled={saving}>
         {saving ? "Saving..." : "Submit Template"}
       </button>
+      </div>
     </div>
   );
 }

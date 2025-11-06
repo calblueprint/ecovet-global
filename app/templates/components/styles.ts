@@ -3,6 +3,10 @@ import { Box, Flex } from "@/styles/containers";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
 
+
+//----------------------------------------------------------------------------------------
+//-----------------------------------   TABS STYLING   -----------------------------------
+//----------------------------------------------------------------------------------------
 export const TabsHeader = styled(Flex).attrs({
   $justify: "between",
   $align: "center",
@@ -141,4 +145,82 @@ export const StepButton = styled.button`
   transition: background 0.15s ease, transform 0.05s ease, border-color 0.15s;
   &:active { transform: translateY(1px); }
   &:disabled { opacity: 0.45; cursor: not-allowed; }
+`;
+
+
+//----------------------------------------------------------------------------------------
+//-----------------------------------   FORM STYLING   -----------------------------------
+//----------------------------------------------------------------------------------------
+
+/* Page section wrapper for a role's panel */
+export const PanelCard = styled(Flex).attrs({ $direction: "column" })`
+  border: 1px solid ${COLORS.black20};
+  border-radius: 6px;
+  padding: 20px;
+  gap: 32px;
+`;
+
+/* Row with name input and remove button */
+export const PanelHeaderRow = styled(Flex).attrs({ $justify: "between", $align: "center" })`
+  margin-bottom: 8px;
+`;
+
+/* Simple text input (used for role name) */
+export const NameInput = styled.input`
+  padding: 6px 10px;
+  border: 1px solid ${COLORS.black20};
+  border-radius: 4px;
+  outline: none;
+  width: 320px;
+  &:focus { border-color: ${COLORS.darkElectricBlue}; }
+`;
+
+/* Ghosty small button */
+export const GhostButton = styled.button`
+  padding: 6px 10px;
+  border: 1px solid ${COLORS.black20};
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+  &:hover { background: #f8f8f8; }
+`;
+
+/* Vertical form spacing */
+export const FormStack = styled(Flex).attrs({ $direction: "column", $gap: "40px" })``;
+
+export const FieldCard = styled.fieldset`
+  position: relative;
+  border: 1px solid ${COLORS.black20};
+  border-radius: 4px;
+  padding: 10px;
+`;
+
+/** Legend text */
+export const FieldLegend = styled.legend`
+  font-family: "Public Sans", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #C7C6C3;
+`;
+
+/* Big comfortable text area (used for description/prompts) */
+export const BigInput = styled.input.attrs({ type: "text" })`
+  width: calc(100% - 20px);
+  margin: 10px;
+  border: none;
+  resize: none;
+  font: inherit;
+  line-height: 1.4;
+  &:focus { outline: none;
+  box-shadow: none;
+  border-color: inherit; }
+`;
+
+/* Section heading like “Phase 1” */
+export const SectionH2 = styled.h2`
+  font-family: "Public Sans", system-ui, sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
 `;
