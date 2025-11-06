@@ -9,10 +9,12 @@ import { Sans } from "@/styles/fonts";
 //----------------------------------------------------------------------------------------
 export const TabsHeader = styled(Flex).attrs({
   $justify: "between",
-  $align: "center",
+  $align: "end",
 })`
   width: auto;
   margin-bottom: 8px;
+  border-bottom: 2px solid #D9D9D9;
+  padding-bottom: 10px;
 `;
 
 /* Left cluster: the tabs list + "+ New" */
@@ -92,16 +94,17 @@ export const TabsDivider = styled.div`
 /* Right cluster: phase count + up/down */
 export const TabsRight = styled(Flex).attrs({ $align: "center", $gap: "8px" })`
     width: auto;
+    gap: 12px;
 `;
 
 export const PhasesControl = styled(Flex).attrs({ $align: "center" })`
-  display: inline-flex;                 /* stay as small as its contents */
+  display: inline-flex;                
   gap: 8px;
   padding: 10px 20px;
   border: 1px solid ${COLORS.teal};
   border-radius: 4px;
   background: ${COLORS.white};
-  user-select: none;                    /* avoid text selection while clicking */
+  user-select: none;             
 `;
 
 /** “Phases:” label */
@@ -131,8 +134,8 @@ export const PhasesStepper = styled.div`
 
 /** Arrow button */
 export const StepButton = styled.button`
-  width: 11px;
-  height: 8px;
+  width: 8px;
+  height: 6px;
   line-height: 0;
   display: grid;
   place-items: center;
@@ -147,6 +150,27 @@ export const StepButton = styled.button`
   &:disabled { opacity: 0.45; cursor: not-allowed; }
 `;
 
+export const SubmitButton = styled.button`
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  width: auto;
+
+  padding: 13px 18px;
+  border-radius: 4px;
+  background: ${COLORS.darkElectricBlue};
+  color: ${COLORS.white};
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  border: none;
+  cursor: pointer;
+`;
+
+
 
 //----------------------------------------------------------------------------------------
 //-----------------------------------   FORM STYLING   -----------------------------------
@@ -154,9 +178,7 @@ export const StepButton = styled.button`
 
 /* Page section wrapper for a role's panel */
 export const PanelCard = styled(Flex).attrs({ $direction: "column" })`
-  border: 1px solid ${COLORS.black20};
-  border-radius: 6px;
-  padding: 20px;
+  // padding: 40px 100px 0 0;
   gap: 32px;
 `;
 
@@ -187,7 +209,9 @@ export const GhostButton = styled.button`
 `;
 
 /* Vertical form spacing */
-export const FormStack = styled(Flex).attrs({ $direction: "column", $gap: "40px" })``;
+export const FormStack = styled(Flex).attrs({ $direction: "column", $gap: "40px" })`
+  padding-right: 150px;
+`;
 
 export const FieldCard = styled.fieldset`
   position: relative;
@@ -220,7 +244,8 @@ export const BigInput = styled.input.attrs({ type: "text" })`
 /* Section heading like “Phase 1” */
 export const SectionH2 = styled.h2`
   font-family: "Public Sans", system-ui, sans-serif;
-  font-size: 2rem;
+  font-size: 24px;
+  font-style: normal;
   font-weight: 700;
-  margin: 0;
+  line-height: normal;
 `;

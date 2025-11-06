@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { localStore } from "@/types/schema";
+import { localStore, Template } from "@/types/schema";
 import TemplateBuilder from "./components/TemplateBuilder";
 import { NewTemplateButton, NewTemplateHeader, TemplateMainBox, NewTemplateDiv } from "./styles";
 
@@ -36,6 +36,12 @@ export const createInitialStore = (): localStore => {
 export default function NewTemplatePage() {
   const [isNew, setIsNew] = useState(false);
   const [newTemp, setNewTemp] = useState<localStore | null>(null);
+  const [, setTick] = useState(0); //some boofed way to force a rerender by calling a random usestate lmao
+
+  function useForceUpdate(): void {
+    // call whenever my screen isn't updating :)
+    setTick(tick => (tick + 1) % 10);
+  }
 
   async function newTemplate() {
     setNewTemp(createInitialStore());
@@ -49,10 +55,10 @@ export default function NewTemplatePage() {
 
   return (
     <TemplateMainBox>
-      <NewTemplateHeader>New Template Page</NewTemplateHeader>
+      <NewTemplateHeader>{(newTemp?.rolesById?.[1] as Template)?.template_name ?? "Create A New Template"}</NewTemplateHeader>
       <NewTemplateDiv>
         {isNew ? (
-          <TemplateBuilder localStore={newTemp} onFinish={resetTemplate} />
+          <TemplateBuilder localStore={newTemp} onFinish={resetTemplate} update={useForceUpdate} />
         ) : (
           <NewTemplateButton onClick={newTemplate}>New Template</NewTemplateButton>
         )}

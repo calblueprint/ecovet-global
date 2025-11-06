@@ -10,14 +10,16 @@ import {
 import { localStore, Prompt, Role, Template } from "@/types/schema";
 import RoleForm from "./RoleForm";
 import TemplateOverviewForm from "./TemplateOverviewForm";
-import { GhostButton, NameInput, NewTabButton, PanelCard, PanelHeaderRow, PhasesControl, PhasesCount, PhasesLabel, PhasesStepper, StepButton, TabButton, TabsHeader, TabsLeft, TabsRight } from "./styles";
+import { SubmitButton, GhostButton, NameInput, NewTabButton, PanelCard, PanelHeaderRow, PhasesControl, PhasesCount, PhasesLabel, PhasesStepper, StepButton, TabButton, TabsHeader, TabsLeft, TabsRight } from "./styles";
 
 export default function TemplateBuilder({
   localStore,
   onFinish,
+  update,
 }: {
   localStore: localStore | null;
   onFinish: () => void;
+  update: () => void;
 }) {
   const [activeId, setActiveId] = useState<UUID | number>(1); // current 'tab' or role
   const [, setTick] = useState(0); //some boofed way to force a rerender by calling a random usestate lmao
@@ -82,7 +84,12 @@ export default function TemplateBuilder({
   function renameRole(role_id: UUID | number, newLabel: string) {
     if (localStore == null) return;
 
-    (localStore.rolesById[role_id] as Role).role_name = newLabel;
+    if (typeof role_id === 'number') {
+      (localStore.rolesById[role_id] as Template).template_name = newLabel;
+      update();
+    } else {
+      (localStore.rolesById[role_id] as Role).role_name = newLabel;
+    }
     useForceUpdate();
   }
 
@@ -300,62 +307,22 @@ export default function TemplateBuilder({
               </StepButton>
             </PhasesStepper>
           </PhasesControl>
+          <SubmitButton onClick={saveTemplate}>{saving ? "Saving..." : "Submit Template"}</SubmitButton>
         </TabsRight>
       </TabsHeader>
 
       <div>
-        {/* {localStore?.roleIds.map(t =>
-          t === activeId ? (
-            <div
-              key={`panel-${String(t)}`}
-              style={{ border: "1px solid #ccc", padding: 12 }}
-            >
-              {activeId !== 1 && (
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: 8,
-                  }}
-                >
-                  <input
-                    value={(localStore.rolesById[t] as Role).role_name}
-                    onChange={e => renameRole(t, e.target.value)}
-                    style={{ padding: 6, border: "1px solid #ccc" }}
-                  />
-                  <button
-                    onClick={() => removeRole(t)}
-                    style={{ border: "1px solid #ccc", padding: 6 }}
-                  >
-                    Remove
-                  </button>
-                </div>
-              )}
-              {typeof activeId === "number" ? (
-                <TemplateOverviewForm
-                  value={localStore.rolesById[activeId] as Template}
-                  onChange={setActiveUpdate}
-                />
-              ) : (
-                <RoleForm
-                  value={{
-                    role: localStore.rolesById[activeId] as Role,
-                    rolePhases: localStore.rolePhasesById,
-                    rolePhaseIndex: localStore.rolePhaseIndex[activeId],
-                    promptById: localStore.promptById,
-                    promptIndex: localStore.promptIndex,
-                  }}
-                  onChange={setActiveUpdate}
-                />
-              )}
-            </div>
-          ) : null,
-        )} */}
-
         {localStore?.roleIds.map((t, idx) =>
           t === activeId ? (
             <PanelCard key={`panel-${String(t)}`}>
-              {activeId !== 1 && (
+              {typeof activeId === "number" ? (
+                <PanelHeaderRow>
+                  <NameInput
+                    value={(localStore.rolesById[t] as Template).template_name ?? ""}
+                    onChange={(e) => renameRole(t, e.target.value)}
+                  />
+                </PanelHeaderRow>
+              ) : (
                 <PanelHeaderRow>
                   <NameInput
                     value={(localStore.rolesById[t] as Role).role_name}
@@ -385,10 +352,6 @@ export default function TemplateBuilder({
             </PanelCard>
           ) : null
         )}
-
-        <button onClick={saveTemplate} disabled={saving}>
-        {saving ? "Saving..." : "Submit Template"}
-      </button>
       </div>
     </div>
   );
