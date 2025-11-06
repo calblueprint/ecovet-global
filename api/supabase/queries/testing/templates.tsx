@@ -30,12 +30,12 @@ export default async function insertTemplateFlow(): Promise<void> {
   );
   console.log("created template: ", template_id);
 
-  let phases: UUID[] = [];
-  let roles: UUID[] = [];
-  let rolePhases: UUID[] = [];
-  let prompts: UUID[] = [];
+  const phases: UUID[] = [];
+  const roles: UUID[] = [];
+  const rolePhases: UUID[] = [];
+  const prompts: UUID[] = [];
 
-  for (let phase of defaultPhases) {
+  for (const phase of defaultPhases) {
     phases.push(
       await createPhases(
         phase.session_id,
@@ -48,7 +48,7 @@ export default async function insertTemplateFlow(): Promise<void> {
   }
   console.log("created all phases: ", phases);
 
-  for (let role of defaultRoles) {
+  for (const role of defaultRoles) {
     roles.push(
       await createRoles(role.role_name, template_id!, role.role_description),
     );

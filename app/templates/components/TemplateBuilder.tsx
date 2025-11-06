@@ -10,6 +10,7 @@ import {
 import { localStore, Prompt, Role, Template } from "@/types/schema";
 import RoleForm from "./RoleForm";
 import TemplateOverviewForm from "./TemplateOverviewForm";
+import { NewTabButton, PhasesControl, PhasesCount, PhasesLabel, PhasesStepper, StepButton, TabButton, TabsHeader, TabsLeft, TabsRight } from "./styles";
 
 export default function TemplateBuilder({
   localStore,
@@ -111,6 +112,7 @@ export default function TemplateBuilder({
       localStore.rolePhaseIndex[role][newPhaseID] = newRolePhaseID;
       localStore.promptIndex[newRolePhaseID] = [];
     }
+    useForceUpdate();
   }
 
   function removePhase(phase_id: UUID | null = null): void {
@@ -205,7 +207,7 @@ export default function TemplateBuilder({
       (localStore.rolesById[1] as Template).current_activity,
     );
 
-    for (let roleID of localStore.roleIds) {
+    for (const roleID of localStore.roleIds) {
       if (!(typeof roleID == "number")) {
         await createRoles(
           roleID,
@@ -216,7 +218,7 @@ export default function TemplateBuilder({
       }
     }
 
-    for (let phaseID of localStore.phaseIds) {
+    for (const phaseID of localStore.phaseIds) {
       await createPhases(
         phaseID,
         localStore.phasesById[phaseID].session_id,
@@ -226,11 +228,11 @@ export default function TemplateBuilder({
       );
     }
 
-    for (let [roleID, obj] of Object.entries(localStore.rolePhaseIndex) as [
+    for (const [roleID, obj] of Object.entries(localStore.rolePhaseIndex) as [
       UUID,
       Record<UUID, UUID>,
     ][]) {
-      for (let [phaseID, rolePhaseID] of Object.entries(obj) as [
+      for (const [phaseID, rolePhaseID] of Object.entries(obj) as [
         UUID,
         UUID,
       ][]) {
@@ -243,7 +245,7 @@ export default function TemplateBuilder({
       }
     }
 
-    for (let [promptID, prompt] of Object.entries(localStore.promptById) as [
+    for (const [promptID, prompt] of Object.entries(localStore.promptById) as [
       UUID,
       Prompt,
     ][]) {
@@ -260,34 +262,46 @@ export default function TemplateBuilder({
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-          {localStore?.roleIds.map(t => (
-            <button
+      <TabsHeader>
+        <TabsLeft>
+          {localStore?.roleIds.map((t) => (
+            <TabButton
               key={String(t)}
+              $active={activeId === t}
               onClick={() => setActiveId(t)}
-              style={{
-                padding: "6px 10px",
-                border: "1px solid #ccc",
-                borderBottom:
-                  activeId === t ? "2px solid transparent" : "1px solid #ccc",
-                background: activeId === t ? "#fff" : "#f8f8f8",
-                fontWeight: activeId === t ? 600 : 400,
-              }}
             >
               {localStore.rolesById[t] && "role_name" in localStore.rolesById[t]
                 ? localStore.rolesById[t].role_name
                 : "Scenario Overview"}
-            </button>
+            </TabButton>
           ))}
-          <button onClick={addRole}>+ New</button>
-        </div>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <p>Phases: {localStore?.phaseIds.length}</p>
-          <button onClick={addPhase}>UP</button>
-          <button onClick={() => removePhase()}>DOWN</button>
-        </div>
-      </div>
+          <NewTabButton onClick={addRole}>+</NewTabButton>
+        </TabsLeft>
+
+        <TabsRight>
+          <PhasesControl
+            role="group"
+            aria-label="Phases control"
+            onKeyDown={(e) => {
+              if (e.key === "ArrowUp") addPhase();
+              if (e.key === "ArrowDown") removePhase();
+            }}
+          >
+            <PhasesLabel>Phases:</PhasesLabel>
+            <PhasesCount>{localStore?.phaseIds.length ?? 0}</PhasesCount>
+            <PhasesStepper>
+              <StepButton aria-label="Increase phases" onClick={addPhase}>▲</StepButton>
+              <StepButton
+                aria-label="Decrease phases"
+                onClick={() => removePhase()}
+                disabled={(localStore?.phaseIds.length ?? 0) === 0}
+              >
+                ▼
+              </StepButton>
+            </PhasesStepper>
+          </PhasesControl>
+        </TabsRight>
+      </TabsHeader>
 
       {localStore?.roleIds.map(t =>
         t === activeId ? (
