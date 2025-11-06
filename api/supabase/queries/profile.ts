@@ -44,7 +44,7 @@ export async function fetchUserGroupById(user_group_id: UUID) {
     .eq("user_group_id", user_group_id)
     .single();
   if (error) {
-    console.error("Error fetching user group by user_group_id:", error);
+    console.error("Error fetching user group by user_group_id:", error.message);
     return null;
   }
 
@@ -58,7 +58,7 @@ export async function fetchPhaseById(phase_id: UUID) {
     .eq("phase_id", phase_id)
     .single();
   if (error) {
-    console.error("Error fetching phase by phase_id:", error);
+    console.error("Error fetching phase by phase_id:", error.message);
     return null;
   }
 
@@ -72,7 +72,7 @@ export async function fetchRoleById(role_id: UUID) {
     .eq("role_id", role_id)
     .single();
   if (error) {
-    console.error("Error fetching role by role_id:", error);
+    console.error("Error fetching role by role_id:", error.message);
     return null;
   }
 

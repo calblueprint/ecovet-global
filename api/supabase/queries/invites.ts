@@ -1,5 +1,5 @@
 import supabase from "@/api/supabase/createClient";
-import { signInWithEmail } from "./auth";
+import { signInWithMagicLink } from "./auth";
 
 export async function submitNewFacilitator(
   email: string,
@@ -22,5 +22,5 @@ export async function submitNewFacilitator(
     console.error("Error inserting new facilitator:", error.message);
   }
 
-  await signInWithEmail(email);
+  await signInWithMagicLink(email);
 }
