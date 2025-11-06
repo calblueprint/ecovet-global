@@ -1,5 +1,5 @@
 import supabase from "@/api/supabase/createClient";
-import { Invite } from "@/types/schema";
+import { Invite, UserType } from "@/types/schema";
 import { UUID } from "crypto";
 
 export async function submitNewFacilitator(
@@ -58,12 +58,16 @@ export async function validateFacilitatorInvite(email: string): Promise<boolean>
     .select("user_type")
     .eq("email", email)
     .single();
-  return true;
+  const user_type: UserType = data as unknown as UserType;
+  if (error) {
+    console.error("Error fetching invite by email:", error);
+    return false;
+  }
+  if (user_type == "Facilitator") {
+    return true;
+  }
+  return false;
 }
-
-Function to check if an invited facilitator is already a facilitator called validateFacilitatorInvite():
-  Given an email, check in the profiles table invitee is in the user-group as a facilitator. Return True if so.
-  If this function returns True, prevent them from being added in add-facilitators.tsx,  and display an error message on screen ('User already is a facilitator').
 
 export async function validateInvite(email: string): Promise<boolean> {
   return true;
