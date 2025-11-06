@@ -3,12 +3,13 @@
 import { ChangeEvent, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { submitNewInvite } from "@/api/supabase/queries/invites";
+import { UserType } from "@/types/schema";
 import {
-  AddFacilitatorButton,
-  AddFacilitatorFormDiv,
-  AddFacilitatorsMain,
-  FacilitatorEmailDiv,
-  FacilitatorEmailInput,
+  AddParticipantButton,
+  AddParticipantFormDiv,
+  AddParticipantsMain,
+  ParticipantEmailDiv,
+  ParticipantEmailInput,
   SubmitButton,
 } from "./styles";
 
@@ -17,28 +18,28 @@ const isEmailValid = (email: string) => {
   return emailRegex.test(email);
 };
 
-export default function AddFacilitators() {
+export default function AddParticipants() {
   const searchParams = useSearchParams();
   const userGroupId = searchParams.get("userGroupId");
-  const [facilitatorEmails, setFacilitatorEmails] = useState<string[]>([""]);
+  const [participantEmails, setParticipantEmails] = useState<string[]>([""]);
 
   const handleInputChange = (
     event: ChangeEvent<HTMLInputElement>,
     index: number,
   ) => {
-    const updated = [...facilitatorEmails];
+    const updated = [...participantEmails];
     updated[index] = event.target.value;
-    setFacilitatorEmails(updated);
+    setParticipantEmails(updated);
   };
 
-  const onAddFacilitatorButtonClick = () => {
-    setFacilitatorEmails([...facilitatorEmails, ""]);
+  const onAddParticipantButtonClick = () => {
+    setParticipantEmails([...participantEmails, ""]);
   };
 
   const onSubmitButtonClick = () => {
-    facilitatorEmails.map(email => {
+    participantEmails.map(email => {
       if (isEmailValid(email)) {
-        submitNewInvite(email, String(userGroupId), "Facilitator");
+        submitNewInvite(email, String(userGroupId), "Participant");
       } else {
         console.error("invalid email format");
       }
@@ -46,24 +47,24 @@ export default function AddFacilitators() {
   };
 
   return (
-    <AddFacilitatorsMain>
-      <AddFacilitatorFormDiv>
-        <FacilitatorEmailDiv>
-          {facilitatorEmails.map((email, index) => (
-            <FacilitatorEmailInput
+    <AddParticipantsMain>
+      <AddParticipantFormDiv>
+        <ParticipantEmailDiv>
+          {participantEmails.map((email, index) => (
+            <ParticipantEmailInput
               key={index}
               value={email}
               onChange={e => handleInputChange(e, index)}
               placeholder="Enter facilitator email"
               required
-            ></FacilitatorEmailInput>
+            ></ParticipantEmailInput>
           ))}
-        </FacilitatorEmailDiv>
-        <AddFacilitatorButton onClick={onAddFacilitatorButtonClick}>
-          Add Facilitator
-        </AddFacilitatorButton>
+        </ParticipantEmailDiv>
+        <AddParticipantButton onClick={onAddParticipantButtonClick}>
+          Add Participant
+        </AddParticipantButton>
         <SubmitButton onClick={onSubmitButtonClick}>Submit</SubmitButton>
-      </AddFacilitatorFormDiv>
-    </AddFacilitatorsMain>
+      </AddParticipantFormDiv>
+    </AddParticipantsMain>
   );
 }

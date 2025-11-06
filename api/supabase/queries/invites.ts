@@ -2,10 +2,10 @@ import supabase from "@/api/supabase/createClient";
 import { Invite, UserType } from "@/types/schema";
 import { UUID } from "crypto";
 
-export async function submitNewFacilitator(
+export async function submitNewInvite(
   email: string,
   user_group_id: string,
-  isFacilitator: boolean,
+  user_type: UserType,
 ): Promise<void> {
   const id = crypto.randomUUID();
   const { error } = await supabase.from("invite").upsert(
@@ -13,7 +13,7 @@ export async function submitNewFacilitator(
       invite_id: id,
       user_group_id: user_group_id,
       email: email,
-      user_type: isFacilitator ? "Facilitator" : "",
+      user_type: user_type,
       status: "Pending",
     },
     { onConflict: "invite_id" },
@@ -32,7 +32,7 @@ export async function cancelInvite(invite_id: UUID): Promise<void> {
     .eq("id", invite_id)
     .single();
   if (error) {
-    console.error("Error fetching invite by invite_id:", error);
+    console.error("Error fetching invite by invite_id:", error.message);
     return;
   }
   const invite_data: Invite = data as Invite;
@@ -46,12 +46,12 @@ export async function cancelInvite(invite_id: UUID): Promise<void> {
   .match({ invite_id:  invite_id})
 
   if (error) {
-    console.error("Error updating invite status to cancelled:", error);
+    console.error("Error updating invite status to cancelled:", error.message);
     return;
   }
   return;
 }
-
+/* in progress*/
 export async function validateFacilitatorInvite(email: string): Promise<boolean> {
   var { data, error } = await supabase
     .from("invite")
@@ -60,7 +60,7 @@ export async function validateFacilitatorInvite(email: string): Promise<boolean>
     .single();
   const user_type: UserType = data as unknown as UserType;
   if (error) {
-    console.error("Error fetching invite by email:", error);
+    console.error("Error fetching invite by email:", error.message);
     return false;
   }
   if (user_type == "Facilitator") {
@@ -68,13 +68,10 @@ export async function validateFacilitatorInvite(email: string): Promise<boolean>
   }
   return false;
 }
-
+/* in progress*/
 export async function validateInvite(email: string): Promise<boolean> {
   return true;
 }
-Function to check if an invited participant is already in the organization called validateInvite():
- Given an email, check in the profiles table invitee is in the user-group. Return True if so.
-  If this function returns True, edit add-participant.tsx to prevent them from adding this person, and display an error message on screen ('User already in this user group').
 
 export async function changeToParticipant(user_id: UUID): Promise<void> {
   const { error } = await supabase
@@ -83,7 +80,7 @@ export async function changeToParticipant(user_id: UUID): Promise<void> {
   .match({ id:  user_id})
 
   if (error) {
-    console.error("Error updating profile user_type to Participant:", error);
+    console.error("Error updating profile user_type to Participant:", error.message);
   }
 }
 
@@ -94,7 +91,7 @@ export async function changeToFacilitator(user_id: UUID): Promise<void> {
   .match({ id:  user_id})
 
   if (error) {
-    console.error("Error updating profile user_type to Facilitator:", error);
+    console.error("Error updating profile user_type to Facilitator:", error.message);
   }
 }
 
