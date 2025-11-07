@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { UUID } from "crypto";
 import {
   createPhases,
@@ -41,10 +41,10 @@ export default function TemplateBuilder({
   const [, setTick] = useState(0); //some boofed way to force a rerender by calling a random usestate lmao
   const [saving, setSaving] = useState(false); //nice 'saving' to let user know supabase push is still happening and when finished
 
-  function useForceUpdate(): void {
+  const forceUpdate = useCallback(() => {
     // call whenever my screen isn't updating :)
     setTick(tick => (tick + 1) % 10);
-  }
+  }, []);
 
   function createUUID(): UUID {
     //helper function to create new UUIDs
@@ -106,7 +106,7 @@ export default function TemplateBuilder({
     } else {
       (localStore.rolesById[role_id] as Role).role_name = newLabel;
     }
-    useForceUpdate();
+    forceUpdate();
   }
 
   function addPhase(): void {
@@ -135,7 +135,7 @@ export default function TemplateBuilder({
       localStore.rolePhaseIndex[role][newPhaseID] = newRolePhaseID;
       localStore.promptIndex[newRolePhaseID] = [];
     }
-    useForceUpdate();
+    forceUpdate();
   }
 
   function removePhase(phase_id: UUID | null = null): void {
@@ -154,7 +154,7 @@ export default function TemplateBuilder({
     if (removedPhaseID) {
       delete localStore.phasesById[removedPhaseID];
 
-      for (const [roleID, obj] of Object.entries(localStore.rolePhaseIndex)) {
+      for (const [, obj] of Object.entries(localStore.rolePhaseIndex)) {
         const rolePhaseID = obj[removedPhaseID];
         if (rolePhaseID) {
           delete localStore.rolePhasesById[rolePhaseID];
@@ -166,7 +166,7 @@ export default function TemplateBuilder({
         delete localStore.promptIndex[rolePhaseID];
       }
     }
-    useForceUpdate();
+    forceUpdate();
   }
 
   function addPrompt(rolePhaseID: UUID): void {
@@ -189,14 +189,13 @@ export default function TemplateBuilder({
     if (i !== -1) localStore.promptIndex[rolePhaseID].splice(i, 1);
 
     delete localStore.promptById[promptID];
-    useForceUpdate();
+    forceUpdate();
   }
 
   function setActiveUpdate(id: UUID | number, field: string, next: string) {
     if (!localStore) return;
 
     if (typeof id === "number") {
-      const key = field as keyof Template;
       (localStore.rolesById[id] as unknown as Record<string, unknown>)[field] =
         next;
     } else {
@@ -214,7 +213,7 @@ export default function TemplateBuilder({
         removePhase(id);
       }
     }
-    useForceUpdate();
+    forceUpdate();
   }
 
   async function saveTemplate(): Promise<void> {
@@ -332,7 +331,7 @@ export default function TemplateBuilder({
       </TabsHeader>
 
       <div>
-        {localStore?.roleIds.map((t, idx) =>
+        {localStore?.roleIds.map(t =>
           t === activeId ? (
             <PanelCard key={`panel-${String(t)}`}>
               {typeof activeId === "number" ? (

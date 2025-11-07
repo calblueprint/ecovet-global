@@ -1,7 +1,6 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
-import { Box, Flex } from "@/styles/containers";
-import { Sans } from "@/styles/fonts";
+import { Flex } from "@/styles/containers";
 
 //----------------------------------------------------------------------------------------
 //-----------------------------------   TABS STYLING   -----------------------------------
