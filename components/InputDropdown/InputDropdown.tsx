@@ -66,7 +66,6 @@ export default function InputDropdown({
       closeMenuOnSelect={false}
       tabSelectsValue={false}
       hideSelectedOptions={false}
-      unstyled
       required={required}
       isDisabled={disabled}
       instanceId={useId()}

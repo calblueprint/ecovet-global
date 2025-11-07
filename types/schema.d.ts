@@ -95,7 +95,16 @@ export interface PromptAnswer {
   prompt_id: UUID;
   prompt_answer: string;
 }
-
+export interface Tag {
+  tag_id: UUID;
+  name: string;
+  user_group_id: UUID;
+  number: number; // (number of templates with this tag)
+}
+export interface TemplateTag {
+  template_id: UUID;
+  tag_id: UUID;
+}
 export interface Invite {
   invite_id: UUID;
   user_group_id: UUID;

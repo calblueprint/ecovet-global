@@ -1,30 +1,46 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { fetchParticipants, fetchRoles } from "@/api/supabase/queries/sessions";
+import {
+  assignRole,
+  fetchParticipants,
+  fetchRoles,
+} from "@/api/supabase/queries/sessions";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
+import { useProfile } from "@/utils/ProfileProvider";
+
+interface ParticipantRole {
+  participant: string | null;
+  role: string | null;
+}
 
 export default function RoleSelectionPage() {
-  const [roles, setRoles] = useState<string[]>([]);
-  const [participants, setParticipants] = useState<string[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedParticipant, setSelectedParticipant] = useState<string | null>(
-    null,
-  );
+  const { profile, loading } = useProfile();
+  const [roles, setRoles] = useState<{ id: string; name: string }[]>([]);
+  const [participants, setParticipants] = useState<
+    { id: string; name: string }[]
+  >([]);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const [roleSelection, setRoleSelection] = useState<ParticipantRole[]>([
+    { participant: null, role: null },
+  ]);
 
   useEffect(() => {
+    if (loading || !profile?.user_group_id) return;
+    const userGroupId = profile.user_group_id;
+
     async function loadData() {
       try {
-        //idk where to get the ids from... so i just used from the supabase
-        const templateId = "0c50c7cf-8e27-41de-9252-e17201ea6f70";
-        const userGroupId = "0b73ed2d-61c3-472e-b361-edaa88f27622";
+        const templateId = "e470268b-6074-435c-b647-85a1c7fff244";
 
         const [rolesData, participantsData] = await Promise.all([
           fetchRoles(templateId),
           fetchParticipants(userGroupId),
         ]);
+
+        console.log("rolesData:", rolesData);
+        console.log("participantsData:", participantsData);
 
         setRoles(rolesData);
         setParticipants(participantsData);
@@ -32,28 +48,103 @@ export default function RoleSelectionPage() {
         console.error("Error fetching roles or participants:", error);
       }
     }
-
     loadData();
-  }, []);
+  }, [loading, profile]);
+
+  const handleChange = async (
+    index: number,
+    field: keyof ParticipantRole,
+    value: string | null,
+  ) => {
+    const newSelection = [...roleSelection];
+    newSelection[index][field] = value;
+    setRoleSelection(newSelection);
+  };
+
+  const addParticipant = () => {
+    setRoleSelection([...roleSelection, { participant: null, role: null }]);
+  };
+
+  const deleteParticipant = (index: number) => {
+    setRoleSelection(prev => prev.toSpliced(index, 1));
+  };
+
+  console.log(roles);
+  console.log(participants);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setMessage("");
+    try {
+      const assignments = roleSelection.filter(
+        p => p.participant && p.role,
+      ) as { participant: string; role: string }[];
+
+      if (assignments.length === 0) {
+        setMessage("Please select at least one participant and role.");
+        setSaving(false);
+        return;
+      }
+
+      await Promise.all(
+        assignments.map(({ participant, role }) =>
+          assignRole(participant, role),
+        ),
+      );
+      setMessage("Roles assigned");
+    } catch (err) {
+      console.error(err);
+      setMessage("Error saving roles");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div>
       <h1>Role Selection</h1>
-      <>
-        <InputDropdown
-          label="Select Role"
-          options={new Set(roles)}
-          placeholder="Choose a role"
-          onChange={setSelectedRole}
-        />
+      {roleSelection.map((pair, index) => {
+        const selectedParticipants = roleSelection
+          .map(p => p.participant)
+          .filter((p, i) => p && i !== index);
 
-        <InputDropdown
-          label="Select Participant"
-          options={new Set(participants)}
-          placeholder="Choose a participant"
-          onChange={setSelectedParticipant}
-        />
-      </>
+        const availableParticipants = participants.filter(
+          p => !selectedParticipants.includes(p.id) && p.id !== profile?.id,
+        );
+
+        return (
+          <div
+            key={index}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "1rem",
+            }}
+          >
+            <InputDropdown
+              label={`Name ${index + 1}`}
+              options={new Map(availableParticipants.map(p => [p.id, p.name]))}
+              placeholder="Select a participant"
+              onChange={val => handleChange(index, "participant", val)}
+            />
+            <InputDropdown
+              label="Role"
+              options={new Map(roles.map(r => [r.id, r.name]))}
+              placeholder="Select a role"
+              onChange={val => handleChange(index, "role", val)}
+            />
+            <button onClick={() => deleteParticipant(index)}> X Delete</button>
+          </div>
+        );
+      })}
+
+      <button onClick={addParticipant}>+ Add Participant</button>
+
+      <button onClick={handleSave} disabled={saving}>
+        {saving ? "Saving..." : "Save"}
+      </button>
+
+      {message && <p>{message}</p>}
     </div>
   );
 }

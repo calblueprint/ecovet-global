@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { UUID } from "crypto";
@@ -18,7 +18,7 @@ export default function UserGroupDetailPage() {
   const [allFacilitators, setAllFacilitators] = useState<Profile[]>([]);
   const [allParticipants, setAllParticipants] = useState<Profile[]>([]);
 
-  async function loadData() {
+  const loadData = useCallback(async () => {
     const [userGroupDetails, groupMembers, groupInvites] = await Promise.all([
       fetchUserGroupById(user_group_id as UUID),
       fetchUserGroupMembers(user_group_id as UUID),
@@ -31,7 +31,7 @@ export default function UserGroupDetailPage() {
 
     console.log(groupMembers);
     console.log(groupInvites);
-  }
+  }, [user_group_id]);
 
   function categorizeMembers(members: Profile[]) {
     const facilitators = members.filter(m => m.user_type === "Facilitator");
@@ -45,7 +45,7 @@ export default function UserGroupDetailPage() {
     if (user_group_id) {
       loadData();
     }
-  }, [user_group_id]);
+  }, [user_group_id, loadData]);
 
   return (
     <div>
