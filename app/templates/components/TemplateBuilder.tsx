@@ -9,8 +9,24 @@ import {
 } from "@/api/supabase/queries/templates";
 import { localStore, Prompt, Role, Template } from "@/types/schema";
 import RoleForm from "./RoleForm";
+import {
+  GhostButton,
+  NameInput,
+  NewTabButton,
+  PanelCard,
+  PanelHeaderRow,
+  PhasesControl,
+  PhasesCount,
+  PhasesLabel,
+  PhasesStepper,
+  StepButton,
+  SubmitButton,
+  TabButton,
+  TabsHeader,
+  TabsLeft,
+  TabsRight,
+} from "./styles";
 import TemplateOverviewForm from "./TemplateOverviewForm";
-import { SubmitButton, GhostButton, NameInput, NewTabButton, PanelCard, PanelHeaderRow, PhasesControl, PhasesCount, PhasesLabel, PhasesStepper, StepButton, TabButton, TabsHeader, TabsLeft, TabsRight } from "./styles";
 
 export default function TemplateBuilder({
   localStore,
@@ -84,7 +100,7 @@ export default function TemplateBuilder({
   function renameRole(role_id: UUID | number, newLabel: string) {
     if (localStore == null) return;
 
-    if (typeof role_id === 'number') {
+    if (typeof role_id === "number") {
       (localStore.rolesById[role_id] as Template).template_name = newLabel;
       update();
     } else {
@@ -271,7 +287,7 @@ export default function TemplateBuilder({
     <div>
       <TabsHeader>
         <TabsLeft>
-          {localStore?.roleIds.map((t) => (
+          {localStore?.roleIds.map(t => (
             <TabButton
               key={String(t)}
               $active={activeId === t}
@@ -289,7 +305,7 @@ export default function TemplateBuilder({
           <PhasesControl
             role="group"
             aria-label="Phases control"
-            onKeyDown={(e) => {
+            onKeyDown={e => {
               if (e.key === "ArrowUp") addPhase();
               if (e.key === "ArrowDown") removePhase();
             }}
@@ -297,7 +313,9 @@ export default function TemplateBuilder({
             <PhasesLabel>Phases:</PhasesLabel>
             <PhasesCount>{localStore?.phaseIds.length ?? 0}</PhasesCount>
             <PhasesStepper>
-              <StepButton aria-label="Increase phases" onClick={addPhase}>▲</StepButton>
+              <StepButton aria-label="Increase phases" onClick={addPhase}>
+                ▲
+              </StepButton>
               <StepButton
                 aria-label="Decrease phases"
                 onClick={() => removePhase()}
@@ -307,7 +325,9 @@ export default function TemplateBuilder({
               </StepButton>
             </PhasesStepper>
           </PhasesControl>
-          <SubmitButton onClick={saveTemplate}>{saving ? "Saving..." : "Submit Template"}</SubmitButton>
+          <SubmitButton onClick={saveTemplate}>
+            {saving ? "Saving..." : "Submit Template"}
+          </SubmitButton>
         </TabsRight>
       </TabsHeader>
 
@@ -318,17 +338,21 @@ export default function TemplateBuilder({
               {typeof activeId === "number" ? (
                 <PanelHeaderRow>
                   <NameInput
-                    value={(localStore.rolesById[t] as Template).template_name ?? ""}
-                    onChange={(e) => renameRole(t, e.target.value)}
+                    value={
+                      (localStore.rolesById[t] as Template).template_name ?? ""
+                    }
+                    onChange={e => renameRole(t, e.target.value)}
                   />
                 </PanelHeaderRow>
               ) : (
                 <PanelHeaderRow>
                   <NameInput
                     value={(localStore.rolesById[t] as Role).role_name}
-                    onChange={(e) => renameRole(t, e.target.value)}
+                    onChange={e => renameRole(t, e.target.value)}
                   />
-                  <GhostButton onClick={() => removeRole(t)}>Remove</GhostButton>
+                  <GhostButton onClick={() => removeRole(t)}>
+                    Remove
+                  </GhostButton>
                 </PanelHeaderRow>
               )}
 
@@ -350,7 +374,7 @@ export default function TemplateBuilder({
                 />
               )}
             </PanelCard>
-          ) : null
+          ) : null,
         )}
       </div>
     </div>

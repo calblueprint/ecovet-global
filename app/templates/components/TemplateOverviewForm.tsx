@@ -16,7 +16,7 @@ export default function TemplteOverviewForm({
           name="template_summary"
           placeholder="da summary"
           value={value.summary ?? ""}
-          onChange={(e) => onChange(1, "summary", e.target.value)}
+          onChange={e => onChange(1, "summary", e.target.value)}
         />
       </FieldCard>
 
@@ -26,7 +26,7 @@ export default function TemplteOverviewForm({
           name="template_setting"
           placeholder="da setting"
           value={value.setting ?? ""}
-          onChange={(e) => onChange(1, "setting", e.target.value)}
+          onChange={e => onChange(1, "setting", e.target.value)}
         />
       </FieldCard>
 
@@ -36,7 +36,7 @@ export default function TemplteOverviewForm({
           name="template_activity"
           placeholder="da current activity"
           value={value.current_activity ?? ""}
-          onChange={(e) => onChange(1, "current_activity", e.target.value)}
+          onChange={e => onChange(1, "current_activity", e.target.value)}
         />
       </FieldCard>
     </FormStack>

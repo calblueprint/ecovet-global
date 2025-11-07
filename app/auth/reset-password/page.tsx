@@ -70,7 +70,8 @@ export default function ResetPassword() {
                   name="password"
                   placeholder="New Password"
                   onChange={e => (
-                    setPassword(e.target.value), setPasswordTouched(true)
+                    setPassword(e.target.value),
+                    setPasswordTouched(true)
                   )}
                   type={showPassword ? "text" : "password"}
                   value={password}

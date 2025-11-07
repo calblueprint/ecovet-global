@@ -1,8 +1,7 @@
 import styled from "styled-components";
-import { Box, Flex } from "@/styles/containers";
 import COLORS from "@/styles/colors";
+import { Box, Flex } from "@/styles/containers";
 import { Sans } from "@/styles/fonts";
-
 
 //----------------------------------------------------------------------------------------
 //-----------------------------------   TABS STYLING   -----------------------------------
@@ -13,13 +12,12 @@ export const TabsHeader = styled(Flex).attrs({
 })`
   width: auto;
   margin-bottom: 8px;
-  border-bottom: 2px solid #D9D9D9;
+  border-bottom: 2px solid #d9d9d9;
   padding-bottom: 10px;
 `;
 
 /* Left cluster: the tabs list + "+ New" */
-export const TabsLeft = styled(Flex).attrs({ $align: 'center', $gap: "8px" })`
-`;
+export const TabsLeft = styled(Flex).attrs({ $align: "center", $gap: "8px" })``;
 
 export const TabButton = styled.button<{ $active?: boolean }>`
   position: relative;
@@ -72,15 +70,17 @@ export const NewTabButton = styled.button`
   font-family: "Public Sans", system-ui, sans-serif;
   font-size: 11px;
   font-weight: 700;
-  color: #0F0F0F;
+  color: #0f0f0f;
 
-  width: 22px;        /* compact square around "+" */
+  width: 22px; /* compact square around "+" */
   height: 22px;
   border-radius: 4px;
   border: 1px dashed transparent;
   background: transparent;
   cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
 `;
 
 /* Divider under tabs */
@@ -93,36 +93,36 @@ export const TabsDivider = styled.div`
 
 /* Right cluster: phase count + up/down */
 export const TabsRight = styled(Flex).attrs({ $align: "center", $gap: "8px" })`
-    width: auto;
-    gap: 12px;
+  width: auto;
+  gap: 12px;
 `;
 
 export const PhasesControl = styled(Flex).attrs({ $align: "center" })`
-  display: inline-flex;                
+  display: inline-flex;
   gap: 8px;
   padding: 10px 20px;
   border: 1px solid ${COLORS.teal};
   border-radius: 4px;
   background: ${COLORS.white};
-  user-select: none;             
+  user-select: none;
 `;
 
 /** “Phases:” label */
 export const PhasesLabel = styled.span`
-    font-size: 11px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: normal;  
-    color: ${COLORS.teal};
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  color: ${COLORS.teal};
 `;
 
 export const PhasesCount = styled.span`
-    text-align: right;
-    font-size: 11px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: normal;  
-    color: ${COLORS.teal};
+  text-align: right;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  color: ${COLORS.teal};
 `;
 
 /** Vertical arrow group */
@@ -145,9 +145,17 @@ export const StepButton = styled.button`
   background: transparent;
   cursor: pointer;
 
-  transition: background 0.15s ease, transform 0.05s ease, border-color 0.15s;
-  &:active { transform: translateY(1px); }
-  &:disabled { opacity: 0.45; cursor: not-allowed; }
+  transition:
+    background 0.15s ease,
+    transform 0.05s ease,
+    border-color 0.15s;
+  &:active {
+    transform: translateY(1px);
+  }
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
 `;
 
 export const SubmitButton = styled.button`
@@ -170,8 +178,6 @@ export const SubmitButton = styled.button`
   cursor: pointer;
 `;
 
-
-
 //----------------------------------------------------------------------------------------
 //-----------------------------------   FORM STYLING   -----------------------------------
 //----------------------------------------------------------------------------------------
@@ -183,7 +189,10 @@ export const PanelCard = styled(Flex).attrs({ $direction: "column" })`
 `;
 
 /* Row with name input and remove button */
-export const PanelHeaderRow = styled(Flex).attrs({ $justify: "between", $align: "center" })`
+export const PanelHeaderRow = styled(Flex).attrs({
+  $justify: "between",
+  $align: "center",
+})`
   margin-bottom: 8px;
 `;
 
@@ -194,7 +203,9 @@ export const NameInput = styled.input`
   border-radius: 4px;
   outline: none;
   width: 320px;
-  &:focus { border-color: ${COLORS.darkElectricBlue}; }
+  &:focus {
+    border-color: ${COLORS.darkElectricBlue};
+  }
 `;
 
 /* Ghosty small button */
@@ -204,12 +215,19 @@ export const GhostButton = styled.button`
   border-radius: 4px;
   background: #fff;
   cursor: pointer;
-  transition: background .15s ease, border-color .15s ease;
-  &:hover { background: #f8f8f8; }
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+  &:hover {
+    background: #f8f8f8;
+  }
 `;
 
 /* Vertical form spacing */
-export const FormStack = styled(Flex).attrs({ $direction: "column", $gap: "40px" })`
+export const FormStack = styled(Flex).attrs({
+  $direction: "column",
+  $gap: "40px",
+})`
   padding-right: 150px;
 `;
 
@@ -221,10 +239,9 @@ export const FieldCard = styled.fieldset`
   margin-bottom: 10px;
 `;
 
-export const PhaseCard = styled.div`
-`;
+export const PhaseCard = styled.div``;
 
-export const PhaseHeader = styled(Flex).attrs({$align: "center",})`
+export const PhaseHeader = styled(Flex).attrs({ $align: "center" })`
   gap: 4px;
   flex-wrap: nowrap;
   padding-bottom: 12px;
@@ -236,7 +253,7 @@ export const RemovePhaseButton = styled.button`
   width: 32px;
   height: 32px;
 
-  flex: 0 0 auto;         /* don't grow or shrink */
+  flex: 0 0 auto; /* don't grow or shrink */
   padding: 0;
   background: #fff;
   border: none;
@@ -253,9 +270,9 @@ export const RemoveQuestionButton = styled.button`
   cursor: pointer;
   white-space: nowrap;
 
-  padding: 4px 8px;     /* tighter padding */
-  line-height: 1;       /* removes default tall line box */
-  font-size: 14px;      /* optional: consistent text sizing */
+  padding: 4px 8px; /* tighter padding */
+  line-height: 1; /* removes default tall line box */
+  font-size: 14px; /* optional: consistent text sizing */
 `;
 
 /** Legend text */
@@ -263,7 +280,7 @@ export const FieldLegend = styled.legend`
   font-family: "Public Sans", system-ui, sans-serif;
   font-size: 14px;
   font-weight: 500;
-  color: #C7C6C3;
+  color: #c7c6c3;
 `;
 
 export const QuestionCard = styled.fieldset`
@@ -282,9 +299,11 @@ export const BigInput = styled.input.attrs({ type: "text" })`
   resize: none;
   font: inherit;
   line-height: 1.4;
-  &:focus { outline: none;
-  box-shadow: none;
-  border-color: inherit; }
+  &:focus {
+    outline: none;
+    box-shadow: none;
+    border-color: inherit;
+  }
 `;
 
 /* Section heading like “Phase 1” */
@@ -295,9 +314,9 @@ export const SectionH2 = styled.h2`
   margin: 0;
 
   /* key bits to stop growing */
-  display: inline-flex;   /* or inline-block */
+  display: inline-flex; /* or inline-block */
   flex: 0 0 auto;
-  width: max-content;     /* or fit-content */
+  width: max-content; /* or fit-content */
   white-space: nowrap;
 
   padding: 2px 8px;

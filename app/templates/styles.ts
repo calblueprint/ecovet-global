@@ -1,12 +1,12 @@
 import styled from "styled-components";
-import { Flex } from "@/styles/containers";
 import COLORS from "@/styles/colors";
+import { Flex } from "@/styles/containers";
 import { Sans } from "@/styles/fonts";
 
 export const TemplateMainBox = styled(Flex).attrs({
   $direction: "column",
 })`
-  width: calc(100vw - 300px);   
+  width: calc(100vw - 300px);
   min-height: 100vh;
   margin: 80px 150px 40px 150px;
   box-sizing: border-box;
@@ -23,8 +23,7 @@ export const NewTemplateHeader = styled.h1`
 
 export const NewTemplateDiv = styled(Flex).attrs({
   $direction: "column",
-})`
-`;
+})``;
 
 export const NewTemplateButton = styled.button`
   display: inline-flex;
@@ -39,7 +38,9 @@ export const NewTemplateButton = styled.button`
   font-weight: 500;
   border: none;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.1s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.1s ease;
 
   width: auto;
   align-self: flex-start;

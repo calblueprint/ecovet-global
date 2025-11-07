@@ -3,7 +3,12 @@
 import { useState } from "react";
 import { localStore, Template } from "@/types/schema";
 import TemplateBuilder from "./components/TemplateBuilder";
-import { NewTemplateButton, NewTemplateHeader, TemplateMainBox, NewTemplateDiv } from "./styles";
+import {
+  NewTemplateButton,
+  NewTemplateDiv,
+  NewTemplateHeader,
+  TemplateMainBox,
+} from "./styles";
 
 export const createInitialStore = (): localStore => {
   const templateID =
@@ -55,12 +60,21 @@ export default function NewTemplatePage() {
 
   return (
     <TemplateMainBox>
-      <NewTemplateHeader>{(newTemp?.rolesById?.[1] as Template)?.template_name ?? "Create A New Template"}</NewTemplateHeader>
+      <NewTemplateHeader>
+        {(newTemp?.rolesById?.[1] as Template)?.template_name ??
+          "Create A New Template"}
+      </NewTemplateHeader>
       <NewTemplateDiv>
         {isNew ? (
-          <TemplateBuilder localStore={newTemp} onFinish={resetTemplate} update={useForceUpdate} />
+          <TemplateBuilder
+            localStore={newTemp}
+            onFinish={resetTemplate}
+            update={useForceUpdate}
+          />
         ) : (
-          <NewTemplateButton onClick={newTemplate}>New Template</NewTemplateButton>
+          <NewTemplateButton onClick={newTemplate}>
+            New Template
+          </NewTemplateButton>
         )}
       </NewTemplateDiv>
     </TemplateMainBox>
