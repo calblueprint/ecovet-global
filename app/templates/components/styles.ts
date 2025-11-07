@@ -218,6 +218,44 @@ export const FieldCard = styled.fieldset`
   border: 1px solid ${COLORS.black20};
   border-radius: 4px;
   padding: 10px;
+  margin-bottom: 10px;
+`;
+
+export const PhaseCard = styled.div`
+`;
+
+export const PhaseHeader = styled(Flex).attrs({$align: "center",})`
+  gap: 4px;
+  flex-wrap: nowrap;
+  padding-bottom: 12px;
+`;
+
+export const RemovePhaseButton = styled.button`
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+
+  flex: 0 0 auto;         /* don't grow or shrink */
+  padding: 0;
+  background: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+
+  font-size: 20px;
+`;
+
+export const RemoveQuestionButton = styled.button`
+  border: 1px solid ${COLORS.black20};
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+
+  padding: 4px 8px;     /* tighter padding */
+  line-height: 1;       /* removes default tall line box */
+  font-size: 14px;      /* optional: consistent text sizing */
 `;
 
 /** Legend text */
@@ -228,6 +266,14 @@ export const FieldLegend = styled.legend`
   color: #C7C6C3;
 `;
 
+export const QuestionCard = styled.fieldset`
+  display: flex;
+  position: relative;
+  border: 1px solid ${COLORS.black20};
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 10px;
+`;
 /* Big comfortable text area (used for description/prompts) */
 export const BigInput = styled.input.attrs({ type: "text" })`
   width: calc(100% - 20px);
@@ -245,7 +291,15 @@ export const BigInput = styled.input.attrs({ type: "text" })`
 export const SectionH2 = styled.h2`
   font-family: "Public Sans", system-ui, sans-serif;
   font-size: 24px;
-  font-style: normal;
   font-weight: 700;
-  line-height: normal;
+  margin: 0;
+
+  /* key bits to stop growing */
+  display: inline-flex;   /* or inline-block */
+  flex: 0 0 auto;
+  width: max-content;     /* or fit-content */
+  white-space: nowrap;
+
+  padding: 2px 8px;
+  line-height: 1.1;
 `;

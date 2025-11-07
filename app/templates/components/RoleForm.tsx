@@ -1,6 +1,6 @@
 import { UUID } from "crypto";
 import { roleFormInput, RolePhase } from "@/types/schema";
-import { BigInput, FieldCard, FieldLegend, FormStack, GhostButton, SectionH2 } from "./styles";
+import { BigInput, FieldCard, FieldLegend, FormStack, GhostButton, PhaseCard, PhaseHeader, QuestionCard, RemovePhaseButton, RemoveQuestionButton, SectionH2 } from "./styles";
 import { Flex } from "@/styles/containers";
 
 export default function RoleForm({
@@ -30,8 +30,17 @@ export default function RoleForm({
       </FieldCard>
 
       {rolePhases.map((rolePhase, i) => (
-        <div key={rolePhase.role_phase_id}>
-          <SectionH2>Phase {i + 1}</SectionH2>
+        <PhaseCard key={rolePhase.role_phase_id}>
+          <PhaseHeader>
+            <SectionH2>Phase {i + 1}</SectionH2>
+            <RemovePhaseButton
+              onClick={() =>
+                onChange(rolePhase.phase_id, "remove_phase", rolePhase.phase_id)
+              }
+            >
+              🗑️
+            </RemovePhaseButton>
+          </PhaseHeader>
 
           <FieldCard>
             <FieldLegend>Description</FieldLegend>
@@ -47,7 +56,7 @@ export default function RoleForm({
 
           {/* Prompts list */}
           {(value.promptIndex[rolePhase.role_phase_id] ?? []).map((promptID, j) => (
-            <FieldCard key={promptID}>
+            <QuestionCard key={promptID}>
               <FieldLegend>Question {j + 1}</FieldLegend>
               <BigInput
                 name="prompt"
@@ -57,16 +66,14 @@ export default function RoleForm({
                   onChange(promptID, "prompt_text", e.target.value)
                 }
               />
-              <Flex $mt="10px">
-                <GhostButton
-                  onClick={() =>
-                    onChange(promptID, "remove_prompt", rolePhase.role_phase_id)
-                  }
-                >
-                  - Remove
-                </GhostButton>
-              </Flex>
-            </FieldCard>
+              <RemoveQuestionButton
+                onClick={() =>
+                  onChange(promptID, "remove_prompt", rolePhase.role_phase_id)
+                }
+              >
+                Remove
+              </RemoveQuestionButton>
+            </QuestionCard>
           ))}
 
           <GhostButton
@@ -76,17 +83,7 @@ export default function RoleForm({
           >
             + New Prompt
           </GhostButton>
-
-          <Flex $mt="12px">
-            <GhostButton
-              onClick={() =>
-                onChange(rolePhase.phase_id, "remove_phase", rolePhase.phase_id)
-              }
-            >
-              🗑️
-            </GhostButton>
-          </Flex>
-        </div>
+        </PhaseCard>
       ))}
     </FormStack>
   );
