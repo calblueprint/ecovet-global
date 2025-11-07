@@ -14,6 +14,7 @@ export type StatusType = "Pending" | "Accepted" | "Cancelled";
 export interface UserGroup {
   user_group_id: UUID; // user_group_id
   user_group_name: string;
+  num_users: number;
 }
 
 export interface User {
@@ -39,7 +40,6 @@ export interface Profile {
   country: string;
   org_role: string;
 }
-
 export interface Role {
   role_id: UUID; // role_id
   role_name: string;
@@ -107,8 +107,9 @@ export interface TemplateTag {
 }
 export interface Invite {
   invite_id: UUID;
-  email: string;
   user_group_id: UUID;
-  user_type: UserType;
-  status: StatusType;
+  invited_by_user_id: UUID;
+  email: string;
+  user_type: string;
+  status: string;
 }

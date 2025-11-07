@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   assignTagToTemplate,
   createTag,
@@ -65,6 +66,7 @@ const UserGroupsPage = () => {
       if (fetchedUserGrps) {
         setUserGroups(fetchedUserGrps);
       }
+      console.log(fetchedUserGrps);
     }
 
     loadUserGroups();
@@ -73,9 +75,21 @@ const UserGroupsPage = () => {
   return (
     <div>
       <h1>User Groups</h1>
-      {userGroups.map((usergrp, index) => (
-        <div key={index}>{usergrp.user_group_name}</div>
-      ))}
+      <ul>
+        {userGroups.map(group => (
+          <li key={group.user_group_id}>
+            <Link href={`/user-groups/${group.user_group_id}`}>
+              {group.user_group_name}
+            </Link>
+
+            <span>{group.num_users}</span>
+          </li>
+        ))}
+      </ul>
+
+      <Link href={"/"}>
+        <button>Invite</button>
+      </Link>
     </div>
   );
 };

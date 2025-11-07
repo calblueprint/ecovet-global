@@ -1,3 +1,4 @@
+import { UUID } from "crypto";
 import supabase from "@/api/supabase/createClient";
 
 export async function submitNewFacilitator(
@@ -19,5 +20,21 @@ export async function submitNewFacilitator(
 
   if (error) {
     console.error("Error inserting new facilitator:", error.message);
+  }
+}
+
+export async function fetchInvites(user_group_id: UUID) {
+  try {
+    // Pull data
+    const { data, error } = await supabase
+      .from("invite")
+      .select("*")
+      .eq("user_group_id", user_group_id);
+
+    if (error) throw error;
+
+    return data;
+  } catch (error) {
+    console.log("Error fetching invites from supabase API: ", error);
   }
 }
