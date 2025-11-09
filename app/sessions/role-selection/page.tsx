@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import {
   assignRole,
+  assignSession,
+  createSession,
   fetchParticipants,
   fetchRoles,
 } from "@/api/supabase/queries/sessions";
@@ -22,6 +24,8 @@ export default function RoleSelectionPage() {
   >([]);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [assignedRoles, setAssign] = useState(false);
+  const [assignMessage, setAssignMessage] = useState("");
   const [roleSelection, setRoleSelection] = useState<ParticipantRole[]>([
     { participant: null, role: null },
   ]);
@@ -69,8 +73,35 @@ export default function RoleSelectionPage() {
     setRoleSelection(prev => prev.toSpliced(index, 1));
   };
 
-  console.log(roles);
-  console.log(participants);
+  const handleAssignSession = async () => {
+    const templateId = "e470268b-6074-435c-b647-85a1c7fff244";
+    if (loading || !profile?.user_group_id) return;
+    //const userGroupId = '0b73ed2d-61c3-472e-b361-edaa88f27622';
+    const userGroupId = profile.user_group_id;
+    const sessionId = await createSession(templateId, userGroupId);
+
+    setAssign(true);
+    setAssignMessage("");
+    try {
+      const assignments = roleSelection.filter(
+        p => p.participant && p.role,
+      ) as { participant: string; role: string }[];
+
+      assignSession(profile.id, sessionId);
+      await Promise.all(
+        assignments.map(({ participant }) =>
+          assignSession(participant, sessionId),
+        ),
+      );
+
+      setAssignMessage("Sessions added to roles");
+    } catch (err) {
+      console.error(err);
+      setAssignMessage("Error adding session to roles");
+    } finally {
+      setAssign(false);
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -144,7 +175,12 @@ export default function RoleSelectionPage() {
         {saving ? "Saving..." : "Save"}
       </button>
 
+      <button onClick={handleAssignSession} disabled={saving}>
+        {assignedRoles ? "Adding Session.." : "Next"}
+      </button>
+
       {message && <p>{message}</p>}
+      {assignMessage && <p>{assignMessage}</p>}
     </div>
   );
 }
