@@ -8,6 +8,8 @@ import {
   AddParticipantButton,
   AddParticipantFormDiv,
   AddParticipantsMain,
+  ErrorMessage,
+  ErrorMessageDiv,
   ParticipantEmailDiv,
   ParticipantEmailInput,
   SubmitButton,
@@ -22,6 +24,7 @@ export default function AddParticipants() {
   const searchParams = useSearchParams();
   const userGroupId = searchParams.get("userGroupId");
   const [participantEmails, setParticipantEmails] = useState<string[]>([""]);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const handleInputChange = (
     event: ChangeEvent<HTMLInputElement>,
@@ -37,11 +40,14 @@ export default function AddParticipants() {
   };
 
   const onSubmitButtonClick = () => {
-    participantEmails.map(email => {
-      if (isEmailValid(email)) {
-        submitNewInvite(email, String(userGroupId), "Participant");
-      } else {
-        console.error("invalid email format");
+    participantEmails.map(async email => {
+      const error = await submitNewInvite(
+        email,
+        String(userGroupId),
+        "Participant",
+      );
+      if (error) {
+        setErrorMessage(error.message);
       }
     });
   };
@@ -49,6 +55,9 @@ export default function AddParticipants() {
   return (
     <AddParticipantsMain>
       <AddParticipantFormDiv>
+        <ErrorMessageDiv $hasError={errorMessage}>
+          <ErrorMessage>{errorMessage}</ErrorMessage>
+        </ErrorMessageDiv>
         <ParticipantEmailDiv>
           {participantEmails.map((email, index) => (
             <ParticipantEmailInput

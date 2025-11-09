@@ -33,3 +33,12 @@ export const SubmitButton = styled.button`
   width: 5rem;
   height: 1.5rem;
 `;
+
+export const ErrorMessageDiv = styled.div<{ $hasError: string }>`
+  display: ${({ $hasError }) => ($hasError == "" ? "flex" : "none")};
+  flex-direction: column;
+`;
+
+export const ErrorMessage = styled.p`
+  color: red;
+`;
