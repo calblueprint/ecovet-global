@@ -3,7 +3,6 @@
 import { ChangeEvent, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { submitNewInvite } from "@/api/supabase/queries/invites";
-import { UserType } from "@/types/schema";
 import {
   AddParticipantButton,
   AddParticipantFormDiv,
@@ -24,7 +23,7 @@ export default function AddParticipants() {
   const searchParams = useSearchParams();
   const userGroupId = searchParams.get("userGroupId");
   const [participantEmails, setParticipantEmails] = useState<string[]>([""]);
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [errorMessages, setErrorMessages] = useState<string[]>([""]);
 
   const handleInputChange = (
     event: ChangeEvent<HTMLInputElement>,
@@ -40,14 +39,16 @@ export default function AddParticipants() {
   };
 
   const onSubmitButtonClick = () => {
-    participantEmails.map(async email => {
+    participantEmails.map(async (email, index) => {
       const error = await submitNewInvite(
         email,
         String(userGroupId),
         "Participant",
       );
-      if (error) {
-        setErrorMessage(error.message);
+      if (error?.error) {
+        const updated_errors = [...errorMessages];
+        updated_errors[index] = error.message;
+        setErrorMessages(updated_errors);
       }
     });
   };
@@ -55,18 +56,20 @@ export default function AddParticipants() {
   return (
     <AddParticipantsMain>
       <AddParticipantFormDiv>
-        <ErrorMessageDiv $hasError={errorMessage}>
-          <ErrorMessage>{errorMessage}</ErrorMessage>
-        </ErrorMessageDiv>
         <ParticipantEmailDiv>
           {participantEmails.map((email, index) => (
-            <ParticipantEmailInput
-              key={index}
-              value={email}
-              onChange={e => handleInputChange(e, index)}
-              placeholder="Enter facilitator email"
-              required
-            ></ParticipantEmailInput>
+            <ParticipantEmailDiv>
+              <ErrorMessageDiv $hasError={errorMessages[index]}>
+                <ErrorMessage>{errorMessages[index]}</ErrorMessage>
+              </ErrorMessageDiv>
+              <ParticipantEmailInput
+                key={index}
+                value={email}
+                onChange={e => handleInputChange(e, index)}
+                placeholder="Enter facilitator email"
+                required
+              ></ParticipantEmailInput>
+            </ParticipantEmailDiv>
           ))}
         </ParticipantEmailDiv>
         <AddParticipantButton onClick={onAddParticipantButtonClick}>

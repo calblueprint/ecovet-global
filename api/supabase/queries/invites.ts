@@ -70,8 +70,7 @@ export async function checkFacilitatorInInvite(
     .select("*")
     .eq("email", email)
     .eq("user_group_id", user_group_id)
-    .eq("user_type", "Facilitator")
-    .single();
+    .eq("user_type", "Facilitator");
   if (error) {
     console.error("Error fetching invite by email:", error.message);
     return false;
@@ -90,9 +89,7 @@ export async function checkUserInProfile(
   var { data, error } = await supabase
     .from("users")
     .select("id")
-    .eq("email", email)
-    .single();
-
+    .eq("email", email);
   if (error) {
     console.error("Error fetching user_id from auth:", error.message);
   }
@@ -104,14 +101,12 @@ export async function checkUserInProfile(
       .from("profile")
       .select("user_group_id" as "id")
       .eq("id", user_id)
-      .eq("user_type", "Facilitator")
-      .single();
+      .eq("user_type", "Facilitator");
   } else {
     var { data, error } = await supabase
       .from("profile")
       .select("user_group_id" as "id")
-      .eq("id", user_id)
-      .single();
+      .eq("id", user_id);
   }
 
   if (error) {

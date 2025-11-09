@@ -35,7 +35,7 @@ export const SubmitButton = styled.button`
 `;
 
 export const ErrorMessageDiv = styled.div<{ $hasError: string }>`
-  display: ${({ $hasError }) => ($hasError == "" ? "flex" : "none")};
+  display: ${({ $hasError }) => ($hasError == "" ? "none" : "flex")};
   flex-direction: column;
 `;
 
