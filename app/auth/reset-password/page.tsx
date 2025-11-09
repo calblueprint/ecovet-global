@@ -16,7 +16,15 @@ import {
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
 
+  const isEmailValid = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleResetPassword = async () => {
+    if (!isEmailValid(email)) {
+      throw new Error("Please enter a valid email address");
+    }
     const { error } = await sendPasswordResetEmail(email);
     if (error) {
       throw new Error("An error occurred: " + error);
@@ -44,7 +52,9 @@ export default function ResetPassword() {
               name="email"
             />
           </EmailAddressDiv>
-          <Button onClick={handleResetPassword}>Send</Button>
+          <Button onClick={handleResetPassword} disabled={!isEmailValid(email)}>
+            Send
+          </Button>
         </Container>
       </Main>
     </>

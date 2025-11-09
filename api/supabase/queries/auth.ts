@@ -7,9 +7,7 @@ export async function sendPasswordResetEmail(email: string) {
     });
     if (error) {
       console.error("Supabase error:", error);
-      alert(JSON.stringify(error, null, 2));
-    } else {
-      alert("Password reset email sent!");
+      return { success: false, error };
     }
     return { success: true };
   } catch (error) {
