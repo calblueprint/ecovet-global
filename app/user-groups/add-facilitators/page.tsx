@@ -7,6 +7,8 @@ import {
   AddFacilitatorButton,
   AddFacilitatorFormDiv,
   AddFacilitatorsMain,
+  ErrorMessage,
+  ErrorMessageDiv,
   FacilitatorEmailDiv,
   FacilitatorEmailInput,
   SubmitButton,
@@ -21,6 +23,7 @@ export default function AddFacilitators() {
   const searchParams = useSearchParams();
   const userGroupId = searchParams.get("userGroupId");
   const [facilitatorEmails, setFacilitatorEmails] = useState<string[]>([""]);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const handleInputChange = (
     event: ChangeEvent<HTMLInputElement>,
@@ -36,11 +39,18 @@ export default function AddFacilitators() {
   };
 
   const onSubmitButtonClick = () => {
-    facilitatorEmails.map(email => {
+    facilitatorEmails.map(async email => {
       if (isEmailValid(email)) {
-        submitNewInvite(email, String(userGroupId), "Facilitator");
+        const error = await submitNewInvite(
+          email,
+          String(userGroupId),
+          "Facilitator",
+        );
+        if (error) {
+          setErrorMessage(error.message);
+        }
       } else {
-        console.error("invalid email format");
+        setErrorMessage("Invalid email format");
       }
     });
   };
@@ -48,6 +58,9 @@ export default function AddFacilitators() {
   return (
     <AddFacilitatorsMain>
       <AddFacilitatorFormDiv>
+        <ErrorMessageDiv $hasError={errorMessage}>
+          <ErrorMessage>{errorMessage}</ErrorMessage>
+        </ErrorMessageDiv>
         <FacilitatorEmailDiv>
           {facilitatorEmails.map((email, index) => (
             <FacilitatorEmailInput
