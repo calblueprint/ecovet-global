@@ -107,12 +107,6 @@ export const EmailAddressDiv = styled.div`
   line-height: normal;
 `;
 
-export const NewEmail = styled.div`
-  width: 100%;
-  padding: 2.25rem, 0rem;
-  height: fit-content;
-`;
-
 export const PasswordDiv = styled.div`
   width: 100%;
   height: fit-content;
