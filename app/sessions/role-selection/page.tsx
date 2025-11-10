@@ -76,7 +76,6 @@ export default function RoleSelectionPage() {
   const handleAssignSession = async () => {
     const templateId = "e470268b-6074-435c-b647-85a1c7fff244";
     if (loading || !profile?.user_group_id) return;
-    //const userGroupId = '0b73ed2d-61c3-472e-b361-edaa88f27622';
     const userGroupId = profile.user_group_id;
     const sessionId = await createSession(templateId, userGroupId);
 
