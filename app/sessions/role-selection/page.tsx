@@ -86,7 +86,7 @@ export default function RoleSelectionPage() {
         p => p.participant && p.role,
       ) as { participant: string; role: string }[];
 
-      assignSession(profile.id, sessionId);
+      await assignSession(profile.id, sessionId);
       await Promise.all(
         assignments.map(({ participant }) =>
           assignSession(participant, sessionId),

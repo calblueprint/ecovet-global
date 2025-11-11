@@ -41,14 +41,13 @@ export async function assignRole(userId: string, roleId: string) {
 }
 
 export async function assignSession(userId: string, sessionId: string) {
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("profile")
     .update({ session_id: sessionId })
     .eq("id", userId);
   if (error) {
     throw error;
   }
-  return data;
 }
 
 export async function createSession(templateId: string, userGroupId: string) {
