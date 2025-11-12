@@ -39,3 +39,31 @@ export async function assignRole(userId: string, roleId: string) {
   }
   return data;
 }
+
+export async function assignSession(userId: string, sessionId: string) {
+  const { error } = await supabase
+    .from("profile")
+    .update({ session_id: sessionId })
+    .eq("id", userId);
+  if (error) {
+    throw error;
+  }
+}
+
+export async function createSession(templateId: string, userGroupId: string) {
+  const id = crypto.randomUUID();
+  const { data, error } = await supabase
+    .from("session")
+    .insert([
+      {
+        session_id: id,
+        template_id: templateId,
+        user_group_id: userGroupId,
+        is_async: false,
+      },
+    ])
+    .select("session_id");
+
+  if (error) throw error;
+  return data[0].session_id;
+}
