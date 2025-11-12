@@ -17,7 +17,7 @@ type Template = {
 
 const SearchBar: React.FC = () => {
   const { profile } = useProfile();
-  const user_group_id = profile?.user_group_id || null;
+  const user_group_id = profile?.user_group_id ?? "";
   const [searchInput, setSearchInput] = useState("");
   const [templates, setTemplates] = useState<Template[]>([]);
   const [filteredTemplates, setFilteredTemplates] = useState<Template[]>([]);
@@ -25,12 +25,17 @@ const SearchBar: React.FC = () => {
   // Fetch all templates
   useEffect(() => {
     const loadTemplates = async () => {
-      const allTemplates = await fetchAllTemplates();
-      setTemplates(allTemplates || []);
-      setFilteredTemplates(allTemplates || []);
+      const allTemplates = (await fetchAllTemplates()) || [];
+      const subsetTemplates = allTemplates.filter(
+        template =>
+          template.user_group_id === user_group_id ||
+          template.accessible_to_all === true,
+      );
+      setTemplates(subsetTemplates);
+      setFilteredTemplates(subsetTemplates);
     };
     loadTemplates();
-  }, []);
+  }, [user_group_id]);
 
   // Filter based on search.
   useEffect(() => {
@@ -41,13 +46,14 @@ const SearchBar: React.FC = () => {
 
     const filtered = templates.filter(template => {
       const matchesName = template.template_name
+        .trim()
         .toLowerCase()
         .includes(searchInput.toLowerCase());
       const matchesGroup =
         template.user_group_id === user_group_id ||
         template.accessible_to_all === true;
 
-      return matchesName || matchesGroup;
+      return matchesName && matchesGroup;
     });
 
     setFilteredTemplates(filtered);
