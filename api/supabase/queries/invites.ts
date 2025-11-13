@@ -23,7 +23,7 @@ export async function submitNewInvite(
       invite_id: id,
       user_group_id: user_group_id,
       email: email,
-      user_type: user_type,
+      user_type: isFacilitator ? "Facilitator" : "Participant",
       status: "Pending",
     },
     { onConflict: "invite_id" },
@@ -174,5 +174,20 @@ export async function changeToFacilitator(user_id: UUID): Promise<void> {
       "Error updating profile user_type to Facilitator:",
       error.message,
     );
+  }
+}
+
+export async function fetchInvites(user_group_id: UUID) {
+  try {
+    const { data, error } = await supabase
+      .from("invite")
+      .select("*")
+      .eq("user_group_id", user_group_id);
+
+    if (error) throw error;
+
+    return data;
+  } catch (error) {
+    console.log("Error fetching invites from supabase API: ", error);
   }
 }
