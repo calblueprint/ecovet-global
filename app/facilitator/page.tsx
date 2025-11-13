@@ -1,19 +1,20 @@
-import { CSSProperties } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import BPLogo from "@/assets/images/bp-logo.png";
+"use client";
 
-export default function Home() {
+import { CSSProperties } from "react";
+import Link from "next/link";
+import { H2 } from "@/styles/text";
+
+export default function FacilitatorFlows() {
   return (
     <main style={mainStyles}>
-      <Image style={imageStyles} src={BPLogo} alt="Blueprint Logo" />
-      <p>Open up app/page.tsx to get started!</p>
-      <Link href="/auth/login-test">
-        <button>Sign-in/Sign-up For Testing</button>
+      <H2>Facilitator Flows</H2>
+      <Link href="/templates/template-list">
+        <button>View All Templates</button>
       </Link>
-      <Link href="/auth/signup">
-        <button>Sign Up</button>
+      <Link href="/templates">
+        <button>Add New Template</button>
       </Link>
+      <button>Add a New Participant (not merged)</button>
     </main>
   );
 }
