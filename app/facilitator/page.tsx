@@ -29,9 +29,3 @@ const mainStyles: CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
 };
-
-const imageStyles: CSSProperties = {
-  width: "80px",
-  height: "80px",
-  marginBottom: "0.5rem",
-};

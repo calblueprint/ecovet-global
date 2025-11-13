@@ -2,14 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  assignTagToTemplate,
-  createTag,
-  getAllTags,
-  getTagsForTemplate,
-  getTemplatesforTag,
-  removeTagFromTemplate,
-} from "@/actions/supabase/queries/tag";
 import { fetchUserGroups } from "@/api/supabase/queries/user-groups";
 import { UserGroup } from "@/types/schema";
 
