@@ -1,34 +1,97 @@
-import { Tag } from "./Tag";
-import { StyledTagCreator } from "./styles";
-import { useState, useEffect } from "react";
-import Tag
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import { UUID } from "crypto";
+import { createTag, getAllTags } from "@/actions/supabase/queries/tag";
+import img from "@/assets/images/NewTagPlus.png";
+import COLORS from "@/styles/colors";
+import { Tag } from "@/types/schema";
+import { AddNewTagPlus, NewTag, SidebarTag, StyledTagCreator } from "./styles";
+import { TagComponent } from "./Tag";
 
-export function TagCreator() {
-    const [tags, setTags] = useState<{ color: string; name: string }[]>([]);
+type TagCreatorProps = {
+  user_group_id: UUID;
+  onTagClick: (tag_id: UUID) => void;
+  selectedTagId: UUID | null;
+};
 
-    // Pull data from server or DB
-    function getTags() {
-        const pulledTags = [
-            { color: "teal", name: "meow" },
-            { color: "orange", name: "meow1" },
-        ];
+type ColorKey = keyof typeof COLORS;
 
-        setTags(pulledTags);
-    }
+export function TagCreator({
+  user_group_id,
+  onTagClick,
+  selectedTagId,
+}: TagCreatorProps) {
+  // Switch to use Tag type from schema
+  const [tags, setTags] = useState<Tag[]>([]);
 
-    useEffect(() => {
-        getTags();
-    }, []);
+  // Pull data from server or DB
+  async function getTags() {
+    const pulledTags = await getAllTags(user_group_id);
 
-    return (
-        <StyledTagCreator>
-            {tags.map((tag) => (
-                <Tag 
-                    key={tag.name}
-                    color={tag.color as any} 
-                    name={tag.name} 
-                />
-            ))}
-        </StyledTagCreator>
-    );
+    // const pulledTags = [
+    //     {
+    //       tag_id: "092fa7b1-7509-4f09-86e6-62a5223113cb" as UUID,
+    //       name: "meow",
+    //       user_group_id: "0b73ed2d-61c3-472e-b361-edaa88f27622" as UUID,
+    //       number: 1, // (number of templates with this tag)
+    //       color: "teal" // might want to change to check COLOR type
+    //     },
+    //     {
+    //       tag_id: "092fa7b1-7509-4f09-86e6-62a5223113cd" as UUID,
+    //       name: "meow1",
+    //       user_group_id: "0b73ed2d-61c3-472e-b361-edaa88f27622" as UUID,
+    //       number: 1, // (number of templates with this tag)
+    //       color: "orange" // might want to change to check COLOR type
+    //     }
+    // ];
+
+    setTags(pulledTags);
+  }
+
+  async function addNewTag() {
+    const new_tag_id = await createTag({
+      name: "New tag",
+      user_group_id: user_group_id,
+      number: 10,
+      color: "teal",
+    });
+
+    // Construct the full Tag manually
+    const newTag: Tag = {
+      tag_id: new_tag_id,
+      name: "New tag",
+      user_group_id: user_group_id,
+      number: 10,
+      color: "teal",
+    };
+
+    // 2) Add returned tag to UI state
+    setTags(prev => [...prev, newTag]);
+  }
+
+  useEffect(() => {
+    getTags();
+  }, []);
+
+  return (
+    <StyledTagCreator>
+      <NewTag onClick={addNewTag}>
+        <AddNewTagPlus>
+          <Image alt="add new tag plus icon" src={img} />
+        </AddNewTagPlus>
+        New Tag
+      </NewTag>
+      {tags.map(tag => (
+        <SidebarTag key={tag.tag_id} $isSelected={selectedTagId === tag.tag_id}>
+          <TagComponent
+            color={tag.color as ColorKey}
+            name={tag.name}
+            tag_id={tag.tag_id}
+            sidebar={true}
+            onClick={() => onTagClick(tag.tag_id)}
+          />
+        </SidebarTag>
+      ))}
+    </StyledTagCreator>
+  );
 }

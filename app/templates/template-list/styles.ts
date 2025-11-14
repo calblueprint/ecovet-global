@@ -2,6 +2,25 @@ import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
 
+export const PageDiv = styled.main`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+`;
+
+export const SidebarDiv = styled.main`
+  display: flex;
+  flex-direction: column;
+  width: 180px;
+  height: 976px;
+  padding: 15px;
+  justify-content: center;
+  align-items: flex-start;
+  flex-shrink: 0;
+  background: ${COLORS["oat_light"]};
+`;
+
 export const MainDiv = styled.main`
   display: flex;
   flex-direction: column;
@@ -85,4 +104,21 @@ export const TemplateList = styled.ul`
   font-size: 12px;
   font-weight: 500;
   font-color: ${COLORS.black70};
+`;
+
+export const AssociatedTags = styled.span`
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+`;
+
+export const TemplateTag = styled.span`
+  border-radius: 4px;
+  background: var(--Oat-Medium, #eee);
+  padding-left: 12px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
 `;
