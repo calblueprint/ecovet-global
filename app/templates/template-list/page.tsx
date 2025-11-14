@@ -95,6 +95,7 @@ const SearchBar: React.FC = () => {
           value={searchInput}
           onChange={handleChange}
           placeholder="Search templates..."
+          style={{ fontSize: "12px", fontWeight: "500" }}
         />
       </SearchBarStyled>
       <Heading3>Browse templates</Heading3>
