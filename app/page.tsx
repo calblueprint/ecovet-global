@@ -8,6 +8,9 @@ export default function Home() {
     <main style={mainStyles}>
       <Image style={imageStyles} src={BPLogo} alt="Blueprint Logo" />
       <p>Open up app/page.tsx to get started!</p>
+      <Link href="/auth/sign-in">
+        <button>Sign-in/Sign-In</button>
+      </Link>
       <Link href="/auth/login-test">
         <button>Sign-in/Sign-up For Testing</button>
       </Link>
