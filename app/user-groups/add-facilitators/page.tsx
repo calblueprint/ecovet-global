@@ -2,11 +2,13 @@
 
 import { ChangeEvent, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { submitNewFacilitator } from "@/api/supabase/queries/invites";
+import { submitNewInvite } from "@/api/supabase/queries/invites";
 import {
   AddFacilitatorButton,
   AddFacilitatorFormDiv,
   AddFacilitatorsMain,
+  ErrorMessage,
+  ErrorMessageDiv,
   FacilitatorEmailDiv,
   FacilitatorEmailInput,
   SubmitButton,
@@ -21,6 +23,8 @@ export default function AddFacilitators() {
   const searchParams = useSearchParams();
   const userGroupId = searchParams.get("userGroupId");
   const [facilitatorEmails, setFacilitatorEmails] = useState<string[]>([""]);
+  const [errorMessages, setErrorMessage] = useState<string[]>([""]);
+  const [hasError, setHasError] = useState<boolean>(false);
 
   const handleInputChange = (
     event: ChangeEvent<HTMLInputElement>,
@@ -36,11 +40,22 @@ export default function AddFacilitators() {
   };
 
   const onSubmitButtonClick = () => {
-    facilitatorEmails.map(email => {
+    facilitatorEmails.map(async (email, index) => {
       if (isEmailValid(email)) {
-        submitNewFacilitator(email, String(userGroupId), true);
+        const error = await submitNewInvite(
+          email,
+          String(userGroupId),
+          "Facilitator",
+        );
+        if (error?.error) {
+          const updated_errors = [...errorMessages];
+          updated_errors[index] = error.message;
+          setErrorMessage(updated_errors);
+        }
       } else {
-        console.error("invalid email format");
+        const updated_errors = [...errorMessages];
+        updated_errors[index] = "Invalid email format";
+        setErrorMessage(updated_errors);
       }
     });
   };
@@ -50,13 +65,18 @@ export default function AddFacilitators() {
       <AddFacilitatorFormDiv>
         <FacilitatorEmailDiv>
           {facilitatorEmails.map((email, index) => (
-            <FacilitatorEmailInput
-              key={index}
-              value={email}
-              onChange={e => handleInputChange(e, index)}
-              placeholder="Enter facilitator email"
-              required
-            ></FacilitatorEmailInput>
+            <FacilitatorEmailDiv>
+              <ErrorMessageDiv $hasError={errorMessages[index]}>
+                <ErrorMessage>{errorMessages[index]}</ErrorMessage>
+              </ErrorMessageDiv>
+              <FacilitatorEmailInput
+                key={index}
+                value={email}
+                onChange={e => handleInputChange(e, index)}
+                placeholder="Enter facilitator email"
+                required
+              ></FacilitatorEmailInput>
+            </FacilitatorEmailDiv>
           ))}
         </FacilitatorEmailDiv>
         <AddFacilitatorButton onClick={onAddFacilitatorButtonClick}>
