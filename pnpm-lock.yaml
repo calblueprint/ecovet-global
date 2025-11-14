@@ -35,6 +35,9 @@ importers:
       styled-components:
         specifier: ^6.1.19
         version: 6.1.19(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      web-app-template:
+        specifier: 'link:'
+        version: 'link:'
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3.3.1
