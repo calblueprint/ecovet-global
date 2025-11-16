@@ -23,7 +23,7 @@ export async function submitNewInvite(
       invite_id: id,
       user_group_id: user_group_id,
       email: email,
-      user_type: isFacilitator ? "Facilitator" : "Participant",
+      user_type: user_type,
       status: "Pending",
     },
     { onConflict: "invite_id" },
