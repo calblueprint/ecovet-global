@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import supabase from "@/actions/supabase/client";
 import { handleProfileSubmit } from "@/api/supabase/queries/profile";
 import { useProfile } from "@/utils/ProfileProvider";
@@ -20,6 +21,9 @@ import {
 
 function OnboardingPage() {
   const { userId, profile, loading: profileLoading } = useProfile();
+
+  const params = useSearchParams();
+  const fromSignup = params.get("fromSignup") === "true";
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -48,13 +52,14 @@ function OnboardingPage() {
       return;
     }
 
-    const { success, error } = await handleProfileSubmit({
-      id: userId,
-      first_name: firstName,
-      last_name: lastName,
+    const { success, error } = await handleProfileSubmit(
+      userId,
+      firstName,
+      lastName,
       country,
-      org_role: role,
-    });
+      role,
+      fromSignup,
+    );
 
     if (!success) {
       setFormMessage(`Error: ${error}`);
@@ -92,7 +97,7 @@ function OnboardingPage() {
             <IntroText>
               <WelcomeTag>
                 {" "}
-                <Heading2> Edit Profile </Heading2>
+                <Heading2> Your Information </Heading2>
                 <Heading3>
                   Fill out these questions to tell us more about you.
                 </Heading3>

@@ -12,7 +12,13 @@ import supabase from "../actions/supabase/client";
 
 export interface AuthState {
   session: Session | null;
-  signUp: (email: string, password: string) => Promise<AuthResponse>;
+  signUp: (
+    email: string,
+    password: string,
+    options: {
+      emailRedirectTo: string;
+    },
+  ) => Promise<AuthResponse>;
   signInWithEmail: (email: string, password: string) => Promise<AuthResponse>;
   signOut: () => void;
 }
@@ -53,11 +59,19 @@ export function AuthContextProvider({
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string) =>
-    supabase.auth.signUp({
+  const signUp = async (
+    email: string,
+    password: string,
+    options: { emailRedirectTo: string },
+  ) => {
+    return supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: options.emailRedirectTo,
+      },
     });
+  };
 
   const signInWithEmail = async (email: string, password: string) =>
     supabase.auth.signInWithPassword({

@@ -48,7 +48,9 @@ export default function Login() {
     if (password !== confirmPassword) {
       throw new Error("Passwords do not match");
     }
-    const { data, error } = await sessionHandler.signUp(email, password);
+    const { data, error } = await sessionHandler.signUp(email, password, {
+      emailRedirectTo: "http://localhost:3000/onboarding?fromSignup=false",
+    });
     if (error) {
       throw new Error(
         "An error occurred during sign up: " +

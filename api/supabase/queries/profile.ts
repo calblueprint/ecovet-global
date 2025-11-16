@@ -79,15 +79,24 @@ export async function fetchRoleById(role_id: UUID) {
   return data;
 }
 
-export async function handleProfileSubmit(profile: {
-  id: string;
-  first_name: string;
-  last_name: string;
-  country: string;
-  org_role: string;
-}) {
+export async function handleProfileSubmit(
+  id: string,
+  first_name: string,
+  last_name: string,
+  country: string,
+  org_role: string,
+  fromSignUp: boolean = false,
+) {
   try {
-    const { error } = await supabase.from("profile").upsert(profile);
+    const user_type = fromSignUp ? "Admin" : null;
+    const { error } = await supabase.from("profile").upsert({
+      id,
+      first_name,
+      last_name,
+      country,
+      org_role,
+      user_type,
+    });
 
     if (error) {
       return { success: false, error: error.message };

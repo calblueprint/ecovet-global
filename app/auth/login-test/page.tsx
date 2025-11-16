@@ -22,7 +22,9 @@ export default function Login() {
   const sessionHandler = useSession();
 
   const handleSignUp = async () => {
-    const { error } = await sessionHandler.signUp(email, password);
+    const { error } = await sessionHandler.signUp(email, password, {
+      emailRedirectTo: "http://localhost:3000/onboarding?fromSignup=true",
+    });
     if (error) {
       throw new Error(
         "An error occurred during sign up: " +
@@ -52,7 +54,7 @@ export default function Login() {
     }
 
     if (await checkProfileExists(data.user.id)) {
-      router.push("/onboarding");
+      router.push("/onboarding?fromSignup=true");
     } else {
       router.push("/edit-profile");
     }
