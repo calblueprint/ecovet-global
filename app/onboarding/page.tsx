@@ -32,7 +32,6 @@ function OnboardingPage() {
   const [save, setSave] = useState(false);
   const [formMessage, setFormMessage] = useState("");
 
-  //to be able to change fields on onboarding screen? for testing?
   useEffect(() => {
     if (profile) {
       setFirstName("");

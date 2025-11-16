@@ -53,9 +53,7 @@ export default function Login() {
       throw new Error("User not found after sign in");
     }
 
-    if (await checkProfileExists(data.user.id)) {
-      router.push("/onboarding?fromSignup=true");
-    } else {
+    if ((await checkProfileExists(data.user.id)) == false) {
       router.push("/edit-profile");
     }
   };
