@@ -35,10 +35,10 @@ function OnboardingPage() {
   //to be able to change fields on onboarding screen? for testing?
   useEffect(() => {
     if (profile) {
-      setFirstName(profile.first_name ?? "");
-      setLastName(profile.last_name ?? "");
-      setCountry(profile.country ?? "");
-      setRole(profile.org_role ?? "");
+      setFirstName("");
+      setLastName("");
+      setCountry("");
+      setRole("");
     }
   }, [profile]);
 
