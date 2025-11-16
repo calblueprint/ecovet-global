@@ -7,7 +7,6 @@ import { useProfile } from "@/utils/ProfileProvider";
 
 export default function AddFacilitators() {
   const router = useRouter();
-  const [usergroup, setUsergroup] = useState<UserType>("Participant");
   const { profile } = useProfile();
 
   return (
