@@ -16,6 +16,7 @@ export async function signInWithMagicLink(email: string) {
   }
 }
 
+/* returns True if there is an unaccepted invite */
 export async function checkInvites(invite_id: UUID) {
   const { data, error } = await supabase
     .from("invite")
@@ -25,6 +26,7 @@ export async function checkInvites(invite_id: UUID) {
   if (error) {
     console.error("Error fetching invite from invite_id:", error.message);
   }
+  if (!data) return false;
   const invite_data: Invite = data as Invite;
   if (invite_data.status == "Pending") {
     return true;
