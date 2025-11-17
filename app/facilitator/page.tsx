@@ -28,4 +28,5 @@ const mainStyles: CSSProperties = {
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
+  gap: "1rem",
 };
