@@ -3,15 +3,13 @@
 import { CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { H2 } from "@/styles/text";
-import { useProfile } from "@/utils/ProfileProvider";
 
 export default function AddFacilitators() {
   const router = useRouter();
-  const { profile } = useProfile();
 
   return (
     <main style={mainStyles}>
-      <H2>I am a {profile?.user_type}</H2>
+      <H2>Testing</H2>
       <button onClick={() => router.replace("/admin/home-screen")}>
         Admin Flow
       </button>

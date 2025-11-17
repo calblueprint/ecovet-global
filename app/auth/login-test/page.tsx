@@ -3,11 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  addEmailtoProfile,
-  checkProfileExists,
-  makeAdmin,
-} from "@/api/supabase/queries/profile";
+import { addEmailtoProfile, makeAdmin } from "@/api/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
 import {
   Button,
@@ -60,12 +56,7 @@ export default function Login() {
     if (!data.user) {
       throw new Error("User not found after sign in");
     }
-
-    if ((await checkProfileExists(data.user.id)) == false) {
-      router.push("/onboarding");
-    } else {
-      router.push("/test-page");
-    }
+    router.push("/test-page");
   };
 
   const signOut = async () => {

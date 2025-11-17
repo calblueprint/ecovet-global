@@ -28,6 +28,14 @@ export async function submitNewInvite(
 
   // Exists in the profile table
   if (profile) {
+    //Is in another user group, error
+    if (profile.user_group_id !== user_group_id) {
+      return {
+        error: true,
+        message: "User already belongs to another user group",
+      };
+    }
+
     const currentType = profile.user_type;
 
     // Inviting a facilitator
@@ -49,7 +57,23 @@ export async function submitNewInvite(
       return { error: true, message: "User already in the user group" };
     }
   }
-  //no profile for the user
+  // check if there is an existing invite
+  const { data: existingInvite } = await supabase
+    .from("invite")
+    .select("invite_id")
+    .eq("email", email)
+    .eq("user_group_id", user_group_id)
+    .eq("status", "Pending")
+    .single();
+
+  if (existingInvite) {
+    return {
+      error: true,
+      message: "An invite has already been sent to this email",
+    };
+  }
+
+  // create a row in invite table
   const { error } = await supabase.from("invite").upsert(
     {
       invite_id: id,

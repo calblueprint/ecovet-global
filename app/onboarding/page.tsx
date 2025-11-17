@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import supabase from "@/actions/supabase/client";
 import { handleProfileSubmit } from "@/api/supabase/queries/profile";
 import { useProfile } from "@/utils/ProfileProvider";
@@ -147,9 +148,11 @@ function OnboardingPage() {
                 </InputDiv>
               </div>
             </InputFields>
-            <Button type="submit" disabled={save}>
-              {save ? "Saving" : "Submit Profile"}
-            </Button>
+            <Link href="/test-page">
+              <Button type="submit" disabled={save}>
+                {save ? "Saving" : "Submit Profile"}
+              </Button>
+            </Link>
           </Container>
         </form>
       </Main>

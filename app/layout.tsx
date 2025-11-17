@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import StyledComponentsRegistry from "@/lib/registry";
 import "@/styles/global.css";
+import { Suspense } from "react";
 import { ProfileProvider } from "@/utils/ProfileProvider";
 import { AuthContextProvider } from "../utils/AuthProvider";
 
@@ -27,7 +28,9 @@ export default function RootLayout({
       <body className={sans.className}>
         <AuthContextProvider>
           <ProfileProvider>
-            <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
+            <StyledComponentsRegistry>
+              <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+            </StyledComponentsRegistry>
           </ProfileProvider>
         </AuthContextProvider>
       </body>
