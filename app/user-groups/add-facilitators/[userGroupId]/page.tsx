@@ -1,11 +1,13 @@
+"use client";
+
+import { useSearchParams } from "next/navigation";
 import AddFacilitators from "../AddFacilitators";
 
-interface PageProps {
-  params: { userGroupId: string };
-}
+export default function ClientWrapper() {
+  const searchParams = useSearchParams();
+  const userGroupId = searchParams.get("userGroupId");
 
-export default function Page({ params }: PageProps) {
-  const { userGroupId } = params;
+  if (!userGroupId) return null;
 
   return <AddFacilitators userGroupId={userGroupId} />;
 }
