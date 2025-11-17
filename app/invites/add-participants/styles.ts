@@ -42,3 +42,8 @@ export const ErrorMessageDiv = styled.div<{ $hasError: string }>`
 export const ErrorMessage = styled.p`
   color: red;
 `;
+
+export const RemoveInput = styled.button`
+  width: 3rem;
+  height: 1.5rem;
+`;

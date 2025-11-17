@@ -24,6 +24,10 @@ const UserGroupsPage = () => {
 
   return (
     <div>
+      <Link href="/test-page">
+        <button>Back</button>
+      </Link>
+
       <h1>User Groups</h1>
       <ul>
         {userGroups.map(group => (

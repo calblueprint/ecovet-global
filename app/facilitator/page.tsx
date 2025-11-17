@@ -7,6 +7,9 @@ import { H2 } from "@/styles/text";
 export default function FacilitatorFlows() {
   return (
     <main style={mainStyles}>
+      <Link href="/test-page">
+        <button>Back</button>
+      </Link>{" "}
       <H2>Facilitator Flows</H2>
       <Link href="/templates/template-list">
         <button>View All Templates</button>
@@ -14,7 +17,9 @@ export default function FacilitatorFlows() {
       <Link href="/templates">
         <button>Add New Template</button>
       </Link>
-      <button>Add a New Participant (not merged)</button>
+      <Link href="/invites/add-participants">
+        <button>Add a New Participant</button>
+      </Link>
     </main>
   );
 }

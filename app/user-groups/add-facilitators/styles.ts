@@ -29,6 +29,11 @@ export const FacilitatorEmailInput = styled.input`
   height: 1.5rem;
 `;
 
+export const RemoveInput = styled.button`
+  width: 3rem;
+  height: 1.5rem;
+`;
+
 export const SubmitButton = styled.button`
   width: 5rem;
   height: 1.5rem;
