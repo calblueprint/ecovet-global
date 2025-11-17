@@ -13,6 +13,18 @@ export async function addEmailtoProfile(userId: string, email: string) {
   }
 }
 
+export async function makeAdmin(userId: string) {
+  const { error } = await supabase.from("profile").upsert({
+    id: userId,
+    user_type: "Admin",
+  });
+
+  if (error) {
+    console.error("Error creating profile:", error.message);
+    throw new Error("Failed to make profile an Admin");
+  }
+}
+
 export async function fetchProfileByUserId(user_id: UUID) {
   const { data, error } = await supabase
     .from("profile")

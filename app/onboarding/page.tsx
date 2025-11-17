@@ -28,13 +28,12 @@ function OnboardingPage() {
   const [save, setSave] = useState(false);
   const [formMessage, setFormMessage] = useState("");
 
-  //to be able to change fields on onboarding screen? for testing?
   useEffect(() => {
     if (profile) {
-      setFirstName(profile.first_name ?? "");
-      setLastName(profile.last_name ?? "");
-      setCountry(profile.country ?? "");
-      setRole(profile.org_role ?? "");
+      setFirstName("");
+      setLastName("");
+      setCountry("");
+      setRole("");
     }
   }, [profile]);
 
@@ -92,7 +91,7 @@ function OnboardingPage() {
             <IntroText>
               <WelcomeTag>
                 {" "}
-                <Heading2> Edit Profile </Heading2>
+                <Heading2> Your Information </Heading2>
                 <Heading3>
                   Fill out these questions to tell us more about you.
                 </Heading3>
