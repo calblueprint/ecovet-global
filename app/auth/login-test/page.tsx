@@ -3,7 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { checkProfileExists } from "@/api/supabase/queries/profile";
+import {
+  addEmailtoProfile,
+  checkProfileExists,
+} from "@/api/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
 import {
   Button,
@@ -22,7 +25,7 @@ export default function Login() {
   const sessionHandler = useSession();
 
   const handleSignUp = async () => {
-    const { error } = await sessionHandler.signUp(email, password);
+    const { data, error } = await sessionHandler.signUp(email, password);
     if (error) {
       throw new Error(
         "An error occurred during sign up: " +
@@ -31,6 +34,11 @@ export default function Login() {
           email,
       );
     }
+    const userId = data.user?.id;
+    if (!userId) {
+      throw new Error("Signup succeeded but user ID was missing.");
+    }
+    await addEmailtoProfile(userId, email);
   };
 
   const signInWithEmail = async () => {

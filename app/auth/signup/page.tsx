@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FiCheck, FiEye, FiEyeOff, FiX } from "react-icons/fi";
 import Link from "next/link";
+import { checkInvites } from "@/api/supabase/queries/auth";
 import { addEmailtoProfile } from "@/api/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
 import {
@@ -43,6 +44,9 @@ export default function Login() {
     rules.length && rules.uppercase && rules.number && rules.specialChar;
 
   const handleSignUp = async () => {
+    if (!(await checkInvites(email))) {
+      throw new Error("You do not have an invite");
+    }
     if (!isPasswordValid) {
       throw new Error("Password does not meet the required criteria");
     }
