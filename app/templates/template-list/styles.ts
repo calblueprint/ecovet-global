@@ -86,3 +86,65 @@ export const TemplateList = styled.ul`
   font-weight: 500;
   font-color: ${COLORS.black70};
 `;
+
+export const SideNavContainer = styled.div`
+  display: flex;
+  padding: 1rem;
+  height: 100vh;
+  align-items: flex-start;
+  flex-direction: column;
+  background-color: ${COLORS.oat_light};
+`;
+
+export const SideNavTemplatesContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1.25rem 0;
+  width: 100%;
+`;
+
+export const SideNavButton = styled.button<{ selected: boolean }>`
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  text-align: left;
+  gap: 0.5em;
+  background-color: ${({ selected }) =>
+    selected ? COLORS.lightEletricBlue : COLORS.oat_light};
+
+  color: ${({ selected }) => (selected ? COLORS.black : COLORS.black70)};
+  border-radius: 0.25rem;
+  border: none;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 12px;
+  font-weight: 500;
+  &:hover {
+    background-color: ${COLORS.oat_medium};
+  }
+`;
+
+export const SideNavNewTemplateButton = styled.button`
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  text-align: left;
+  gap: 0.5em;
+  background-color: ${COLORS.darkElectricBlue};
+  border-radius: 0.25rem;
+  border: none;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 12px;
+  font-weight: 500;
+  color: ${COLORS.white};
+`;
+
+export const LayoutWrapper = styled.div`
+  display: flex;
+  height: calc(100vh - 64px);
+  widthL 100%;
+`;
+
+export const ContentWrapper = styled.div`
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+`;
