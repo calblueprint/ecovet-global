@@ -1,6 +1,7 @@
 import { UUID } from "crypto";
 import supabase from "@/api/supabase/createClient";
 import { Invite, Profile, UserType } from "@/types/schema";
+import { signInWithMagicLink } from "./auth";
 
 async function getProfileByEmail(
   email: string,
@@ -66,7 +67,7 @@ export async function submitNewInvite(
       message: "Error inserting new invite: " + error.message,
     };
   }
-
+  await signInWithMagicLink(email);
   return { error: false, message: "Invite sent successfully" };
 }
 

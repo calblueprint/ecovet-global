@@ -82,7 +82,7 @@ export default function UserGroupDetailPage() {
         </ul>
       </section>
 
-      <Link href={"/user-groups/home-screen"}>Back to Organizations</Link>
+      <Link href={"/admin/home-screen"}>Back to Organizations</Link>
     </div>
   );
 }

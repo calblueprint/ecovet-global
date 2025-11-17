@@ -76,7 +76,8 @@ export default function Login() {
           </WelcomeTag>
           <SignInTag>
             {" "}
-            Already have an account? <Link href="/auth/login"> Sign in. </Link>
+            Already have an account?{" "}
+            <Link href="/auth/login-test"> Sign in. </Link>
           </SignInTag>
         </IntroText>
         <InputFields>
