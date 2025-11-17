@@ -1,5 +1,6 @@
 import { UUID } from "crypto";
 import supabase from "@/api/supabase/createClient";
+import { signInWithMagicLink } from "./auth";
 
 export async function submitNewFacilitator(
   email: string,
@@ -21,6 +22,8 @@ export async function submitNewFacilitator(
   if (error) {
     console.error("Error inserting new facilitator:", error.message);
   }
+
+  await signInWithMagicLink(email);
 }
 
 export async function fetchInvites(user_group_id: UUID) {
