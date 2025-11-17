@@ -1,6 +1,18 @@
 import { UUID } from "crypto";
 import supabase from "@/api/supabase/createClient";
 
+export async function addEmailtoProfile(userId: string, email: string) {
+  const { error } = await supabase.from("profile").insert({
+    id: userId,
+    email: email,
+  });
+
+  if (error) {
+    console.error("Error creating profile:", error.message);
+    throw new Error("Failed to create user profile");
+  }
+}
+
 export async function fetchProfileByUserId(user_id: UUID) {
   const { data, error } = await supabase
     .from("profile")

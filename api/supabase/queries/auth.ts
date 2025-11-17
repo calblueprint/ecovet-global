@@ -1,4 +1,3 @@
-import { UUID } from "crypto";
 import supabase from "@/api/supabase/createClient";
 import { Invite } from "@/types/schema";
 
@@ -23,7 +22,7 @@ export async function signInWithMagicLink(email: string) {
     email: email,
     options: {
       shouldCreateUser: true,
-      emailRedirectTo: "http://localhost:3000/auth/login",
+      emailRedirectTo: "http://localhost:3000/auth/signup",
     },
   });
 
@@ -32,15 +31,15 @@ export async function signInWithMagicLink(email: string) {
   }
 }
 
-/* returns True if there is an unaccepted invite */
-export async function checkInvites(invite_id: UUID) {
+/* returns True if there is an unaccepted invite given an email*/
+export async function checkInvites(email: string) {
   const { data, error } = await supabase
     .from("invite")
     .select("*")
-    .eq("invite_id", invite_id)
-    .single();
+    .eq("email", email)
+    .maybeSingle();
   if (error) {
-    console.error("Error fetching invite from invite_id:", error.message);
+    console.error("Error fetching invite from email:", error.message);
   }
   if (!data) return false;
   const invite_data: Invite = data as Invite;

@@ -4,13 +4,13 @@ import { ChangeEvent, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { submitNewInvite } from "@/api/supabase/queries/invites";
 import {
-  AddFacilitatorButton,
-  AddFacilitatorFormDiv,
-  AddFacilitatorsMain,
+  AddParticipantButton,
+  AddParticipantFormDiv,
+  AddParticipantsMain,
   ErrorMessage,
   ErrorMessageDiv,
-  FacilitatorEmailDiv,
-  FacilitatorEmailInput,
+  ParticipantEmailDiv,
+  ParticipantEmailInput,
   SubmitButton,
 } from "./styles";
 
@@ -19,33 +19,33 @@ const isEmailValid = (email: string) => {
   return emailRegex.test(email);
 };
 
-export default function AddFacilitators() {
+export default function AddParticipants() {
   const searchParams = useSearchParams();
   const userGroupId = searchParams.get("userGroupId");
-  const [facilitatorEmails, setFacilitatorEmails] = useState<string[]>([""]);
+  const [participantEmails, setParticipantEmails] = useState<string[]>([""]);
   const [errorMessages, setErrorMessage] = useState<string[]>([""]);
 
   const handleInputChange = (
     event: ChangeEvent<HTMLInputElement>,
     index: number,
   ) => {
-    const updated = [...facilitatorEmails];
+    const updated = [...participantEmails];
     updated[index] = event.target.value;
-    setFacilitatorEmails(updated);
+    setParticipantEmails(updated);
   };
 
-  const onAddFacilitatorButtonClick = () => {
-    setFacilitatorEmails([...facilitatorEmails, ""]);
+  const onAddParticipantButtonClick = () => {
+    setParticipantEmails([...participantEmails, ""]);
     setErrorMessage([...errorMessages, ""]);
   };
 
   const onSubmitButtonClick = () => {
-    facilitatorEmails.map(async (email, index) => {
+    participantEmails.map(async (email, index) => {
       if (isEmailValid(email)) {
         const error = await submitNewInvite(
           email,
           String(userGroupId),
-          "Facilitator",
+          "Participant",
         );
         if (error?.error) {
           const updated_errors = [...errorMessages];
@@ -61,28 +61,28 @@ export default function AddFacilitators() {
   };
 
   return (
-    <AddFacilitatorsMain>
-      <AddFacilitatorFormDiv>
-        <FacilitatorEmailDiv>
-          {facilitatorEmails.map((email, index) => (
-            <FacilitatorEmailDiv key={index}>
+    <AddParticipantsMain>
+      <AddParticipantFormDiv>
+        <ParticipantEmailDiv>
+          {participantEmails.map((email, index) => (
+            <ParticipantEmailDiv key={index}>
               <ErrorMessageDiv $hasError={errorMessages[index]}>
                 <ErrorMessage>{errorMessages[index]}</ErrorMessage>
               </ErrorMessageDiv>
-              <FacilitatorEmailInput
+              <ParticipantEmailInput
                 value={email}
                 onChange={e => handleInputChange(e, index)}
                 placeholder="Enter facilitator email"
                 required
-              ></FacilitatorEmailInput>
-            </FacilitatorEmailDiv>
+              ></ParticipantEmailInput>
+            </ParticipantEmailDiv>
           ))}
-        </FacilitatorEmailDiv>
-        <AddFacilitatorButton onClick={onAddFacilitatorButtonClick}>
-          Add Facilitator
-        </AddFacilitatorButton>
+        </ParticipantEmailDiv>
+        <AddParticipantButton onClick={onAddParticipantButtonClick}>
+          Add Participant
+        </AddParticipantButton>
         <SubmitButton onClick={onSubmitButtonClick}>Submit</SubmitButton>
-      </AddFacilitatorFormDiv>
-    </AddFacilitatorsMain>
+      </AddParticipantFormDiv>
+    </AddParticipantsMain>
   );
 }

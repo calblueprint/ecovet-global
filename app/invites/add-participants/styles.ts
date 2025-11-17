@@ -1,29 +1,29 @@
 import styled from "styled-components";
 
-export const AddFacilitatorsMain = styled.div`
+export const AddParticipantsMain = styled.div`
   display: flex;
   flex-direction: column;
   padding: 0.75rem;
 `;
 
-export const AddFacilitatorFormDiv = styled.div`
+export const AddParticipantFormDiv = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
 `;
 
-export const AddFacilitatorButton = styled.button`
+export const AddParticipantButton = styled.button`
   width: 10rem;
   height: 1.5rem;
 `;
 
-export const FacilitatorEmailDiv = styled.div`
+export const ParticipantEmailDiv = styled.div`
   flex-direction: column;
   display: flex;
   gap: 0.3rem;
 `;
 
-export const FacilitatorEmailInput = styled.input`
+export const ParticipantEmailInput = styled.input`
   border: line;
   width: 10rem;
   height: 1.5rem;
