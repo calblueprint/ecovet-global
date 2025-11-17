@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { CSSProperties } from "react";
 import { useRouter } from "next/navigation";
-import { Profile, UserType } from "@/types/schema";
+import { H2 } from "@/styles/text";
 import { useProfile } from "@/utils/ProfileProvider";
 
 export default function AddFacilitators() {
@@ -10,8 +10,8 @@ export default function AddFacilitators() {
   const { profile } = useProfile();
 
   return (
-    <main>
-      <p>I am a {profile?.user_type}</p>
+    <main style={mainStyles}>
+      <H2>I am a {profile?.user_type}</H2>
       <button onClick={() => router.replace("/admin/home-screen")}>
         Admin Flow
       </button>
@@ -24,3 +24,13 @@ export default function AddFacilitators() {
     </main>
   );
 }
+
+const mainStyles: CSSProperties = {
+  width: "100%",
+  height: "100vh",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "1rem",
+};

@@ -46,7 +46,7 @@ export default function Login() {
     if (await checkProfileExists(data.user.id)) {
       router.push("/onboarding");
     } else {
-      router.push("/edit-profile");
+      router.push("/test-page");
     }
   };
 
