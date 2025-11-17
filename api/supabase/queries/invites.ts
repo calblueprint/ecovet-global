@@ -1,3 +1,4 @@
+import { UUID } from "crypto";
 import supabase from "@/api/supabase/createClient";
 import { signInWithMagicLink } from "./auth";
 
@@ -12,7 +13,7 @@ export async function submitNewFacilitator(
       invite_id: id,
       user_group_id: user_group_id,
       email: email,
-      user_type: isFacilitator ? "Facilitator" : "",
+      user_type: isFacilitator ? "Facilitator" : "Participant",
       status: "Pending",
     },
     { onConflict: "invite_id" },
@@ -23,4 +24,20 @@ export async function submitNewFacilitator(
   }
 
   await signInWithMagicLink(email);
+}
+
+export async function fetchInvites(user_group_id: UUID) {
+  try {
+    // Pull data
+    const { data, error } = await supabase
+      .from("invite")
+      .select("*")
+      .eq("user_group_id", user_group_id);
+
+    if (error) throw error;
+
+    return data;
+  } catch (error) {
+    console.log("Error fetching invites from supabase API: ", error);
+  }
 }

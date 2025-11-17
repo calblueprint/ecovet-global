@@ -1,6 +1,8 @@
 const COLORS = {
   black: "#000000",
   black20: "#C7C6C3",
+  black40: "#959492",
+  black70: "#4B4A49",
   black100: "#0f0f0f",
   teal: "#476C77",
   orange: "#ED953B",
