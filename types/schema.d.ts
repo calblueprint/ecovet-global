@@ -39,6 +39,7 @@ export interface Profile {
   last_name: string;
   country: string;
   org_role: string;
+  email: string;
 }
 export interface Role {
   role_id: UUID; // role_id

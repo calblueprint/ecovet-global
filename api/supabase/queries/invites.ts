@@ -1,6 +1,21 @@
 import { UUID } from "crypto";
 import supabase from "@/api/supabase/createClient";
-import { Invite, UserType } from "@/types/schema";
+import { Invite, Profile, UserType } from "@/types/schema";
+
+async function getProfileByEmail(
+  email: string,
+  user_group_id: string,
+): Promise<Profile | null> {
+  const { data, error } = await supabase
+    .from("profile")
+    .select("*")
+    .eq("email", email)
+    .eq("user_group_id", user_group_id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return data;
+}
 
 export async function submitNewInvite(
   email: string,
@@ -8,22 +23,38 @@ export async function submitNewInvite(
   user_type: UserType,
 ) {
   const id = crypto.randomUUID();
-  if (user_type == "Facilitator") {
-    if (await validateFacilitatorInvite(email, user_group_id)) {
-      return { error: true, message: "User already is a facilitator" };
+  const profile = await getProfileByEmail(email, user_group_id);
+
+  // Exists in the profile table
+  if (profile) {
+    const currentType = profile.user_type;
+
+    // Inviting a facilitator
+    if (user_type === "Facilitator") {
+      if (currentType === "Facilitator") {
+        return { error: true, message: "User already is a facilitator" };
+      }
+      // Promote participant to facilitator
+      if (currentType === "Participant") {
+        await changeToFacilitator(profile.id);
+        return {
+          error: false,
+          message: "User was a participant and is now a facilitator",
+        };
+      }
     }
-  } else {
-    if (await validateInvite(email, user_group_id)) {
+    // Inviting a participant
+    if (user_type === "Participant") {
       return { error: true, message: "User already in the user group" };
     }
   }
-
+  //no profile for the user
   const { error } = await supabase.from("invite").upsert(
     {
       invite_id: id,
-      user_group_id: user_group_id,
-      email: email,
-      user_type: user_type,
+      user_group_id,
+      email,
+      user_type,
       status: "Pending",
     },
     { onConflict: "invite_id" },
@@ -32,121 +63,81 @@ export async function submitNewInvite(
   if (error) {
     return {
       error: true,
-      message: "Error inserting new facilitator:" + error.message,
+      message: "Error inserting new invite: " + error.message,
     };
   }
+
+  return { error: false, message: "Invite sent successfully" };
 }
 
 /* updates a pending invite status to cancelled given an invite_id */
 export async function cancelInvite(invite_id: UUID): Promise<void> {
-  var { data, error } = await supabase
+  const { data, error } = await supabase
     .from("invite")
     .select("*")
-    .eq("id", invite_id)
+    .eq("invite_id", invite_id)
     .single();
   if (error) {
     console.error("Error fetching invite by invite_id:", error.message);
+    return;
   }
   const invite_data: Invite = data as Invite;
   if (invite_data.status == "Accepted") {
     console.error("Invite has already been accepted.");
+    return;
   }
-  var { error } = await supabase
+  const { error: updateError } = await supabase
     .from("invite")
     .update({ status: "Cancelled" })
     .match({ invite_id: invite_id });
 
-  if (error) {
-    console.error("Error updating invite status to cancelled:", error.message);
+  if (updateError) {
+    console.error(
+      "Error updating invite status to cancelled:",
+      updateError.message,
+    );
+    return;
   }
 }
 
-export async function checkFacilitatorInInvite(
+//Returns true if user is a facilitator in the user group given their email
+export async function isFacilitatorInUserGroup(
   email: string,
   user_group_id: string,
 ): Promise<boolean> {
   const { data, error } = await supabase
-    .from("invite")
-    .select("*")
+    .from("profile")
+    .select("user_type")
     .eq("email", email)
     .eq("user_group_id", user_group_id)
-    .eq("user_type", "Facilitator");
+    .maybeSingle();
+
   if (error) {
-    console.error("Error fetching invite by email:", error.message);
+    console.error("Profile lookup failed:", error.message);
     return false;
   }
-  if (data != null) {
-    return true;
-  }
-  return false;
+
+  return data?.user_type === "Facilitator";
 }
 
-export async function checkUserInProfile(
+//Returns true if user is in the user group given their email
+export async function isInUserGroup(
   email: string,
   user_group_id: string,
-  check_facilitator: boolean,
 ): Promise<boolean> {
-  var { data, error } = await supabase
-    .from("users")
-    .select("id")
-    .eq("email", email);
-  if (error) {
-    console.error("Error fetching user_id from auth:", error.message);
-  }
-
-  const user_id: UUID = data as unknown as UUID;
-
-  if (check_facilitator) {
-    var { data, error } = await supabase
-      .from("profile")
-      .select("user_group_id" as "id")
-      .eq("id", user_id)
-      .eq("user_type", "Facilitator");
-  } else {
-    var { data, error } = await supabase
-      .from("profile")
-      .select("user_group_id" as "id")
-      .eq("id", user_id);
-  }
+  const { data, error } = await supabase
+    .from("profile")
+    .select("email")
+    .eq("email", email)
+    .eq("user_group_id", user_group_id)
+    .maybeSingle();
 
   if (error) {
-    console.error("Error fetching user_group_id from profile:", error.message);
+    console.error("Profile lookup error:", error.message);
+    return false;
   }
 
-  const fetched_user_group_id: UUID = data as unknown as UUID;
-
-  if (user_group_id != fetched_user_group_id) {
-    return true;
-  }
-
-  return false;
-}
-
-/* in progress*/
-export async function validateFacilitatorInvite(
-  email: string,
-  user_group_id: string,
-): Promise<boolean> {
-  // check if facilitator is in invite
-  if (await checkFacilitatorInInvite(email, user_group_id)) {
-    return true;
-  }
-
-  // check if facilitator is in profiles
-  if (await checkUserInProfile(email, user_group_id, true)) {
-    return true;
-  }
-  return false;
-}
-/* in progress*/
-export async function validateInvite(
-  email: string,
-  user_group_id: string,
-): Promise<boolean> {
-  if (await checkUserInProfile(email, user_group_id, false)) {
-    return true;
-  }
-  return false;
+  return !!data;
 }
 
 export async function changeToParticipant(user_id: UUID): Promise<void> {

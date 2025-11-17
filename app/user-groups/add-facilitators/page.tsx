@@ -24,7 +24,6 @@ export default function AddFacilitators() {
   const userGroupId = searchParams.get("userGroupId");
   const [facilitatorEmails, setFacilitatorEmails] = useState<string[]>([""]);
   const [errorMessages, setErrorMessage] = useState<string[]>([""]);
-  const [hasError, setHasError] = useState<boolean>(false);
 
   const handleInputChange = (
     event: ChangeEvent<HTMLInputElement>,
@@ -37,6 +36,7 @@ export default function AddFacilitators() {
 
   const onAddFacilitatorButtonClick = () => {
     setFacilitatorEmails([...facilitatorEmails, ""]);
+    setErrorMessage([...errorMessages, ""]);
   };
 
   const onSubmitButtonClick = () => {
@@ -65,12 +65,11 @@ export default function AddFacilitators() {
       <AddFacilitatorFormDiv>
         <FacilitatorEmailDiv>
           {facilitatorEmails.map((email, index) => (
-            <FacilitatorEmailDiv>
+            <FacilitatorEmailDiv key={index}>
               <ErrorMessageDiv $hasError={errorMessages[index]}>
                 <ErrorMessage>{errorMessages[index]}</ErrorMessage>
               </ErrorMessageDiv>
               <FacilitatorEmailInput
-                key={index}
                 value={email}
                 onChange={e => handleInputChange(e, index)}
                 placeholder="Enter facilitator email"

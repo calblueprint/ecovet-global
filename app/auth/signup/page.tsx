@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FiCheck, FiEye, FiEyeOff, FiX } from "react-icons/fi";
 import Link from "next/link";
+import { addEmailtoProfile } from "@/api/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
 import {
   Button,
@@ -57,6 +58,12 @@ export default function Login() {
           data,
       );
     }
+    const userId = data.user?.id;
+    if (!userId) {
+      throw new Error("Signup succeeded but user ID was missing.");
+    }
+    await addEmailtoProfile(userId, email);
+
     alert("Password successfully updated!");
   };
 

@@ -23,7 +23,7 @@ export default function AddParticipants() {
   const searchParams = useSearchParams();
   const userGroupId = searchParams.get("userGroupId");
   const [participantEmails, setParticipantEmails] = useState<string[]>([""]);
-  const [errorMessages, setErrorMessages] = useState<string[]>([""]);
+  const [errorMessages, setErrorMessage] = useState<string[]>([""]);
 
   const handleInputChange = (
     event: ChangeEvent<HTMLInputElement>,
@@ -36,19 +36,26 @@ export default function AddParticipants() {
 
   const onAddParticipantButtonClick = () => {
     setParticipantEmails([...participantEmails, ""]);
+    setErrorMessage([...errorMessages, ""]);
   };
 
   const onSubmitButtonClick = () => {
     participantEmails.map(async (email, index) => {
-      const error = await submitNewInvite(
-        email,
-        String(userGroupId),
-        "Participant",
-      );
-      if (error?.error) {
+      if (isEmailValid(email)) {
+        const error = await submitNewInvite(
+          email,
+          String(userGroupId),
+          "Participant",
+        );
+        if (error?.error) {
+          const updated_errors = [...errorMessages];
+          updated_errors[index] = error.message;
+          setErrorMessage(updated_errors);
+        }
+      } else {
         const updated_errors = [...errorMessages];
-        updated_errors[index] = error.message;
-        setErrorMessages(updated_errors);
+        updated_errors[index] = "Invalid email format";
+        setErrorMessage(updated_errors);
       }
     });
   };
@@ -58,12 +65,11 @@ export default function AddParticipants() {
       <AddParticipantFormDiv>
         <ParticipantEmailDiv>
           {participantEmails.map((email, index) => (
-            <ParticipantEmailDiv>
+            <ParticipantEmailDiv key={index}>
               <ErrorMessageDiv $hasError={errorMessages[index]}>
                 <ErrorMessage>{errorMessages[index]}</ErrorMessage>
               </ErrorMessageDiv>
               <ParticipantEmailInput
-                key={index}
                 value={email}
                 onChange={e => handleInputChange(e, index)}
                 placeholder="Enter facilitator email"
