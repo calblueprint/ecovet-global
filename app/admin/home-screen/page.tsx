@@ -37,7 +37,7 @@ const UserGroupsPage = () => {
         ))}
       </ul>
 
-      <button onClick={() => router.replace("/user-groups/add-user-group")}>
+      <button onClick={() => router.replace("/user-groups/add-user-groups")}>
         Invite
       </button>
     </div>
