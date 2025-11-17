@@ -1,5 +1,11 @@
 import AddFacilitators from "../AddFacilitators";
 
-export default function Page({ params }: { params: { userGroupId: string } }) {
-  return <AddFacilitators userGroupId={params.userGroupId} />;
+interface PageProps {
+  params: { userGroupId: string };
+}
+
+export default function Page({ params }: PageProps) {
+  const { userGroupId } = params;
+
+  return <AddFacilitators userGroupId={userGroupId} />;
 }
