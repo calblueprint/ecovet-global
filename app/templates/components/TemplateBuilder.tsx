@@ -111,6 +111,7 @@ export default function TemplateBuilder({
       localStore.rolePhaseIndex[role][newPhaseID] = newRolePhaseID;
       localStore.promptIndex[newRolePhaseID] = [];
     }
+    useForceUpdate();
   }
 
   function removePhase(phase_id: UUID | null = null): void {

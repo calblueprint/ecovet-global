@@ -1,6 +1,6 @@
 import { Template } from "@/types/schema";
 
-export default function TemplteOverviewForm({
+export default function TemplateOverviewForm({
   value,
   onChange,
 }: {
