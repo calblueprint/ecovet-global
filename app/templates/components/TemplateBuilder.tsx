@@ -177,26 +177,32 @@ export default function TemplateBuilder({
   function setActiveUpdate(id: UUID | number, field: string, next: string) {
     if (!localStore) return;
 
-    update(draft => {
-      if (typeof id === "number") {
+    if (typeof id === "number") {
+      update(draft => {
         (draft.rolesById[id] as unknown as Record<string, unknown>)[field] =
           next;
-      } else {
-        if (field == "add_prompt") {
-          addPrompt(id as UUID);
-        } else if (field == "remove_prompt") {
-          removePrompt(next as UUID, id as UUID);
-        } else if (field == "role_description") {
+      });
+    } else {
+      if (field == "add_prompt") {
+        addPrompt(id as UUID);
+      } else if (field == "remove_prompt") {
+        removePrompt(next as UUID, id as UUID);
+      } else if (field == "role_description") {
+        update(draft => {
           (draft.rolesById[id as UUID] as Role).role_description = next;
-        } else if (field == "description") {
+        });
+      } else if (field == "description") {
+        update(draft => {
           draft.rolePhasesById[id as UUID].description = next;
-        } else if (field == "prompt_text") {
+        });
+      } else if (field == "prompt_text") {
+        update(draft => {
           draft.promptById[id as UUID].prompt_text = next;
-        } else if (field == "remove_phase") {
-          removePhase(id);
-        }
+        });
+      } else if (field == "remove_phase") {
+        removePhase(id);
       }
-    });
+    }
   }
 
   async function saveTemplate(): Promise<void> {
