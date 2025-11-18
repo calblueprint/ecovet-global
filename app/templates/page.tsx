@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { produce } from "immer";
 import { localStore } from "@/types/schema";
 import TemplateBuilder from "./components/TemplateBuilder";
 
-export const createInitialStore = (): localStore => {
+const createInitialStore = (): localStore => {
   const templateID =
     crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`; //some crazy fix bc this crypto returns as a string but technically isnt UUID like in schema
 
@@ -36,6 +37,10 @@ export default function NewTemplatePage() {
   const [isNew, setIsNew] = useState(false);
   const [newTemp, setNewTemp] = useState<localStore | null>(null);
 
+  function updateLocalStore(updater: (draft: localStore) => void) {
+    setNewTemp(prev => produce(prev, updater));
+  }
+
   async function newTemplate() {
     setNewTemp(createInitialStore());
     setIsNew(true);
@@ -50,7 +55,11 @@ export default function NewTemplatePage() {
     <>
       <h1>New Template Page</h1>
       {isNew ? (
-        <TemplateBuilder localStore={newTemp} onFinish={resetTemplate} />
+        <TemplateBuilder
+          localStore={newTemp}
+          onFinish={resetTemplate}
+          update={updateLocalStore}
+        />
       ) : (
         <button onClick={newTemplate}>New Template</button>
       )}

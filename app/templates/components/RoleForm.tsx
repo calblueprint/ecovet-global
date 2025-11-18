@@ -53,33 +53,31 @@ export default function RoleForm({
                   width: "25%",
                 }}
               >
-                {value.promptIndex[rolePhase.role_phase_id].map(
-                  (promptID, i) => (
-                    <div key={"div" + promptID}>
-                      <input
-                        key={promptID}
-                        type="text"
-                        name="prompt"
-                        placeholder="da prompt"
-                        value={value.promptById[promptID].prompt_text ?? ""}
-                        onChange={e =>
-                          onChange(promptID, "prompt_text", e.target.value)
-                        }
-                      />
-                      <button
-                        onClick={() =>
-                          onChange(
-                            promptID,
-                            "remove_prompt",
-                            rolePhase.role_phase_id,
-                          )
-                        }
-                      >
-                        - Remove
-                      </button>
-                    </div>
-                  ),
-                )}
+                {value.promptIndex[rolePhase.role_phase_id].map(promptID => (
+                  <div key={"div" + promptID}>
+                    <input
+                      key={promptID}
+                      type="text"
+                      name="prompt"
+                      placeholder="da prompt"
+                      value={value.promptById[promptID].prompt_text ?? ""}
+                      onChange={e =>
+                        onChange(promptID, "prompt_text", e.target.value)
+                      }
+                    />
+                    <button
+                      onClick={() =>
+                        onChange(
+                          promptID,
+                          "remove_prompt",
+                          rolePhase.role_phase_id,
+                        )
+                      }
+                    >
+                      - Remove
+                    </button>
+                  </div>
+                ))}
               </div>
               <button
                 onClick={() =>
