@@ -3,6 +3,19 @@
 import React, { useEffect, useState } from "react";
 import { handleProfileSubmit } from "@/api/supabase/queries/profile";
 import { useProfile } from "@/utils/ProfileProvider";
+import {
+  Button,
+  Container,
+  Heading2,
+  Heading3,
+  Input,
+  InputDiv,
+  InputFields,
+  IntroText,
+  Label,
+  Main,
+  WelcomeTag,
+} from "./styles";
 
 export default function EditProfilePage() {
   const { userId, profile, loading: profileLoading } = useProfile();
@@ -43,8 +56,11 @@ export default function EditProfilePage() {
     setMessage("");
 
     const result = await handleProfileSubmit({
-      ...formData,
       id: userId,
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      country: formData.country,
+      org_role: formData.org_role,
     });
 
     if (result.success) {
@@ -59,58 +75,69 @@ export default function EditProfilePage() {
   if (profileLoading) return <p>Loading profile...</p>;
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Edit Profile</h2>
+    <Main>
+      <form onSubmit={handleSubmit}>
+        <Container>
+          <IntroText>
+            <WelcomeTag>
+              {" "}
+              <Heading2> Edit Profile </Heading2>
+              <Heading3>Update your profile information below.</Heading3>
+            </WelcomeTag>
+          </IntroText>
+          <InputFields>
+            <div>
+              <InputDiv>
+                <Label>First Name </Label>
+                <Input
+                  type="text"
+                  name="first_name"
+                  value={formData.first_name}
+                  onChange={handleChange}
+                />
+              </InputDiv>
+            </div>
+            <div>
+              <InputDiv>
+                <Label>Last Name </Label>
+                <Input
+                  type="text"
+                  name="last_name"
+                  value={formData.last_name}
+                  onChange={handleChange}
+                />
+              </InputDiv>
+            </div>
+            <div>
+              <InputDiv>
+                <Label>Country </Label>
+                <Input
+                  type="text"
+                  name="country"
+                  value={formData.country}
+                  onChange={handleChange}
+                />
+              </InputDiv>
+            </div>
+            <div>
+              <InputDiv>
+                <Label>Organization Role </Label>
+                <Input
+                  type="text"
+                  name="org_role"
+                  value={formData.org_role}
+                  onChange={handleChange}
+                />
+              </InputDiv>
+            </div>
+          </InputFields>
+          <Button type="submit" disabled={saving}>
+            {saving ? "Saving..." : "Save Changes"}
+          </Button>
 
-      <label>
-        First Name:
-        <input
-          type="text"
-          name="first_name"
-          value={formData.first_name}
-          onChange={handleChange}
-        />
-      </label>
-      <br />
-
-      <label>
-        Last Name:
-        <input
-          type="text"
-          name="last_name"
-          value={formData.last_name}
-          onChange={handleChange}
-        />
-      </label>
-      <br />
-
-      <label>
-        Country:
-        <input
-          type="text"
-          name="country"
-          value={formData.country}
-          onChange={handleChange}
-        />
-      </label>
-      <br />
-
-      <label>
-        Organization Role:
-        <input
-          type="text"
-          name="org_role"
-          value={formData.org_role}
-          onChange={handleChange}
-        />
-      </label>
-      <br />
-
-      <button type="submit" disabled={saving}>
-        {saving ? "Saving..." : "Save Changes"}
-      </button>
-
-      {message && <p>{message}</p>}
-    </form>
+          {message && <p>{message}</p>}
+        </Container>
+      </form>
+    </Main>
   );
 }

@@ -25,7 +25,7 @@ export default function AddUserGroups() {
       setIsError(true);
     } else {
       const userGroupId = await submitNewUserGroup(userGroupInput);
-      router.push(`/user-groups/add-facilitators?&userGroupId=${userGroupId}`);
+      router.push(`/user-groups/add-facilitators/${userGroupId}`);
     }
   };
 

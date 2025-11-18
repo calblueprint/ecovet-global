@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { FiCheck, FiEye, FiEyeOff, FiX } from "react-icons/fi";
 import Link from "next/link";
+import { checkInvites } from "@/api/supabase/queries/auth";
+import { addEmailtoProfile } from "@/api/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
 import {
   Button,
@@ -42,6 +44,9 @@ export default function Login() {
     rules.length && rules.uppercase && rules.number && rules.specialChar;
 
   const handleSignUp = async () => {
+    if (!(await checkInvites(email))) {
+      throw new Error("You do not have an invite");
+    }
     if (!isPasswordValid) {
       throw new Error("Password does not meet the required criteria");
     }
@@ -57,6 +62,12 @@ export default function Login() {
           data,
       );
     }
+    const userId = data.user?.id;
+    if (!userId) {
+      throw new Error("Signup succeeded but user ID was missing.");
+    }
+    await addEmailtoProfile(userId, email);
+
     alert("Password successfully updated!");
   };
 
@@ -69,7 +80,8 @@ export default function Login() {
           </WelcomeTag>
           <SignInTag>
             {" "}
-            Already have an account? <Link href="/auth/login"> Sign in. </Link>
+            Already have an account?{" "}
+            <Link href="/auth/login-test"> Sign in. </Link>
           </SignInTag>
         </IntroText>
         <InputFields>

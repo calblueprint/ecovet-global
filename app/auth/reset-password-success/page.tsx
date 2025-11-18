@@ -7,14 +7,16 @@ export default function Redirect() {
   const router = useRouter();
 
   const handleRedirect = () => {
-    router.push("/auth/signup");
+    router.push("/auth/sign-in");
   };
 
   return (
     <Main>
       <Container>
         <Heading2> Your password has been reset.</Heading2>
-        <Button onClick={handleRedirect}>Return to Sign in</Button>
+        <Button onClick={handleRedirect} style={{ margin: "2.25rem 0rem" }}>
+          Return to Sign in
+        </Button>
       </Container>
     </Main>
   );
