@@ -3,14 +3,18 @@ import type { UUID } from "crypto";
 // ENUM for Emails.user_email
 export type EmailType = "PLACEHOLDER";
 
-// ENUM for Profiles.user_group
+// ENUM for user_type / user_group
 export type UserType = "Admin" | "Facilitator" | "Participant";
+
+// ENUM for status
+export type StatusType = "Pending" | "Accepted" | "Cancelled";
 
 /* SCHEMA */
 //org_id --> user_group_id
 export interface UserGroup {
   user_group_id: UUID; // user_group_id
   user_group_name: string;
+  num_users: number;
 }
 
 export interface User {
@@ -35,8 +39,8 @@ export interface Profile {
   last_name: string;
   country: string;
   org_role: string;
+  email: string;
 }
-
 export interface Role {
   role_id: UUID; // role_id
   role_name: string;
@@ -122,3 +126,21 @@ export type roleFormInput = {
   promptById: Record<UUID, Prompt>;
   promptIndex: Record<UUID, UUID[]>; // rolephase uuid mapping to a list of prompt uuids
 };
+export interface Tag {
+  tag_id: UUID;
+  name: string;
+  user_group_id: UUID;
+  number: number; // (number of templates with this tag)
+}
+export interface TemplateTag {
+  template_id: UUID;
+  tag_id: UUID;
+}
+export interface Invite {
+  invite_id: UUID;
+  user_group_id: UUID;
+  invited_by_user_id: UUID;
+  email: string;
+  user_type: string;
+  status: string;
+}
