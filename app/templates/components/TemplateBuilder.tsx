@@ -98,7 +98,11 @@ export default function TemplateBuilder({
     if (localStore == null) return;
 
     update(draft => {
-      (draft.rolesById[role_id] as Role).role_name = newLabel;
+      if (typeof role_id === "number") {
+        (draft.rolesById[role_id] as Template).template_name = newLabel;
+      } else {
+        (draft.rolesById[role_id] as Role).role_name = newLabel;
+      }
     });
   }
 
