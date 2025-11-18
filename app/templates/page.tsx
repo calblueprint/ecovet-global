@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { produce } from "immer";
 import { localStore, Template } from "@/types/schema";
 import TemplateBuilder from "./components/TemplateBuilder";
 import {
@@ -41,11 +42,9 @@ const createInitialStore = (): localStore => {
 export default function NewTemplatePage() {
   const [isNew, setIsNew] = useState(false);
   const [newTemp, setNewTemp] = useState<localStore | null>(null);
-  const [, setTick] = useState(0); //some boofed way to force a rerender by calling a random usestate lmao
 
-  function useForceUpdate(): void {
-    // call whenever my screen isn't updating :)
-    setTick(tick => (tick + 1) % 10);
+  function updateLocalStore(updater: (draft: localStore) => void) {
+    setNewTemp(prev => produce(prev, updater));
   }
 
   async function newTemplate() {
@@ -69,7 +68,7 @@ export default function NewTemplatePage() {
           <TemplateBuilder
             localStore={newTemp}
             onFinish={resetTemplate}
-            update={useForceUpdate}
+            update={updateLocalStore}
           />
         ) : (
           <NewTemplateButton onClick={newTemplate}>

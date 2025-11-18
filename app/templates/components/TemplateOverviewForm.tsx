@@ -1,7 +1,7 @@
 import { Template } from "@/types/schema";
 import { BigInput, FieldCard, FieldLegend, FormStack } from "./styles";
 
-export default function TemplteOverviewForm({
+export default function TemplateOverviewForm({
   value,
   onChange,
 }: {
