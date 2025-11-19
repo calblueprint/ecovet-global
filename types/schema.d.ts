@@ -57,6 +57,7 @@ export interface Template {
   summary: string;
   setting: string;
   current_activity: string;
+  timestamp: string;
 }
 
 export interface Session {
@@ -101,6 +102,7 @@ export interface Tag {
   name: string;
   user_group_id: UUID;
   number: number; // (number of templates with this tag)
+  color: string; // might want to change to check COLOR type
 }
 export interface TemplateTag {
   template_id: UUID;

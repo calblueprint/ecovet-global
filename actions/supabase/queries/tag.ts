@@ -2,18 +2,24 @@ import { UUID } from "crypto";
 import { Tag, Template } from "@/types/schema";
 import supabase from "../client";
 
-export async function createTag(
-  name: string,
-  user_group_id: UUID,
-  number: number,
-): Promise<UUID> {
+export type CreateTagParams = {
+  name: string;
+  user_group_id: string;
+  number: number;
+  color: string;
+};
+
+export async function createTag(params: CreateTagParams): Promise<UUID> {
   // inserts a new tag into the tag table, returns the tag_id
+  const { name, user_group_id, number, color } = params;
+
   const { data, error } = await supabase
     .from("tag")
     .insert({
       name,
       user_group_id,
       number,
+      color,
     })
     .select("tag_id")
     .single();
@@ -23,6 +29,15 @@ export async function createTag(
   }
 
   return data.tag_id;
+}
+export async function deleteTag(tag_id: UUID): Promise<boolean> {
+  const { error } = await supabase.from("tag").delete().eq("tag_id", tag_id);
+
+  if (error) {
+    throw new Error(`Error deleting tag: ${error.message}`);
+  }
+
+  return true;
 }
 
 export async function getAllTags(user_group_id: UUID): Promise<Tag[]> {
@@ -119,4 +134,21 @@ export async function getTemplatesforTag(tagId: UUID): Promise<Template[]> {
 
   // List of dicts, one for each template
   return data.map((item: tagTemplate) => item.template);
+}
+
+export async function renameTag(
+  tag_id: UUID,
+  new_name: string,
+): Promise<boolean> {
+  const { error } = await supabase
+    .from("tag")
+    .update({ name: new_name })
+    .eq("tag_id", tag_id);
+
+  if (error) {
+    console.error("Error updating tag:", error.message);
+    return false;
+  }
+
+  return true;
 }
