@@ -46,6 +46,7 @@ export function TagComponent({
 
       {editing ? (
         <input
+          style={{ width: "100%", maxWidth: "100%" }}
           autoFocus
           value={value}
           onChange={e => setValue(e.target.value)}
