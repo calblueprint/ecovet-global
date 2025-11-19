@@ -45,6 +45,7 @@ const SearchBar: React.FC = () => {
   const [sortKey, setSortKey] = useState<"name" | "date">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [selectedTagId, setSelectedTagId] = useState<UUID | null>(null);
+  const [tagVersion, setTagVersion] = useState(0);
 
   // Fetch all templates
   useEffect(() => {
@@ -69,7 +70,7 @@ const SearchBar: React.FC = () => {
       setFilteredTemplates(templatesWithTags);
     };
     loadTemplates();
-  }, [user_group_id]);
+  }, [user_group_id, tagVersion]);
 
   // Filter based on search.
   useEffect(() => {
@@ -162,6 +163,7 @@ const SearchBar: React.FC = () => {
           user_group_id={user_group_id}
           onTagClick={handleTagFilter}
           selectedTagId={selectedTagId}
+          onTagRenamed={() => setTagVersion(v => v + 1)}
         />
       </SidebarDiv>
       <MainDiv>

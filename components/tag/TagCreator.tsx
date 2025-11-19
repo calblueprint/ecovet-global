@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { UUID } from "crypto";
-import { createTag, getAllTags } from "@/actions/supabase/queries/tag";
+import {
+  createTag,
+  getAllTags,
+  renameTag,
+} from "@/actions/supabase/queries/tag";
 import img from "@/assets/images/NewTagPlus.png";
 import COLORS from "@/styles/colors";
 import { Tag } from "@/types/schema";
@@ -12,6 +16,7 @@ type TagCreatorProps = {
   user_group_id: UUID;
   onTagClick: (tag_id: UUID) => void;
   selectedTagId: UUID | null;
+  onTagRenamed?: () => void;
 };
 
 type ColorKey = keyof typeof COLORS;
@@ -20,6 +25,7 @@ export function TagCreator({
   user_group_id,
   onTagClick,
   selectedTagId,
+  onTagRenamed,
 }: TagCreatorProps) {
   // Switch to use Tag type from schema
   const [tags, setTags] = useState<Tag[]>([]);
@@ -65,8 +71,20 @@ export function TagCreator({
       color: "teal",
     };
 
-    // 2) Add returned tag to UI state
+    // Add returned tag to UI state
     setTags(prev => [...prev, newTag]);
+  }
+
+  async function handleRename(tag_id: UUID, newName: string) {
+    const success = await renameTag(tag_id, newName);
+    if (!success) return;
+
+    // Update state
+    setTags(prev =>
+      prev.map(t => (t.tag_id === tag_id ? { ...t, name: newName } : t)),
+    );
+
+    onTagRenamed?.();
   }
 
   useEffect(() => {
@@ -89,6 +107,7 @@ export function TagCreator({
             tag_id={tag.tag_id}
             sidebar={true}
             onClick={() => onTagClick(tag.tag_id)}
+            onRename={handleRename}
           />
         </SidebarTag>
       ))}

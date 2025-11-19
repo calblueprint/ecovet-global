@@ -1,4 +1,5 @@
 import { UUID } from "crypto";
+import { rename } from "fs";
 import { Tag, Template } from "@/types/schema";
 import supabase from "../client";
 
@@ -134,4 +135,21 @@ export async function getTemplatesforTag(tagId: UUID): Promise<Template[]> {
 
   // List of dicts, one for each template
   return data.map((item: tagTemplate) => item.template);
+}
+
+export async function renameTag(
+  tag_id: UUID,
+  new_name: string,
+): Promise<boolean> {
+  const { error } = await supabase
+    .from("tag")
+    .update({ name: new_name })
+    .eq("tag_id", tag_id);
+
+  if (error) {
+    console.error("Error updating tag:", error.message);
+    return false;
+  }
+
+  return true;
 }
