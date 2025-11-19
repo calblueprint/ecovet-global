@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { checkProfileExists } from "@/api/supabase/queries/profile";
+import { addEmailtoProfile, makeAdmin } from "@/api/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
 import {
   Button,
@@ -22,7 +22,7 @@ export default function Login() {
   const sessionHandler = useSession();
 
   const handleSignUp = async () => {
-    const { error } = await sessionHandler.signUp(email, password);
+    const { data, error } = await sessionHandler.signUp(email, password);
     if (error) {
       throw new Error(
         "An error occurred during sign up: " +
@@ -31,6 +31,12 @@ export default function Login() {
           email,
       );
     }
+    const userId = data.user?.id;
+    if (!userId) {
+      throw new Error("Signup succeeded but user ID was missing.");
+    }
+    await addEmailtoProfile(userId, email);
+    await makeAdmin(userId);
   };
 
   const signInWithEmail = async () => {
@@ -50,12 +56,7 @@ export default function Login() {
     if (!data.user) {
       throw new Error("User not found after sign in");
     }
-
-    if (await checkProfileExists(data.user.id)) {
-      router.push("/onboarding");
-    } else {
-      router.push("/edit-profile");
-    }
+    router.push("/test-page");
   };
 
   const signOut = async () => {
@@ -69,8 +70,8 @@ export default function Login() {
   return (
     <>
       <Main>
-        <WelcomeTag>Welcome!</WelcomeTag>
-        <SignInTag> Already have an account? Sign in.</SignInTag>
+        <WelcomeTag>Test Admin Portal</WelcomeTag>
+        <SignInTag>Sign up to be admin, no password requirements</SignInTag>
         Email address
         <EmailAddressDiv>
           <Input

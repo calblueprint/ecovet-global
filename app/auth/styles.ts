@@ -219,3 +219,15 @@ export const Button = styled.button`
   opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 `;
+
+export const ForgetPasswordTag = styled.div`
+  width: fit-content;
+  height: fit-content;
+  color: ${COLORS.black70};
+  font-family: ${Sans.style.fontFamily};
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  padding-top: 0.6rem;
+`;
