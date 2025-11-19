@@ -1,22 +1,29 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import { UUID } from "crypto";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import {
+  assignTagToTemplate,
+  getAllTags,
   getTagsForTemplate,
   removeTagFromTemplate,
 } from "@/actions/supabase/queries/tag";
 import { fetchAllTemplates } from "@/actions/supabase/queries/templates";
+import img from "@/assets/images/NewTagPlus.png";
+import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import { TagComponent } from "@/components/tag/Tag";
 import { TagCreator } from "@/components/tag/TagCreator";
 import COLORS from "@/styles/colors";
 import { Tag, Template } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
+  AddNewTagPlus,
   AssociatedTags,
   Heading3,
   MainDiv,
+  NewTag,
   PageDiv,
   SearchBarStyled,
   SearchInput,
@@ -46,6 +53,10 @@ const SearchBar: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [selectedTagId, setSelectedTagId] = useState<UUID | null>(null);
   const [tagVersion, setTagVersion] = useState(0);
+  const [openTagDropdownFor, setOpenTagDropdownFor] = useState<UUID | null>(
+    null,
+  );
+  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
 
   // Fetch all templates
   useEffect(() => {
@@ -151,6 +162,55 @@ const SearchBar: React.FC = () => {
     );
   }
 
+  async function addNewTag(template_id: UUID) {
+    // If dropdown already open for template, close the dropdown
+    if (openTagDropdownFor == template_id) {
+      setOpenTagDropdownFor(null);
+      return;
+    }
+
+    // Get all tags for the user group
+    const allTags = await getAllTags(user_group_id);
+
+    // Get current template
+    const template = templates.find(t => t.template_id === template_id);
+    if (!template) return;
+
+    // Remove tags already assigned
+    const alreadyAssigned = new Set(
+      template.associated_tags.map(t => t.tag_id),
+    );
+
+    const filtered = allTags.filter(t => !alreadyAssigned.has(t.tag_id));
+
+    setAvailableTags(filtered);
+    setOpenTagDropdownFor(template_id);
+  }
+
+  async function handleSelectTag(template_id: UUID, tag_id: UUID) {
+    const success = await assignTagToTemplate(template_id, tag_id);
+
+    if (success) {
+      // Optimistically update UI
+      setTemplates(prev =>
+        prev.map(t =>
+          t.template_id === template_id
+            ? {
+                ...t,
+                associated_tags: [
+                  ...t.associated_tags,
+                  availableTags.find(tag => tag.tag_id === tag_id)!,
+                ],
+              }
+            : t,
+        ),
+      );
+    }
+
+    // close dropdown
+    setOpenTagDropdownFor(null);
+  }
+
   const handleTagFilter = (tag_id: UUID) => {
     // Toggle: click again to clear filter
     setSelectedTagId(prev => (prev === tag_id ? null : tag_id));
@@ -227,6 +287,27 @@ const SearchBar: React.FC = () => {
                   />{" "}
                 </TemplateTag>
               ))}
+
+              <NewTag onClick={() => addNewTag(template.template_id)}>
+                <AddNewTagPlus>
+                  <Image alt="add new tag plus icon" src={img} />
+                </AddNewTagPlus>
+                New Tag
+              </NewTag>
+
+              {openTagDropdownFor === template.template_id && (
+                <InputDropdown
+                  options={
+                    new Map(availableTags.map(tag => [tag.tag_id, tag.name]))
+                  }
+                  label="Select tag"
+                  onChange={value => {
+                    if (value) {
+                      handleSelectTag(template.template_id, value as UUID);
+                    }
+                  }}
+                />
+              )}
             </AssociatedTags>
             <span>
               {" "}

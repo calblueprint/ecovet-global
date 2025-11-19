@@ -1,5 +1,4 @@
 import { UUID } from "crypto";
-import { rename } from "fs";
 import { Tag, Template } from "@/types/schema";
 import supabase from "../client";
 
