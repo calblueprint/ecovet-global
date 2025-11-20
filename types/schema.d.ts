@@ -9,6 +9,9 @@ export type UserType = "Admin" | "Facilitator" | "Participant";
 // ENUM for status
 export type StatusType = "Pending" | "Accepted" | "Cancelled";
 
+// ENUM for prompt_type
+export type PromptType = "text" | "multiple_choice" | "checkbox"; 
+
 /* SCHEMA */
 //org_id --> user_group_id
 export interface UserGroup {
@@ -88,12 +91,14 @@ export interface Prompt {
   phase_id: UUID;
   role_phase_id: UUID;
   prompt_text: string;
+  prompt_type: PromptType;
 }
 
 export interface PromptAnswer {
   prompt_response_id: UUID; // prompt_answer_id
   user_id: UUID;
   prompt_id: UUID;
+  prompt_option_id: UUID;
   prompt_answer: string;
 }
 export interface Tag {
@@ -113,4 +118,9 @@ export interface Invite {
   email: string;
   user_type: string;
   status: string;
+}
+export interface PromptOption {
+  option_id: UUID;
+  prompt_id: UUID;
+  option_text: string;
 }
