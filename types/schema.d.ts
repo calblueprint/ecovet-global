@@ -93,7 +93,11 @@ export interface Prompt {
   prompt_text: string;
   prompt_type: PromptType;
 }
-
+export interface PromptOption {
+  option_id: UUID;
+  prompt_id: UUID;
+  option_text: string;
+}
 export interface PromptAnswer {
   prompt_response_id: UUID; // prompt_answer_id
   user_id: UUID;
@@ -118,9 +122,4 @@ export interface Invite {
   email: string;
   user_type: string;
   status: string;
-}
-export interface PromptOption {
-  option_id: UUID;
-  prompt_id: UUID;
-  option_text: string;
 }

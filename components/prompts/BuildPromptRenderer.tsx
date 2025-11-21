@@ -1,10 +1,7 @@
 'use client'
-
-import { UUID } from "crypto";
 import { useState, useEffect } from "react";
 import { PromptRendererStyled, QuestionHeader } from "./styles";
 import { PromptType, PromptOption } from "@/types/schema";
-import { getOptionsForPrompt } from "@/actions/supabase/queries/prompt";
 import TextPrompt from "./TextPrompt";
 import MultipleChoicePrompt from "./MultipleChoicePrompt";
 import CheckboxPrompt from "./CheckboxPrompt";
@@ -13,24 +10,21 @@ import CheckboxPrompt from "./CheckboxPrompt";
 export type StagedOption = {
     option_number: number;
     option_text: string;
-    is_correct?: boolean;    // used for MCQ/Checkbox
 }
 
 type PromptRendererProps = {
-    prompt_id: UUID;
-    onUpdate: (prompt_id: UUID, data: { 
+    prompt_id: number;
+    onUpdate: (prompt_id: number, data: { 
         question: string;
         promptType: PromptType; 
         options: StagedOption[];
     }) => void;
 };
-
 export interface OptionsProps {
     options: StagedOption[];
     updateOptionText: (option_number: number, text: string) => void;
     addNewOption?: (newText: string) => void;
     deleteOption?: (option_number: number) => void;
-    toggleCorrect?: (option_number: number) => void;
 }
 
 export default function PromptRenderer ({
@@ -60,7 +54,6 @@ export default function PromptRenderer ({
         {
         option_number: prev.length + 1,
         option_text: newText,
-        is_correct: false,
         }
     ]);
     }
@@ -83,27 +76,6 @@ export default function PromptRenderer ({
         );
     }
 
-    function toggleCorrect(option_number: number) {
-        if (promptType === "multiple_choice") {
-        // only one correct
-        setOptions(prev =>
-            prev.map(o => ({
-            ...o,
-            is_correct: o.option_number === option_number
-            }))
-        );
-        } else {
-        // checkbox: many correct
-        setOptions(prev =>
-            prev.map(o =>
-            o.option_number === option_number
-                ? { ...o, is_correct: !o.is_correct }
-                : o
-            )
-        );
-        }
-    }
-
     const optionsField =
         promptType === "text" ? (
         <TextPrompt 
@@ -116,7 +88,6 @@ export default function PromptRenderer ({
             addNewOption={addNewOption}
             deleteOption={deleteOption}
             updateOptionText={updateOptionText}
-            toggleCorrect={toggleCorrect}
         />
         ) : (
         <CheckboxPrompt
@@ -124,7 +95,6 @@ export default function PromptRenderer ({
             addNewOption={addNewOption}
             deleteOption={deleteOption}
             updateOptionText={updateOptionText}
-            toggleCorrect={toggleCorrect}
         />
         );
 

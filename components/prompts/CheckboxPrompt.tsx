@@ -6,7 +6,6 @@ export default function CheckboxPrompt ({
     options,
     addNewOption,
     deleteOption, 
-    toggleCorrect,
     updateOptionText, 
 }: OptionsProps) {
 
@@ -27,8 +26,8 @@ export default function CheckboxPrompt ({
                 >
                     <input 
                         type="checkbox"
-                        checked={opt.is_correct}
-                        onChange={() => toggleCorrect?.(opt.option_number)}
+                        // checked={opt.is_correct}
+                        // onChange={() => toggleCorrect?.(opt.option_number)}
                     />
 
                     <input

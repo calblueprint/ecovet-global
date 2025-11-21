@@ -5,7 +5,6 @@ export default function MultipleChoicePrompt ({
     options,
     addNewOption,
     deleteOption, 
-    toggleCorrect,
     updateOptionText,
 }: OptionsProps) {
 
@@ -29,8 +28,8 @@ export default function MultipleChoicePrompt ({
                 <input
                     type="radio"
                     name="mcq-correct"
-                    checked={opt.is_correct === true}
-                    onChange={() => toggleCorrect?.(opt.option_number)}
+                    // checked={opt.is_correct === true}
+                    // onChange={() => toggleCorrect?.(opt.option_number)}
                 />
 
                 {/* Option text */}
