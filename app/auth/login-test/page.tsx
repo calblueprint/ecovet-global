@@ -23,7 +23,7 @@ export default function Login() {
 
   const handleSignUp = async () => {
     const { error } = await sessionHandler.signUp(email, password, {
-      emailRedirectTo: "http://localhost:3000/onboarding?fromSignup=true",
+      emailRedirectTo: "http://ecovet-global.vercel.app/onboarding?fromSignup=true",
     });
     if (error) {
       throw new Error(
