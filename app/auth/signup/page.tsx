@@ -49,7 +49,8 @@ export default function Login() {
       throw new Error("Passwords do not match");
     }
     const { data, error } = await sessionHandler.signUp(email, password, {
-      emailRedirectTo: "http://ecovet-global.vercel.app/onboarding?fromSignup=false",
+      emailRedirectTo:
+        "http://ecovet-global.vercel.app/onboarding?fromSignup=false",
     });
     if (error) {
       throw new Error(
