@@ -5,19 +5,7 @@ import supabase from "@/actions/supabase/client";
 import { fetchSessionById } from "@/api/supabase/queries/profile";
 import { fetchTemplateId } from "@/api/supabase/queries/sessions";
 import { useProfile } from "@/utils/ProfileProvider";
-import {
-  Button,
-  Container,
-  Heading2,
-  Heading3,
-  Input,
-  InputDiv,
-  InputFields,
-  IntroText,
-  Label,
-  Main,
-  WelcomeTag,
-} from "./styles";
+import { Heading2, Main } from "./styles";
 
 export default function ParticipantWaitingPage() {
   const { profile } = useProfile();
