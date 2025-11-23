@@ -17,6 +17,12 @@ export default function Home() {
       <Link href="/auth/sign-in">
         <button>Sign in</button>
       </Link>
+      <Link href="/participants/session-start">
+        <button>Participants View</button>
+      </Link>
+      <Link href="/sessions/role-selection">
+        <button>Role Selection</button>
+      </Link>
     </main>
   );
 }
