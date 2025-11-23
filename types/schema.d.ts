@@ -10,7 +10,7 @@ export type UserType = "Admin" | "Facilitator" | "Participant";
 export type StatusType = "Pending" | "Accepted" | "Cancelled";
 
 // ENUM for prompt_type
-export type PromptType = "text" | "multiple_choice" | "checkbox"; 
+export type PromptType = "text" | "multiple_choice" | "checkbox";
 
 /* SCHEMA */
 //org_id --> user_group_id
