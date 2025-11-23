@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { UUID } from "crypto";
 import supabase from "@/api/supabase/createClient";
 
@@ -84,23 +84,27 @@ export async function getIsAsync(user_session_id: UUID): Promise<boolean> {
   return is_async;
 }
 
-export async function getSessionById(
-  session_id: string,
-): Promise<SessionLevelContext> {
+export function getSessionById(session_id: string): SessionLevelContext {
   const [sessionContext, setSessionContext] = useState<SessionLevelContext>({
     sessionId: session_id,
     templateId: null,
     isAsync: null,
   });
-  const user_id = await getUserId(session_id);
-  const user_session_id = await getSessionId(user_id);
-  const template_id = await getTemplateId(user_session_id);
-  const is_async = await getIsAsync(user_session_id);
-  setSessionContext({
-    sessionId: session_id,
-    templateId: template_id,
-    isAsync: is_async,
-  });
+  useEffect(() => {
+    (async () => {
+      const user_id = await getUserId(session_id);
+      const user_session_id = await getSessionId(user_id);
+      const template_id = await getTemplateId(user_session_id);
+      const is_async = await getIsAsync(user_session_id);
+
+      setSessionContext({
+        sessionId: session_id,
+        templateId: template_id,
+        isAsync: is_async,
+      });
+    })();
+  }, [session_id]);
+
   return sessionContext;
 }
 
