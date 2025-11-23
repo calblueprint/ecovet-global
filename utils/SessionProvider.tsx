@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { createContext, useState } from "react";
 import { UUID } from "crypto";
 import supabase from "@/api/supabase/createClient";
 
@@ -18,14 +18,20 @@ export interface ParticipantSessionContext {
   isFinished: boolean | null;
 }
 
+type SessionContextType = {
+  userId: string | null;
+  sessionLevelContext: SessionLevelContext | null;
+  participantSessionContext: ParticipantSessionContext | null;
+};
+
 export async function getUserId(session_id: string): Promise<UUID> {
   const { data, error } = await supabase
-    .from("sessions")
+    .from("session")
     .select("user_id")
     .eq("id", session_id)
     .single();
 
-  if (error) {
+  if (error || !data) {
     console.error("Error fetching session by session_id:", error);
   }
 
@@ -40,7 +46,7 @@ export async function getSessionId(user_id: UUID): Promise<UUID> {
     .eq("id", user_id)
     .single();
 
-  if (error) {
+  if (error || !data) {
     console.error("Error fetching session by session_id:", error);
   }
 
@@ -63,18 +69,18 @@ export async function getTemplateId(user_session_id: UUID): Promise<UUID> {
   return template_id;
 }
 
-export async function isAsync(user_session_id: UUID): Promise<boolean> {
+export async function getIsAsync(user_session_id: UUID): Promise<boolean> {
   const { data, error } = await supabase
     .from("session")
     .select("is_async")
     .eq("session_id", user_session_id)
     .single();
 
-  if (error) {
+  if (error || !data) {
     console.error("Error fetching session by session_id:", error);
   }
 
-  const is_async: boolean = data as unknown as boolean;
+  const is_async = data?.is_async ?? false;
   return is_async;
 }
 
@@ -89,7 +95,7 @@ export async function getSessionById(
   const user_id = await getUserId(session_id);
   const user_session_id = await getSessionId(user_id);
   const template_id = await getTemplateId(user_session_id);
-  const is_async = await isAsync(user_session_id);
+  const is_async = await getIsAsync(user_session_id);
   setSessionContext({
     sessionId: session_id,
     templateId: template_id,
@@ -106,6 +112,11 @@ export async function getUserProfile(
     .select("role_id, phase_id, is_finished")
     .eq("id", user_id)
     .single();
+
+  if (error || !data) {
+    console.error("Error fetching session by session_id:", error);
+  }
+
   const participantContext: ParticipantSessionContext =
     data as unknown as ParticipantSessionContext;
   return participantContext;
@@ -118,5 +129,14 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [participantSessionContext, setParticipantSessionContext] =
     useState<ParticipantSessionContext | null>(null);
 
-  return <div></div>;
+  const SessionContext = createContext<SessionContextType | undefined>(
+    undefined,
+  );
+  return (
+    <SessionContext.Provider
+      value={{ userId, sessionLevelContext, participantSessionContext }}
+    >
+      {children}
+    </SessionContext.Provider>
+  );
 }
