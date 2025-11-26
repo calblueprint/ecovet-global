@@ -60,6 +60,12 @@ export default function TemplateBuilder({
   function removeRole(role_id: UUID | number): void {
     if (localStore == null || typeof role_id == "number") return; //if role_id is '1', the current tab is Scenario Overivew and therefore should not be removed
 
+    let nextActive: UUID | number = 1;
+    const idx = localStore.roleIds.indexOf(role_id);
+    if (idx !== -1) {
+      nextActive =
+        localStore.roleIds[idx + 1] ?? localStore.roleIds[idx - 1] ?? 1;
+    }
     update(draft => {
       delete draft.rolesById[role_id];
       const i = draft.roleIds.indexOf(role_id);
@@ -74,7 +80,7 @@ export default function TemplateBuilder({
       }
       delete draft.rolePhaseIndex[role_id];
     });
-    setActiveId(localStore.roleIds.at(-1)!);
+    setActiveId(nextActive);
   }
 
   function renameRole(role_id: UUID | number, newLabel: string) {
@@ -138,11 +144,11 @@ export default function TemplateBuilder({
           if (rolePhaseID) {
             delete draft.rolePhasesById[rolePhaseID];
             delete obj[removedPhaseID];
+            for (const prompt of draft.promptIndex[rolePhaseID]) {
+              delete draft.promptById[prompt];
+            }
+            delete draft.promptIndex[rolePhaseID];
           }
-          for (const prompt of draft.promptIndex[rolePhaseID]) {
-            delete draft.promptById[prompt];
-          }
-          delete draft.promptIndex[rolePhaseID];
         }
       }
     });
@@ -157,7 +163,7 @@ export default function TemplateBuilder({
         prompt_id: newPromptID,
         user_id: null,
         role_phase_id: rolePhaseID,
-        prompt_text: "New Prompt",
+        prompt_text: "",
       };
       draft.promptIndex[rolePhaseID].push(newPromptID);
     });
@@ -207,39 +213,42 @@ export default function TemplateBuilder({
 
   async function saveTemplate(): Promise<void> {
     setSaving(true);
+
     if (localStore == null) return;
+    const saveStore: localStore = structuredClone(localStore);
+
     const realtemplateID = await createTemplates(
-      localStore.templateID,
-      "erm name tbd",
+      saveStore.templateID,
+      (saveStore.rolesById[1] as Template).template_name,
       null,
-      (localStore.rolesById[1] as Template).objective,
-      (localStore.rolesById[1] as Template).summary,
-      (localStore.rolesById[1] as Template).setting,
-      (localStore.rolesById[1] as Template).current_activity,
+      (saveStore.rolesById[1] as Template).objective,
+      (saveStore.rolesById[1] as Template).summary,
+      (saveStore.rolesById[1] as Template).setting,
+      (saveStore.rolesById[1] as Template).current_activity,
     );
 
-    for (const roleID of localStore.roleIds) {
+    for (const roleID of saveStore.roleIds) {
       if (!(typeof roleID == "number")) {
         await createRoles(
           roleID,
           realtemplateID,
-          (localStore.rolesById[roleID] as Role).role_name,
-          (localStore.rolesById[roleID] as Role).role_description,
+          (saveStore.rolesById[roleID] as Role).role_name,
+          (saveStore.rolesById[roleID] as Role).role_description,
         );
       }
     }
 
-    for (const phaseID of localStore.phaseIds) {
+    for (const phaseID of saveStore.phaseIds) {
       await createPhases(
         phaseID,
-        localStore.phasesById[phaseID].session_id,
-        localStore.phasesById[phaseID].phase_name,
-        localStore.phasesById[phaseID].is_finished,
-        localStore.phasesById[phaseID].phase_description,
+        saveStore.phasesById[phaseID].session_id,
+        saveStore.phasesById[phaseID].phase_name,
+        saveStore.phasesById[phaseID].is_finished,
+        saveStore.phasesById[phaseID].phase_description,
       );
     }
 
-    for (const [roleID, obj] of Object.entries(localStore.rolePhaseIndex) as [
+    for (const [roleID, obj] of Object.entries(saveStore.rolePhaseIndex) as [
       UUID,
       Record<UUID, UUID>,
     ][]) {
@@ -251,12 +260,12 @@ export default function TemplateBuilder({
           rolePhaseID,
           phaseID,
           roleID,
-          localStore.rolePhasesById[rolePhaseID].description,
+          saveStore.rolePhasesById[rolePhaseID].description,
         );
       }
     }
 
-    for (const [promptID, prompt] of Object.entries(localStore.promptById) as [
+    for (const [promptID, prompt] of Object.entries(saveStore.promptById) as [
       UUID,
       Prompt,
     ][]) {
