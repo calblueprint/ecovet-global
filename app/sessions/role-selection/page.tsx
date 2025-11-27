@@ -73,6 +73,11 @@ export default function RoleSelectionPage() {
     setRoleSelection(prev => prev.toSpliced(index, 1));
   };
 
+  const handleStartGame = async () => {
+    handleSave();
+    handleAssignSession();
+  };
+
   const handleAssignSession = async () => {
     const templateId = "e470268b-6074-435c-b647-85a1c7fff244";
     if (loading || !profile?.user_group_id) return;
@@ -170,12 +175,8 @@ export default function RoleSelectionPage() {
 
       <button onClick={addParticipant}>+ Add Participant</button>
 
-      <button onClick={handleSave} disabled={saving}>
-        {saving ? "Saving..." : "Save"}
-      </button>
-
-      <button onClick={handleAssignSession} disabled={saving}>
-        {assignedRoles ? "Adding Session.." : "Next"}
+      <button onClick={handleStartGame} disabled={saving}>
+        {assignedRoles ? "Starting Game..." : "Start Game"}
       </button>
 
       {message && <p>{message}</p>}

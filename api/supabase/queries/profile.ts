@@ -103,6 +103,20 @@ export async function fetchRoleById(role_id: UUID) {
   return data;
 }
 
+export async function fetchSessionById(id: string) {
+  const { data, error } = await supabase
+    .from("profile")
+    .select("session_id")
+    .eq("id", id)
+    .single();
+  if (error) {
+    console.error("Error fetching role by role_id:", error.message);
+    return null;
+  }
+
+  return data;
+}
+
 export async function handleProfileSubmit(profile: {
   id: string;
   first_name: string;
