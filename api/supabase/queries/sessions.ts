@@ -1,4 +1,6 @@
+import { UUID } from "crypto";
 import supabase from "@/actions/supabase/client";
+import { Phase, RolePhase } from "@/types/schema";
 
 export async function fetchRoles(templateId: string) {
   const { data, error } = await supabase
@@ -66,4 +68,43 @@ export async function createSession(templateId: string, userGroupId: string) {
 
   if (error) throw error;
   return data[0].session_id;
+}
+
+export async function fetchPhases(sessionId: UUID): Promise<Phase[]> {
+  const { data, error } = await supabase
+    .from("phase")
+    .select("*")
+    .eq("session_id", sessionId);
+  if (error) {
+    console.error("Error fetching profile by user_id:", error);
+  }
+
+  return data ?? [];
+}
+
+export async function fetchRolePhases(
+  roleId: UUID,
+  phaseId: UUID,
+): Promise<RolePhase> {
+  const { data, error } = await supabase
+    .from("role_phase")
+    .select("*")
+    .eq("phase_id", phaseId)
+    .eq("role_id", roleId)
+    .single();
+  if (error) {
+    console.error("Error fetching profile by user_id:", error);
+  }
+  return data;
+}
+
+export async function fetchPrompts(rolePhaseId: UUID): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("prompt")
+    .select("prompt_text")
+    .eq("role_phase_id", rolePhaseId);
+  if (error) {
+    console.error("Error fetching profile by user_id:", error);
+  }
+  return data?.map(prompt => prompt.prompt_text) ?? [];
 }
