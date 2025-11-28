@@ -39,7 +39,6 @@ export const TopNavButton = styled.button<{ $active?: boolean }>`
   text-align: center;
   gap: 0.5em;
   background-color: ${COLORS.oat_light};
-  border-radius: 0.25rem;
   border: none;
   font-family: ${Sans.style.fontFamily};
   font-size: 12px;
@@ -59,7 +58,14 @@ export const TopNavButton = styled.button<{ $active?: boolean }>`
   }
 
   color: ${COLORS.black70};
+
   gap: 0.75rem;
+  ${({ $active }) =>
+    $active &&
+    `
+      border-bottom: 0.175rem solid ${COLORS.teal};
+      color: ${COLORS.black70};
+    `}
 `;
 
 export const ImageLogo = styled.img`
