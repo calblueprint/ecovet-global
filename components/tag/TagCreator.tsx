@@ -21,6 +21,14 @@ type TagCreatorProps = {
 
 type ColorKey = keyof typeof COLORS;
 
+const TAG_COLOR_ORDER: ColorKey[] = [
+  "tagRed",
+  "tagOrange",
+  "tagYellow",
+  "tagGreen",
+  "tagBlue",
+];
+
 export function TagCreator({
   user_group_id,
   onTagClick,
@@ -33,33 +41,17 @@ export function TagCreator({
   // Pull data from server or DB
   async function getTags() {
     const pulledTags = await getAllTags(user_group_id);
-
-    // const pulledTags = [
-    //     {
-    //       tag_id: "092fa7b1-7509-4f09-86e6-62a5223113cb" as UUID,
-    //       name: "meow",
-    //       user_group_id: "0b73ed2d-61c3-472e-b361-edaa88f27622" as UUID,
-    //       number: 1, // (number of templates with this tag)
-    //       color: "teal" // might want to change to check COLOR type
-    //     },
-    //     {
-    //       tag_id: "092fa7b1-7509-4f09-86e6-62a5223113cd" as UUID,
-    //       name: "meow1",
-    //       user_group_id: "0b73ed2d-61c3-472e-b361-edaa88f27622" as UUID,
-    //       number: 1, // (number of templates with this tag)
-    //       color: "orange" // might want to change to check COLOR type
-    //     }
-    // ];
-
     setTags(pulledTags);
   }
 
   async function addNewTag() {
+    const nextColor = TAG_COLOR_ORDER[tags.length % TAG_COLOR_ORDER.length];
+
     const new_tag_id = await createTag({
       name: "New tag",
       user_group_id: user_group_id,
       number: 10,
-      color: "teal",
+      color: nextColor,
     });
 
     // Construct the full Tag manually
@@ -68,7 +60,7 @@ export function TagCreator({
       name: "New tag",
       user_group_id: user_group_id,
       number: 10,
-      color: "teal",
+      color: nextColor,
     };
 
     // Add returned tag to UI state
@@ -100,13 +92,16 @@ export function TagCreator({
         New Tag
       </NewTag>
       {tags.map(tag => (
-        <SidebarTag key={tag.tag_id} $isSelected={selectedTagId === tag.tag_id}>
+        <SidebarTag
+          key={tag.tag_id}
+          $isSelected={selectedTagId === tag.tag_id}
+          onClick={() => onTagClick(tag.tag_id)}
+        >
           <TagComponent
             color={tag.color as ColorKey}
             name={tag.name}
             tag_id={tag.tag_id}
             sidebar={true}
-            onClick={() => onTagClick(tag.tag_id)}
             onRename={handleRename}
           />
         </SidebarTag>

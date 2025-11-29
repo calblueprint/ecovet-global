@@ -70,7 +70,7 @@ export const TemplateTitle = styled.h1`
   padding: 1.25rem 2rem 1.25rem 2rem;
   background: ${COLORS.white};
   font-family: ${Sans.style.fontFamily};
-  font-color: ${COLORS.black40};
+  color: ${COLORS.black40};
   font-size: 12px;
   font-weight: 500;
 `;
@@ -97,15 +97,16 @@ export const TemplateList = styled.ul`
   grid-template-columns: 1fr 1fr auto; /* left | middle | right */
   column-gap: 1rem;
   align-items: start;
+  justify-content: center;
 
   border-radius: 0.5rem 0.5rem 0 0;
   border-bottom: 1px solid ${COLORS.oat_medium};
-  padding: 1.25rem 2rem 1.25rem 2rem;
+  padding: 1rem 2rem;
   list-style-type: none;
-  ont-family: ${Sans.style.fontFamily};
+  font-family: ${Sans.style.fontFamily};
   font-size: 12px;
   font-weight: 500;
-  font-color: ${COLORS.black70};
+  color: ${COLORS.black70};
 `;
 
 export const AssociatedTags = styled.div`
@@ -118,28 +119,33 @@ export const TemplateTag = styled.span`
   display: inline-flex;
   border-radius: 4px;
   background: var(--Oat-Medium, #eee);
-  padding-left: 12px;
   justify-content: center;
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
+  height: 30px;
 `;
 
 export const NewTag = styled.button`
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  width: 150px;
   padding: 12px 24px;
-  gap: 10px;
+  gap: 7px;
   font-family: ${Sans.style.fontFamily};
   font-size: 12px;
   font-style: normal;
   font-weight: 500;
   line-height: normal;
   border: none;
+  border-radius: 4px;
   background-color: transparent;
   color: var(--Black-40, #959492);
+  height: 30px;
+  cursor: pointer;
+  &:hover {
+    background-color: ${COLORS["oat_light"]};
+  }
 `;
 
 export const AddNewTagPlus = styled.div`
@@ -148,4 +154,7 @@ export const AddNewTagPlus = styled.div`
   width: 11px;
   height: 11px;
   flex-shrink: 0;
+  &:hover {
+    background-color: ${COLORS["oat_medium"]};
+  }
 `;
