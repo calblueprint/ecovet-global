@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { fetchUserGroups } from "@/api/supabase/queries/user-groups";
 import { UserGroup } from "@/types/schema";
 
 const UserGroupsPage = () => {
+  const router = useRouter();
   const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
 
   useEffect(() => {
@@ -22,6 +24,10 @@ const UserGroupsPage = () => {
 
   return (
     <div>
+      <Link href="/test-page">
+        <button>Back</button>
+      </Link>
+
       <h1>User Groups</h1>
       <ul>
         {userGroups.map(group => (
@@ -35,9 +41,9 @@ const UserGroupsPage = () => {
         ))}
       </ul>
 
-      <Link href={"/"}>
-        <button>Invite</button>
-      </Link>
+      <button onClick={() => router.replace("/user-groups/add-user-groups")}>
+        Invite
+      </button>
     </div>
   );
 };
