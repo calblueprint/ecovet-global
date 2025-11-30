@@ -6,6 +6,7 @@ import { UUID } from "crypto";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import {
   assignTagToTemplate,
+  deleteTag,
   getAllTags,
   getTagsForTemplate,
   removeTagFromTemplate,
@@ -90,27 +91,29 @@ const SearchBar: React.FC = () => {
 
     console.log("updated ", updated.length);
 
-    if (selectedTagId) {
-      updated = updated.filter(template =>
-        template.associated_tags.some(tag => tag.tag_id === selectedTagId),
-      );
+    updated = updated.filter(template =>
+      template.associated_tags.some(tag => tag.tag_id === selectedTagId),
+    );
 
-      console.log("updated for selected tag", selectedTagId);
-    }
+    console.log("updated for selected tag", selectedTagId);
 
     console.log("updated ", updated.length);
 
-    updated = (updated ?? []).filter(template =>
-      template.template_name
-        .toLowerCase()
-        .includes(searchInput.trim().toLowerCase()),
-    );
+    if (updated) {
+      updated = updated.filter(template =>
+        template.template_name
+          ?.toLowerCase()
+          .includes(searchInput.trim().toLowerCase()),
+      );
+    }
 
     console.log("updated ", updated.length);
 
     updated.sort((a, b) => {
       if (sortKey === "name") {
-        const result = a.template_name.localeCompare(b.template_name);
+        const result = (a.template_name ?? "").localeCompare(
+          b.template_name ?? "",
+        );
         return sortOrder === "asc" ? result : -result;
       } else {
         const result =
@@ -137,29 +140,70 @@ const SearchBar: React.FC = () => {
     }
   };
 
-  async function deleteTagComponent(template_id: UUID, tag_id: UUID) {
-    // Delete tag from DB
-    const success = await removeTagFromTemplate(template_id, tag_id);
-    if (success) {
-      console.log("Deleted tag from DB");
+  async function deleteTagComponent(
+    tag_id: UUID,
+    template_id?: UUID,
+  ): Promise<boolean> {
+    let success = false;
+
+    if (template_id) {
+      // Deleting from row
+      success = await removeTagFromTemplate(template_id, tag_id);
+      if (!success) {
+        console.log("Unable to delete tag_id with template_Id");
+        return false;
+      }
+
+      // Update state by removing the tag from the specific template
+      setTemplates(prevTemplates => {
+        const newTemplates = prevTemplates.map(template =>
+          template.template_id === template_id
+            ? {
+                ...template,
+                associated_tags: template.associated_tags.filter(
+                  tag => tag.tag_id !== tag_id,
+                ),
+              }
+            : template,
+        );
+
+        // If the new templates no longer contain the tag anywhere and the tag was selected, clear filter
+        const tagStillExists = newTemplates.some(template =>
+          template.associated_tags.some(tag => tag.tag_id === tag_id),
+        );
+
+        if (!tagStillExists) {
+          setSelectedTagId(prevSelected =>
+            prevSelected === tag_id ? null : prevSelected,
+          );
+        }
+
+        return newTemplates;
+      });
     } else {
-      console.log("Unable to deleted tag from DB");
-      return;
+      // Deleting from sidebar
+      success = await deleteTag(tag_id);
+      if (!success) return false;
+
+      console.log("Deleted tag from DB");
+
+      // Update state by removing tag from all templates
+      setTemplates(prevTemplates =>
+        prevTemplates.map(template => ({
+          ...template,
+          associated_tags: template.associated_tags.filter(
+            tag => tag.tag_id !== tag_id,
+          ),
+        })),
+      );
+
+      // if deleted tag was previously selected, set selected id to null
+      setSelectedTagId(prevSelected =>
+        prevSelected === tag_id ? null : prevSelected,
+      );
     }
 
-    // Update state by removing the tag from the specific template
-    setTemplates(prevTemplates =>
-      prevTemplates.map(template =>
-        template.template_id === template_id
-          ? {
-              ...template,
-              associated_tags: template.associated_tags.filter(
-                tag => tag.tag_id !== tag_id,
-              ),
-            }
-          : template,
-      ),
-    );
+    return true;
   }
 
   async function addNewTag(template_id: UUID) {
@@ -191,7 +235,6 @@ const SearchBar: React.FC = () => {
     const success = await assignTagToTemplate(template_id, tag_id);
 
     if (success) {
-      // Optimistically update UI
       setTemplates(prev =>
         prev.map(t =>
           t.template_id === template_id
@@ -224,6 +267,7 @@ const SearchBar: React.FC = () => {
           onTagClick={handleTagFilter}
           selectedTagId={selectedTagId}
           onTagRenamed={() => setTagVersion(v => v + 1)}
+          onDeleteTag={deleteTagComponent}
         />
       </SidebarDiv>
       <MainDiv>
@@ -282,7 +326,7 @@ const SearchBar: React.FC = () => {
                     tag_id={tag.tag_id}
                     sidebar={false}
                     onDelete={tagId =>
-                      deleteTagComponent(template.template_id, tagId)
+                      deleteTagComponent(tagId, template.template_id)
                     }
                   />{" "}
                 </TemplateTag>

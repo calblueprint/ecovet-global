@@ -57,8 +57,13 @@ export function TagComponent({
         <StyledTagName>{name}</StyledTagName>
       )}
 
-      {!sidebar && onDelete && (
-        <DeleteButton onClick={() => onDelete(tag_id)}>
+      {onDelete && (
+        <DeleteButton
+          onClick={e => {
+            e.stopPropagation();
+            onDelete(tag_id);
+          }}
+        >
           <Image alt="delete tag cross" src={cross} />
         </DeleteButton>
       )}

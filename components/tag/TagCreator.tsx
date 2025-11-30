@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { UUID } from "crypto";
@@ -17,6 +19,7 @@ type TagCreatorProps = {
   onTagClick: (tag_id: UUID) => void;
   selectedTagId: UUID | null;
   onTagRenamed?: () => void;
+  onDeleteTag: (tag_id: UUID) => Promise<boolean>;
 };
 
 type ColorKey = keyof typeof COLORS;
@@ -26,6 +29,7 @@ export function TagCreator({
   onTagClick,
   selectedTagId,
   onTagRenamed,
+  onDeleteTag,
 }: TagCreatorProps) {
   // Switch to use Tag type from schema
   const [tags, setTags] = useState<Tag[]>([]);
@@ -87,6 +91,15 @@ export function TagCreator({
     onTagRenamed?.();
   }
 
+  async function handleDeleteTag(tag_id: UUID) {
+    // Run parent delete function
+    const success = await onDeleteTag(tag_id); // return boolean
+    if (!success) return;
+
+    // Remove from local state
+    setTags(prev => prev.filter(t => t.tag_id !== tag_id));
+  }
+
   useEffect(() => {
     getTags();
   }, []);
@@ -108,6 +121,7 @@ export function TagCreator({
             sidebar={true}
             onClick={() => onTagClick(tag.tag_id)}
             onRename={handleRename}
+            onDelete={() => handleDeleteTag(tag.tag_id)}
           />
         </SidebarTag>
       ))}
