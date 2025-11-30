@@ -23,6 +23,10 @@ export const NewTag = styled.button`
   line-height: normal;
   border: none;
   background-color: transparent;
+  cursor: pointer;
+  &:hover {
+    background-color: ${COLORS["oat_medium"]};
+  }
 `;
 
 export const AddNewTagPlus = styled.div`
@@ -37,8 +41,12 @@ export const SidebarTag = styled.div<{ $isSelected?: boolean }>`
   width: 150px;
   padding: 12px 24px;
   border-radius: 4px;
+  cursor: pointer;
   background: ${({ $isSelected }) =>
     $isSelected ? COLORS["oat_medium"] : COLORS["oat_light"]};
+  &:hover {
+    background: ${COLORS["oat_medium"]};
+  }
 `;
 
 export const StyledTag = styled.div`
@@ -77,10 +85,9 @@ export const DeleteButton = styled.button`
   width: 11px;
   height: 11px;
   flex-shrink: 0;
-
   color: ${COLORS.black20};
 
-  &:hover {
-    color: ${COLORS.black100};
+  &:hover img {
+    filter: brightness(0);
   }
 `;

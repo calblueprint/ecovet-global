@@ -315,7 +315,7 @@ const SearchBar: React.FC = () => {
         </TemplateTitle>
         {filteredTemplates.map(template => (
           <TemplateList key={template.template_id}>
-            <span> {template.template_name} </span>
+            <div style={{ marginTop: "9px" }}>{template.template_name}</div>
             <AssociatedTags>
               {template.associated_tags.map(tag => (
                 <TemplateTag key={tag.tag_id}>
@@ -353,14 +353,14 @@ const SearchBar: React.FC = () => {
                 />
               )}
             </AssociatedTags>
-            <span>
+            <div style={{ marginTop: "9px" }}>
               {" "}
               {new Date(template.timestamp).toLocaleDateString("en-GB", {
                 day: "2-digit",
                 month: "short",
                 year: "numeric",
               })}
-            </span>
+            </div>
           </TemplateList>
         ))}
       </MainDiv>
