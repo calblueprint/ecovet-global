@@ -97,7 +97,6 @@ export const TemplateList = styled.ul`
   grid-template-columns: 1fr 1fr auto; /* left | middle | right */
   column-gap: 1rem;
   align-items: start;
-  justify-content: center;
 
   border-radius: 0.5rem 0.5rem 0 0;
   border-bottom: 1px solid ${COLORS.oat_medium};
