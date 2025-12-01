@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import supabase from "@/actions/supabase/client";
 import { fetchSessionById } from "@/api/supabase/queries/profile";
-import { fetchTemplateId } from "@/api/supabase/queries/sessions";
+import { fetchSessionName } from "@/api/supabase/queries/sessions";
 import { useProfile } from "@/utils/ProfileProvider";
-import { Heading2, Main } from "./styles";
+import { Button, Container, Heading2, Label, Main } from "./styles";
 
 export default function ParticipantWaitingPage() {
   const { profile } = useProfile();
   const [status, setStatus] = useState("Waiting for session to start...");
+  const [sessionName, setSessionName] = useState("");
 
   useEffect(() => {
     if (!profile?.id) return;
@@ -19,10 +20,9 @@ export default function ParticipantWaitingPage() {
       const data = await fetchSessionById(profile.id);
 
       if (data?.session_id) {
-        const template = await fetchTemplateId(data.session_id);
-        setStatus(
-          `Session has just started with templateId: ${template.template_id}`,
-        );
+        const sessionName = await fetchSessionName(data.session_id);
+        setSessionName(sessionName.session_name);
+        setStatus(`You were invited as a participant in:`);
       }
     }
 
@@ -48,10 +48,9 @@ export default function ParticipantWaitingPage() {
           }
 
           (async () => {
-            const template = await fetchTemplateId(sessionId);
-            setStatus(
-              `Session has just started with templateId: ${template.template_id}`,
-            );
+            const sessionName = await fetchSessionName(sessionId);
+            setSessionName(sessionName.session_name);
+            setStatus(`You were invited as a participant in:`);
           })();
         },
       )
@@ -64,7 +63,12 @@ export default function ParticipantWaitingPage() {
 
   return (
     <Main>
-      <Heading2>{status}</Heading2>
+      <Container>
+        <Heading2>{status}</Heading2>
+
+        {sessionName && <Label>{sessionName}</Label>}
+        {sessionName && <Button>Start Session</Button>}
+      </Container>
     </Main>
   );
 }

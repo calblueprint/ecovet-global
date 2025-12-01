@@ -41,7 +41,7 @@ export const Heading3 = styled.h3`
 `;
 
 export const WelcomeTag = styled.div`
-  dispay: flex;
+  display: flex;
   color: ${COLORS.black100};
 `;
 
