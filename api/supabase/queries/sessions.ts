@@ -108,3 +108,21 @@ export async function fetchPrompts(rolePhaseId: UUID): Promise<string[]> {
   }
   return data?.map(prompt => prompt.prompt_text) ?? [];
 }
+
+export async function createPromptAnswer(userId: string, promptId: string, answer: string) {
+  const { data, error } = await supabase
+    .from("prompt_response")
+    .insert([
+      {
+        prompt_response_id: crypto.randomUUID(),
+        user_id: userId,
+        prompt_id: promptId,
+        prompt_answer: answer,
+      },
+    ])
+    .select("prompt_response_id");
+  if (error) {
+    console.error("Error creating prompt answer:", error);
+  }
+  return data;
+}
