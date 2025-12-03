@@ -25,7 +25,7 @@ export const Container = styled.div`
 
 export const Heading2 = styled.h2`
   font-family: ${Sans.style.fontFamily};
-  font-size: 2 rem;
+  font-size: 2rem;
   font-style: normal;
   font-weight: 700;
   line-height: normal;

@@ -11,6 +11,7 @@ export default function ParticipantWaitingPage() {
   const { profile } = useProfile();
   const [status, setStatus] = useState("Waiting for session to start...");
   const [sessionName, setSessionName] = useState("");
+  const [sessionExists, setSessionExists] = useState(false);
 
   useEffect(() => {
     if (!profile?.id) return;
@@ -23,6 +24,7 @@ export default function ParticipantWaitingPage() {
         const sessionName = await fetchSessionName(data.session_id);
         setSessionName(sessionName.session_name);
         setStatus(`You were invited as a participant in:`);
+        setSessionExists(true);
       }
     }
 
@@ -67,7 +69,7 @@ export default function ParticipantWaitingPage() {
         <Heading2>{status}</Heading2>
 
         {sessionName && <Label>{sessionName}</Label>}
-        {sessionName && <Button>Start Session</Button>}
+        {sessionExists && <Button>Start Session</Button>}
       </Container>
     </Main>
   );
