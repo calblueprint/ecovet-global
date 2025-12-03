@@ -74,7 +74,10 @@ const SearchBar: React.FC = () => {
       const templatesWithTags = await Promise.all(
         subsetTemplates.map(async template => ({
           ...template,
-          associated_tags: await getTagsForTemplate(template.template_id, user_group_id),
+          associated_tags: await getTagsForTemplate(
+            template.template_id,
+            user_group_id,
+          ),
         })),
       );
 
@@ -93,7 +96,7 @@ const SearchBar: React.FC = () => {
 
     if (selectedTagId) {
       updated = updated.filter(template =>
-        template.associated_tags.some(tag => tag.tag_id === selectedTagId)
+        template.associated_tags.some(tag => tag.tag_id === selectedTagId),
       );
     }
 

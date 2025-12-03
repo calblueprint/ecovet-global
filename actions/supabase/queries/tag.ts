@@ -91,7 +91,10 @@ export async function removeTagFromTemplate(
 
 type templateTag = { tag: Tag };
 
-export async function getTagsForTemplate(templateId: string, userGroupId: string): Promise<Tag[]> {
+export async function getTagsForTemplate(
+  templateId: string,
+  userGroupId: string,
+): Promise<Tag[]> {
   const { data, error } = await supabase
     .from("template_tag")
     .select(
