@@ -54,10 +54,11 @@ export interface Template {
   template_name: string | null;
   accessible_to_all: boolean | null;
   user_group_id: UUID | null;
-  objective: string | null;
-  summary: string | null;
-  setting: string | null;
-  current_activity: string | null;
+  objective: string;
+  summary: string;
+  setting: string;
+  current_activity: string;
+  timestamp: string;
 }
 type TemplateUpdatable = Omit<Template, "template_id">;
 
@@ -131,6 +132,7 @@ export interface Tag {
   name: string;
   user_group_id: UUID;
   number: number; // (number of templates with this tag)
+  color: string; // might want to change to check COLOR type
 }
 export interface TemplateTag {
   template_id: UUID;
