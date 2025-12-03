@@ -32,14 +32,18 @@ export interface Profile {
   id: UUID; // user_id
   user_type: UserType;
   user_group_id: UUID;
-  role_id: UUID;
-  phase_id: UUID;
-  is_finished: boolean;
   first_name: string;
   last_name: string;
   country: string;
   org_role: string;
   email: string;
+}
+export interface ParticipantSession {
+  user_id: UUID;
+  role_id: UUID;
+  phase_id: UUID;
+  is_finished: boolean;
+  session_id: UUID;
 }
 export interface Role {
   role_id: UUID; // role_id
@@ -68,6 +72,7 @@ export interface Session {
   user_group_id: UUID;
   session_name: string;
   is_async: boolean;
+  phase_id: UUID;
   after_action_report_id?: UUID;
 }
 
