@@ -91,7 +91,7 @@ export async function removeTagFromTemplate(
 
 type templateTag = { tag: Tag };
 
-export async function getTagsForTemplate(templateId: string): Promise<Tag[]> {
+export async function getTagsForTemplate(templateId: string, userGroupId: string): Promise<Tag[]> {
   const { data, error } = await supabase
     .from("template_tag")
     .select(
@@ -100,6 +100,7 @@ export async function getTagsForTemplate(templateId: string): Promise<Tag[]> {
     `,
     )
     .eq("template_id", templateId)
+    .eq("tag.user_group_id", userGroupId)
     .overrideTypes<templateTag[], { merge: false }>(); // Add this bc data pulled from supabase has type Dict{tag: any[]}[], need to force it to Dict{tag: Tag[]}[]
 
   if (error) {
@@ -111,7 +112,9 @@ export async function getTagsForTemplate(templateId: string): Promise<Tag[]> {
   }
 
   // Extract the tag objects from the wrapper
-  return data.map((item: templateTag) => item.tag);
+  return data
+    .map((item: templateTag) => item.tag)
+    .filter((tag): tag is Tag => tag !== null);
 }
 
 type tagTemplate = { template: Template };
