@@ -1,4 +1,6 @@
+import { UUID } from "crypto";
 import supabase from "@/actions/supabase/client";
+import { ParticipantSession } from "@/app/facilitator/session-test/page";
 
 export async function fetchRoles(templateId: string) {
   const { data, error } = await supabase
@@ -86,4 +88,17 @@ export async function createSession(templateId: string, userGroupId: string) {
 
   if (error) throw error;
   return data[0].session_id;
+}
+
+export async function participant_session_update(
+  session_id: UUID,
+): Promise<ParticipantSession[]> {
+  const { data, error } = await supabase
+    .from("participant_session")
+    .select("*")
+    .eq("session_id", session_id);
+
+  if (error) throw error;
+
+  return data ?? [];
 }
