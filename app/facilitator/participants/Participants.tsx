@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { UUID } from "crypto";
 import {
-  fetchUserGroupById,
+  // fetchUserGroupById,
   fetchUserGroupMembers,
 } from "@/api/supabase/queries/user-groups";
 import { Profile } from "@/types/schema";
@@ -11,7 +11,7 @@ import { useProfile } from "@/utils/ProfileProvider";
 import { Heading3, MainDiv, TemplateList, TemplateTitle } from "./styles";
 
 export default function Participants() {
-  const { profile } = useProfile();
+  // const { profile } = useProfile();
   const user_group_id = "0b73ed2d-61c3-472e-b361-edaa88f27622";
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
 
