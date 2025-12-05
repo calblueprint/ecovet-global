@@ -51,7 +51,7 @@ export const TemplateTitle = styled.h1`
   padding: 1.25rem 2rem 1.25rem 2rem;
   background: ${COLORS.white};
   font-family: ${Sans.style.fontFamily};
-  font-color: ${COLORS.black40};
+  color: ${COLORS.black40};
   font-size: 12px;
   font-weight: 500;
 `;
@@ -84,7 +84,7 @@ export const TemplateList = styled.ul`
   ont-family: ${Sans.style.fontFamily};
   font-size: 12px;
   font-weight: 500;
-  font-color: ${COLORS.black70};
+  color: ${COLORS.black70};
 `;
 
 export const SideNavContainer = styled.div`

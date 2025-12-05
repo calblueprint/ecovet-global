@@ -18,11 +18,9 @@ export default function ParticipantsPage() {
           return <div>Retrieving your profile...</div>;
         return <Participants user_group_id={profile.user_group_id} />;
       case "invites":
-        // if (!profile?.user_group_id)
-        //   return <div>Retrieving your profile...</div>;
-        return (
-          <Invites user_group_id={"0b73ed2d-61c3-472e-b361-edaa88f27622"} />
-        );
+        if (!profile?.user_group_id)
+          return <div>Retrieving your profile...</div>;
+        return <Invites user_group_id={profile.user_group_id} />;
     }
   };
 

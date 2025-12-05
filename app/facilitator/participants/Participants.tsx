@@ -2,22 +2,60 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { UUID } from "crypto";
-import {
-  // fetchUserGroupById,
-  fetchUserGroupMembers,
-} from "@/api/supabase/queries/user-groups";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { fetchUserGroupMembers } from "@/api/supabase/queries/user-groups";
 import { Profile } from "@/types/schema";
-// import { useProfile } from "@/utils/ProfileProvider";
-import { Heading3, MainDiv, TemplateList, TemplateTitle } from "./styles";
+import {
+  Heading3,
+  MainDiv,
+  SortButton,
+  TemplateList,
+  TemplateTitle,
+} from "./styles";
 
 export default function Participants({
   user_group_id,
 }: {
   user_group_id: string;
 }) {
-  // const { profile } = useProfile();
-  // const user_group_id = "0b73ed2d-61c3-472e-b361-edaa88f27622";
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
+  const [sortKey, setSortKey] = useState<"name" | "email" | "role">("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  const toggleSort = (key: "name" | "email" | "role") => {
+    let nextSortKey = sortKey;
+    let nextSortOrder = sortOrder;
+
+    if (sortKey === key) {
+      nextSortOrder = sortOrder === "asc" ? "desc" : "asc";
+    } else {
+      nextSortKey = key;
+      nextSortOrder = "asc";
+    }
+
+    setSortKey(nextSortKey);
+    setSortOrder(nextSortOrder);
+  };
+
+  const sortedUsers = [...allUsers].sort((a, b) => {
+    let aVal = "";
+    let bVal = "";
+
+    if (sortKey === "name") {
+      aVal = `${a.first_name} ${a.last_name}`.toLowerCase();
+      bVal = `${b.first_name} ${b.last_name}`.toLowerCase();
+    } else if (sortKey === "email") {
+      aVal = a.email?.toLowerCase() ?? "";
+      bVal = b.email?.toLowerCase() ?? "";
+    } else if (sortKey === "role") {
+      aVal = a.user_type?.toLowerCase() ?? "";
+      bVal = b.user_type?.toLowerCase() ?? "";
+    }
+
+    if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
+    if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
+    return 0;
+  });
 
   const loadData = useCallback(async () => {
     const [groupMembers] = await Promise.all([
@@ -38,11 +76,50 @@ export default function Participants({
     <MainDiv>
       <Heading3>Participants</Heading3>
       <TemplateTitle>
-        <span>Name </span>
-        <span>Email</span>
-        <span>Role</span>
+        <span>
+          Name
+          <SortButton onClick={() => toggleSort("name")}>
+            {sortKey === "name" ? (
+              sortOrder === "asc" ? (
+                <ArrowUp size={16} />
+              ) : (
+                <ArrowDown size={16} />
+              )
+            ) : (
+              <ArrowUpDown size={16} />
+            )}
+          </SortButton>{" "}
+        </span>
+        <span>
+          Email
+          <SortButton onClick={() => toggleSort("email")}>
+            {sortKey === "email" ? (
+              sortOrder === "asc" ? (
+                <ArrowUp size={16} />
+              ) : (
+                <ArrowDown size={16} />
+              )
+            ) : (
+              <ArrowUpDown size={16} />
+            )}
+          </SortButton>{" "}
+        </span>
+        <span>
+          Role
+          <SortButton onClick={() => toggleSort("role")}>
+            {sortKey === "role" ? (
+              sortOrder === "asc" ? (
+                <ArrowUp size={16} />
+              ) : (
+                <ArrowDown size={16} />
+              )
+            ) : (
+              <ArrowUpDown size={16} />
+            )}
+          </SortButton>{" "}
+        </span>
       </TemplateTitle>
-      {allUsers.map(groupMember => (
+      {sortedUsers.map(groupMember => (
         <TemplateList key={groupMember.id}>
           <span>
             {" "}
