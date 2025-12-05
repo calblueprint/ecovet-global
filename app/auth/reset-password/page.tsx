@@ -1,37 +1,57 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { sendPasswordResetEmail } from "@/api/supabase/queries/auth";
+import {
+  checkIfUserExists,
+  sendPasswordResetEmail,
+} from "@/api/supabase/queries/auth";
 import {
   Button,
   Container,
   EmailAddressDiv,
+  ErrorMessage,
   Heading2,
   Input,
   IntroText,
   Main,
   SignInTag,
+  SuccessMessage,
 } from "../styles";
 
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
-
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const isEmailValid = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
   const handleResetPassword = async () => {
-    if (!isEmailValid(email)) {
-      throw new Error("Please enter a valid email address");
+    try {
+      if (!isEmailValid(email)) {
+        throw new Error("Please enter a valid email address");
+      }
+      if (!(await checkIfUserExists(email))) {
+        throw new Error(
+          "No account exists with that email. Please sign up first.",
+        );
+      }
+      const { error } = await sendPasswordResetEmail(email);
+      if (error) {
+        throw new Error("An error occurred: " + error);
+        return;
+      }
+      setSuccessMessage(
+        "If an account with that email exists, a password reset link has been sent.",
+      );
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("An unexpected error occurred.");
+      }
     }
-    const { error } = await sendPasswordResetEmail(email);
-    if (error) {
-      throw new Error("An error occurred: " + error);
-      return;
-    }
-    <Link href="/auth/reset-password-success" />;
   };
 
   return (
@@ -49,7 +69,10 @@ export default function ResetPassword() {
             <Input
               placeholder="Email Address"
               type="email"
-              onChange={e => setEmail(e.target.value)}
+              onChange={e => {
+                setEmail(e.target.value);
+                setErrorMessage(null);
+              }}
               value={email}
               name="email"
             />
@@ -57,6 +80,8 @@ export default function ResetPassword() {
           <Button onClick={handleResetPassword} disabled={!isEmailValid(email)}>
             Send
           </Button>
+          {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
+          {successMessage && <SuccessMessage>{successMessage}</SuccessMessage>}
         </Container>
       </Main>
     </>

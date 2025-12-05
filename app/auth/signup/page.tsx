@@ -10,6 +10,7 @@ import {
   Button,
   Container,
   EmailAddressDiv,
+  ErrorMessage,
   Heading2,
   Input,
   InputFields,
@@ -32,6 +33,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const sessionHandler = useSession();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const rules = {
     length: password.length >= 12,
@@ -44,31 +46,39 @@ export default function Login() {
     rules.length && rules.uppercase && rules.number && rules.specialChar;
 
   const handleSignUp = async () => {
-    if (!(await checkInvites(email))) {
-      throw new Error("You do not have an invite");
-    }
-    if (!isPasswordValid) {
-      throw new Error("Password does not meet the required criteria");
-    }
-    if (password !== confirmPassword) {
-      throw new Error("Passwords do not match");
-    }
-    const { data, error } = await sessionHandler.signUp(email, password);
-    if (error) {
-      throw new Error(
-        "An error occurred during sign up: " +
-          error.message +
-          "with email" +
-          data,
-      );
-    }
-    const userId = data.user?.id;
-    if (!userId) {
-      throw new Error("Signup succeeded but user ID was missing.");
-    }
-    await addEmailtoProfile(userId, email);
+    try {
+      if (!(await checkInvites(email))) {
+        throw new Error("You do not have an invitation");
+      }
+      if (!isPasswordValid) {
+        throw new Error("Password does not meet the required criteria");
+      }
+      if (password !== confirmPassword) {
+        throw new Error("Passwords do not match");
+      }
+      const { data, error } = await sessionHandler.signUp(email, password);
+      if (error) {
+        throw new Error(
+          "An error occurred during sign up: " +
+            error.message +
+            "with email" +
+            data,
+        );
+      }
+      const userId = data.user?.id;
+      if (!userId) {
+        throw new Error("Signup succeeded but user ID was missing.");
+      }
+      await addEmailtoProfile(userId, email);
 
-    alert("Password successfully updated!");
+      alert("Password successfully updated!");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("An unexpected error occurred.");
+      }
+    }
   };
 
   return (
@@ -89,7 +99,10 @@ export default function Login() {
             <Input
               name="email"
               placeholder="Email Address"
-              onChange={e => setEmail(e.target.value)}
+              onChange={e => {
+                setEmail(e.target.value);
+                setErrorMessage(null);
+              }}
               value={email}
             />{" "}
           </EmailAddressDiv>
@@ -180,6 +193,7 @@ export default function Login() {
         >
           Continue
         </Button>
+        {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
       </Container>
     </Main>
   );
