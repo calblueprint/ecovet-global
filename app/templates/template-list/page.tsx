@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import TopNavBar from "@/components/NavBar";
+import TopNavBar from "@/components/NavBar/NavBar";
 import SearchBar from "./SearchBar";
 import { ContentWrapper, LayoutWrapper } from "./styles";
 import TemplateSideBar from "./TemplateSidebar";
