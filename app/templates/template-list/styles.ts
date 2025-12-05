@@ -39,7 +39,7 @@ export const SearchInput = styled.input`
 
 export const Heading3 = styled.h3`
   font-family: ${Sans.style.fontFamily};
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   margin-bottom: 0.5rem;
   font-style: normal;
