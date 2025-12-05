@@ -151,4 +151,5 @@ export const ContentWrapper = styled.div`
   flex: 1;
   padding: 2rem;
   overflow-y: auto;
+  margin-right: 10.25rem;
 `;
