@@ -10,9 +10,13 @@ import { Profile } from "@/types/schema";
 // import { useProfile } from "@/utils/ProfileProvider";
 import { Heading3, MainDiv, TemplateList, TemplateTitle } from "./styles";
 
-export default function Participants() {
+export default function Participants({
+  user_group_id,
+}: {
+  user_group_id: string;
+}) {
   // const { profile } = useProfile();
-  const user_group_id = "0b73ed2d-61c3-472e-b361-edaa88f27622";
+  // const user_group_id = "0b73ed2d-61c3-472e-b361-edaa88f27622";
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
 
   const loadData = useCallback(async () => {
@@ -35,6 +39,7 @@ export default function Participants() {
       <Heading3>Participants</Heading3>
       <TemplateTitle>
         <span>Name </span>
+        <span>Email</span>
         <span>Role</span>
       </TemplateTitle>
       {allUsers.map(groupMember => (
@@ -43,6 +48,7 @@ export default function Participants() {
             {" "}
             {groupMember.first_name} {groupMember.last_name}{" "}
           </span>
+          <span> {groupMember.email} </span>
           <span> {groupMember.user_type}</span>
         </TemplateList>
       ))}

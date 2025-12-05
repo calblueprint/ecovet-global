@@ -4,12 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import { UUID } from "crypto";
 import { fetchInvites } from "@/api/supabase/queries/invites";
 import { Invite } from "@/types/schema";
-import { useProfile } from "@/utils/ProfileProvider";
 import { Heading3, MainDiv, TemplateList, TemplateTitle } from "./styles";
 
-export default function Invites() {
-  const { profile } = useProfile();
-  const user_group_id = profile?.user_group_id;
+export default function Invites({ user_group_id }: { user_group_id: string }) {
   const [invites, setInvites] = useState<Invite[]>([]);
 
   const loadData = useCallback(async () => {
