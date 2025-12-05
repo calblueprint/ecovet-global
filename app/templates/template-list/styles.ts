@@ -31,6 +31,8 @@ export const SearchInput = styled.input`
     border-color: ${COLORS.oat_medium};
     box-shadow: 0 0 0 2px ${COLORS.oat_light};
   }
+
+  background-color: ${COLORS.oat_light};
 `;
 
 export const Heading3 = styled.h3`

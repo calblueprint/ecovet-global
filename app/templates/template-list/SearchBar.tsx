@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { fetchAllTemplates } from "@/actions/supabase/queries/templates";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
@@ -93,12 +93,18 @@ const SearchBar: React.FC<{ filterMode: "all" | "your" | "browse" }> = ({
   };
 
   const toggleSort = (key: "name" | "date") => {
+    let nextSortKey = sortKey;
+    let nextSortOrder = sortOrder;
+
     if (sortKey === key) {
-      setSortOrder(prevOrder => (prevOrder === "asc" ? "desc" : "asc"));
+      nextSortOrder = sortOrder === "asc" ? "desc" : "asc";
     } else {
-      setSortKey(key);
-      setSortOrder("asc");
+      nextSortKey = key;
+      nextSortOrder = "asc";
     }
+
+    setSortKey(nextSortKey);
+    setSortOrder(nextSortOrder);
   };
 
   return (
@@ -124,7 +130,7 @@ const SearchBar: React.FC<{ filterMode: "all" | "your" | "browse" }> = ({
                 <ArrowDown size={16} />
               )
             ) : (
-              <ArrowUp size={16} />
+              <ArrowUpDown size={16} />
             )}
           </SortButton>{" "}
         </span>
@@ -140,7 +146,7 @@ const SearchBar: React.FC<{ filterMode: "all" | "your" | "browse" }> = ({
                 <ArrowDown size={16} />
               )
             ) : (
-              <ArrowUp size={16} />
+              <ArrowUpDown size={16} />
             )}
           </SortButton>
         </span>

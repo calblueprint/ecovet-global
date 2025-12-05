@@ -21,6 +21,7 @@ export const LogoContainer = styled.div`
   height: 3rem;
   flex-shrink: 0;
   gap: 2rem;
+  padding: 0.5rem 0rem 1rem 1rem;
 `;
 
 export const ButtonContainer = styled.div`
