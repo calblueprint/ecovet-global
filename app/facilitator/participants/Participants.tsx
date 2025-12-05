@@ -12,25 +12,17 @@ import { Heading3, MainDiv, TemplateList, TemplateTitle } from "./styles";
 
 export default function Participants() {
   const { profile } = useProfile();
-  const user_group_id = profile?.user_group_id;
-  const [allParticipants, setAllParticipants] = useState<Profile[]>([]);
+  const user_group_id = "0b73ed2d-61c3-472e-b361-edaa88f27622";
+  const [allUsers, setAllUsers] = useState<Profile[]>([]);
 
   const loadData = useCallback(async () => {
     const [groupMembers] = await Promise.all([
-      fetchUserGroupById(user_group_id as UUID),
       fetchUserGroupMembers(user_group_id as UUID),
     ]);
-
-    categorizeMembers(groupMembers || []);
+    setAllUsers(groupMembers ?? []);
 
     console.log(groupMembers);
   }, [user_group_id]);
-
-  function categorizeMembers(members: Profile[]) {
-    const participants = members.filter(m => m.user_type === "Participant");
-
-    setAllParticipants(participants);
-  }
 
   useEffect(() => {
     if (user_group_id) {
@@ -45,13 +37,13 @@ export default function Participants() {
         <span>Name </span>
         <span>Role</span>
       </TemplateTitle>
-      {allParticipants.map(participant => (
-        <TemplateList key={participant.id}>
+      {allUsers.map(groupMember => (
+        <TemplateList key={groupMember.id}>
           <span>
             {" "}
-            {participant.first_name} + {participant.last_name}{" "}
+            {groupMember.first_name} {groupMember.last_name}{" "}
           </span>
-          <span> {participant.org_role}</span>
+          <span> {groupMember.user_type}</span>
         </TemplateList>
       ))}
     </MainDiv>
