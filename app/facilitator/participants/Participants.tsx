@@ -7,7 +7,7 @@ import {
   fetchUserGroupMembers,
 } from "@/api/supabase/queries/user-groups";
 import { Profile } from "@/types/schema";
-import { useProfile } from "@/utils/ProfileProvider";
+// import { useProfile } from "@/utils/ProfileProvider";
 import { Heading3, MainDiv, TemplateList, TemplateTitle } from "./styles";
 
 export default function Participants() {
