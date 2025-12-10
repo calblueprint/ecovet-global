@@ -11,17 +11,17 @@ import {
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
-  Main,
-  Container,
-  Heading,
-  Subheading,
-  SelectionRows,
-  Row,
-  DeleteButton,
   AddButton,
-  StartButton,
+  Container,
+  DeleteButton,
+  Heading,
+  Main,
   Message,
-} from "./styles"; 
+  Row,
+  SelectionRows,
+  StartButton,
+  Subheading,
+} from "./styles";
 
 interface ParticipantRole {
   participant: string | null;
@@ -151,32 +151,36 @@ export default function RoleSelectionPage() {
     <Main>
       <Container>
         <Heading>Role Selection</Heading>
-        <Subheading>Assign roles to participants before starting the session.</Subheading>
+        <Subheading>
+          Assign roles to participants before starting the session.
+        </Subheading>
 
         <SelectionRows>
           {roleSelection.map((pair, index) => {
             const selectedParticipants = roleSelection
-              .map((p) => p.participant)
+              .map(p => p.participant)
               .filter((p, i) => p && i !== index);
 
             const availableParticipants = participants.filter(
-              (p) => !selectedParticipants.includes(p.id) && p.id !== profile?.id
+              p => !selectedParticipants.includes(p.id) && p.id !== profile?.id,
             );
 
             return (
               <Row key={index}>
                 <InputDropdown
                   label={`Name ${index + 1}`}
-                  options={new Map(availableParticipants.map(p => [p.id, p.name]))}
+                  options={
+                    new Map(availableParticipants.map(p => [p.id, p.name]))
+                  }
                   placeholder="Select participant"
-                  onChange={(val) => handleChange(index, "participant", val)}
+                  onChange={val => handleChange(index, "participant", val)}
                 />
 
                 <InputDropdown
                   label="Role"
                   options={new Map(roles.map(r => [r.id, r.name]))}
                   placeholder="Select role"
-                  onChange={(val) => handleChange(index, "role", val)}
+                  onChange={val => handleChange(index, "role", val)}
                 />
 
                 <DeleteButton onClick={() => deleteParticipant(index)}>
@@ -198,5 +202,4 @@ export default function RoleSelectionPage() {
       </Container>
     </Main>
   );
-
 }
