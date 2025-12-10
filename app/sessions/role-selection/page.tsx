@@ -10,6 +10,18 @@ import {
 } from "@/api/supabase/queries/sessions";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import { useProfile } from "@/utils/ProfileProvider";
+import {
+  Main,
+  Container,
+  Heading,
+  Subheading,
+  SelectionRows,
+  Row,
+  DeleteButton,
+  AddButton,
+  StartButton,
+  Message,
+} from "./styles"; 
 
 interface ParticipantRole {
   participant: string | null;
@@ -136,51 +148,55 @@ export default function RoleSelectionPage() {
   };
 
   return (
-    <div>
-      <h1>Role Selection</h1>
-      {roleSelection.map((pair, index) => {
-        const selectedParticipants = roleSelection
-          .map(p => p.participant)
-          .filter((p, i) => p && i !== index);
+    <Main>
+      <Container>
+        <Heading>Role Selection</Heading>
+        <Subheading>Assign roles to participants before starting the session.</Subheading>
 
-        const availableParticipants = participants.filter(
-          p => !selectedParticipants.includes(p.id) && p.id !== profile?.id,
-        );
+        <SelectionRows>
+          {roleSelection.map((pair, index) => {
+            const selectedParticipants = roleSelection
+              .map((p) => p.participant)
+              .filter((p, i) => p && i !== index);
 
-        return (
-          <div
-            key={index}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginBottom: "1rem",
-            }}
-          >
-            <InputDropdown
-              label={`Name ${index + 1}`}
-              options={new Map(availableParticipants.map(p => [p.id, p.name]))}
-              placeholder="Select a participant"
-              onChange={val => handleChange(index, "participant", val)}
-            />
-            <InputDropdown
-              label="Role"
-              options={new Map(roles.map(r => [r.id, r.name]))}
-              placeholder="Select a role"
-              onChange={val => handleChange(index, "role", val)}
-            />
-            <button onClick={() => deleteParticipant(index)}> X Delete</button>
-          </div>
-        );
-      })}
+            const availableParticipants = participants.filter(
+              (p) => !selectedParticipants.includes(p.id) && p.id !== profile?.id
+            );
 
-      <button onClick={addParticipant}>+ Add Participant</button>
+            return (
+              <Row key={index}>
+                <InputDropdown
+                  label={`Name ${index + 1}`}
+                  options={new Map(availableParticipants.map(p => [p.id, p.name]))}
+                  placeholder="Select participant"
+                  onChange={(val) => handleChange(index, "participant", val)}
+                />
 
-      <button onClick={handleStartGame} disabled={saving}>
-        {assignedRoles ? "Starting Game..." : "Start Game"}
-      </button>
+                <InputDropdown
+                  label="Role"
+                  options={new Map(roles.map(r => [r.id, r.name]))}
+                  placeholder="Select role"
+                  onChange={(val) => handleChange(index, "role", val)}
+                />
 
-      {message && <p>{message}</p>}
-      {assignMessage && <p>{assignMessage}</p>}
-    </div>
+                <DeleteButton onClick={() => deleteParticipant(index)}>
+                  Remove
+                </DeleteButton>
+              </Row>
+            );
+          })}
+        </SelectionRows>
+
+        <AddButton onClick={addParticipant}>+ Add Participant</AddButton>
+
+        <StartButton disabled={saving} onClick={handleStartGame}>
+          {assignedRoles ? "Starting..." : "Start Game"}
+        </StartButton>
+
+        {message && <Message>{message}</Message>}
+        {assignMessage && <Message>{assignMessage}</Message>}
+      </Container>
+    </Main>
   );
+
 }
