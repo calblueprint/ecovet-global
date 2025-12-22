@@ -114,7 +114,7 @@ export const SideNavButton = styled.button<{ selected: boolean }>`
   text-align: left;
   gap: 0.5em;
   background-color: ${({ selected }) =>
-    selected ? COLORS.lightEletricBlue : COLORS.oat_light};
+    selected ? COLORS.oat_dark : COLORS.oat_light};
 
   color: ${({ selected }) => (selected ? COLORS.black : COLORS.black70)};
   border-radius: 0.25rem;
@@ -124,6 +124,7 @@ export const SideNavButton = styled.button<{ selected: boolean }>`
   font-weight: 500;
   &:hover {
     background-color: ${COLORS.oat_medium};
+    cursor: pointer;
   }
 `;
 

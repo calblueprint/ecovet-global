@@ -6,6 +6,7 @@ const COLORS = {
   black100: "#0f0f0f",
   teal: "#476C77",
   orange: "#ED953B",
+  oat_dark: "#e3e1db",
   oat_medium: "#EEEDE9",
   oat_light: "#F9F7F4",
   white: "#FFFFFF",

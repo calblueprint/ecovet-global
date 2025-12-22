@@ -67,6 +67,9 @@ export const TopNavButton = styled.button<{ $active?: boolean }>`
       border-bottom: 0.175rem solid ${COLORS.teal};
       color: ${COLORS.black70};
     `}
+  &:hover {
+    cursor: pointer;
+  }
 `;
 
 export const ImageLogo = styled.img`
