@@ -99,6 +99,7 @@ export const Button = styled.button`
   width: 100%;
   height: 45px;
   gap: 10rem;
+  border-radius: 0.25rem;
   display: flex;
   flex-direction: column;
   justify-content: center;

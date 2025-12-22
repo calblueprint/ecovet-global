@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { sendPasswordResetEmail } from "@/api/supabase/queries/auth";
 import {
   Button,
@@ -30,6 +31,7 @@ export default function ResetPassword() {
       throw new Error("An error occurred: " + error);
       return;
     }
+    <Link href="/auth/reset-password-success" />;
   };
 
   return (

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import supabase from "@/actions/supabase/client";
 import { handleProfileSubmit } from "@/api/supabase/queries/profile";
 import { useProfile } from "@/utils/ProfileProvider";
@@ -28,13 +29,12 @@ function OnboardingPage() {
   const [save, setSave] = useState(false);
   const [formMessage, setFormMessage] = useState("");
 
-  //to be able to change fields on onboarding screen? for testing?
   useEffect(() => {
     if (profile) {
-      setFirstName(profile.first_name ?? "");
-      setLastName(profile.last_name ?? "");
-      setCountry(profile.country ?? "");
-      setRole(profile.org_role ?? "");
+      setFirstName("");
+      setLastName("");
+      setCountry("");
+      setRole("");
     }
   }, [profile]);
 
@@ -92,7 +92,7 @@ function OnboardingPage() {
             <IntroText>
               <WelcomeTag>
                 {" "}
-                <Heading2> Edit Profile </Heading2>
+                <Heading2> Your Information </Heading2>
                 <Heading3>
                   Fill out these questions to tell us more about you.
                 </Heading3>
@@ -148,9 +148,11 @@ function OnboardingPage() {
                 </InputDiv>
               </div>
             </InputFields>
-            <Button type="submit" disabled={save}>
-              {save ? "Saving" : "Submit Profile"}
-            </Button>
+            <Link href="/test-page">
+              <Button type="submit" disabled={save}>
+                {save ? "Saving" : "Submit Profile"}
+              </Button>
+            </Link>
           </Container>
         </form>
       </Main>

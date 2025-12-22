@@ -12,6 +12,12 @@ const COLORS = {
   white: "#FFFFFF",
   lightEletricBlue: "##DAE2E4",
   darkElectricBlue: "#476c77",
+
+  tagRed: "#EF4444",
+  tagOrange: "#FB923C",
+  tagYellow: "#FACC15",
+  tagGreen: "#22C55E",
+  tagBlue: "#3B82F6",
 };
 
 export default COLORS;
