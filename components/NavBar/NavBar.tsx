@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import ecovetGlobal from "@/assets/images/ecovet-global.svg";
+import ecovetGlobal from "@/assets/images/ecovet-global-new.svg";
 import {
   ButtonContainer,
   LogoContainer,
@@ -20,7 +20,7 @@ const TopNavBar = () => {
         <Image
           src={ecovetGlobal}
           alt="Ecovet Global Logo"
-          height={40}
+          height={30}
           style={{ width: "auto", objectFit: "contain" }}
         />
       </LogoContainer>
