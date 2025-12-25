@@ -3,7 +3,6 @@
 import React from "react";
 import {
   SideNavButton,
-  SideNavContainer,
   SideNavNewTemplateButton,
   SideNavTemplatesContainer,
 } from "./styles";
