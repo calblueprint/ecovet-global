@@ -7,6 +7,7 @@ import supabase from "@/actions/supabase/client";
 import {
   Button,
   Container,
+  ErrorMessage,
   Heading2,
   Input,
   InputFields,
@@ -26,6 +27,7 @@ export default function ChangePassword() {
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
 
   const rules = {
@@ -39,20 +41,27 @@ export default function ChangePassword() {
     rules.length && rules.uppercase && rules.number && rules.specialChar;
 
   const handleUpdateUser = async () => {
-    if (!isPasswordValid) {
-      throw new Error("Password does not meet the required criteria");
+    try {
+      if (!isPasswordValid) {
+        throw new Error("Password does not meet the required criteria");
+      }
+      if (password !== confirmPassword) {
+        throw new Error("Passwords do not match");
+      }
+      const { error } = await supabase.auth.updateUser({
+        password: password,
+      });
+      if (error) {
+        throw new Error("Error updating password: " + error.message);
+      }
+      router.push("/auth/reset-password-success");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("Something went wrong. Please try again.");
+      }
     }
-    if (password !== confirmPassword) {
-      throw new Error("Passwords do not match");
-    }
-    const { error } = await supabase.auth.updateUser({
-      password: password,
-    });
-    if (error) {
-      alert("An error occurred: " + error.message);
-      return;
-    }
-    router.push("/auth/reset-password-success");
   };
 
   return (
@@ -91,7 +100,10 @@ export default function ChangePassword() {
                   name="confirmPassword"
                   placeholder="Password Confirmation"
                   value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
+                  onChange={e => {
+                    setConfirmPassword(e.target.value);
+                    setErrorMessage(null);
+                  }}
                   type={showConfirmPassword ? "text" : "password"}
                 />
                 <VisibilityToggle
@@ -156,6 +168,7 @@ export default function ChangePassword() {
           >
             Continue
           </Button>
+          {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
         </Container>
       </Main>
     </>

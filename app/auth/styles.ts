@@ -231,3 +231,29 @@ export const ForgetPasswordTag = styled.div`
   line-height: normal;
   padding-top: 0.6rem;
 `;
+
+export const ErrorMessage = styled.div`
+  width: 100%;
+  height: fit-content;
+  color: red;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  padding-top: 1rem;
+  text-align: center;
+`;
+
+export const SuccessMessage = styled.div`
+  width: 100%;
+  height: fit-content;
+  color: ${COLORS.black70};
+  font-family: ${Sans.style.fontFamily};
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  padding-top: 1rem;
+  text-align: center;
+`;
