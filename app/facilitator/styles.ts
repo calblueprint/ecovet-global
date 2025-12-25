@@ -2,12 +2,32 @@ import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
 
+export const LayoutWrapper = styled.div`
+  display: flex;
+  height: calc(100vh - 64px);
+  width: 100%;
+`;
+
+export const ContentWrapper = styled.div`
+  flex: 1;
+  padding: 2rem;
+  margin-right: 10%;
+`;
+
+export const PageDiv = styled.main`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+`;
+
 export const MainDiv = styled.main`
   display: flex;
   flex-direction: column;
   width: 100%;
   min-height: 100vh;
   padding: 2rem;
+  padding-top: 1rem;
   background-color: ${COLORS.white};
   background: ${COLORS.white};
 `;
@@ -22,27 +42,40 @@ export const SearchInput = styled.input`
   border-radius: 8px;
   padding: 0.5rem 1rem;
   width: 100%;
+  height: 2.75rem;
   margin-bottom: 1rem;
   font-family: ${Sans.style.fontFamily};
-  font-size: 16px;
-
-  &:focus {
-    outline: none;
-    border-color: ${COLORS.oat_medium};
-    box-shadow: 0 0 0 2px ${COLORS.oat_light};
-  }
+  font-size: 12px;
+  background-color: ${COLORS.oat_light};
 `;
 
 export const Heading3 = styled.h3`
   font-family: ${Sans.style.fontFamily};
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   margin-bottom: 0.5rem;
   font-style: normal;
   line-height: normal;
 `;
 
-export const TemplateTitle = styled.h1`
+export const GeneralList = styled.ul`
+  display: grid;
+  grid-template-columns: 1fr 1fr auto; /* left | middle | right */
+  column-gap: 1rem;
+
+  border-radius: 0.5rem 0.5rem 0 0;
+  border-bottom: 1px solid ${COLORS.oat_medium};
+  padding: 1rem 2rem;
+  list-style-type: none;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 12px;
+  font-weight: 500;
+  color: ${COLORS.black70};
+  min-height: 4rem;
+  align-items: center;
+`;
+
+export const GeneralTitle = styled.h1`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -72,24 +105,10 @@ export const SortButton = styled.button`
     color: #555;
   }
 `;
-
-export const TemplateList = styled.ul`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: 0.5rem 0.5rem 0 0;
-  border-bottom: 1px solid ${COLORS.oat_medium};
-  padding: 1.25rem 2rem 1.25rem 2rem;
-  list-style-type: none;
-  ont-family: ${Sans.style.fontFamily};
-  font-size: 12px;
-  font-weight: 500;
-  color: ${COLORS.black70};
-`;
-
 export const SideNavContainer = styled.div`
   display: flex;
   padding: 1rem;
+  width: 12rem;
   height: 100vh;
   align-items: flex-start;
   flex-direction: column;
@@ -110,7 +129,7 @@ export const SideNavButton = styled.button<{ selected: boolean }>`
   text-align: left;
   gap: 0.5em;
   background-color: ${({ selected }) =>
-    selected ? COLORS.lightEletricBlue : COLORS.oat_light};
+    selected ? COLORS.oat_dark : COLORS.oat_light};
 
   color: ${({ selected }) => (selected ? COLORS.black : COLORS.black70)};
   border-radius: 0.25rem;
@@ -120,13 +139,14 @@ export const SideNavButton = styled.button<{ selected: boolean }>`
   font-weight: 500;
   &:hover {
     background-color: ${COLORS.oat_medium};
+    cursor: pointer;
   }
 `;
 
 export const SideNavNewTemplateButton = styled.button`
-  width: 100%;
+  width: 9.25rem;
   padding: 0.75rem 1.5rem;
-  text-align: left;
+  text-align: middle;
   gap: 0.5em;
   background-color: ${COLORS.darkElectricBlue};
   border-radius: 0.25rem;
@@ -135,17 +155,4 @@ export const SideNavNewTemplateButton = styled.button`
   font-size: 12px;
   font-weight: 500;
   color: ${COLORS.white};
-`;
-
-export const LayoutWrapper = styled.div`
-  display: flex;
-  height: calc(100vh - 64px);
-  widthL 100%;
-`;
-
-export const ContentWrapper = styled.div`
-  flex: 1;
-  padding: 2rem;
-  overflow-y: auto;
-  margin-right: 10.25rem;
 `;

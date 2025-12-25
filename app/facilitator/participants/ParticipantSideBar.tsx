@@ -6,10 +6,9 @@ import { useRouter } from "next/navigation";
 import Plus from "@/assets/images/plus.svg";
 import {
   SideNavButton,
-  SideNavContainer,
   SideNavNewTemplateButton,
   SideNavTemplatesContainer,
-} from "./styles";
+} from "../styles";
 
 export default function ParticipantSideBar({
   filterMode,
@@ -20,12 +19,9 @@ export default function ParticipantSideBar({
 }) {
   const router = useRouter();
   return (
-    <SideNavContainer>
-      <SideNavNewTemplateButton
-        onClick={() => router.push("/invites/add-participants")}
-      >
-        {" "}
-        <Image src={Plus} alt="+" width={12} height={12} /> Send Invite{" "}
+    <div>
+      <SideNavNewTemplateButton onClick={() => router.push("/templates")}>
+        <Image src={Plus} alt="+" width={10} height={10} /> New Invite
       </SideNavNewTemplateButton>
       <SideNavTemplatesContainer>
         <SideNavButton
@@ -41,6 +37,6 @@ export default function ParticipantSideBar({
           Your Invites
         </SideNavButton>
       </SideNavTemplatesContainer>
-    </SideNavContainer>
+    </div>
   );
 }

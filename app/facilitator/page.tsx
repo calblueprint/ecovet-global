@@ -11,7 +11,7 @@ export default function FacilitatorFlows() {
         <button>Back</button>
       </Link>{" "}
       <H2>Facilitator Flows</H2>
-      <Link href="/templates/template-list">
+      <Link href="/facilitator/template-list">
         <button>View All Templates</button>
       </Link>
       <Link href="/templates">

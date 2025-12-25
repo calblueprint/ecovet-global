@@ -21,22 +21,19 @@ import COLORS from "@/styles/colors";
 import { Tag, Template } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
-  AddNewTagPlus,
-  AssociatedTags,
   ContentWrapper,
+  GeneralList,
+  GeneralTitle,
   Heading3,
   LayoutWrapper,
   MainDiv,
-  NewTag,
   PageDiv,
   SearchBarStyled,
   SearchInput,
   SideNavContainer,
   SortButton,
-  TemplateList,
-  TemplateTag,
-  TemplateTitle,
-} from "./styles";
+} from "../styles";
+import { AddNewTagPlus, AssociatedTags, NewTag, TemplateTag } from "./styles";
 import TemplateSideBar from "./TemplateSidebar";
 
 type TemplateWithTags = Template & {
@@ -243,7 +240,7 @@ export default function TemplateListPage() {
 
               <Heading3>Browse templates</Heading3>
 
-              <TemplateTitle>
+              <GeneralTitle>
                 <span>
                   Name{" "}
                   <SortButton onClick={() => toggleSort("name")}>
@@ -273,10 +270,10 @@ export default function TemplateListPage() {
                     )}
                   </SortButton>
                 </span>
-              </TemplateTitle>
+              </GeneralTitle>
 
               {filteredTemplates.map(t => (
-                <TemplateList key={t.template_id}>
+                <GeneralList key={t.template_id}>
                   <div>{t.template_name}</div>
 
                   <AssociatedTags>
@@ -320,7 +317,7 @@ export default function TemplateListPage() {
                       year: "numeric",
                     })}
                   </div>
-                </TemplateList>
+                </GeneralList>
               ))}
             </MainDiv>
           </PageDiv>

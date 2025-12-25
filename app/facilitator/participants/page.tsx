@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import TopNavBar from "@/components/NavBar";
+import TopNavBar from "@/components/NavBar/NavBar";
 import { useProfile } from "@/utils/ProfileProvider";
+import { ContentWrapper, LayoutWrapper, SideNavContainer } from "../styles";
 import Invites from "./Invites";
 import Participants from "./Participants";
 import ParticipantSideBar from "./ParticipantSideBar";
-import { ContentWrapper, LayoutWrapper } from "./styles";
 
 export default function ParticipantsPage() {
   const [filterMode, setFilterMode] = useState<"all" | "invites">("all");
@@ -28,10 +28,12 @@ export default function ParticipantsPage() {
     <>
       <TopNavBar />
       <LayoutWrapper>
-        <ParticipantSideBar
-          filterMode={filterMode}
-          setFilterMode={setFilterMode}
-        />
+        <SideNavContainer>
+          <ParticipantSideBar
+            filterMode={filterMode}
+            setFilterMode={setFilterMode}
+          />
+        </SideNavContainer>
         <ContentWrapper>{renderComponent()}</ContentWrapper>
       </LayoutWrapper>
     </>

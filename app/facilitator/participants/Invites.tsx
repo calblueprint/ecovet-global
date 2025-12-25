@@ -6,12 +6,12 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { fetchInvites } from "@/api/supabase/queries/invites";
 import { Invite } from "@/types/schema";
 import {
+  GeneralList,
+  GeneralTitle,
   Heading3,
   MainDiv,
   SortButton,
-  TemplateList,
-  TemplateTitle,
-} from "./styles";
+} from "../styles";
 
 export default function Invites({ user_group_id }: { user_group_id: string }) {
   const [invites, setInvites] = useState<Invite[]>([]);
@@ -63,7 +63,7 @@ export default function Invites({ user_group_id }: { user_group_id: string }) {
   return (
     <MainDiv>
       <Heading3>Your Invites</Heading3>
-      <TemplateTitle>
+      <GeneralTitle>
         <span>
           Email
           <SortButton onClick={() => toggleSort("email")}>
@@ -78,11 +78,11 @@ export default function Invites({ user_group_id }: { user_group_id: string }) {
             )}
           </SortButton>{" "}
         </span>
-      </TemplateTitle>
+      </GeneralTitle>
       {sortedInvites.map(invite => (
-        <TemplateList key={invite.invite_id}>
+        <GeneralList key={invite.invite_id}>
           <span> {invite.email} </span>
-        </TemplateList>
+        </GeneralList>
       ))}
     </MainDiv>
   );

@@ -6,12 +6,12 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { fetchUserGroupMembers } from "@/api/supabase/queries/user-groups";
 import { Profile } from "@/types/schema";
 import {
+  GeneralList,
+  GeneralTitle,
   Heading3,
   MainDiv,
   SortButton,
-  TemplateList,
-  TemplateTitle,
-} from "./styles";
+} from "../styles";
 
 export default function Participants({
   user_group_id,
@@ -75,7 +75,7 @@ export default function Participants({
   return (
     <MainDiv>
       <Heading3>Participants</Heading3>
-      <TemplateTitle>
+      <GeneralTitle>
         <span>
           Name
           <SortButton onClick={() => toggleSort("name")}>
@@ -118,16 +118,16 @@ export default function Participants({
             )}
           </SortButton>{" "}
         </span>
-      </TemplateTitle>
+      </GeneralTitle>
       {sortedUsers.map(groupMember => (
-        <TemplateList key={groupMember.id}>
+        <GeneralList key={groupMember.id}>
           <span>
             {" "}
             {groupMember.first_name} {groupMember.last_name}{" "}
           </span>
           <span> {groupMember.email} </span>
           <span> {groupMember.user_type}</span>
-        </TemplateList>
+        </GeneralList>
       ))}
     </MainDiv>
   );

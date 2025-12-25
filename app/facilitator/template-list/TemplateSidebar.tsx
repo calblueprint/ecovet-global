@@ -1,11 +1,14 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import Plus from "@/assets/images/plus.svg";
 import {
   SideNavButton,
   SideNavNewTemplateButton,
   SideNavTemplatesContainer,
-} from "./styles";
+} from "../styles";
 
 export default function TemplateSideBar({
   filterMode,
@@ -14,9 +17,15 @@ export default function TemplateSideBar({
   filterMode: "all" | "your" | "browse";
   setFilterMode: (val: "all" | "your" | "browse") => void;
 }) {
+  const router = useRouter();
+
   return (
     <div>
-      <SideNavNewTemplateButton>+ New Template</SideNavNewTemplateButton>
+      <SideNavNewTemplateButton
+        onClick={() => router.push("/invites/add-participants")}
+      >
+        <Image src={Plus} alt="+" width={10} height={10} /> New Template
+      </SideNavNewTemplateButton>
       <SideNavTemplatesContainer>
         <SideNavButton
           selected={filterMode === "all"}
