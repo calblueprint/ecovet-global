@@ -3,8 +3,11 @@
 import { useState } from "react";
 import { FiCheck, FiEye, FiEyeOff, FiX } from "react-icons/fi";
 import Link from "next/link";
-import { checkInvites } from "@/api/supabase/queries/auth";
-import { addEmailtoProfile } from "@/api/supabase/queries/profile";
+import { checkIfUserExists, checkInvites } from "@/api/supabase/queries/auth";
+import {
+  addEmailtoProfile,
+  markInviteAccepted,
+} from "@/api/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
 import {
   Button,
@@ -47,11 +50,24 @@ export default function Login() {
 
   const handleSignUp = async () => {
     try {
-      if (!(await checkInvites(email))) {
-        throw new Error("You do not have an invitation");
+      if (await checkIfUserExists(email)) {
+        throw new Error("You already have an account, please sign in.");
       }
-      if (!isPasswordValid) {
-        throw new Error("Password does not meet the required criteria");
+      const inviteStatus = await checkInvites(email);
+      switch (inviteStatus) {
+        case "no_invite":
+        case "cancelled":
+          throw new Error("You do not have an invitation.");
+        case "accepted":
+          throw new Error("You already have an account, please sign in.");
+        case "pending":
+          break;
+        case "error":
+          throw new Error(
+            "There was an error checking your invitation. Please try again.",
+          );
+        default:
+          throw new Error("Unknown invitation status.");
       }
       if (password !== confirmPassword) {
         throw new Error("Passwords do not match");
@@ -70,8 +86,7 @@ export default function Login() {
         throw new Error("Signup succeeded but user ID was missing.");
       }
       await addEmailtoProfile(userId, email);
-
-      alert("Password successfully updated!");
+      await markInviteAccepted(email);
     } catch (error: unknown) {
       if (error instanceof Error) {
         setErrorMessage(error.message);
@@ -91,7 +106,7 @@ export default function Login() {
           <SignInTag>
             {" "}
             Already have an account?{" "}
-            <Link href="/auth/login-test"> Sign in. </Link>
+            <Link href="/auth/sign-in"> Sign in. </Link>
           </SignInTag>
         </IntroText>
         <InputFields>

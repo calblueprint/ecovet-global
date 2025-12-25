@@ -12,6 +12,23 @@ export async function addEmailtoProfile(userId: string, email: string) {
     throw new Error("Failed to create user profile");
   }
 }
+export async function markInviteAccepted(email: string) {
+  const { data, error } = await supabase
+    .from("invite")
+    .update({ status: "Accepted" })
+    .eq("email", email);
+
+  if (error) {
+    console.error("Error updating invite status:", error.message);
+    throw new Error("Failed to mark invite as accepted");
+  }
+
+  if (!data) {
+    throw new Error("No invite found to update for email" + email);
+  }
+
+  return true;
+}
 
 export async function makeAdmin(userId: string) {
   const { error } = await supabase.from("profile").upsert({

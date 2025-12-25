@@ -51,13 +51,26 @@ export async function checkInvites(email: string) {
     .select("*")
     .eq("email", email)
     .maybeSingle();
+
   if (error) {
     console.error("Error fetching invite from email:", error.message);
+    return "error";
   }
-  if (!data) return false;
+
+  if (!data) {
+    return "no_invite";
+  }
+
   const invite_data: Invite = data as Invite;
-  if (invite_data.status == "Pending") {
-    return true;
+
+  switch (invite_data.status) {
+    case "Pending":
+      return "pending";
+    case "Accepted":
+      return "accepted";
+    case "Cancelled":
+      return "cancelled";
+    default:
+      return "unknown_status";
   }
-  return false;
 }
