@@ -25,8 +25,10 @@ const TopNavBar = () => {
         />
       </LogoContainer>
       <ButtonContainer>
-        <Link href="/templates/template-list">
-          <TopNavButton $active={pathname.startsWith("/templates")}>
+        <Link href="/facilitator/template-list">
+          <TopNavButton
+            $active={pathname.startsWith("/facilitator/template-list")}
+          >
             Templates
           </TopNavButton>
         </Link>
