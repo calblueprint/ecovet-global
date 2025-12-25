@@ -1,0 +1,42 @@
+"use client";
+
+import React from "react";
+import {
+  SideNavButton,
+  SideNavNewTemplateButton,
+  SideNavTemplatesContainer,
+} from "./styles";
+
+export default function TemplateSideBar({
+  filterMode,
+  setFilterMode,
+}: {
+  filterMode: "all" | "your" | "browse";
+  setFilterMode: (val: "all" | "your" | "browse") => void;
+}) {
+  return (
+    <div>
+      <SideNavNewTemplateButton>+ New Template</SideNavNewTemplateButton>
+      <SideNavTemplatesContainer>
+        <SideNavButton
+          selected={filterMode === "all"}
+          onClick={() => setFilterMode("all")}
+        >
+          All Templates
+        </SideNavButton>
+        <SideNavButton
+          selected={filterMode === "your"}
+          onClick={() => setFilterMode("your")}
+        >
+          Your Templates
+        </SideNavButton>
+        <SideNavButton
+          selected={filterMode === "browse"}
+          onClick={() => setFilterMode("browse")}
+        >
+          Browse Templates
+        </SideNavButton>
+      </SideNavTemplatesContainer>
+    </div>
+  );
+}

@@ -9,24 +9,13 @@ export const PageDiv = styled.main`
   height: 100%;
 `;
 
-export const SidebarDiv = styled.main`
-  display: flex;
-  flex-direction: column;
-  width: 180px;
-  height: 976px;
-  padding: 15px;
-  justify-content: center;
-  align-items: flex-start;
-  flex-shrink: 0;
-  background: ${COLORS["oat_light"]};
-`;
-
 export const MainDiv = styled.main`
   display: flex;
   flex-direction: column;
   width: 100%;
   min-height: 100vh;
   padding: 2rem;
+  padding-top: 1rem;
   background-color: ${COLORS.white};
   background: ${COLORS.white};
 `;
@@ -41,20 +30,16 @@ export const SearchInput = styled.input`
   border-radius: 8px;
   padding: 0.5rem 1rem;
   width: 100%;
+  height: 2.75rem;
   margin-bottom: 1rem;
   font-family: ${Sans.style.fontFamily};
-  font-size: 16px;
-
-  &:focus {
-    outline: none;
-    border-color: ${COLORS.oat_medium};
-    box-shadow: 0 0 0 2px ${COLORS.oat_light};
-  }
+  font-size: 12px;
+  background-color: ${COLORS.oat_light};
 `;
 
 export const Heading3 = styled.h3`
   font-family: ${Sans.style.fontFamily};
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   margin-bottom: 0.5rem;
   font-style: normal;
@@ -108,6 +93,57 @@ export const TemplateList = styled.ul`
   color: ${COLORS.black70};
 `;
 
+export const SideNavContainer = styled.div`
+  display: flex;
+  padding: 1rem;
+  height: 100vh;
+  align-items: flex-start;
+  flex-direction: column;
+  background-color: ${COLORS.oat_light};
+`;
+
+export const SideNavTemplatesContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1.25rem 0;
+  width: 100%;
+`;
+
+export const SideNavButton = styled.button<{ selected: boolean }>`
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  text-align: left;
+  gap: 0.5em;
+  background-color: ${({ selected }) =>
+    selected ? COLORS.oat_dark : COLORS.oat_light};
+
+  color: ${({ selected }) => (selected ? COLORS.black : COLORS.black70)};
+  border-radius: 0.25rem;
+  border: none;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 12px;
+  font-weight: 500;
+  &:hover {
+    background-color: ${COLORS.oat_medium};
+    cursor: pointer;
+  }
+`;
+
+export const SideNavNewTemplateButton = styled.button`
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  text-align: left;
+  gap: 0.5em;
+  background-color: ${COLORS.darkElectricBlue};
+  border-radius: 0.25rem;
+  border: none;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 12px;
+  font-weight: 500;
+  color: ${COLORS.white};
+`;
+
 export const AssociatedTags = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -156,4 +192,18 @@ export const AddNewTagPlus = styled.div`
   &:hover {
     background-color: ${COLORS["oat_medium"]};
   }
+  color: ${COLORS.white};
+`;
+
+export const LayoutWrapper = styled.div`
+  display: flex;
+  height: calc(100vh - 64px);
+  width: 100%;
+`;
+
+export const ContentWrapper = styled.div`
+  flex: 1;
+  padding: 2rem;
+  /* margin-right: 10.25rem; */
+  margin-right: 10%;
 `;
