@@ -16,7 +16,7 @@ export default function TemplateSideBar({
   setFilterMode: (val: "all" | "your" | "browse") => void;
 }) {
   return (
-    <SideNavContainer>
+    <div>
       <SideNavNewTemplateButton>+ New Template</SideNavNewTemplateButton>
       <SideNavTemplatesContainer>
         <SideNavButton
@@ -38,6 +38,6 @@ export default function TemplateSideBar({
           Browse Templates
         </SideNavButton>
       </SideNavTemplatesContainer>
-    </SideNavContainer>
+    </div>
   );
 }

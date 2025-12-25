@@ -9,18 +9,6 @@ export const PageDiv = styled.main`
   height: 100%;
 `;
 
-export const SidebarDiv = styled.main`
-  display: flex;
-  flex-direction: column;
-  width: 180px;
-  height: 976px;
-  padding: 15px;
-  justify-content: center;
-  align-items: flex-start;
-  flex-shrink: 0;
-  background: ${COLORS["oat_light"]};
-`;
-
 export const MainDiv = styled.main`
   display: flex;
   flex-direction: column;
@@ -42,17 +30,10 @@ export const SearchInput = styled.input`
   border-radius: 8px;
   padding: 0.5rem 1rem;
   width: 100%;
-  height: 3rem;
+  height: 2.75rem;
   margin-bottom: 1rem;
   font-family: ${Sans.style.fontFamily};
-  font-size: 16px;
-
-  &:focus {
-    outline: none;
-    border-color: ${COLORS.oat_medium};
-    box-shadow: 0 0 0 2px ${COLORS.oat_light};
-  }
-
+  font-size: 12px;
   background-color: ${COLORS.oat_light};
 `;
 
@@ -223,6 +204,6 @@ export const LayoutWrapper = styled.div`
 export const ContentWrapper = styled.div`
   flex: 1;
   padding: 2rem;
-  overflow-y: auto;
-  margin-right: 10.25rem;
+  /* margin-right: 10.25rem; */
+  margin-right: 10%;
 `;
