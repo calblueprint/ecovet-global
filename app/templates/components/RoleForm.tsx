@@ -29,7 +29,9 @@ export default function RoleForm({
       </fieldset>
       {rolePhases.map((rolePhase, i) => (
         <fieldset key={rolePhase.role_phase_id}>
-          <legend>Phase {i + 1}</legend>
+          <legend>
+            Phase {value.phasesById[rolePhase.phase_id]?.phase_number ?? i + 1}
+          </legend>
           <div style={{ display: "flex" }}>
             <div>
               <input

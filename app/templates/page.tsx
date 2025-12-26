@@ -35,8 +35,9 @@ const createInitialStore = (): localStore => {
 };
 
 export default function NewTemplatePage() {
-  const [isNew, setIsNew] = useState(false);
-  const [newTemp, setNewTemp] = useState<localStore | null>(null);
+  const [newTemp, setNewTemp] = useState<localStore>(() =>
+    createInitialStore(),
+  );
   const template = newTemp?.rolesById[1] as Template;
 
   function updateLocalStore(updater: (draft: localStore) => void) {
@@ -45,37 +46,34 @@ export default function NewTemplatePage() {
 
   async function newTemplate() {
     setNewTemp(createInitialStore());
-    setIsNew(true);
   }
 
   function resetTemplate() {
-    setIsNew(false);
-    setNewTemp(null);
+    setNewTemp(createInitialStore());
   }
 
   return (
-    <>
-      {isNew && newTemp && (
-        <input
-          type="text"
-          value={template.template_name ?? "New Template"}
-          onChange={e =>
-            updateLocalStore(draft => {
-              (draft.rolesById[1] as Template).template_name = e.target.value;
-            })
-          }
-          className="text-4xl font-bold mb-4 border"
-        />
-      )}
-      {isNew ? (
-        <TemplateBuilder
-          localStore={newTemp}
-          onFinish={resetTemplate}
-          update={updateLocalStore}
-        />
-      ) : (
-        <button onClick={newTemplate}>New Template</button>
-      )}
-    </>
+    <div>
+      <h1
+        contentEditable
+        suppressContentEditableWarning
+        className="text-5xl font-extrabold mb-4 outline-none"
+        onBlur={e => {
+          const value = e.currentTarget.textContent?.trim();
+
+          updateLocalStore(draft => {
+            (draft.rolesById[1] as Template).template_name =
+              value && value.length > 0 ? value : "New Template";
+          });
+        }}
+      >
+        {template.template_name}
+      </h1>
+      <TemplateBuilder
+        localStore={newTemp}
+        onFinish={resetTemplate}
+        update={updateLocalStore}
+      />
+    </div>
   );
 }
