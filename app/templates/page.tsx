@@ -4,6 +4,7 @@ import { useState } from "react";
 import { produce } from "immer";
 import { localStore, Template } from "@/types/schema";
 import TemplateBuilder from "./components/TemplateBuilder";
+import { TemplateMainBox } from "./styles";
 
 const createInitialStore = (): localStore => {
   const templateID =
@@ -49,7 +50,7 @@ export default function NewTemplatePage() {
   }
 
   return (
-    <div>
+    <TemplateMainBox>
       <h1
         contentEditable
         suppressContentEditableWarning
@@ -70,6 +71,6 @@ export default function NewTemplatePage() {
         onFinish={resetTemplate}
         update={updateLocalStore}
       />
-    </div>
+    </TemplateMainBox>
   );
 }

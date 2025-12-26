@@ -54,10 +54,10 @@ export interface Template {
   template_name: string | null;
   accessible_to_all: boolean | null;
   user_group_id: UUID | null;
-  objective: string;
-  summary: string;
-  setting: string;
-  current_activity: string;
+  objective: string | null;
+  summary: string | null;
+  setting: string | null;
+  current_activity: string | null;
   timestamp: string;
 }
 type TemplateUpdatable = Omit<Template, "template_id">;

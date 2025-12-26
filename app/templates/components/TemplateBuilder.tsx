@@ -9,6 +9,20 @@ import {
 } from "@/api/supabase/queries/templates";
 import { localStore, Prompt, Role, Template } from "@/types/schema";
 import RoleForm from "./RoleForm";
+import {
+  NewTabButton,
+  PanelCard,
+  PhasesControl,
+  PhasesCount,
+  PhasesLabel,
+  PhasesStepper,
+  StepButton,
+  SubmitButton,
+  TabButton,
+  TabsHeader,
+  TabsLeft,
+  TabsRight,
+} from "./styles";
 import TemplateOverviewForm from "./TemplateOverviewForm";
 
 export default function TemplateBuilder({
@@ -36,7 +50,7 @@ export default function TemplateBuilder({
       draft.rolesById[newRoleID] = {
         role_id: newRoleID,
         role_name: "New Role",
-        role_description: "New Role Description",
+        role_description: "",
         template_id: draft.templateID,
       };
       draft.roleIds.push(newRoleID);
@@ -87,7 +101,11 @@ export default function TemplateBuilder({
     if (localStore == null) return;
 
     update(draft => {
-      (draft.rolesById[role_id] as Role).role_name = newLabel;
+      if (typeof role_id === "number") {
+        (draft.rolesById[role_id] as Template).template_name = newLabel;
+      } else {
+        (draft.rolesById[role_id] as Role).role_name = newLabel;
+      }
     });
   }
 
@@ -123,17 +141,19 @@ export default function TemplateBuilder({
   }
 
   function removePhase(phase_id: UUID | null = null): void {
-    if (!localStore || localStore.phaseIds.length === 0) return;
+    if (localStore?.phaseIds.length == 0 || localStore == null) {
+      return;
+    }
 
     update(draft => {
       let removedPhaseID: UUID | undefined;
+
       if (phase_id) {
         const i = draft.phaseIds.indexOf(phase_id);
         [removedPhaseID] = draft.phaseIds.splice(i, 1);
       } else {
         removedPhaseID = draft.phaseIds.pop() as UUID;
       }
-
       if (removedPhaseID) {
         delete draft.phasesById[removedPhaseID];
         for (const [, obj] of Object.entries(draft.rolePhaseIndex)) {
@@ -285,86 +305,114 @@ export default function TemplateBuilder({
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-          {localStore?.roleIds.map(t => (
-            <button
-              key={String(t)}
-              onClick={() => setActiveId(t)}
-              style={{
-                padding: "6px 10px",
-                border: "1px solid #ccc",
-                borderBottom:
-                  activeId === t ? "2px solid transparent" : "1px solid #ccc",
-                background: activeId === t ? "#fff" : "#f8f8f8",
-                fontWeight: activeId === t ? 600 : 400,
-              }}
-            >
-              {localStore.rolesById[t] && "role_name" in localStore.rolesById[t]
-                ? localStore.rolesById[t].role_name
-                : "Scenario Overview"}
-            </button>
-          ))}
-          <button onClick={addRole}>+ New</button>
-        </div>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <p>Phases: {localStore?.phaseIds.length}</p>
-          <button onClick={addPhase}>UP</button>
-          <button onClick={() => removePhase()}>DOWN</button>
-        </div>
-      </div>
+      <TabsHeader>
+        <TabsLeft>
+          {localStore?.roleIds.map(t => {
+            const roleOrTemplate = localStore.rolesById[t];
+            const isTemplate = typeof t === "number";
 
-      {localStore?.roleIds.map(t =>
-        t === activeId ? (
-          <div
-            key={`panel-${String(t)}`}
-            style={{ border: "1px solid #ccc", padding: 12 }}
-          >
-            {activeId !== 1 && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: 8,
-                }}
+            return (
+              <TabButton
+                key={String(t)}
+                $active={activeId === t}
+                onClick={() => setActiveId(t)}
               >
-                <input
-                  value={(localStore.rolesById[t] as Role).role_name}
-                  onChange={e => renameRole(t, e.target.value)}
-                  style={{ padding: 6, border: "1px solid #ccc" }}
+                {isTemplate ? (
+                  "Scenario Overview"
+                ) : (
+                  <>
+                    <span
+                      contentEditable
+                      suppressContentEditableWarning
+                      className="outline-none"
+                      onBlur={e => {
+                        const value =
+                          e.currentTarget.textContent?.trim() || "New Role";
+                        update(draft => {
+                          (draft.rolesById[t] as Role).role_name = value;
+                        });
+                      }}
+                    >
+                      {(roleOrTemplate as Role).role_name}
+                    </span>
+                    <span
+                      role="button"
+                      style={{
+                        marginLeft: 10,
+                        background: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                      }}
+                      onClick={() => removeRole(t)}
+                    >
+                      ×
+                    </span>
+                  </>
+                )}
+              </TabButton>
+            );
+          })}
+
+          <NewTabButton onClick={addRole}>+</NewTabButton>
+        </TabsLeft>
+
+        <TabsRight>
+          <PhasesControl
+            role="group"
+            aria-label="Phases control"
+            onKeyDown={e => {
+              if (e.key === "ArrowUp") addPhase();
+              if (e.key === "ArrowDown") removePhase();
+            }}
+          >
+            <PhasesLabel>Phases:</PhasesLabel>
+            <PhasesCount>{localStore?.phaseIds.length ?? 0}</PhasesCount>
+            <PhasesStepper>
+              <StepButton aria-label="Increase phases" onClick={addPhase}>
+                ▲
+              </StepButton>
+              <StepButton
+                aria-label="Decrease phases"
+                onClick={() => removePhase()}
+                disabled={(localStore?.phaseIds.length ?? 0) === 0}
+              >
+                ▼
+              </StepButton>
+            </PhasesStepper>
+          </PhasesControl>
+          <SubmitButton onClick={saveTemplate}>
+            {saving ? "Saving..." : "Submit Template"}
+          </SubmitButton>
+        </TabsRight>
+      </TabsHeader>
+
+      <div>
+        {localStore?.roleIds.map(t =>
+          t === activeId ? (
+            <PanelCard key={`panel-${String(t)}`}>
+              {typeof activeId === "number" ? (
+                <TemplateOverviewForm
+                  value={localStore.rolesById[activeId] as Template}
+                  onChange={setActiveUpdate}
                 />
-                <button
-                  onClick={() => removeRole(t)}
-                  style={{ border: "1px solid #ccc", padding: 6 }}
-                >
-                  Remove
-                </button>
-              </div>
-            )}
-            {typeof activeId === "number" ? (
-              <TemplateOverviewForm
-                value={localStore.rolesById[activeId] as Template}
-                onChange={setActiveUpdate}
-              />
-            ) : (
-              <RoleForm
-                value={{
-                  role: localStore.rolesById[activeId] as Role,
-                  rolePhases: localStore.rolePhasesById,
-                  rolePhaseIndex: localStore.rolePhaseIndex[activeId],
-                  promptById: localStore.promptById,
-                  promptIndex: localStore.promptIndex,
-                  phasesById: localStore.phasesById,
-                }}
-                onChange={setActiveUpdate}
-              />
-            )}
-          </div>
-        ) : null,
-      )}
-      <button onClick={saveTemplate} disabled={saving}>
-        {saving ? "Saving..." : "Submit Template"}
-      </button>
+              ) : (
+                <RoleForm
+                  value={{
+                    role: localStore.rolesById[activeId] as Role,
+                    rolePhases: localStore.rolePhasesById,
+                    rolePhaseIndex: localStore.rolePhaseIndex[activeId],
+                    promptById: localStore.promptById,
+                    promptIndex: localStore.promptIndex,
+                    phasesById: localStore.phasesById,
+                  }}
+                  onChange={setActiveUpdate}
+                />
+              )}
+            </PanelCard>
+          ) : null,
+        )}
+      </div>
     </div>
   );
 }
