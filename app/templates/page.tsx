@@ -44,10 +44,6 @@ export default function NewTemplatePage() {
     setNewTemp(prev => produce(prev, updater));
   }
 
-  async function newTemplate() {
-    setNewTemp(createInitialStore());
-  }
-
   function resetTemplate() {
     setNewTemp(createInitialStore());
   }
