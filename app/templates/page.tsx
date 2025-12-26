@@ -22,6 +22,7 @@ const createInitialStore = (): localStore => {
         summary: "",
         setting: "",
         current_activity: "",
+        timestamp: "",
       },
     },
     roleIds: [1],

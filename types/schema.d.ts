@@ -58,6 +58,7 @@ export interface Template {
   summary: string | null;
   setting: string | null;
   current_activity: string | null;
+  timestamp: string;
 }
 type TemplateUpdatable = Omit<Template, "template_id">;
 
