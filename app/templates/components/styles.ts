@@ -177,10 +177,6 @@ export const SubmitButton = styled.button`
   cursor: pointer;
 `;
 
-//----------------------------------------------------------------------------------------
-//-----------------------------------   FORM STYLING   -----------------------------------
-//----------------------------------------------------------------------------------------
-
 /* Page section wrapper for a role's panel */
 export const PanelCard = styled(Flex).attrs({ $direction: "column" })`
   // padding: 40px 100px 0 0;

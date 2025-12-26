@@ -4,12 +4,7 @@ import { useState } from "react";
 import { produce } from "immer";
 import { localStore, Template } from "@/types/schema";
 import TemplateBuilder from "./components/TemplateBuilder";
-import {
-  NewTemplateButton,
-  NewTemplateDiv,
-  NewTemplateHeader,
-  TemplateMainBox,
-} from "./styles";
+import { TemplateMainBox } from "./styles";
 
 const createInitialStore = (): localStore => {
   const templateID =
@@ -23,10 +18,10 @@ const createInitialStore = (): localStore => {
         template_name: "New Template",
         accessible_to_all: null,
         user_group_id: null,
-        objective: "New Template Objective",
-        summary: "New Template Summary",
-        setting: "New Template Setting",
-        current_activity: "New Template Current Activity",
+        objective: "",
+        summary: "",
+        setting: "",
+        current_activity: "",
       },
     },
     roleIds: [1],
@@ -40,42 +35,41 @@ const createInitialStore = (): localStore => {
 };
 
 export default function NewTemplatePage() {
-  const [isNew, setIsNew] = useState(false);
-  const [newTemp, setNewTemp] = useState<localStore | null>(null);
+  const [newTemp, setNewTemp] = useState<localStore>(() =>
+    createInitialStore(),
+  );
+  const template = newTemp?.rolesById[1] as Template;
 
   function updateLocalStore(updater: (draft: localStore) => void) {
     setNewTemp(prev => produce(prev, updater));
   }
 
-  async function newTemplate() {
-    setNewTemp(createInitialStore());
-    setIsNew(true);
-  }
-
   function resetTemplate() {
-    setIsNew(false);
-    setNewTemp(null);
+    setNewTemp(createInitialStore());
   }
 
   return (
     <TemplateMainBox>
-      <NewTemplateHeader>
-        {(newTemp?.rolesById?.[1] as Template)?.template_name ??
-          "Create A New Template"}
-      </NewTemplateHeader>
-      <NewTemplateDiv>
-        {isNew ? (
-          <TemplateBuilder
-            localStore={newTemp}
-            onFinish={resetTemplate}
-            update={updateLocalStore}
-          />
-        ) : (
-          <NewTemplateButton onClick={newTemplate}>
-            New Template
-          </NewTemplateButton>
-        )}
-      </NewTemplateDiv>
+      <h1
+        contentEditable
+        suppressContentEditableWarning
+        className="text-5xl font-extrabold mb-4 outline-none"
+        onBlur={e => {
+          const value = e.currentTarget.textContent?.trim();
+
+          updateLocalStore(draft => {
+            (draft.rolesById[1] as Template).template_name =
+              value && value.length > 0 ? value : "New Template";
+          });
+        }}
+      >
+        {template.template_name}
+      </h1>
+      <TemplateBuilder
+        localStore={newTemp}
+        onFinish={resetTemplate}
+        update={updateLocalStore}
+      />
     </TemplateMainBox>
   );
 }

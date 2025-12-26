@@ -28,6 +28,26 @@ export async function fetchParticipants(userGroupId: string) {
     : [];
 }
 
+export async function fetchTemplateId(session_id: string) {
+  const { data, error } = await supabase
+    .from("session")
+    .select("template_id")
+    .eq("session_id", session_id)
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function fetchSessionName(session_id: string) {
+  const { data, error } = await supabase
+    .from("session")
+    .select("session_name")
+    .eq("session_id", session_id)
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 export async function assignRole(userId: string, roleId: string) {
   const { data, error } = await supabase
     .from("profile")

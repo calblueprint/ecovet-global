@@ -74,6 +74,7 @@ export interface Phase {
   phase_id: UUID; // phase_id
   session_id: UUID | null;
   phase_name: string | null;
+  phase_number: number;
   phase_description: string | null;
   is_finished: boolean | null;
 }
@@ -125,12 +126,14 @@ export type roleFormInput = {
   rolePhaseIndex: Record<UUID, UUID>;
   promptById: Record<UUID, Prompt>;
   promptIndex: Record<UUID, UUID[]>; // rolephase uuid mapping to a list of prompt uuids
+  phasesById: Record<UUID, Phase>;
 };
 export interface Tag {
   tag_id: UUID;
   name: string;
   user_group_id: UUID;
   number: number; // (number of templates with this tag)
+  color: string; // might want to change to check COLOR type
 }
 export interface TemplateTag {
   template_id: UUID;

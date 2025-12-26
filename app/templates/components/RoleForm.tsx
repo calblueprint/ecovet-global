@@ -32,7 +32,7 @@ export default function RoleForm({
         <FieldLegend>Role description</FieldLegend>
         <BigInput
           name="role_description"
-          placeholder="da descrition"
+          placeholder="Role description"
           value={value.role.role_description ?? ""}
           onChange={e =>
             onChange(value.role.role_id, "role_description", e.target.value)
@@ -43,7 +43,10 @@ export default function RoleForm({
       {rolePhases.map((rolePhase, i) => (
         <PhaseCard key={rolePhase.role_phase_id}>
           <PhaseHeader>
-            <SectionH2>Phase {i + 1}</SectionH2>
+            <SectionH2>
+              Phase{" "}
+              {value.phasesById[rolePhase.phase_id]?.phase_number ?? i + 1}
+            </SectionH2>
             <RemovePhaseButton
               onClick={() =>
                 onChange(rolePhase.phase_id, "remove_phase", rolePhase.phase_id)
@@ -57,7 +60,7 @@ export default function RoleForm({
             <FieldLegend>Description</FieldLegend>
             <BigInput
               name="role_phase_description"
-              placeholder="da descrition"
+              placeholder="Description"
               value={rolePhase.description ?? ""}
               onChange={e =>
                 onChange(rolePhase.role_phase_id, "description", e.target.value)
@@ -72,7 +75,7 @@ export default function RoleForm({
                 <FieldLegend>Question {j + 1}</FieldLegend>
                 <BigInput
                   name="prompt"
-                  placeholder="da prompt"
+                  placeholder="The prompt"
                   value={value.promptById[promptID].prompt_text ?? ""}
                   onChange={e =>
                     onChange(promptID, "prompt_text", e.target.value)
