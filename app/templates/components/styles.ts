@@ -221,7 +221,7 @@ export const GhostButton = styled.button`
 /* Vertical form spacing */
 export const FormStack = styled(Flex).attrs({
   $direction: "column",
-  $gap: "40px",
+  $gap: "20px",
 })`
   padding-right: 150px;
 `;
@@ -289,7 +289,7 @@ export const QuestionCard = styled.fieldset`
 /* Big comfortable text area (used for description/prompts) */
 export const BigInput = styled.input.attrs({ type: "text" })`
   width: calc(100% - 20px);
-  margin: 10px;
+  margin: 5px;
   border: none;
   resize: none;
   font: inherit;

@@ -10,11 +10,8 @@ import {
 import { localStore, Prompt, Role, Template } from "@/types/schema";
 import RoleForm from "./RoleForm";
 import {
-  GhostButton,
-  NameInput,
   NewTabButton,
   PanelCard,
-  PanelHeaderRow,
   PhasesControl,
   PhasesCount,
   PhasesLabel,
@@ -53,7 +50,7 @@ export default function TemplateBuilder({
       draft.rolesById[newRoleID] = {
         role_id: newRoleID,
         role_name: "New Role",
-        role_description: "New Role Description",
+        role_description: "",
         template_id: draft.templateID,
       };
       draft.roleIds.push(newRoleID);
@@ -310,17 +307,53 @@ export default function TemplateBuilder({
     <div>
       <TabsHeader>
         <TabsLeft>
-          {localStore?.roleIds.map(t => (
-            <TabButton
-              key={String(t)}
-              $active={activeId === t}
-              onClick={() => setActiveId(t)}
-            >
-              {localStore.rolesById[t] && "role_name" in localStore.rolesById[t]
-                ? localStore.rolesById[t].role_name
-                : "Scenario Overview"}
-            </TabButton>
-          ))}
+          {localStore?.roleIds.map(t => {
+            const roleOrTemplate = localStore.rolesById[t];
+            const isTemplate = typeof t === "number";
+
+            return (
+              <TabButton
+                key={String(t)}
+                $active={activeId === t}
+                onClick={() => setActiveId(t)}
+              >
+                {isTemplate ? (
+                  "Scenario Overview"
+                ) : (
+                  <>
+                    <span
+                      contentEditable
+                      suppressContentEditableWarning
+                      className="outline-none"
+                      onBlur={e => {
+                        const value =
+                          e.currentTarget.textContent?.trim() || "New Role";
+                        update(draft => {
+                          (draft.rolesById[t] as Role).role_name = value;
+                        });
+                      }}
+                    >
+                      {(roleOrTemplate as Role).role_name}
+                    </span>
+                    <span
+                      role="button"
+                      style={{
+                        marginLeft: 10,
+                        background: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                      }}
+                      onClick={() => removeRole(t)}
+                    >
+                      ×
+                    </span>
+                  </>
+                )}
+              </TabButton>
+            );
+          })}
+
           <NewTabButton onClick={addRole}>+</NewTabButton>
         </TabsLeft>
 
@@ -359,27 +392,6 @@ export default function TemplateBuilder({
           t === activeId ? (
             <PanelCard key={`panel-${String(t)}`}>
               {typeof activeId === "number" ? (
-                <PanelHeaderRow>
-                  <NameInput
-                    value={
-                      (localStore.rolesById[t] as Template).template_name ?? ""
-                    }
-                    onChange={e => renameRole(t, e.target.value)}
-                  />
-                </PanelHeaderRow>
-              ) : (
-                <PanelHeaderRow>
-                  <NameInput
-                    value={(localStore.rolesById[t] as Role).role_name}
-                    onChange={e => renameRole(t, e.target.value)}
-                  />
-                  <GhostButton onClick={() => removeRole(t)}>
-                    Remove
-                  </GhostButton>
-                </PanelHeaderRow>
-              )}
-
-              {typeof activeId === "number" ? (
                 <TemplateOverviewForm
                   value={localStore.rolesById[activeId] as Template}
                   onChange={setActiveUpdate}
@@ -404,7 +416,3 @@ export default function TemplateBuilder({
     </div>
   );
 }
-
-// <button onClick={saveTemplate} disabled={saving}>
-//   {saving ? "Saving..." : "Submit Template"}
-// </button>

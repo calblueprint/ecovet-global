@@ -75,7 +75,7 @@ export default function RoleForm({
                 <FieldLegend>Question {j + 1}</FieldLegend>
                 <BigInput
                   name="prompt"
-                  placeholder="The prompt"
+                  placeholder="Prompt"
                   value={value.promptById[promptID].prompt_text ?? ""}
                   onChange={e =>
                     onChange(promptID, "prompt_text", e.target.value)
