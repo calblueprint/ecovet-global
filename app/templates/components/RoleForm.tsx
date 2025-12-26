@@ -20,7 +20,7 @@ export default function RoleForm({
         <input
           type="text"
           name="role_description"
-          placeholder="da descrition"
+          placeholder="Role Description"
           value={value.role.role_description ?? ""}
           onChange={e =>
             onChange(value.role.role_id, "role_description", e.target.value)
@@ -29,13 +29,15 @@ export default function RoleForm({
       </fieldset>
       {rolePhases.map((rolePhase, i) => (
         <fieldset key={rolePhase.role_phase_id}>
-          <legend>Phase {i + 1}</legend>
+          <legend>
+            Phase {value.phasesById[rolePhase.phase_id]?.phase_number ?? i + 1}
+          </legend>
           <div style={{ display: "flex" }}>
             <div>
               <input
                 type="text"
                 name="role_phase_description"
-                placeholder="da descrition"
+                placeholder="Phase Role Description"
                 value={rolePhase.description ?? ""}
                 onChange={e =>
                   onChange(
@@ -59,7 +61,7 @@ export default function RoleForm({
                       key={promptID}
                       type="text"
                       name="prompt"
-                      placeholder="da prompt"
+                      placeholder="prompt"
                       value={value.promptById[promptID].prompt_text ?? ""}
                       onChange={e =>
                         onChange(promptID, "prompt_text", e.target.value)
@@ -74,7 +76,7 @@ export default function RoleForm({
                         )
                       }
                     >
-                      - Remove
+                      Remove
                     </button>
                   </div>
                 ))}
@@ -96,7 +98,7 @@ export default function RoleForm({
                 onChange(rolePhase.phase_id, "remove_phase", rolePhase.phase_id)
               }
             >
-              Trash
+              Remove Phase
             </button>
           </div>
         </fieldset>

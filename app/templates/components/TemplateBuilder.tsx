@@ -92,23 +92,23 @@ export default function TemplateBuilder({
   }
 
   function addPhase(): void {
-    if (localStore == null) return;
+    if (!localStore) return;
     const newPhaseID = createUUID();
 
     update(draft => {
+      const phaseNumber = draft.phaseIds.length + 1;
       draft.phasesById[newPhaseID] = {
         phase_id: newPhaseID,
         session_id: null,
-        phase_name: String(draft.phaseIds.length),
+        phase_name: `Phase ${phaseNumber}`,
+        phase_number: phaseNumber,
         phase_description: null,
         is_finished: null,
       };
       draft.phaseIds.push(newPhaseID);
 
       for (const role of draft.roleIds) {
-        if (typeof role === "number") {
-          continue;
-        }
+        if (typeof role === "number") continue;
         const newRolePhaseID = createUUID();
         draft.rolePhasesById[newRolePhaseID] = {
           role_phase_id: newRolePhaseID,
@@ -123,34 +123,36 @@ export default function TemplateBuilder({
   }
 
   function removePhase(phase_id: UUID | null = null): void {
-    if (localStore?.phaseIds.length == 0 || localStore == null) {
-      return;
-    }
+    if (!localStore || localStore.phaseIds.length === 0) return;
 
     update(draft => {
       let removedPhaseID: UUID | undefined;
-
       if (phase_id) {
         const i = draft.phaseIds.indexOf(phase_id);
         [removedPhaseID] = draft.phaseIds.splice(i, 1);
       } else {
         removedPhaseID = draft.phaseIds.pop() as UUID;
       }
+
       if (removedPhaseID) {
         delete draft.phasesById[removedPhaseID];
-
         for (const [, obj] of Object.entries(draft.rolePhaseIndex)) {
           const rolePhaseID = obj[removedPhaseID];
           if (rolePhaseID) {
             delete draft.rolePhasesById[rolePhaseID];
-            delete obj[removedPhaseID];
             for (const prompt of draft.promptIndex[rolePhaseID]) {
               delete draft.promptById[prompt];
             }
             delete draft.promptIndex[rolePhaseID];
           }
+          delete obj[removedPhaseID];
         }
       }
+
+      draft.phaseIds.forEach((pid, index) => {
+        draft.phasesById[pid].phase_name = `Phase ${index + 1}`;
+        draft.phasesById[pid].phase_number = index + 1;
+      });
     });
   }
 
@@ -245,6 +247,7 @@ export default function TemplateBuilder({
         saveStore.phasesById[phaseID].phase_name,
         saveStore.phasesById[phaseID].is_finished,
         saveStore.phasesById[phaseID].phase_description,
+        saveStore.phasesById[phaseID].phase_number,
       );
     }
 
@@ -351,6 +354,7 @@ export default function TemplateBuilder({
                   rolePhaseIndex: localStore.rolePhaseIndex[activeId],
                   promptById: localStore.promptById,
                   promptIndex: localStore.promptIndex,
+                  phasesById: localStore.phasesById,
                 }}
                 onChange={setActiveUpdate}
               />

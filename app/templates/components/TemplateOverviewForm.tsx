@@ -14,7 +14,7 @@ export default function TemplateOverviewForm({
         <input
           type="text"
           name="template_summary"
-          placeholder="da summary"
+          placeholder="Summary"
           value={value.summary ?? ""}
           onChange={e => onChange(1, "summary", e.target.value)}
         />
@@ -24,7 +24,7 @@ export default function TemplateOverviewForm({
         <input
           type="text"
           name="template_setting"
-          placeholder="da setting"
+          placeholder="Setting"
           value={value.setting ?? ""}
           onChange={e => onChange(1, "setting", e.target.value)}
         />
@@ -34,7 +34,7 @@ export default function TemplateOverviewForm({
         <input
           type="text"
           name="template_activity"
-          placeholder="da current activity"
+          placeholder="Current activity"
           value={value.current_activity ?? ""}
           onChange={e => onChange(1, "current_activity", e.target.value)}
         />
