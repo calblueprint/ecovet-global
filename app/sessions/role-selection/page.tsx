@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   assignRole,
   assignSession,
@@ -18,6 +20,8 @@ interface ParticipantRole {
 
 export default function RoleSelectionPage() {
   const { profile, loading } = useProfile();
+  const searchParams = useSearchParams();
+  const templateId = searchParams.get("templateId");
   const [roles, setRoles] = useState<{ id: string; name: string }[]>([]);
   const [participants, setParticipants] = useState<
     { id: string; name: string }[]
@@ -36,24 +40,24 @@ export default function RoleSelectionPage() {
 
     async function loadData() {
       try {
-        const templateId = "e470268b-6074-435c-b647-85a1c7fff244";
+        if (templateId) {
+          const [rolesData, participantsData] = await Promise.all([
+            fetchRoles(templateId),
+            fetchParticipants(userGroupId),
+          ]);
 
-        const [rolesData, participantsData] = await Promise.all([
-          fetchRoles(templateId),
-          fetchParticipants(userGroupId),
-        ]);
+          console.log("rolesData:", rolesData);
+          console.log("participantsData:", participantsData);
 
-        console.log("rolesData:", rolesData);
-        console.log("participantsData:", participantsData);
-
-        setRoles(rolesData);
-        setParticipants(participantsData);
+          setRoles(rolesData);
+          setParticipants(participantsData);
+        }
       } catch (error) {
         console.error("Error fetching roles or participants:", error);
       }
     }
     loadData();
-  }, [loading, profile]);
+  }, [loading, profile, templateId]);
 
   const handleChange = async (
     index: number,
@@ -79,7 +83,7 @@ export default function RoleSelectionPage() {
   };
 
   const handleAssignSession = async () => {
-    const templateId = "e470268b-6074-435c-b647-85a1c7fff244";
+    if (!templateId) return;
     if (loading || !profile?.user_group_id) return;
     const userGroupId = profile.user_group_id;
     const sessionId = await createSession(templateId, userGroupId);
@@ -137,6 +141,7 @@ export default function RoleSelectionPage() {
 
   return (
     <div>
+      <Link href={`/sessions/${templateId}`}>Back</Link>
       <h1>Role Selection</h1>
       {roleSelection.map((pair, index) => {
         const selectedParticipants = roleSelection

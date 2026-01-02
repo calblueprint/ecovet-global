@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Link from "next/link";
 import { UUID } from "crypto";
 import {
   createPhases,
@@ -8,6 +9,7 @@ import {
   createTemplates,
 } from "@/api/supabase/queries/templates";
 import { localStore, Prompt, Role, Template } from "@/types/schema";
+import { useProfile } from "@/utils/ProfileProvider";
 import RoleForm from "./RoleForm";
 import {
   NewTabButton,
@@ -36,6 +38,7 @@ export default function TemplateBuilder({
 }) {
   const [activeId, setActiveId] = useState<UUID | number>(1); // current 'tab' or role
   const [saving, setSaving] = useState(false); //nice 'saving' to let user know supabase push is still happening and when finished
+  const { profile } = useProfile();
 
   function createUUID(): UUID {
     //helper function to create new UUIDs
@@ -247,6 +250,7 @@ export default function TemplateBuilder({
       (saveStore.rolesById[1] as Template).summary,
       (saveStore.rolesById[1] as Template).setting,
       (saveStore.rolesById[1] as Template).current_activity,
+      profile?.user_group_id,
     );
 
     for (const roleID of saveStore.roleIds) {
@@ -381,9 +385,11 @@ export default function TemplateBuilder({
               </StepButton>
             </PhasesStepper>
           </PhasesControl>
-          <SubmitButton onClick={saveTemplate}>
-            {saving ? "Saving..." : "Submit Template"}
-          </SubmitButton>
+          <Link href="/facilitator/template-list">
+            <SubmitButton onClick={saveTemplate}>
+              {saving ? "Saving..." : "Submit Template"}
+            </SubmitButton>
+          </Link>
         </TabsRight>
       </TabsHeader>
 

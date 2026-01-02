@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { UUID } from "crypto";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import {
@@ -43,6 +44,7 @@ type TemplateWithTags = Template & {
 type ColorKey = keyof typeof COLORS;
 
 export default function TemplateListPage() {
+  const router = useRouter();
   const { profile } = useProfile();
   const user_group_id = profile?.user_group_id as UUID;
 
@@ -274,7 +276,12 @@ export default function TemplateListPage() {
 
               {filteredTemplates.map(t => (
                 <GeneralList key={t.template_id}>
-                  <div>{t.template_name}</div>
+                  <div
+                    onClick={() => router.replace(`/sessions/${t.template_id}`)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {t.template_name}
+                  </div>
 
                   <AssociatedTags>
                     {t.associated_tags.map(tag => (

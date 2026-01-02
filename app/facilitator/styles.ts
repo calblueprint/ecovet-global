@@ -4,7 +4,6 @@ import { Sans } from "@/styles/fonts";
 
 export const LayoutWrapper = styled.div`
   display: flex;
-  height: calc(100vh - 64px);
   width: 100%;
 `;
 
@@ -109,7 +108,6 @@ export const SideNavContainer = styled.div`
   display: flex;
   padding: 1rem;
   width: 12rem;
-  height: 100vh;
   align-items: flex-start;
   flex-direction: column;
   background-color: ${COLORS.oat_light};
@@ -155,4 +153,5 @@ export const SideNavNewTemplateButton = styled.button`
   font-size: 12px;
   font-weight: 500;
   color: ${COLORS.white};
+  cursor: pointer;
 `;

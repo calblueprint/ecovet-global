@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { handleProfileSubmit } from "@/api/supabase/queries/profile";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
@@ -78,9 +79,9 @@ export default function EditProfilePage() {
     <Main>
       <form onSubmit={handleSubmit}>
         <Container>
+          <Link href={`/test-page`}>Back</Link>
           <IntroText>
             <WelcomeTag>
-              {" "}
               <Heading2> Edit Profile </Heading2>
               <Heading3>Update your profile information below.</Heading3>
             </WelcomeTag>

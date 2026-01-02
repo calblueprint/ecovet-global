@@ -4,6 +4,7 @@ import {
   PromptUpdatable,
   RolePhaseUpdatable,
   RoleUpdatable,
+  Template,
   TemplateUpdatable,
 } from "@/types/schema";
 import supabase from "../createClient";
@@ -230,4 +231,19 @@ export async function deletePrompts(prompt_id: UUID): Promise<void> {
     .eq("prompt_id", prompt_id);
 
   if (error) throw error;
+}
+
+export async function fetchTemplate(
+  template_id: UUID,
+): Promise<Template | null> {
+  const { data, error } = await supabase
+    .from("template")
+    .select("*")
+    .eq("template_id", template_id)
+    .single();
+  if (error) {
+    console.error("Error fetching template by template_id:", error);
+    return null;
+  }
+  return data;
 }
