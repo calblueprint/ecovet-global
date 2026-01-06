@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { UUID } from "crypto";
 import { fetchTemplate } from "@/api/supabase/queries/templates";
 import { Template } from "@/types/schema";
-import { Button, Container, Heading2, Main } from "../styles";
+import { Button, Container, Heading2, Heading3, Main } from "../styles";
 
 export default function Sessions() {
   const { templateId } = useParams<{ templateId: string }>();
@@ -30,16 +30,21 @@ export default function Sessions() {
 
   return (
     <Main>
-      <Link href="/facilitator/template-list">Back</Link>
-      {templateInfo && (
-        <div>
-          <Heading2>{templateInfo.template_name}</Heading2>
-          <div>{templateInfo.summary}</div>
-          <div>{templateInfo.setting}</div>
-        </div>
-      )}
       <Container>
-        <Button onClick={handleStartGame}>Start game</Button>
+        <Link
+          href="/facilitator/template-list"
+          style={{ textDecoration: "none" }}
+        >
+          <Heading3>← Back</Heading3>
+        </Link>
+        {templateInfo && (
+          <div>
+            <Heading2>{templateInfo.template_name}</Heading2>
+            <div>Summary: {templateInfo.summary}</div>
+            <div>Setting: {templateInfo.setting}</div>
+          </div>
+        )}
+        <Button onClick={handleStartGame}>Start session</Button>
       </Container>
     </Main>
   );

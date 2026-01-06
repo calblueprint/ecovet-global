@@ -89,7 +89,7 @@ export default function AddFacilitators() {
   return (
     <AddFacilitatorsMain>
       <Link href="/admin/home-screen">
-        <button>Back</button>
+        <button>← Back</button>
       </Link>
       <AddFacilitatorFormDiv>
         <FacilitatorEmailDiv>

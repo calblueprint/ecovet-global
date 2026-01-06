@@ -73,13 +73,15 @@ export default function EditProfilePage() {
     setSaving(false);
   };
 
-  if (profileLoading) return <p>Loading profile...</p>;
+  if (profileLoading) return <p></p>;
 
   return (
     <Main>
       <form onSubmit={handleSubmit}>
         <Container>
-          <Link href={`/test-page`}>Back</Link>
+          <Link href={`/test-page`} style={{ textDecoration: "none" }}>
+            <Heading3>← Back</Heading3>
+          </Link>
           <IntroText>
             <WelcomeTag>
               <Heading2> Edit Profile </Heading2>

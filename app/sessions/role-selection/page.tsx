@@ -141,7 +141,7 @@ export default function RoleSelectionPage() {
 
   return (
     <div>
-      <Link href={`/sessions/${templateId}`}>Back</Link>
+      <Link href={`/sessions/${templateId}`}>← Back</Link>
       <h1>Role Selection</h1>
       {roleSelection.map((pair, index) => {
         const selectedParticipants = roleSelection

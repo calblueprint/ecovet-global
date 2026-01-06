@@ -20,7 +20,6 @@ export const Container = styled.div`
   width: 20rem;
   display: flex;
   flex-direction: column;
-  margin-top: 2rem;
   gap: 2.25rem;
 `;
 
@@ -57,4 +56,13 @@ export const Button = styled.button`
   border: 0px ${COLORS.darkElectricBlue};
   opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+`;
+
+export const Heading3 = styled.h3`
+  font-family: ${Sans.style.fontFamily};
+  color: ${COLORS.black100};
+  font-size: 0.9rem;
+  font-style: normal;
+  font-weight: 500;
+  text-align: start;
 `;

@@ -24,9 +24,7 @@ const UserGroupsPage = () => {
 
   return (
     <div>
-      <Link href="/test-page">
-        <button>Back</button>
-      </Link>
+      <Link href="/test-page">← Back</Link>
 
       <h1>User Groups</h1>
       <ul>
