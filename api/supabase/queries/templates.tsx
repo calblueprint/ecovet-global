@@ -65,6 +65,7 @@ export async function createPhases(
   phase_name: string | null,
   is_finished: boolean | null,
   phase_description: string | null = null,
+  phase_number: number,
 ): Promise<UUID> {
   const { data, error } = await supabase
     .from("phase")
@@ -74,6 +75,7 @@ export async function createPhases(
       phase_name: phase_name,
       phase_description: phase_description,
       is_finished: is_finished,
+      phase_number,
     })
     .select("phase_id")
     .single();

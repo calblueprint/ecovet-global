@@ -32,14 +32,18 @@ export interface Profile {
   id: UUID; // user_id
   user_type: UserType;
   user_group_id: UUID;
-  role_id: UUID;
-  phase_id: UUID;
-  is_finished: boolean;
   first_name: string;
   last_name: string;
   country: string;
   org_role: string;
   email: string;
+}
+export interface ParticipantSession {
+  user_id: UUID;
+  role_id: UUID;
+  phase_id: UUID;
+  is_finished: boolean;
+  session_id: UUID;
 }
 export interface Role {
   role_id: UUID; // role_id
@@ -54,10 +58,10 @@ export interface Template {
   template_name: string | null;
   accessible_to_all: boolean | null;
   user_group_id: UUID | null;
-  objective: string;
-  summary: string;
-  setting: string;
-  current_activity: string;
+  objective: string | null;
+  summary: string | null;
+  setting: string | null;
+  current_activity: string | null;
   timestamp: string;
 }
 type TemplateUpdatable = Omit<Template, "template_id">;
@@ -68,6 +72,7 @@ export interface Session {
   user_group_id: UUID;
   session_name: string;
   is_async: boolean;
+  phase_id: UUID;
   after_action_report_id?: UUID;
 }
 
@@ -75,6 +80,7 @@ export interface Phase {
   phase_id: UUID; // phase_id
   session_id: UUID | null;
   phase_name: string | null;
+  phase_number: number;
   phase_description: string | null;
   is_finished: boolean | null;
 }
@@ -126,6 +132,7 @@ export type roleFormInput = {
   rolePhaseIndex: Record<UUID, UUID>;
   promptById: Record<UUID, Prompt>;
   promptIndex: Record<UUID, UUID[]>; // rolephase uuid mapping to a list of prompt uuids
+  phasesById: Record<UUID, Phase>;
 };
 export interface Tag {
   tag_id: UUID;
