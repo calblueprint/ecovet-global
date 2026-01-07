@@ -120,7 +120,7 @@ export default function TemplateBuilder({
       const phaseNumber = draft.phaseIds.length + 1;
       draft.phasesById[newPhaseID] = {
         phase_id: newPhaseID,
-        session_id: null,
+        template_id: draft.templateID,
         phase_name: `Phase ${phaseNumber}`,
         phase_number: phaseNumber,
         phase_description: null,
@@ -267,7 +267,7 @@ export default function TemplateBuilder({
     for (const phaseID of saveStore.phaseIds) {
       await createPhases(
         phaseID,
-        saveStore.phasesById[phaseID].session_id,
+        saveStore.phasesById[phaseID].template_id,
         saveStore.phasesById[phaseID].phase_name,
         saveStore.phasesById[phaseID].is_finished,
         saveStore.phasesById[phaseID].phase_description,

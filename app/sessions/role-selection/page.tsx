@@ -102,7 +102,7 @@ export default function RoleSelectionPage() {
         ),
       );
 
-      setAssignMessage("Sessions added to roles");
+      setAssignMessage("Sessions added to profiles");
     } catch (err) {
       console.error(err);
       setAssignMessage("Error adding session to roles");

@@ -62,7 +62,7 @@ export async function deleteTemplates(template_id: UUID): Promise<void> {
 
 export async function createPhases(
   phase_id: UUID,
-  session_id: UUID | null,
+  template_id: UUID | null,
   phase_name: string | null,
   is_finished: boolean | null,
   phase_description: string | null = null,
@@ -72,7 +72,7 @@ export async function createPhases(
     .from("phase")
     .insert({
       phase_id: phase_id,
-      session_id: session_id,
+      template_id: template_id,
       phase_name: phase_name,
       phase_description: phase_description,
       is_finished: is_finished,

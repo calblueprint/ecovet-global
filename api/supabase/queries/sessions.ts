@@ -1,4 +1,6 @@
+import { UUID } from "crypto";
 import supabase from "@/actions/supabase/client";
+import { Prompt, RolePhase } from "@/types/schema";
 
 export async function fetchRoles(templateId: string) {
   const { data, error } = await supabase
@@ -86,4 +88,55 @@ export async function createSession(templateId: string, userGroupId: string) {
 
   if (error) throw error;
   return data[0].session_id;
+}
+
+export async function fetchPhases(sessionId: string) {
+  const { data: session, error: sessionError } = await supabase
+    .from("session")
+    .select("template_id")
+    .eq("session_id", sessionId)
+    .single();
+
+  if (sessionError || !session) {
+    throw new Error("Failed to fetch session");
+  }
+
+  const { data: phases, error: phasesError } = await supabase
+    .from("phase")
+    .select("*")
+    .eq("template_id", session.template_id)
+    .order("phase_number", { ascending: true });
+
+  if (phasesError) {
+    throw new Error("Failed to fetch phases");
+  }
+
+  return phases ?? [];
+}
+
+export async function fetchRolePhases(
+  roleId: UUID,
+  phaseId: UUID,
+): Promise<RolePhase> {
+  const { data, error } = await supabase
+    .from("role_phase")
+    .select("*")
+    .eq("phase_id", phaseId)
+    .eq("role_id", roleId)
+    .single();
+  if (error) {
+    console.error("Error fetching profile by user_id:", error);
+  }
+  return data;
+}
+
+export async function fetchPrompts(rolePhaseId: UUID): Promise<Prompt[]> {
+  const { data, error } = await supabase
+    .from("prompt")
+    .select("*")
+    .eq("role_phase_id", rolePhaseId);
+  if (error) {
+    console.error("Error fetching profile by user_id:", error);
+  }
+  return data ?? [];
 }
