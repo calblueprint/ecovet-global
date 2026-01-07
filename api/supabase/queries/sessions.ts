@@ -70,7 +70,7 @@ export async function setIsFinished(
   userId: UUID,
   roleId: UUID,
   sessionId: UUID,
-): Promise<boolean> {
+): Promise<void> {
   console.log(userId, roleId, sessionId);
 
   const { data, error } = await supabase
@@ -81,17 +81,11 @@ export async function setIsFinished(
     .eq("session_id", sessionId)
     .select();
 
-  console.log("Supabase result:", { data, error });
-
   if (error) {
-    console.error("Supabase error:", error);
-    return false;
+    throw new Error(`Failed to set is_finished: ${error.message}`);
   }
 
   if (!data || data.length === 0) {
-    console.warn("No matching row found in participant_session");
-    return false;
+    throw new Error("No participant_session row matched the update");
   }
-
-  return data.length > 0; // true if row updated
 }
