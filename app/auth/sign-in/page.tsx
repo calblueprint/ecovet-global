@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { checkProfileExists } from "@/api/supabase/queries/profile";
@@ -9,13 +10,15 @@ import {
   Button,
   Container,
   EmailAddressDiv,
+  ErrorMessage,
   ForgetPasswordTag,
   Heading2,
   Input,
   InputFields,
   IntroText,
   Main,
-  SignInTag,
+  PasswordDiv,
+  VisibilityToggle,
   WelcomeTag,
 } from "../styles";
 
@@ -23,30 +26,39 @@ export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const sessionHandler = useSession();
+  const isEmailValid = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const signInWithEmail = async () => {
-    const { data, error } = await sessionHandler.signInWithEmail(
-      email,
-      password,
-    );
-    if (error) {
-      throw new Error(
-        "An error occurred during sign in: " +
-          error.message +
-          "with email" +
-          email,
+    try {
+      const { data, error } = await sessionHandler.signInWithEmail(
+        email,
+        password,
       );
-    }
+      if (error) {
+        throw new Error("Incorrect email or password. Please try again.");
+      }
 
-    if (!data.user) {
-      throw new Error("User not found after sign in");
-    }
+      if (!data.user) {
+        throw new Error("User not found after sign in");
+      }
 
-    if (await checkProfileExists(data.user.id)) {
-      router.push("/onboarding");
-    } else {
-      router.push("/test-page");
+      if (await checkProfileExists(data.user.id)) {
+        router.push("/onboarding");
+      } else {
+        router.push("/test-page");
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("An unexpected error occurred.");
+      }
     }
   };
 
@@ -58,32 +70,49 @@ export default function Login() {
             <WelcomeTag>
               <Heading2>Welcome back!</Heading2>
             </WelcomeTag>
-            <SignInTag> Sign in to admin portal.</SignInTag>
           </IntroText>
           <InputFields>
             <EmailAddressDiv>
               <Input
                 name="email"
                 placeholder="Email Address"
-                onChange={e => setEmail(e.target.value)}
+                onChange={e => {
+                  setEmail(e.target.value);
+                  setErrorMessage(null);
+                }}
                 value={email}
               />
             </EmailAddressDiv>
-            <Input
-              type="password"
-              name="password"
-              onChange={e => setPassword(e.target.value)}
-              value={password}
-              placeholder="Password"
-            />
+            <PasswordDiv>
+              <div style={{ position: "relative", width: "100%" }}>
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  onChange={e => setPassword(e.target.value)}
+                  value={password}
+                  placeholder="Password"
+                />{" "}
+                <VisibilityToggle
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <FiEye size={18} /> : <FiEyeOff size={18} />}
+                </VisibilityToggle>
+              </div>
+            </PasswordDiv>
             <ForgetPasswordTag>
               <Link href="/auth/reset-password"> Forget password? </Link>
             </ForgetPasswordTag>
           </InputFields>
-          <Button type="button" onClick={signInWithEmail}>
+          <Button
+            type="button"
+            onClick={signInWithEmail}
+            disabled={!isEmailValid(email)}
+          >
             {" "}
             Sign in{" "}
           </Button>
+          {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
         </Container>
       </Main>
     </>

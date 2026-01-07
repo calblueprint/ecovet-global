@@ -12,6 +12,23 @@ export async function addEmailtoProfile(userId: string, email: string) {
     throw new Error("Failed to create user profile");
   }
 }
+export async function markInviteAccepted(email: string) {
+  const { data, error } = await supabase
+    .from("invite")
+    .update({ status: "Accepted" })
+    .eq("email", email);
+
+  if (error) {
+    console.error("Error updating invite status:", error.message);
+    throw new Error("Failed to mark invite as accepted");
+  }
+
+  if (!data) {
+    throw new Error("No invite found to update for email" + email);
+  }
+
+  return true;
+}
 
 export async function makeAdmin(userId: string) {
   const { error } = await supabase.from("profile").upsert({
@@ -94,6 +111,20 @@ export async function fetchRoleById(role_id: UUID) {
     .from("role")
     .select("*")
     .eq("role_id", role_id)
+    .single();
+  if (error) {
+    console.error("Error fetching role by role_id:", error.message);
+    return null;
+  }
+
+  return data;
+}
+
+export async function fetchSessionById(id: string) {
+  const { data, error } = await supabase
+    .from("profile")
+    .select("session_id")
+    .eq("id", id)
     .single();
   if (error) {
     console.error("Error fetching role by role_id:", error.message);
