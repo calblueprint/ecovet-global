@@ -1,3 +1,4 @@
+import { UUID } from "crypto";
 import supabase from "@/actions/supabase/client";
 
 export async function fetchRoles(templateId: string) {
@@ -50,9 +51,9 @@ export async function fetchSessionName(session_id: string) {
 
 export async function assignRole(userId: string, roleId: string) {
   const { data, error } = await supabase
-    .from("profile")
+    .from("participant_session")
     .update({ role_id: roleId })
-    .eq("id", userId);
+    .eq("user_id", userId);
 
   if (error) {
     throw error;
@@ -62,28 +63,49 @@ export async function assignRole(userId: string, roleId: string) {
 
 export async function assignSession(userId: string, sessionId: string) {
   const { error } = await supabase
-    .from("profile")
+    .from("participant-session")
     .update({ session_id: sessionId })
-    .eq("id", userId);
+    .eq("user_id", userId);
   if (error) {
     throw error;
   }
 }
 
 export async function createSession(templateId: string, userGroupId: string) {
-  const id = crypto.randomUUID();
   const { data, error } = await supabase
     .from("session")
     .insert([
       {
-        session_id: id,
         template_id: templateId,
         user_group_id: userGroupId,
-        is_async: false,
       },
     ])
     .select("session_id");
 
   if (error) throw error;
   return data[0].session_id;
+}
+
+export async function setIsFinished(
+  userId: UUID,
+  roleId: UUID,
+  sessionId: UUID,
+): Promise<void> {
+  console.log(userId, roleId, sessionId);
+
+  const { data, error } = await supabase
+    .from("participant_session")
+    .update({ is_finished: true })
+    .eq("user_id", userId)
+    .eq("role_id", roleId) // REQUIRED because PK contains role_id
+    .eq("session_id", sessionId)
+    .select();
+
+  if (error) {
+    throw new Error(`Failed to set is_finished: ${error.message}`);
+  }
+
+  if (!data || data.length === 0) {
+    throw new Error("No participant_session row matched the update");
+  }
 }
