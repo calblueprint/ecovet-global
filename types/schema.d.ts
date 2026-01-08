@@ -40,8 +40,8 @@ export interface Profile {
 }
 export interface ParticipantSession {
   user_id: UUID;
-  role_id: UUID;
-  phase_id: UUID;
+  role_id: UUID | null; //null if facilitator
+  phase_index: number;
   is_finished: boolean;
   session_id: UUID;
 }

@@ -8,6 +8,19 @@ export const LayoutWrapper = styled.div`
   width: 100%;
 `;
 
+export const Main = styled.main`
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  min-height: 100vh;
+  padding: 2rem;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background-color: ${COLORS.white};
+  background: ${COLORS.white};
+`;
+
 export const ContentWrapper = styled.div`
   flex: 1;
   padding: 2rem;
