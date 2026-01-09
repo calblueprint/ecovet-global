@@ -13,8 +13,8 @@ import {
 } from "@/actions/supabase/queries/tag";
 import { fetchAllTemplates } from "@/actions/supabase/queries/templates";
 import img from "@/assets/images/NewTagPlus.png";
+import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
-import TopNavBar from "@/components/NavBar/NavBar";
 import { TagComponent } from "@/components/tag/Tag";
 import { TagCreator } from "@/components/tag/TagCreator";
 import COLORS from "@/styles/colors";

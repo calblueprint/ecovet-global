@@ -34,6 +34,44 @@ export const ButtonContainer = styled.div`
   height: 3rem;
 `;
 
+export const TopNavButton = styled.button<{ $active?: boolean }>`
+  width: auto;
+  padding: 0.75rem 1.5rem;
+  text-align: center;
+  gap: 0.5em;
+  background-color: ${COLORS.oat_light};
+  border: none;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 12px;
+  font-weight: 500;
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 100%;
+    background: ${COLORS.lightEletricBlue};
+    opacity: ${props => (props.$active ? 1 : 0)};
+    transition: opacity 0.2s ease;
+  }
+
+  color: ${COLORS.black70};
+
+  gap: 0.75rem;
+  ${({ $active }) =>
+    $active &&
+    `
+      border-bottom: 0.175rem solid ${COLORS.teal};
+      color: ${COLORS.black70};
+    `}
+  &:hover {
+    cursor: pointer;
+  }
+`;
+
 export const ImageLogo = styled.img`
   height: auto;
   max-height: 40px;

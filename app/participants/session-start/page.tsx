@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import supabase from "@/actions/supabase/client";
 import { fetchSessionById } from "@/api/supabase/queries/profile";
 import { fetchSessionName } from "@/api/supabase/queries/sessions";
+import NavBar from "@/components/NavBar/NavBar";
 import { useProfile } from "@/utils/ProfileProvider";
 import { Button, Container, Heading2, Label, Main } from "./styles";
 
@@ -64,13 +65,16 @@ export default function ParticipantWaitingPage() {
   }, [profile?.id]);
 
   return (
-    <Main>
-      <Container>
-        <Heading2>{status}</Heading2>
+    <>
+      <NavBar />
+      <Main>
+        <Container>
+          <Heading2>{status}</Heading2>
 
-        {sessionName && <Label>{sessionName}</Label>}
-        {sessionExists && <Button>Start Session</Button>}
-      </Container>
-    </Main>
+          {sessionName && <Label>{sessionName}</Label>}
+          {sessionExists && <Button>Start Session</Button>}
+        </Container>
+      </Main>
+    </>
   );
 }
