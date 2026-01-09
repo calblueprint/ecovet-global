@@ -1,8 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import { useParams } from "next/navigation";
 import { UUID } from "crypto";
 import { fetchInvites } from "@/api/supabase/queries/invites";
 import {
@@ -10,9 +8,20 @@ import {
   fetchUserGroupMembers,
 } from "@/api/supabase/queries/user-groups";
 import { Invite, Profile, UserGroup } from "@/types/schema";
+import {
+  GeneralList,
+  GeneralTitle,
+  Heading3,
+  Heading4,
+  MainDiv,
+} from "../styles";
 
-export default function UserGroupDetailPage() {
-  const { user_group_id } = useParams();
+export default function UserGroupDetails({
+  user_group_id,
+}: {
+  user_group_id: string;
+  onBack?: () => void;
+}) {
   const [userGroup, setUserGroup] = useState<UserGroup | null>(null);
   const [invites, setInvites] = useState<Invite[]>([]);
   const [allFacilitators, setAllFacilitators] = useState<Profile[]>([]);
@@ -24,9 +33,9 @@ export default function UserGroupDetailPage() {
       fetchUserGroupMembers(user_group_id as UUID),
       fetchInvites(user_group_id as UUID),
     ]);
+
     setUserGroup(userGroupDetails || null);
     setInvites(groupInvites || []);
-
     categorizeMembers(groupMembers || []);
 
     console.log(groupMembers);
@@ -42,47 +51,46 @@ export default function UserGroupDetailPage() {
   }
 
   useEffect(() => {
-    if (user_group_id) {
-      loadData();
-    }
+    if (user_group_id) loadData();
   }, [user_group_id, loadData]);
 
   return (
-    <div>
-      <h1>Group Details: {userGroup?.user_group_name}</h1>
+    <MainDiv>
+      <Heading3>Group Details: {userGroup?.user_group_name}</Heading3>
 
-      <section>
-        <h2>Facilitators</h2>
-        <ul>
-          {allFacilitators.map(mem => (
-            <li key={mem.id}>
-              {mem.first_name}, {mem.last_name}
-            </li>
-          ))}
-        </ul>
-      </section>
+      <Heading4>Facilitators</Heading4>
+      <GeneralTitle>
+        <span>Name</span>
+      </GeneralTitle>
+      {allFacilitators.map(mem => (
+        <GeneralList key={mem.id}>
+          <span>
+            {mem.first_name} {mem.last_name}
+          </span>
+        </GeneralList>
+      ))}
 
-      <section>
-        <h2>Participants</h2>
-        <ul>
-          {allParticipants.map(mem => (
-            <li key={mem.id}>
-              {mem.first_name}, {mem.last_name}
-            </li>
-          ))}
-        </ul>
-      </section>
+      <Heading4>Participants</Heading4>
+      <GeneralTitle>
+        <span>Name</span>
+      </GeneralTitle>
+      {allParticipants.map(mem => (
+        <GeneralList key={mem.id}>
+          <span>
+            {mem.first_name} {mem.last_name}
+          </span>
+        </GeneralList>
+      ))}
 
-      <section>
-        <h2>Invites</h2>
-        <ul>
-          {invites.map((inv: Invite) => (
-            <li key={inv.invite_id}>{inv.email}</li>
-          ))}
-        </ul>
-      </section>
-
-      <Link href={"/admin/home-screen"}>Back to Organizations</Link>
-    </div>
+      <Heading4>Invites</Heading4>
+      <GeneralTitle>
+        <span>Email</span>
+      </GeneralTitle>
+      {invites.map(inv => (
+        <GeneralList key={inv.invite_id}>
+          <span>{inv.email}</span>
+        </GeneralList>
+      ))}
+    </MainDiv>
   );
 }

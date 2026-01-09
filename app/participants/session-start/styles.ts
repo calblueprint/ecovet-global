@@ -4,9 +4,7 @@ import { Sans } from "@/styles/fonts";
 
 export const Main = styled.main`
   display: flex;
-  height: 100vh;
   min-height: 100vh;
-  padding: 2rem;
   justify-content: center;
   align-items: center;
   flex-direction: column;
@@ -42,7 +40,7 @@ export const Label = styled.div`
 
 export const Button = styled.button`
   width: 100%;
-  height: 45px;
+  height: 3rem;
   gap: 10rem;
   display: flex;
   flex-direction: column;
@@ -51,7 +49,7 @@ export const Button = styled.button`
   align-self: stretch;
   background-color: ${COLORS.darkElectricBlue};
   font-family: ${Sans.style.fontFamily};
-  font-size: 12px;
+  font-size: 1rem;
   font-style: normal;
   font-weight: 700;
   line-height: normal;

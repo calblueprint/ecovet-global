@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import TopNavBar from "@/components/NavBar/NavBar";
+import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
 import { ContentWrapper, LayoutWrapper, SideNavContainer } from "../styles";
 import Invites from "./Invites";
