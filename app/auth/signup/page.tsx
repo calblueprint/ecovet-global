@@ -10,7 +10,6 @@ import {
   addInviteInfoToProfile,
   markInviteAccepted,
 } from "@/api/supabase/queries/profile";
-import { useSession } from "@/utils/AuthProvider";
 import {
   Button,
   Container,
