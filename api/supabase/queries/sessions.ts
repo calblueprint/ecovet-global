@@ -1,5 +1,6 @@
 import { UUID } from "crypto";
 import supabase from "@/actions/supabase/client";
+import { ParticipantSession } from "@/types/schema";
 
 export async function fetchRoles(templateId: string) {
   const { data, error } = await supabase
@@ -49,23 +50,25 @@ export async function fetchSessionName(session_id: string) {
   return data;
 }
 
-export async function assignRole(userId: string, roleId: string) {
-  const { data, error } = await supabase
-    .from("participant_session")
-    .update({ role_id: roleId })
-    .eq("user_id", userId);
+export async function assignParticipantToSession(
+  userId: UUID,
+  sessionId: UUID,
+  roleId: UUID | null,
+) {
+  console.log(userId, sessionId, roleId);
+  const { error } = await supabase.from("participant_session").upsert(
+    {
+      user_id: userId,
+      session_id: sessionId,
+      role_id: roleId,
+      is_finished: false,
+      phase_index: 1,
+    },
+    {
+      onConflict: "user_id,session_id",
+    },
+  );
 
-  if (error) {
-    throw error;
-  }
-  return data;
-}
-
-export async function assignSession(userId: string, sessionId: string) {
-  const { error } = await supabase
-    .from("participant-session")
-    .update({ session_id: sessionId })
-    .eq("user_id", userId);
   if (error) {
     throw error;
   }
@@ -80,10 +83,29 @@ export async function createSession(templateId: string, userGroupId: string) {
         user_group_id: userGroupId,
       },
     ])
-    .select("session_id");
+    .select("session_id")
+    .single();
+
+  if (error) {
+    console.error("createSession error:", error);
+    throw error;
+  }
+
+  console.log("Created session row:", data);
+  return data.session_id;
+}
+
+export async function participant_session_update(
+  session_id: UUID,
+): Promise<ParticipantSession[]> {
+  const { data, error } = await supabase
+    .from("participant_session")
+    .select("*")
+    .eq("session_id", session_id);
 
   if (error) throw error;
-  return data[0].session_id;
+
+  return data ?? [];
 }
 
 export async function setIsFinished(

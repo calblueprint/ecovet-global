@@ -1,72 +1,88 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { UUID } from "crypto";
 import {
-  assignRole,
-  assignSession,
+  assignParticipantToSession,
   createSession,
   fetchParticipants,
   fetchRoles,
 } from "@/api/supabase/queries/sessions";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import { useProfile } from "@/utils/ProfileProvider";
+import { Button, Main, SmallButton } from "./styles";
 
 interface ParticipantRole {
-  participant: string | null;
-  role: string | null;
+  participant: UUID | null;
+  role: UUID | null;
 }
+
+interface RoleName {
+  id: UUID;
+  name: string;
+}
+
+interface ParticipantName {
+  id: UUID;
+  name: string;
+}
+
+const TEMPLATE_ID = "89dfd6e4-fb1d-456b-b7cc-7577eb02fce6";
 
 export default function RoleSelectionPage() {
   const { profile, loading } = useProfile();
-  const [roles, setRoles] = useState<{ id: string; name: string }[]>([]);
-  const [participants, setParticipants] = useState<
-    { id: string; name: string }[]
-  >([]);
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState("");
-  const [assignedRoles, setAssign] = useState(false);
-  const [assignMessage, setAssignMessage] = useState("");
+
+  const [roles, setRoles] = useState<RoleName[]>([]);
+  const [participants, setParticipants] = useState<ParticipantName[]>([]);
+
   const [roleSelection, setRoleSelection] = useState<ParticipantRole[]>([
     { participant: null, role: null },
   ]);
 
+  const [starting, setStarting] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const router = useRouter();
+
   useEffect(() => {
     if (loading || !profile?.user_group_id) return;
-    const userGroupId = profile.user_group_id;
 
     async function loadData() {
       try {
-        const templateId = "e470268b-6074-435c-b647-85a1c7fff244";
+        if (!profile?.user_group_id) {
+          return;
+        }
 
         const [rolesData, participantsData] = await Promise.all([
-          fetchRoles(templateId),
-          fetchParticipants(userGroupId),
+          fetchRoles(TEMPLATE_ID),
+          fetchParticipants(profile?.user_group_id),
         ]);
 
-        console.log("rolesData:", rolesData);
-        console.log("participantsData:", participantsData);
-
-        setRoles(rolesData);
-        setParticipants(participantsData);
-      } catch (error) {
-        console.error("Error fetching roles or participants:", error);
+        setRoles(rolesData as RoleName[]);
+        setParticipants(participantsData as ParticipantName[]);
+      } catch (err) {
+        console.error(err);
+        setMessage("Failed to load roles or participants");
       }
     }
+
     loadData();
   }, [loading, profile]);
 
-  const handleChange = async (
+  const handleChange = (
     index: number,
     field: keyof ParticipantRole,
-    value: string | null,
+    value: UUID | null,
   ) => {
-    const newSelection = [...roleSelection];
-    newSelection[index][field] = value;
-    setRoleSelection(newSelection);
+    setRoleSelection(prev => {
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: value };
+      return next;
+    });
   };
 
   const addParticipant = () => {
-    setRoleSelection([...roleSelection, { participant: null, role: null }]);
+    setRoleSelection(prev => [...prev, { participant: null, role: null }]);
   };
 
   const deleteParticipant = (index: number) => {
@@ -74,70 +90,45 @@ export default function RoleSelectionPage() {
   };
 
   const handleStartGame = async () => {
-    handleSave();
-    handleAssignSession();
-  };
+    if (!profile?.id || !profile.user_group_id) return;
 
-  const handleAssignSession = async () => {
-    const templateId = "e470268b-6074-435c-b647-85a1c7fff244";
-    if (loading || !profile?.user_group_id) return;
-    const userGroupId = profile.user_group_id;
-    const sessionId = await createSession(templateId, userGroupId);
+    setStarting(true);
+    setMessage(null);
 
-    setAssign(true);
-    setAssignMessage("");
     try {
       const assignments = roleSelection.filter(
         p => p.participant && p.role,
-      ) as { participant: string; role: string }[];
-
-      await assignSession(profile.id, sessionId);
-      await Promise.all(
-        assignments.map(({ participant }) =>
-          assignSession(participant, sessionId),
-        ),
-      );
-
-      setAssignMessage("Sessions added to roles");
-    } catch (err) {
-      console.error(err);
-      setAssignMessage("Error adding session to roles");
-    } finally {
-      setAssign(false);
-    }
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
-    setMessage("");
-    try {
-      const assignments = roleSelection.filter(
-        p => p.participant && p.role,
-      ) as { participant: string; role: string }[];
+      ) as { participant: UUID; role: UUID }[];
 
       if (assignments.length === 0) {
-        setMessage("Please select at least one participant and role.");
-        setSaving(false);
-        return;
+        throw new Error("No participants assigned");
       }
 
+      const sessionId = (await createSession(
+        TEMPLATE_ID,
+        profile.user_group_id,
+      )) as UUID;
+
+      //assign the facilitator to session
+      await assignParticipantToSession(profile.id as UUID, sessionId, null);
       await Promise.all(
         assignments.map(({ participant, role }) =>
-          assignRole(participant, role),
+          assignParticipantToSession(participant, sessionId, role),
         ),
       );
-      setMessage("Roles assigned");
+      router.push(`/facilitator/session-view?sessionId=${sessionId}`);
     } catch (err) {
       console.error(err);
-      setMessage("Error saving roles");
+      setMessage("Failed to start game");
     } finally {
-      setSaving(false);
+      setStarting(false);
     }
   };
 
   return (
-    <div>
-      <h1>Role Selection</h1>
+    <Main>
+      <h1 style={{ marginBottom: "2rem" }}>Role Selection</h1>
+
       {roleSelection.map((pair, index) => {
         const selectedParticipants = roleSelection
           .map(p => p.participant)
@@ -150,37 +141,39 @@ export default function RoleSelectionPage() {
         return (
           <div
             key={index}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginBottom: "1rem",
-            }}
+            style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}
           >
             <InputDropdown
-              label={`Name ${index + 1}`}
+              label={`Participant ${index + 1}`}
               options={new Map(availableParticipants.map(p => [p.id, p.name]))}
-              placeholder="Select a participant"
-              onChange={val => handleChange(index, "participant", val)}
+              placeholder="Select participant"
+              onChange={val => handleChange(index, "participant", val as UUID)}
             />
+
             <InputDropdown
               label="Role"
               options={new Map(roles.map(r => [r.id, r.name]))}
-              placeholder="Select a role"
-              onChange={val => handleChange(index, "role", val)}
+              placeholder="Select role"
+              onChange={val => handleChange(index, "role", val as UUID)}
             />
-            <button onClick={() => deleteParticipant(index)}> X Delete</button>
+
+            <div
+              onClick={() => deleteParticipant(index)}
+              style={{ cursor: "pointer", paddingTop: "7px" }}
+            >
+              ✕
+            </div>
           </div>
         );
       })}
 
-      <button onClick={addParticipant}>+ Add Participant</button>
+      <SmallButton onClick={addParticipant}>+ Add Participant</SmallButton>
 
-      <button onClick={handleStartGame} disabled={saving}>
-        {assignedRoles ? "Starting Game..." : "Start Game"}
-      </button>
+      <Button onClick={handleStartGame} disabled={starting}>
+        {starting ? "Starting Game…" : "Start Game"}
+      </Button>
 
       {message && <p>{message}</p>}
-      {assignMessage && <p>{assignMessage}</p>}
-    </div>
+    </Main>
   );
 }
