@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ecovetGlobal from "@/assets/images/ecovet-global-new.svg";
 import {
   ButtonContainer,
+  ImageLogo,
   LogoContainer,
   TopNavButton,
   TopNavContainer,
@@ -17,12 +17,9 @@ const TopNavBar = () => {
   return (
     <TopNavContainer>
       <LogoContainer>
-        <Image
-          src={ecovetGlobal}
-          alt="Ecovet Global Logo"
-          height={30}
-          style={{ width: "auto", objectFit: "contain" }}
-        />
+        <Link href="/test-page" aria-label="Go to home">
+          <ImageLogo src={ecovetGlobal} alt="Ecovet Global Logo" />
+        </Link>
       </LogoContainer>
       <ButtonContainer>
         <Link href="/facilitator/template-list">
