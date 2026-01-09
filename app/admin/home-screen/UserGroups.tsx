@@ -11,8 +11,6 @@ import {
   NumUsers,
 } from "../styles";
 
-// example names if you have them
-
 export default function UserGroups({
   onSelectGroup,
 }: {
