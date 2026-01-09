@@ -1,6 +1,6 @@
+import Image from "next/image";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
-import { Sans } from "@/styles/fonts";
 
 export const TopNavContainer = styled.div`
   display: flex;
@@ -34,7 +34,7 @@ export const ButtonContainer = styled.div`
   height: 3rem;
 `;
 
-export const ImageLogo = styled.img`
+export const ImageLogo = styled(Image)`
   height: auto;
   max-height: 40px;
 `;

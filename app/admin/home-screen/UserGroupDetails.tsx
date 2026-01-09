@@ -14,12 +14,10 @@ import {
   Heading3,
   Heading4,
   MainDiv,
-  SideNavNewTemplateButton,
 } from "../styles";
 
 export default function UserGroupDetails({
   user_group_id,
-  onBack,
 }: {
   user_group_id: string;
   onBack?: () => void;

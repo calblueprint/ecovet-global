@@ -9,7 +9,6 @@ import {
   Heading3,
   MainDiv,
   NumUsers,
-  StyledLink,
 } from "../styles";
 
 // example names if you have them
