@@ -1,14 +1,37 @@
 import { UUID } from "crypto";
 import supabase from "@/api/supabase/createClient";
 
-export async function addEmailtoProfile(userId: string, email: string) {
+async function getInviteByEmail(email: string) {
+  const { data, error } = await supabase
+    .from("invite")
+    .select("user_group_id, user_type")
+    .eq("email", email)
+    .single();
+
+  if (error) {
+    console.error("Error fetching invite: ", error.message);
+    throw new Error("Failed to fetch invite");
+  }
+
+  if (!data) {
+    throw new Error(`No invite found for email ${email}`);
+  }
+
+  return data;
+}
+
+export async function addInviteInfoToProfile(userId: string, email: string) {
+  const invite = await getInviteByEmail(email);
+
   const { error } = await supabase.from("profile").insert({
     id: userId,
+    user_group_id: invite.user_group_id,
+    user_type: invite.user_type,
     email: email,
   });
 
   if (error) {
-    console.error("Error creating profile:", error.message);
+    console.error("Error creating profile: ", error.message);
     throw new Error("Failed to create user profile");
   }
 }
@@ -16,28 +39,31 @@ export async function markInviteAccepted(email: string) {
   const { data, error } = await supabase
     .from("invite")
     .update({ status: "Accepted" })
-    .eq("email", email);
+    .eq("email", email)
+    .select();
 
   if (error) {
-    console.error("Error updating invite status:", error.message);
+    console.error("Error updating invite status: ", error.message);
     throw new Error("Failed to mark invite as accepted");
   }
 
   if (!data) {
-    throw new Error("No invite found to update for email" + email);
+    throw new Error("No invite found for email " + email);
   }
 
   return true;
 }
 
-export async function makeAdmin(userId: string) {
+export async function makeAdmin(userId: string, email: string) {
   const { error } = await supabase.from("profile").upsert({
     id: userId,
     user_type: "Admin",
+    email: email,
+    user_group_id: "0b73ed2d-61c3-472e-b361-edaa88f27622",
   });
 
   if (error) {
-    console.error("Error creating profile:", error.message);
+    console.error("Error creating profile: ", error.message);
     throw new Error("Failed to make profile an Admin");
   }
 }
@@ -49,7 +75,7 @@ export async function fetchProfileByUserId(user_id: UUID) {
     .eq("id", user_id)
     .single();
   if (error) {
-    console.error("Error fetching profile by user_id:", error);
+    console.error("Error fetching profile by user_id: ", error);
     return null;
   }
 

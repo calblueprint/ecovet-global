@@ -64,7 +64,7 @@ export async function submitNewInvite(
     .eq("email", email)
     .eq("user_group_id", user_group_id)
     .eq("status", "Pending")
-    .single();
+    .maybeSingle();
 
   if (existingInvite) {
     return {
