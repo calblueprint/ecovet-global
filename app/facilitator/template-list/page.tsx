@@ -47,7 +47,7 @@ export default function TemplateListPage() {
   const router = useRouter();
   const { profile } = useProfile();
   const user_group_id = profile?.user_group_id as UUID;
-
+  const loading = !user_group_id;
   const [filterMode, setFilterMode] = useState<"all" | "your" | "browse">(
     "all",
   );
@@ -69,6 +69,8 @@ export default function TemplateListPage() {
 
   /** Fetch templates + tags */
   useEffect(() => {
+    if (!user_group_id) return;
+
     const load = async () => {
       console.log(user_group_id);
       const allTemplates = (await fetchAllTemplates()) || [];
@@ -208,7 +210,9 @@ export default function TemplateListPage() {
     setOpenTagDropdownFor(null);
   }
 
-  return (
+  return loading ? (
+    <MainDiv>Loading profile...</MainDiv>
+  ) : (
     <>
       <TopNavBar />
 

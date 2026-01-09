@@ -33,9 +33,9 @@ export const Heading2 = styled.h2`
 `;
 
 export const Button = styled.button`
-  width: 100%;
+  width: 15rem;
   height: 45px;
-  gap: 10rem;
+  margin-top: 2rem;
   border-radius: 0.25rem;
   display: flex;
   flex-direction: column;

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import supabase from "@/actions/supabase/client";
 import { handleProfileSubmit } from "@/api/supabase/queries/profile";
 import { useProfile } from "@/utils/ProfileProvider";
@@ -28,15 +28,7 @@ function OnboardingPage() {
   const [role, setRole] = useState("");
   const [save, setSave] = useState(false);
   const [formMessage, setFormMessage] = useState("");
-
-  useEffect(() => {
-    if (profile) {
-      setFirstName("");
-      setLastName("");
-      setCountry("");
-      setRole("");
-    }
-  }, [profile]);
+  const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -44,15 +36,15 @@ function OnboardingPage() {
     setSave(true);
 
     if (!userId) {
-      setFormMessage("Missing user ID.");
+      setFormMessage("User not logged in yet. Please wait…");
+      setSave(false);
       return;
     }
-
     const { success, error } = await handleProfileSubmit({
       id: userId,
       first_name: firstName,
       last_name: lastName,
-      country,
+      country: country,
       org_role: role,
     });
 
@@ -73,6 +65,7 @@ function OnboardingPage() {
             .update({ num_users: (data.num_users ?? 0) + 1 })
             .eq("user_group_id", profile?.user_group_id);
         }
+        router.push("/test-page");
       } catch (err) {
         console.error("Error incrementing num_users:", err);
       }
@@ -148,11 +141,9 @@ function OnboardingPage() {
                 </InputDiv>
               </div>
             </InputFields>
-            <Link href="/test-page">
-              <Button type="submit" disabled={save}>
-                {save ? "Saving" : "Submit Profile"}
-              </Button>
-            </Link>
+            <Button type="submit" disabled={save}>
+              {save ? "Saving" : "Submit Profile"}
+            </Button>
           </Container>
         </form>
       </Main>

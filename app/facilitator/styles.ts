@@ -7,6 +7,19 @@ export const LayoutWrapper = styled.div`
   width: 100%;
 `;
 
+export const Main = styled.main`
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  min-height: 100vh;
+  padding: 2rem;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background-color: ${COLORS.white};
+  background: ${COLORS.white};
+`;
+
 export const ContentWrapper = styled.div`
   flex: 1;
   padding: 2rem;
@@ -144,7 +157,7 @@ export const SideNavButton = styled.button<{ selected: boolean }>`
 export const SideNavNewTemplateButton = styled.button`
   width: 9.25rem;
   padding: 0.75rem 1.5rem;
-  text-align: middle;
+  text-align: center;
   gap: 0.5em;
   background-color: ${COLORS.darkElectricBlue};
   border-radius: 0.25rem;
