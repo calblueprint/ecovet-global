@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { UUID } from "crypto";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { fetchInvites } from "@/api/supabase/queries/invites";
+import InviteComponent from "@/components/InviteComponent/InviteComponent";
 import { Invite } from "@/types/schema";
 import {
   GeneralList,
@@ -63,6 +64,10 @@ export default function Invites({ user_group_id }: { user_group_id: string }) {
   return (
     <MainDiv>
       <Heading3>Your Invites</Heading3>
+      <InviteComponent
+        user_group_id={user_group_id}
+        onInvitesChange={() => loadData()}
+      />
       <GeneralTitle>
         <span>
           Email

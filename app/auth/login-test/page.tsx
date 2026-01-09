@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { addEmailtoProfile, makeAdmin } from "@/api/supabase/queries/profile";
+import { makeAdmin } from "@/api/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
 import {
   Button,
@@ -35,8 +35,7 @@ export default function Login() {
     if (!userId) {
       throw new Error("Signup succeeded but user ID was missing.");
     }
-    await addEmailtoProfile(userId, email);
-    await makeAdmin(userId);
+    await makeAdmin(userId, email);
   };
 
   const signInWithEmail = async () => {
