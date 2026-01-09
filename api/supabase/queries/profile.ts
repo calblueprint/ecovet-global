@@ -54,7 +54,7 @@ export async function markInviteAccepted(email: string) {
   return true;
 }
 
-export async function makeAdmin(userId: string,  email: string) {
+export async function makeAdmin(userId: string, email: string) {
   const { error } = await supabase.from("profile").upsert({
     id: userId,
     user_type: "Admin",
@@ -67,7 +67,6 @@ export async function makeAdmin(userId: string,  email: string) {
     throw new Error("Failed to make profile an Admin");
   }
 }
-
 
 export async function fetchProfileByUserId(user_id: UUID) {
   const { data, error } = await supabase
