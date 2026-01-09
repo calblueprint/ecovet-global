@@ -12,6 +12,8 @@ export const AddInviteMain = styled.div`
   border-radius: 0.5rem;
   border: 1px solid ${COLORS.oat_medium};
   background: ${COLORS.oat_light};
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 `;
 export const FormHeader = styled.h2`
   color: ${COLORS.black70};
@@ -78,6 +80,7 @@ export const SubmitButton = styled.button`
   border-radius: 0.25rem;
   border: 1px transparent;
   background: ${COLORS.darkElectricBlue};
+  cursor: pointer;
 
   color: ${COLORS.white};
   font-family: ${Sans.style.fontFamily};
@@ -86,6 +89,12 @@ export const SubmitButton = styled.button`
   font-weight: 700;
   line-height: normal;
   white-space: nowrap;
+
+  &:disabled {
+    background: ${COLORS.darkElectricBlue};
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
 `;
 
 export const ErrorMessageDiv = styled.div<{ $hasError: string }>`
@@ -127,6 +136,7 @@ export const ParticipantButton = styled.button<{ $isOn: boolean }>`
   flex: 1 0 0;
   align-self: stretch;
   border: transparent;
+  cursor: pointer;
 
   border-radius: 0.25rem;
   background: ${({ $isOn }) => ($isOn ? COLORS.oat_medium : COLORS.white)};
@@ -147,6 +157,7 @@ export const FacilitatorButton = styled.button<{ $isOn: boolean }>`
   flex: 1 0 0;
   align-self: stretch;
   border: transparent;
+  cursor: pointer;
 
   border-radius: 0.25rem;
   background: ${({ $isOn }) => ($isOn ? COLORS.oat_medium : COLORS.white)};

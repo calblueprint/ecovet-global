@@ -146,7 +146,7 @@ export const SideNavButton = styled.button<{ selected: boolean }>`
 export const SideNavNewTemplateButton = styled.button`
   width: 9.25rem;
   padding: 0.75rem 1.5rem;
-  text-align: middle;
+  text-align: center;
   gap: 0.5em;
   background-color: ${COLORS.darkElectricBlue};
   border-radius: 0.25rem;

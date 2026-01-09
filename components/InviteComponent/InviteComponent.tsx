@@ -1,9 +1,7 @@
 "use client";
 
 import { ChangeEvent, useState } from "react";
-import Link from "next/link";
 import { submitNewInvite } from "@/api/supabase/queries/invites";
-import { useProfile } from "@/utils/ProfileProvider";
 import {
   AddInviteFormDiv,
   AddInviteMain,
@@ -24,11 +22,17 @@ const isEmailValid = (email: string) => {
   return emailRegex.test(email);
 };
 
-function Invite({ user_group_id }: { user_group_id: string }) {
-  const { profile } = useProfile();
+function InviteComponent({
+  user_group_id,
+  onInvitesChange,
+}: {
+  user_group_id: string;
+  onInvitesChange?: () => void;
+}) {
   const [email, setEmail] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [participantSelected, setParticipantSelected] = useState<boolean>(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
@@ -39,21 +43,35 @@ function Invite({ user_group_id }: { user_group_id: string }) {
   };
 
   const onSubmitButtonClick = async () => {
+    if (isSubmitting) return;
+
     if (!isEmailValid(email)) {
       setErrorMessage("Invalid email format");
+      return;
     }
 
-    const result = await submitNewInvite(
-      email,
-      user_group_id,
-      participantSelected ? "Participant" : "Facilitator",
-    );
+    setIsSubmitting(true);
 
-    if (result?.error) {
-      setErrorMessage(result.message);
-    } else {
-      setErrorMessage("");
-      console.log("Invite success for:", email);
+    try {
+      const result = await submitNewInvite(
+        email,
+        user_group_id,
+        participantSelected ? "Participant" : "Facilitator",
+      );
+
+      if (result?.error) {
+        setErrorMessage(result.message);
+        if (onInvitesChange) onInvitesChange();
+        setEmail("");
+      } else {
+        if (onInvitesChange) onInvitesChange();
+        setEmail("");
+        setErrorMessage("");
+      }
+    } catch {
+      setErrorMessage("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -70,7 +88,9 @@ function Invite({ user_group_id }: { user_group_id: string }) {
         <EmailDiv>
           <EmailInput
             value={email}
-            onChange={e => handleInputChange(e)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              handleInputChange(e)
+            }
             placeholder="Email Address"
             required
           />
@@ -91,7 +111,7 @@ function Invite({ user_group_id }: { user_group_id: string }) {
             </InviteTypeButton>
             <SubmitButton
               onClick={onSubmitButtonClick}
-              disabled={hasErrorsOrEmpty}
+              disabled={hasErrorsOrEmpty || isSubmitting}
             >
               Send Invite
             </SubmitButton>
@@ -101,4 +121,4 @@ function Invite({ user_group_id }: { user_group_id: string }) {
     </AddInviteMain>
   );
 }
-export default Invite;
+export default InviteComponent;

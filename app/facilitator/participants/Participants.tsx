@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { UUID } from "crypto";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { fetchUserGroupMembers } from "@/api/supabase/queries/user-groups";
-import Invite from "@/components/Invite/Invite";
 import { Profile } from "@/types/schema";
 import {
   GeneralList,
@@ -76,7 +75,6 @@ export default function Participants({
   return (
     <MainDiv>
       <Heading3>Participants</Heading3>
-      <Invite user_group_id={user_group_id}></Invite>
       <GeneralTitle>
         <span>
           Name

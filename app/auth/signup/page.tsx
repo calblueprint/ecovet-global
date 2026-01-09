@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { SetStateAction, useState } from "react";
 import { FiCheck, FiEye, FiEyeOff, FiX } from "react-icons/fi";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import supabase from "@/actions/supabase/client";
 import { checkIfUserExists, checkInvites } from "@/api/supabase/queries/auth";
 import {
-  addEmailtoProfile,
+  addInviteInfoToProfile,
   markInviteAccepted,
 } from "@/api/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
@@ -35,8 +37,8 @@ export default function Login() {
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const sessionHandler = useSession();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const router = useRouter();
 
   const rules = {
     length: password.length >= 12,
@@ -72,7 +74,9 @@ export default function Login() {
       if (password !== confirmPassword) {
         throw new Error("Passwords do not match");
       }
-      const { data, error } = await sessionHandler.signUp(email, password);
+      const { data, error } = await supabase.auth.updateUser({
+        password: password,
+      });
       if (error) {
         throw new Error(
           "An error occurred during sign up: " +
@@ -85,8 +89,9 @@ export default function Login() {
       if (!userId) {
         throw new Error("Signup succeeded but user ID was missing.");
       }
-      await addEmailtoProfile(userId, email);
       await markInviteAccepted(email);
+      await addInviteInfoToProfile(userId, email);
+      router.push("/onboarding");
     } catch (error: unknown) {
       if (error instanceof Error) {
         setErrorMessage(error.message);
@@ -114,7 +119,7 @@ export default function Login() {
             <Input
               name="email"
               placeholder="Email Address"
-              onChange={e => {
+              onChange={(e: { target: { value: SetStateAction<string> } }) => {
                 setEmail(e.target.value);
                 setErrorMessage(null);
               }}
@@ -127,9 +132,9 @@ export default function Login() {
                 name="password"
                 placeholder="Password"
                 type={showPassword ? "text" : "password"}
-                onChange={e => (
-                  setPassword(e.target.value), setPasswordTouched(true)
-                )}
+                onChange={(e: {
+                  target: { value: SetStateAction<string> };
+                }) => (setPassword(e.target.value), setPasswordTouched(true))}
                 value={password}
               />{" "}
               <VisibilityToggle
@@ -147,7 +152,9 @@ export default function Login() {
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="Password Confirmation"
                 value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
+                onChange={(e: { target: { value: SetStateAction<string> } }) =>
+                  setConfirmPassword(e.target.value)
+                }
               />
               <VisibilityToggle
                 type="button"
