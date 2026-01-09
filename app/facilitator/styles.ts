@@ -12,6 +12,9 @@ export const ContentWrapper = styled.div`
   flex: 1;
   padding: 2rem;
   margin-right: 10%;
+
+  overflow-y: auto;
+  min-height: 0;
 `;
 
 export const PageDiv = styled.main`
@@ -25,7 +28,6 @@ export const MainDiv = styled.main`
   display: flex;
   flex-direction: column;
   width: 100%;
-  min-height: 100vh;
   padding: 2rem;
   padding-top: 1rem;
   background-color: ${COLORS.white};
