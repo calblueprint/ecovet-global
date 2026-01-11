@@ -5,6 +5,7 @@ import Link from "next/link";
 import supabase from "@/actions/supabase/client";
 import { fetchSessionById } from "@/api/supabase/queries/profile";
 import { fetchSessionName } from "@/api/supabase/queries/sessions";
+import ParticipantsNavBar from "@/components/ParticipantsNavBar/ParticipantsNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
 import { Button, Container, Heading2, Label, Main } from "./styles";
 
@@ -51,13 +52,15 @@ export default function ParticipantWaitingPage() {
       .on(
         "postgres_changes",
         {
-          event: "UPDATE",
+          event: "INSERT",
           schema: "public",
-          table: "profile",
-          filter: `id=eq.${profile.id}`,
+          table: "participant_session",
+          filter: `profile_id=eq.${profile.id}`,
         },
         payload => {
-          const newSessionId = payload.new?.session_id;
+          console.log(payload);
+
+          const newSessionId = payload.new.session_id;
 
           if (!newSessionId) {
             processedSessionRef.current = null;
@@ -79,23 +82,26 @@ export default function ParticipantWaitingPage() {
   }, [profile?.id, profile]);
 
   return (
-    <Main>
-      <Container>
-        <Heading2>{status}</Heading2>
+    <div>
+      <ParticipantsNavBar />
+      <Main>
+        <Container>
+          <Heading2>{status}</Heading2>
 
-        {sessionName && <Label>{sessionName}</Label>}
+          {sessionName && <Label>{sessionName}</Label>}
 
-        {sessionExists && (
-          <Link
-            href={{
-              pathname: "/participants/session-flow",
-              query: { sessionId },
-            }}
-          >
-            <Button>Start Session</Button>
-          </Link>
-        )}
-      </Container>
-    </Main>
+          {sessionExists && (
+            <Link
+              href={{
+                pathname: "/participants/session-flow",
+                query: { sessionId },
+              }}
+            >
+              <Button>Start Session</Button>
+            </Link>
+          )}
+        </Container>
+      </Main>
+    </div>
   );
 }
