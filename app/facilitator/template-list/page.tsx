@@ -16,8 +16,8 @@ import { fetchAllTemplates } from "@/api/supabase/queries/templates";
 import img from "@/assets/images/NewTagPlus.png";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import TopNavBar from "@/components/NavBar/NavBar";
-import { TagComponent } from "@/components/Tag/Tag";
-import { TagCreator } from "@/components/Tag/TagCreator";
+import { TagComponent } from "@/components/TempFolder/Tag";
+import { TagCreator } from "@/components/TempFolder/TagCreator";
 import COLORS from "@/styles/colors";
 import { Tag, Template } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
@@ -225,7 +225,7 @@ export default function TemplateListPage() {
           <TagCreator
             user_group_id={user_group_id}
             selectedTagId={selectedTagId}
-            onTagClick={id =>
+            onTagClick={(id: UUID) =>
               setSelectedTagId(prev => (prev === id ? null : id))
             }
             onTagRenamed={() => setTagVersion(v => v + 1)}
@@ -295,7 +295,7 @@ export default function TemplateListPage() {
                           color={tag.color as ColorKey}
                           tag_id={tag.tag_id}
                           sidebar={false}
-                          onDelete={id => deleteTagComponent(id, t.template_id)}
+                          onDelete={(id: UUID) => deleteTagComponent(id, t.template_id)}
                         />
                       </TemplateTag>
                     ))}
