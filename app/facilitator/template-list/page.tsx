@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { UUID } from "crypto";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import {
@@ -10,8 +11,8 @@ import {
   getAllTags,
   getTagsForTemplate,
   removeTagFromTemplate,
-} from "@/actions/supabase/queries/tag";
-import { fetchAllTemplates } from "@/actions/supabase/queries/templates";
+} from "@/api/supabase/queries/tag";
+import { fetchAllTemplates } from "@/api/supabase/queries/templates";
 import img from "@/assets/images/NewTagPlus.png";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
@@ -43,9 +44,10 @@ type TemplateWithTags = Template & {
 type ColorKey = keyof typeof COLORS;
 
 export default function TemplateListPage() {
+  const router = useRouter();
   const { profile } = useProfile();
   const user_group_id = profile?.user_group_id as UUID;
-
+  const loading = !user_group_id;
   const [filterMode, setFilterMode] = useState<"all" | "your" | "browse">(
     "all",
   );
@@ -67,6 +69,8 @@ export default function TemplateListPage() {
 
   /** Fetch templates + tags */
   useEffect(() => {
+    if (!user_group_id) return;
+
     const load = async () => {
       console.log(user_group_id);
       const allTemplates = (await fetchAllTemplates()) || [];
@@ -206,7 +210,9 @@ export default function TemplateListPage() {
     setOpenTagDropdownFor(null);
   }
 
-  return (
+  return loading ? (
+    <MainDiv>Loading profile...</MainDiv>
+  ) : (
     <>
       <TopNavBar />
 
@@ -219,7 +225,7 @@ export default function TemplateListPage() {
           <TagCreator
             user_group_id={user_group_id}
             selectedTagId={selectedTagId}
-            onTagClick={id =>
+            onTagClick={(id: UUID) =>
               setSelectedTagId(prev => (prev === id ? null : id))
             }
             onTagRenamed={() => setTagVersion(v => v + 1)}
@@ -274,7 +280,12 @@ export default function TemplateListPage() {
 
               {filteredTemplates.map(t => (
                 <GeneralList key={t.template_id}>
-                  <div>{t.template_name}</div>
+                  <div
+                    onClick={() => router.replace(`/sessions/${t.template_id}`)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {t.template_name}
+                  </div>
 
                   <AssociatedTags>
                     {t.associated_tags.map(tag => (
@@ -284,7 +295,9 @@ export default function TemplateListPage() {
                           color={tag.color as ColorKey}
                           tag_id={tag.tag_id}
                           sidebar={false}
-                          onDelete={id => deleteTagComponent(id, t.template_id)}
+                          onDelete={(id: UUID) =>
+                            deleteTagComponent(id, t.template_id)
+                          }
                         />
                       </TemplateTag>
                     ))}

@@ -2,7 +2,7 @@
 
 import { SetStateAction, useState } from "react";
 import { useRouter } from "next/navigation";
-import { submitNewUserGroup } from "@/api/supabase/queries/usergroup";
+import { submitNewUserGroup } from "@/api/supabase/queries/user-groups";
 import {
   AddUserGroupsMain,
   ErrorBanner,
@@ -25,7 +25,7 @@ export default function AddUserGroups() {
       setIsError(true);
     } else {
       const userGroupId = await submitNewUserGroup(userGroupInput);
-      router.push(`/user-groups/add-facilitators/${userGroupId}`);
+      router.push(`/invites/add-facilitators/${userGroupId}`);
     }
   };
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import supabase from "@/actions/supabase/client";
 import { fetchSessionById } from "@/api/supabase/queries/profile";
 import { fetchSessionName } from "@/api/supabase/queries/sessions";
@@ -10,22 +11,37 @@ import { Button, Container, Heading2, Label, Main } from "./styles";
 
 export default function ParticipantWaitingPage() {
   const { profile } = useProfile();
+
   const [status, setStatus] = useState("Waiting for session to start...");
   const [sessionName, setSessionName] = useState("");
   const [sessionExists, setSessionExists] = useState(false);
+  const [sessionId, setSessionId] = useState("");
+
+  const processedSessionRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!profile?.id) return;
 
+    async function handleSession(sessionId: string) {
+      if (processedSessionRef.current === sessionId) return;
+
+      processedSessionRef.current = sessionId;
+
+      const session = await fetchSessionName(sessionId);
+
+      setSessionId(sessionId);
+      setSessionName(session.session_name);
+      setStatus(`You were invited as a participant.`);
+      setSessionExists(true);
+    }
+
     async function initialLoad() {
-      if (!profile?.id) return;
+      if (!profile) return;
+      console.log(profile.id);
       const data = await fetchSessionById(profile.id);
 
-      if (data?.session_id) {
-        const sessionName = await fetchSessionName(data.session_id);
-        setSessionName(sessionName.session_name);
-        setStatus(`You were invited as a participant in:`);
-        setSessionExists(true);
+      if (data) {
+        await handleSession(data);
       }
     }
 
@@ -42,19 +58,18 @@ export default function ParticipantWaitingPage() {
           filter: `id=eq.${profile.id}`,
         },
         payload => {
-          const sessionId = payload.new?.session_id;
-          console.log("Received profile update:", payload);
+          const newSessionId = payload.new?.session_id;
 
-          if (!sessionId) {
+          if (!newSessionId) {
+            processedSessionRef.current = null;
+            setSessionExists(false);
+            setSessionName("");
+            setSessionId("");
             setStatus("Waiting for session to start...");
             return;
           }
 
-          (async () => {
-            const sessionName = await fetchSessionName(sessionId);
-            setSessionName(sessionName.session_name);
-            setStatus(`You were invited as a participant in:`);
-          })();
+          handleSession(newSessionId);
         },
       )
       .subscribe();
@@ -62,7 +77,7 @@ export default function ParticipantWaitingPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [profile?.id]);
+  }, [profile?.id, profile]);
 
   return (
     <>
@@ -71,10 +86,19 @@ export default function ParticipantWaitingPage() {
         <Container>
           <Heading2>{status}</Heading2>
 
-          {sessionName && <Label>{sessionName}</Label>}
-          {sessionExists && <Button>Start Session</Button>}
-        </Container>
-      </Main>
-    </>
+        {sessionName && <Label>{sessionName}</Label>}
+
+        {sessionExists && (
+          <Link
+            href={{
+              pathname: "/participants/session-flow",
+              query: { sessionId },
+            }}
+          >
+            <Button>Start Session</Button>
+          </Link>
+        )}
+      </Container>
+    </Main>
   );
 }

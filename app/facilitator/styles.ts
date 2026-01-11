@@ -4,8 +4,20 @@ import { Sans } from "@/styles/fonts";
 
 export const LayoutWrapper = styled.div`
   display: flex;
-  height: calc(100vh - 64px);
   width: 100%;
+`;
+
+export const Main = styled.main`
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  min-height: 100vh;
+  padding: 2rem;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background-color: ${COLORS.white};
+  background: ${COLORS.white};
 `;
 
 export const ContentWrapper = styled.div`
@@ -111,7 +123,6 @@ export const SideNavContainer = styled.div`
   display: flex;
   padding: 1rem;
   width: 12rem;
-  height: 100vh;
   align-items: flex-start;
   flex-direction: column;
   background-color: ${COLORS.oat_light};
@@ -148,7 +159,7 @@ export const SideNavButton = styled.button<{ selected: boolean }>`
 export const SideNavNewTemplateButton = styled.button`
   width: 9.25rem;
   padding: 0.75rem 1.5rem;
-  text-align: middle;
+  text-align: center;
   gap: 0.5em;
   background-color: ${COLORS.darkElectricBlue};
   border-radius: 0.25rem;
@@ -157,4 +168,5 @@ export const SideNavNewTemplateButton = styled.button`
   font-size: 12px;
   font-weight: 500;
   color: ${COLORS.white};
+  cursor: pointer;
 `;

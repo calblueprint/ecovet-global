@@ -2,16 +2,16 @@
 
 import { ChangeEvent, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { submitNewInvite } from "@/api/supabase/queries/invites";
-import { useProfile } from "@/utils/ProfileProvider";
 import {
-  AddParticipantButton,
-  AddParticipantFormDiv,
-  AddParticipantsMain,
+  AddFacilitatorButton,
+  AddFacilitatorFormDiv,
+  AddFacilitatorsMain,
   ErrorMessage,
   ErrorMessageDiv,
-  ParticipantEmailDiv,
-  ParticipantEmailInput,
+  FacilitatorEmailDiv,
+  FacilitatorEmailInput,
   RemoveInput,
   SubmitButton,
 } from "./styles";
@@ -21,18 +21,19 @@ const isEmailValid = (email: string) => {
   return emailRegex.test(email);
 };
 
-export default function AddParticipants() {
-  const { profile } = useProfile();
-  const [participantEmails, setParticipantEmails] = useState<string[]>([""]);
+export default function AddFacilitators() {
+  const searchParams = useSearchParams();
+  const userGroupId = searchParams.get("userGroupId");
+  const [facilitatorEmails, setFacilitatorEmails] = useState<string[]>([""]);
   const [errorMessages, setErrorMessage] = useState<string[]>([""]);
 
   const handleInputChange = (
     event: ChangeEvent<HTMLInputElement>,
     index: number,
   ) => {
-    const updatedEmails = [...participantEmails];
+    const updatedEmails = [...facilitatorEmails];
     updatedEmails[index] = event.target.value;
-    setParticipantEmails(updatedEmails);
+    setFacilitatorEmails(updatedEmails);
 
     const updatedErrors = [...errorMessages];
     updatedErrors[index] = isEmailValid(event.target.value)
@@ -41,87 +42,84 @@ export default function AddParticipants() {
     setErrorMessage(updatedErrors);
   };
 
-  const onAddParticipantButtonClick = () => {
-    setParticipantEmails([...participantEmails, ""]);
+  const onAddFacilitatorButtonClick = () => {
+    setFacilitatorEmails([...facilitatorEmails, ""]);
     setErrorMessage([...errorMessages, ""]);
   };
 
-  const onRemoveParticipantClick = (index: number) => {
-    const updatedEmails = [...participantEmails];
+  const onRemoveFacilitatorClick = (index: number) => {
+    const updatedEmails = [...facilitatorEmails];
     const updatedErrors = [...errorMessages];
     updatedEmails.splice(index, 1);
     updatedErrors.splice(index, 1);
-    setParticipantEmails(updatedEmails);
+    setFacilitatorEmails(updatedEmails);
     setErrorMessage(updatedErrors);
   };
 
   const onSubmitButtonClick = async () => {
     const updatedErrors = [...errorMessages];
 
-    for (let index = 0; index < participantEmails.length; index++) {
-      const email = participantEmails[index];
+    for (let index = 0; index < facilitatorEmails.length; index++) {
+      const email = facilitatorEmails[index];
 
       if (!isEmailValid(email)) {
         updatedErrors[index] = "Invalid email format";
         continue;
       }
 
-      const result = await submitNewInvite(
-        email,
-        String(profile?.user_group_id),
-        "Participant",
-      );
+      if (userGroupId) {
+        const result = await submitNewInvite(email, userGroupId, "Facilitator");
 
-      if (result?.error) {
-        updatedErrors[index] = result.message;
-      } else {
-        updatedErrors[index] = "";
-        console.log("Invite success for:", email);
+        if (result?.error) {
+          updatedErrors[index] = result.message;
+        } else {
+          updatedErrors[index] = "";
+          console.log("Invite success for:", email);
+        }
       }
     }
 
     setErrorMessage(updatedErrors);
   };
 
-  // Disable submit if any errors exist or any email is empty
   const hasErrorsOrEmpty =
     errorMessages.some(msg => msg.length > 0) ||
-    participantEmails.some(email => email.trim() === "");
+    facilitatorEmails.some(email => email.trim() === "");
 
   return (
-    <AddParticipantsMain>
-      <Link href="/facilitator">
-        <button>Back</button>
+    <AddFacilitatorsMain>
+      <Link href="/admin/home-screen">
+        <button>← Back</button>
       </Link>
-      <AddParticipantFormDiv>
-        <ParticipantEmailDiv>
-          {participantEmails.map((email, index) => (
-            <ParticipantEmailDiv key={index}>
+      <AddFacilitatorFormDiv>
+        <FacilitatorEmailDiv>
+          {facilitatorEmails.map((email, index) => (
+            <FacilitatorEmailDiv key={index}>
               <ErrorMessageDiv $hasError={errorMessages[index]}>
                 <ErrorMessage>{errorMessages[index]}</ErrorMessage>
               </ErrorMessageDiv>
-              <ParticipantEmailInput
+              <FacilitatorEmailInput
                 value={email}
                 onChange={e => handleInputChange(e, index)}
-                placeholder="Enter participant email"
+                placeholder="Enter facilitator email"
                 required
               />
               <RemoveInput
                 type="button"
-                onClick={() => onRemoveParticipantClick(index)}
+                onClick={() => onRemoveFacilitatorClick(index)}
               >
                 Remove
               </RemoveInput>
-            </ParticipantEmailDiv>
+            </FacilitatorEmailDiv>
           ))}
-        </ParticipantEmailDiv>
-        <AddParticipantButton onClick={onAddParticipantButtonClick}>
-          Add Participant
-        </AddParticipantButton>
+        </FacilitatorEmailDiv>
+        <AddFacilitatorButton onClick={onAddFacilitatorButtonClick}>
+          Add Facilitator
+        </AddFacilitatorButton>
         <SubmitButton onClick={onSubmitButtonClick} disabled={hasErrorsOrEmpty}>
           Submit
         </SubmitButton>
-      </AddParticipantFormDiv>
-    </AddParticipantsMain>
+      </AddFacilitatorFormDiv>
+    </AddFacilitatorsMain>
   );
 }

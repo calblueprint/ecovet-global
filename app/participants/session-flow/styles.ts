@@ -1,0 +1,70 @@
+import TextareaAutosize from "@mui/material/TextareaAutosize";
+import styled from "styled-components";
+import COLORS from "@/styles/colors";
+import { Sans } from "@/styles/fonts";
+
+export const ParticipantFlowMain = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem 0;
+  width: 100%;
+`;
+
+export const Container = styled.div`
+  background-color: ${COLORS.white};
+  width: 30rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+`;
+
+export const PromptCard = styled.div`
+  gap: 1rem;
+  padding-bottom: 1rem;
+`;
+
+export const Main = styled.main`
+  display: flex;
+  height: 100vh;
+  min-height: 100vh;
+  padding: 2rem;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background-color: ${COLORS.white};
+  background: ${COLORS.white};
+`;
+
+export const PhaseHeading = styled.h1`
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem;
+`;
+
+export const RolePhaseDescription = styled.p`
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem;
+`;
+
+export const PromptText = styled.p`
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem;
+`;
+
+export const StyledTextarea = styled(TextareaAutosize)`
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: ${COLORS.black20} 0.1rem solid;
+  font-size: 0.8rem;
+  font-family: ${Sans.style.fontFamily};
+
+  &:focus {
+    outline: none;
+    border-color: #7aa0ff;
+    box-shadow: 0 0 0 2px #e8efff;
+  }
+`;

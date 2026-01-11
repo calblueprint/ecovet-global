@@ -4,6 +4,7 @@ import {
   PromptUpdatable,
   RolePhaseUpdatable,
   RoleUpdatable,
+  Template,
   TemplateUpdatable,
 } from "@/types/schema";
 import supabase from "../createClient";
@@ -61,7 +62,7 @@ export async function deleteTemplates(template_id: UUID): Promise<void> {
 
 export async function createPhases(
   phase_id: UUID,
-  session_id: UUID | null,
+  template_id: UUID | null,
   phase_name: string | null,
   is_finished: boolean | null,
   phase_description: string | null = null,
@@ -71,7 +72,7 @@ export async function createPhases(
     .from("phase")
     .insert({
       phase_id: phase_id,
-      session_id: session_id,
+      template_id: template_id,
       phase_name: phase_name,
       phase_description: phase_description,
       is_finished: is_finished,
@@ -230,4 +231,32 @@ export async function deletePrompts(prompt_id: UUID): Promise<void> {
     .eq("prompt_id", prompt_id);
 
   if (error) throw error;
+}
+
+export async function fetchTemplate(
+  template_id: UUID,
+): Promise<Template | null> {
+  const { data, error } = await supabase
+    .from("template")
+    .select("*")
+    .eq("template_id", template_id)
+    .single();
+  if (error) {
+    console.error("Error fetching template by template_id:", error);
+    return null;
+  }
+  return data;
+}
+
+export async function fetchAllTemplates() {
+  try {
+    // Pull data
+    const { data, error } = await supabase.from("template").select("*");
+
+    if (error) throw error;
+
+    return data;
+  } catch (error) {
+    console.log("Error fetching templates from supabase API: ", error);
+  }
 }
