@@ -146,18 +146,21 @@ export async function fetchRoleById(role_id: UUID) {
   return data;
 }
 
-export async function fetchSessionById(id: string) {
+export async function fetchSessionById(userId: string) {
   const { data, error } = await supabase
-    .from("profile")
-    .select("session_id")
-    .eq("id", id)
-    .single();
+    .from("participant_session")
+    .select("session_id, session:session_id!inner(is_finished)")
+    .eq("user_id", userId)
+    .filter("session.is_finished", "eq", false)
+    .maybeSingle();
+  console.log(data);
+
   if (error) {
-    console.error("Error fetching role by role_id:", error.message);
+    console.error("Error fetching active session for user:", error.message);
     return null;
   }
 
-  return data;
+  return data?.session_id ?? null;
 }
 
 export async function handleProfileSubmit(profile: {

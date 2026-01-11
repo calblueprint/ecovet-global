@@ -167,7 +167,7 @@ export async function fetchRolePhases(
     .eq("role_id", roleId)
     .single();
   if (error) {
-    console.error("Error fetching profile by user_id:", error);
+    console.error("Error fetching role phases:", error);
   }
   return data;
 }
@@ -178,7 +178,7 @@ export async function fetchPrompts(rolePhaseId: UUID): Promise<Prompt[]> {
     .select("*")
     .eq("role_phase_id", rolePhaseId);
   if (error) {
-    console.error("Error fetching profile by user_id:", error);
+    console.error("Error fetching prompts:", error);
   }
   return data ?? [];
 }
@@ -191,4 +191,36 @@ export async function assignSession(userId: string, sessionId: string) {
   if (error) {
     throw error;
   }
+}
+
+export async function finishSession(sessionId: string) {
+  if (!sessionId) throw new Error("Missing sessionId");
+
+  const { error: sessionError } = await supabase
+    .from("session")
+    .update({
+      is_finished: true,
+    })
+    .eq("session_id", sessionId);
+
+  if (sessionError) {
+    console.error("Error finishing session:", sessionError.message);
+    throw sessionError;
+  }
+}
+
+export async function fetchRole(
+  userId: string,
+  sessionId: string,
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("participant_session")
+    .select("role_id")
+    .eq("session_id", sessionId)
+    .eq("user_id", userId)
+    .single();
+  if (error) {
+    throw error;
+  }
+  return data.role_id;
 }
