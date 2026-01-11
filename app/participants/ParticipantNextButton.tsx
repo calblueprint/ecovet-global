@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UUID } from "crypto";
 import { setIsFinished } from "@/api/supabase/queries/sessions";
+import { Button } from "./styles";
 
 interface NextButtonProps {
   user_id: UUID;
@@ -11,6 +12,7 @@ interface NextButtonProps {
   session_id: UUID;
   isLastPhase: boolean;
   currentPhaseIndex: number;
+  onClick: () => void;
 }
 
 export default function NextButton({
@@ -19,6 +21,7 @@ export default function NextButton({
   session_id,
   isLastPhase,
   currentPhaseIndex,
+  onClick,
 }: NextButtonProps) {
   const [clicked, setClicked] = useState(false);
   const router = useRouter();
@@ -31,6 +34,9 @@ export default function NextButton({
     setClicked(true);
 
     try {
+      if (onClick) {
+        await onClick();
+      }
       await setIsFinished(user_id, role_id, session_id);
       if (isLastPhase) {
         router.push("/sessions/session-finish");
@@ -43,9 +49,9 @@ export default function NextButton({
 
   return (
     <div>
-      <button onClick={handleClick} disabled={clicked}>
+      <Button onClick={handleClick} disabled={clicked}>
         {isLastPhase ? "Finish Game" : "Next"}
-      </button>
+      </Button>
 
       {clicked && <span> waiting for others...</span>}
     </div>

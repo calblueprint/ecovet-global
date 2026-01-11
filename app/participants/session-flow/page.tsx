@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { UUID } from "crypto";
 import supabase from "@/actions/supabase/client";
 import {
+  createPromptAnswer,
   fetchPhases,
   fetchPrompts,
   fetchRole,
@@ -13,6 +14,16 @@ import {
 import { Phase, Prompt, RolePhase } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import NextButton from "../ParticipantNextButton";
+import {
+  Container,
+  Main,
+  ParticipantFlowMain,
+  PhaseHeading,
+  PromptCard,
+  PromptText,
+  RolePhaseDescription,
+  StyledTextarea,
+} from "./styles";
 
 export default function ParticipantFlowPage() {
   const { userId } = useProfile();
@@ -25,6 +36,7 @@ export default function ParticipantFlowPage() {
   const [rolePhase, setRolePhase] = useState<RolePhase | null>(null);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
+  const [answers, setAnswers] = useState<string[]>([]);
   const isLastPhase = currentPhaseIndex === phases.length - 1;
 
   const currentPhase = phases[currentPhaseIndex];
@@ -113,6 +125,28 @@ export default function ParticipantFlowPage() {
     };
   }, [userId, sessionId, phases]);
 
+  useEffect(() => {
+    setAnswers(Array(prompts.length).fill(""));
+  }, [prompts]);
+
+  function handleInputAnswer(index: number, value: string) {
+    const updated = [...answers];
+    updated[index] = value;
+    setAnswers(updated);
+  }
+
+  async function submitAnswers() {
+    for (let i = 0; i < answers.length; i++) {
+      const answer = answers[i];
+
+      if (!answer.trim()) continue;
+      const promptId = prompts[i].prompt_id;
+
+      if (!userId) continue;
+      await createPromptAnswer(userId, promptId, answer);
+    }
+  }
+
   if (loading || !currentPhase) {
     console.log("Loading or currentPhase not yet available");
     return <div>Loading phases...</div>;
@@ -123,28 +157,48 @@ export default function ParticipantFlowPage() {
   console.log("currentPhaseIndex:", currentPhaseIndex);
 
   return (
-    <div>
-      <h1>Phase {currentPhaseIndex + 1}</h1>
+    <Main>
+      <Container>
+        <ParticipantFlowMain>
+          <PhaseHeading>Phase {currentPhaseIndex + 1}</PhaseHeading>
 
-      {rolePhase && <p>{rolePhase.description}</p>}
+          {rolePhase && (
+            <RolePhaseDescription>
+              Role description: {rolePhase.description}
+            </RolePhaseDescription>
+          )}
 
-      <ul>
-        {prompts.map(prompt => (
-          <li key={prompt.prompt_id}>{prompt.prompt_text}</li>
-        ))}
-      </ul>
+          <PromptCard>
+            {prompts.map((prompt, index) => (
+              <div key={index}>
+                <PromptText>{prompt.prompt_text}</PromptText>
 
-      {roleId && userId && sessionId && (
-        <NextButton
-          user_id={userId as UUID}
-          role_id={roleId as UUID}
-          session_id={sessionId as UUID}
-          isLastPhase={isLastPhase}
-          currentPhaseIndex={currentPhaseIndex}
-        />
-      )}
+                <StyledTextarea
+                  value={answers[index]}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    handleInputAnswer(index, e.target.value)
+                  }
+                  minRows={3}
+                  placeholder="Type your answer..."
+                />
+              </div>
+            ))}
+          </PromptCard>
 
-      {currentPhaseIndex === phases.length && <div>End of phases</div>}
-    </div>
+          {roleId && userId && sessionId && (
+            <NextButton
+              user_id={userId as UUID}
+              role_id={roleId as UUID}
+              session_id={sessionId as UUID}
+              isLastPhase={isLastPhase}
+              currentPhaseIndex={currentPhaseIndex}
+              onClick={submitAnswers}
+            />
+          )}
+
+          {currentPhaseIndex === phases.length && <div>End of phases</div>}
+        </ParticipantFlowMain>
+      </Container>
+    </Main>
   );
 }

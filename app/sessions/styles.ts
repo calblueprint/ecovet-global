@@ -35,7 +35,6 @@ export const Heading2 = styled.h2`
 export const Button = styled.button`
   width: 15rem;
   height: 45px;
-  margin-top: 2rem;
   border-radius: 0.25rem;
   display: flex;
   flex-direction: column;

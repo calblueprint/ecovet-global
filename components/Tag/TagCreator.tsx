@@ -3,11 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { UUID } from "crypto";
-import {
-  createTag,
-  getAllTags,
-  renameTag,
-} from "@/actions/supabase/queries/tag";
+import { createTag, getAllTags, renameTag } from "@/api/supabase/queries/tag";
 import img from "@/assets/images/NewTagPlus.png";
 import COLORS from "@/styles/colors";
 import { Tag } from "@/types/schema";

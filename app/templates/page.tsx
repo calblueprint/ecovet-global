@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { produce } from "immer";
 import { localStore, Template } from "@/types/schema";
 import TemplateBuilder from "./components/TemplateBuilder";
@@ -8,7 +9,7 @@ import { TemplateMainBox } from "./styles";
 
 const createInitialStore = (): localStore => {
   const templateID =
-    crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`; //some crazy fix bc this crypto returns as a string but technically isnt UUID like in schema
+    crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
 
   return {
     templateID: templateID,
@@ -51,6 +52,7 @@ export default function NewTemplatePage() {
 
   return (
     <TemplateMainBox>
+      <Link href="/facilitator/template-list">← Back</Link>
       <h1
         contentEditable
         suppressContentEditableWarning
