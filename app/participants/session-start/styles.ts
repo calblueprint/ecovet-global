@@ -43,7 +43,6 @@ export const Label = styled.div`
 export const Button = styled.button`
   width: 100%;
   height: 45px;
-  gap: 10rem;
   display: flex;
   flex-direction: column;
   justify-content: center;

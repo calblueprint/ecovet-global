@@ -1,6 +1,6 @@
 import { UUID } from "crypto";
 import { Tag, Template } from "@/types/schema";
-import supabase from "../client";
+import supabase from "../createClient";
 
 export type CreateTagParams = {
   name: string;

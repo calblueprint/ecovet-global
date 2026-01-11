@@ -16,7 +16,7 @@ import {
   Label,
   Main,
   WelcomeTag,
-} from "./styles";
+} from "../styles";
 
 export default function EditProfilePage() {
   const { userId, profile, loading: profileLoading } = useProfile();

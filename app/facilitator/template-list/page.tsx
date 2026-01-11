@@ -11,13 +11,13 @@ import {
   getAllTags,
   getTagsForTemplate,
   removeTagFromTemplate,
-} from "@/actions/supabase/queries/tag";
-import { fetchAllTemplates } from "@/actions/supabase/queries/templates";
+} from "@/api/supabase/queries/tag";
+import { fetchAllTemplates } from "@/api/supabase/queries/templates";
 import img from "@/assets/images/NewTagPlus.png";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import TopNavBar from "@/components/NavBar/NavBar";
-import { TagComponent } from "@/components/tag/Tag";
-import { TagCreator } from "@/components/tag/TagCreator";
+import { TagComponent } from "@/components/Tag/Tag";
+import { TagCreator } from "@/components/Tag/TagCreator";
 import COLORS from "@/styles/colors";
 import { Tag, Template } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";

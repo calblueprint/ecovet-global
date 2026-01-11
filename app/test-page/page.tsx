@@ -24,7 +24,7 @@ export default function AddFacilitators() {
       <button onClick={() => router.replace("/participants/session-start")}>
         Participant Flow
       </button>
-      <button onClick={() => router.replace("/edit-profile")}>
+      <button onClick={() => router.replace("/onboarding/edit-profile")}>
         Edit Profile
       </button>
     </main>
