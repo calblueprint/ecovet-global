@@ -1,5 +1,5 @@
-import styled from "styled-components";
 import TextareaAutosize from "@mui/material/TextareaAutosize";
+import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
 
@@ -35,7 +35,6 @@ export const Main = styled.main`
   background-color: ${COLORS.white};
   background: ${COLORS.white};
 `;
-
 
 export const PhaseHeading = styled.h1`
   display: flex;

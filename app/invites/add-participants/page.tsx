@@ -91,7 +91,7 @@ export default function AddParticipants() {
   return (
     <AddParticipantsMain>
       <Link href="/facilitator">
-        <button>Back</button>
+        <button>← Back</button>
       </Link>
       <AddParticipantFormDiv>
         <ParticipantEmailDiv>

@@ -1,74 +1,76 @@
 "use client";
 
 import { useState } from "react";
-import { NewPhase, NewRole } from "./components/components";
+import { produce } from "immer";
+import { localStore, Template } from "@/types/schema";
+import TemplateBuilder from "./components/TemplateBuilder";
+import { TemplateMainBox } from "./styles";
 
-function ScenarioStep({ next }: { next: () => void }) {
-  return (
-    <>
-      <form>
-        <label>
-          Scenario Title:
-          <input type="text" name="scenario_title" placeholder="" />
-        </label>
-        <label>
-          Scenario Description:
-          <input type="text" name="scenario_description" placeholder="" />
-        </label>
-      </form>
-      <button onClick={next}>Add Roles</button>
-    </>
-  );
-}
+const createInitialStore = (): localStore => {
+  const templateID =
+    crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`; //some crazy fix bc this crypto returns as a string but technically isnt UUID like in schema
 
-function RolesStep({ next }: { next: () => void }) {
-  const [roles, setRoles] = useState([<NewRole key={0} />]);
-
-  const newRole = () => {
-    setRoles([...roles, <NewRole key={roles.length} />]);
+  return {
+    templateID: templateID,
+    rolesById: {
+      1: {
+        template_id: templateID,
+        template_name: "New Template",
+        accessible_to_all: null,
+        user_group_id: null,
+        objective: "",
+        summary: "",
+        setting: "",
+        current_activity: "",
+        timestamp: "",
+      },
+    },
+    roleIds: [1],
+    phasesById: {},
+    phaseIds: [],
+    rolePhasesById: {},
+    rolePhaseIndex: {},
+    promptById: {},
+    promptIndex: {},
   };
-  return (
-    <>
-      {roles.map(role => role)}
-      <button onClick={newRole}>New Role</button>
-      <button onClick={next}>Add Phases</button>
-    </>
-  );
-}
-
-function PhasesStep() {
-  const roles = ["role1", "role2", "role3"]; // temp roles
-
-  const [phases, setPhases] = useState([<NewPhase roles={roles} key={0} />]);
-
-  const newPhase = () => {
-    setPhases([...phases, <NewPhase roles={roles} key={phases.length} />]);
-  };
-  return (
-    <>
-      {phases.map(phase => phase)}
-      <button onClick={newPhase}>New Phase</button>
-      <button>Finish Template</button>
-    </>
-  );
-}
+};
 
 export default function NewTemplatePage() {
-  const next = () => {
-    setIndex(prev => prev + 1);
-  };
+  const [newTemp, setNewTemp] = useState<localStore>(() =>
+    createInitialStore(),
+  );
+  const template = newTemp?.rolesById[1] as Template;
 
-  const components = [
-    <ScenarioStep next={next} key={"scenario"} />,
-    <RolesStep next={next} key={"role"} />,
-    <PhasesStep key={"phase"} />,
-  ];
-  const [index, setIndex] = useState(0);
+  function updateLocalStore(updater: (draft: localStore) => void) {
+    setNewTemp(prev => produce(prev, updater));
+  }
+
+  function resetTemplate() {
+    setNewTemp(createInitialStore());
+  }
 
   return (
-    <>
-      <h1>New Template Page</h1>
-      {components[index]}
-    </>
+    <TemplateMainBox>
+      <h1
+        contentEditable
+        suppressContentEditableWarning
+        className="text-5xl font-extrabold mb-4 outline-none"
+        onBlur={e => {
+          const value = e.currentTarget.textContent?.trim();
+
+          updateLocalStore(draft => {
+            (draft.rolesById[1] as Template).template_name =
+              value && value.length > 0 ? value : "New Template";
+          });
+        }}
+      >
+        {template.template_name}
+      </h1>
+      <TemplateBuilder
+        localStore={newTemp}
+        onFinish={resetTemplate}
+        update={updateLocalStore}
+      />
+    </TemplateMainBox>
   );
 }

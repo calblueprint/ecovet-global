@@ -1,15 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { SetStateAction, useState } from "react";
 import { FiCheck, FiEye, FiEyeOff, FiX } from "react-icons/fi";
 import Link from "next/link";
-import { checkInvites } from "@/api/supabase/queries/auth";
-import { addEmailtoProfile } from "@/api/supabase/queries/profile";
-import { useSession } from "@/utils/AuthProvider";
+import { useRouter } from "next/navigation";
+import supabase from "@/actions/supabase/client";
+import { checkIfUserExists, checkInvites } from "@/api/supabase/queries/auth";
+import {
+  addInviteInfoToProfile,
+  markInviteAccepted,
+} from "@/api/supabase/queries/profile";
 import {
   Button,
   Container,
   EmailAddressDiv,
+  ErrorMessage,
   Heading2,
   Input,
   InputFields,
@@ -31,7 +36,8 @@ export default function Login() {
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const sessionHandler = useSession();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const router = useRouter();
 
   const rules = {
     length: password.length >= 12,
@@ -44,31 +50,54 @@ export default function Login() {
     rules.length && rules.uppercase && rules.number && rules.specialChar;
 
   const handleSignUp = async () => {
-    if (!(await checkInvites(email))) {
-      throw new Error("You do not have an invite");
+    try {
+      if (await checkIfUserExists(email)) {
+        throw new Error("You already have an account, please sign in.");
+      }
+      const inviteStatus = await checkInvites(email);
+      switch (inviteStatus) {
+        case "no_invite":
+        case "cancelled":
+          throw new Error("You do not have an invitation.");
+        case "accepted":
+          throw new Error("You already have an account, please sign in.");
+        case "pending":
+          break;
+        case "error":
+          throw new Error(
+            "There was an error checking your invitation. Please try again.",
+          );
+        default:
+          throw new Error("Unknown invitation status.");
+      }
+      if (password !== confirmPassword) {
+        throw new Error("Passwords do not match");
+      }
+      const { data, error } = await supabase.auth.updateUser({
+        password: password,
+      });
+      if (error) {
+        throw new Error(
+          "An error occurred during sign up: " +
+            error.message +
+            "with email" +
+            data,
+        );
+      }
+      const userId = data.user?.id;
+      if (!userId) {
+        throw new Error("Signup succeeded but user ID was missing.");
+      }
+      await markInviteAccepted(email);
+      await addInviteInfoToProfile(userId, email);
+      router.push("/onboarding");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("An unexpected error occurred.");
+      }
     }
-    if (!isPasswordValid) {
-      throw new Error("Password does not meet the required criteria");
-    }
-    if (password !== confirmPassword) {
-      throw new Error("Passwords do not match");
-    }
-    const { data, error } = await sessionHandler.signUp(email, password);
-    if (error) {
-      throw new Error(
-        "An error occurred during sign up: " +
-          error.message +
-          "with email" +
-          data,
-      );
-    }
-    const userId = data.user?.id;
-    if (!userId) {
-      throw new Error("Signup succeeded but user ID was missing.");
-    }
-    await addEmailtoProfile(userId, email);
-
-    alert("Password successfully updated!");
   };
 
   return (
@@ -81,7 +110,7 @@ export default function Login() {
           <SignInTag>
             {" "}
             Already have an account?{" "}
-            <Link href="/auth/login-test"> Sign in. </Link>
+            <Link href="/auth/sign-in"> Sign in. </Link>
           </SignInTag>
         </IntroText>
         <InputFields>
@@ -89,7 +118,10 @@ export default function Login() {
             <Input
               name="email"
               placeholder="Email Address"
-              onChange={e => setEmail(e.target.value)}
+              onChange={(e: { target: { value: SetStateAction<string> } }) => {
+                setEmail(e.target.value);
+                setErrorMessage(null);
+              }}
               value={email}
             />{" "}
           </EmailAddressDiv>
@@ -99,9 +131,9 @@ export default function Login() {
                 name="password"
                 placeholder="Password"
                 type={showPassword ? "text" : "password"}
-                onChange={e => (
-                  setPassword(e.target.value), setPasswordTouched(true)
-                )}
+                onChange={(e: {
+                  target: { value: SetStateAction<string> };
+                }) => (setPassword(e.target.value), setPasswordTouched(true))}
                 value={password}
               />{" "}
               <VisibilityToggle
@@ -119,7 +151,9 @@ export default function Login() {
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="Password Confirmation"
                 value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
+                onChange={(e: { target: { value: SetStateAction<string> } }) =>
+                  setConfirmPassword(e.target.value)
+                }
               />
               <VisibilityToggle
                 type="button"
@@ -180,6 +214,7 @@ export default function Login() {
         >
           Continue
         </Button>
+        {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
       </Container>
     </Main>
   );

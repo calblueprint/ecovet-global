@@ -8,10 +8,10 @@ export default function FacilitatorFlows() {
   return (
     <main style={mainStyles}>
       <Link href="/test-page">
-        <button>Back</button>
+        <button>← Back</button>
       </Link>{" "}
       <H2>Facilitator Flows</H2>
-      <Link href="/templates/template-list">
+      <Link href="/facilitator/template-list">
         <button>View All Templates</button>
       </Link>
       <Link href="/templates">

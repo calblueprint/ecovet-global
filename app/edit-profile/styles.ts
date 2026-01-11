@@ -26,7 +26,7 @@ export const Container = styled.div`
 export const Heading2 = styled.h2`
   font-family: ${Sans.style.fontFamily};
   padding-bottom: 0.5rem;
-  font-size: 2 rem;
+  font-size: 2rem;
   font-style: normal;
   font-weight: 700;
   line-height: normal;
@@ -41,7 +41,8 @@ export const Heading3 = styled.h3`
 `;
 
 export const WelcomeTag = styled.div`
-  dispay: flex;
+  display: flex;
+  flex-direction: column;
   color: ${COLORS.black100};
 `;
 
