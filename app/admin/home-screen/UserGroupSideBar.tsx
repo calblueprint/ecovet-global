@@ -21,7 +21,7 @@ export default function UserGroupSideBar({
   return (
     <div>
       <SideNavNewTemplateButton
-        onClick={() => router.push("/user-groups/add-user-groups")}
+        onClick={() => router.push("/invites/add-user-groups")}
       >
         <Image src={Plus} alt="+" width={10} height={10} /> New Invite
       </SideNavNewTemplateButton>
@@ -31,12 +31,6 @@ export default function UserGroupSideBar({
           onClick={() => setFilterMode("all")}
         >
           All User Groups
-        </SideNavButton>
-        <SideNavButton
-          selected={filterMode === "invites"}
-          onClick={() => setFilterMode("invites")}
-        >
-          Your Invites
         </SideNavButton>
       </SideNavTemplatesContainer>
     </div>

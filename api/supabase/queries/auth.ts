@@ -22,7 +22,8 @@ export async function signInWithMagicLink(email: string) {
     email: email,
     options: {
       shouldCreateUser: true,
-      emailRedirectTo: `${window.location.origin}/auth/signup`,
+      // emailRedirectTo: `${window.location.origin}/auth/signup`,
+      emailRedirectTo: "https://ecovet-global.vercel.app/auth/signup",
     },
   });
 
