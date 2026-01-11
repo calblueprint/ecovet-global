@@ -3,11 +3,24 @@ import COLORS from "@/styles/colors";
 
 export const Main = styled.main`
   display: flex;
-  width: 100%;
   height: 100vh;
+  min-height: 100vh;
+  padding: 2rem;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  background-color: ${COLORS.white};
+  background: ${COLORS.white};
+`;
+
+export const Container = styled.div`
+  align-items: center;
+  background-color: ${COLORS.white};
+  width: stretch;
+  width: 30rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 `;
 
 export const Button = styled.button`
@@ -22,7 +35,6 @@ export const Button = styled.button`
   color: white;
   border: none;
   border-radius: 4px;
-  margin-top: 2rem;
   cursor: pointer;
 `;
 
@@ -38,4 +50,5 @@ export const SmallButton = styled.button`
   border: 1px solid black;
   border-radius: 4px;
   cursor: pointer;
+  margin-bottom: 0.5rem;
 `;

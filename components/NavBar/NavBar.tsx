@@ -17,12 +17,14 @@ const TopNavBar = () => {
   return (
     <TopNavContainer>
       <LogoContainer>
-        <Image
-          src={ecovetGlobal}
-          alt="Ecovet Global Logo"
-          height={30}
-          style={{ width: "auto", objectFit: "contain" }}
-        />
+        <Link href="../test-page">
+          <Image
+            src={ecovetGlobal}
+            alt="Ecovet Global Logo"
+            height={30}
+            style={{ width: "auto", objectFit: "contain" }}
+          />
+        </Link>
       </LogoContainer>
       <ButtonContainer>
         <Link href="/facilitator/template-list">

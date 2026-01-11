@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Link from "next/link";
 import { UUID } from "crypto";
 import {
   createPhases,
@@ -8,6 +9,7 @@ import {
   createTemplates,
 } from "@/api/supabase/queries/templates";
 import { localStore, Prompt, Role, Template } from "@/types/schema";
+import { useProfile } from "@/utils/ProfileProvider";
 import RoleForm from "./RoleForm";
 import {
   NewTabButton,
@@ -36,6 +38,7 @@ export default function TemplateBuilder({
 }) {
   const [activeId, setActiveId] = useState<UUID | number>(1); // current 'tab' or role
   const [saving, setSaving] = useState(false); //nice 'saving' to let user know supabase push is still happening and when finished
+  const { profile } = useProfile();
 
   function createUUID(): UUID {
     //helper function to create new UUIDs
@@ -117,7 +120,7 @@ export default function TemplateBuilder({
       const phaseNumber = draft.phaseIds.length + 1;
       draft.phasesById[newPhaseID] = {
         phase_id: newPhaseID,
-        session_id: null,
+        template_id: draft.templateID,
         phase_name: `Phase ${phaseNumber}`,
         phase_number: phaseNumber,
         phase_description: null,
@@ -247,6 +250,7 @@ export default function TemplateBuilder({
       (saveStore.rolesById[1] as Template).summary,
       (saveStore.rolesById[1] as Template).setting,
       (saveStore.rolesById[1] as Template).current_activity,
+      profile?.user_group_id,
     );
 
     for (const roleID of saveStore.roleIds) {
@@ -263,7 +267,7 @@ export default function TemplateBuilder({
     for (const phaseID of saveStore.phaseIds) {
       await createPhases(
         phaseID,
-        saveStore.phasesById[phaseID].session_id,
+        saveStore.phasesById[phaseID].template_id,
         saveStore.phasesById[phaseID].phase_name,
         saveStore.phasesById[phaseID].is_finished,
         saveStore.phasesById[phaseID].phase_description,
@@ -381,9 +385,11 @@ export default function TemplateBuilder({
               </StepButton>
             </PhasesStepper>
           </PhasesControl>
-          <SubmitButton onClick={saveTemplate}>
-            {saving ? "Saving..." : "Submit Template"}
-          </SubmitButton>
+          <Link href="/facilitator/template-list">
+            <SubmitButton onClick={saveTemplate}>
+              {saving ? "Saving..." : "Submit Template"}
+            </SubmitButton>
+          </Link>
         </TabsRight>
       </TabsHeader>
 

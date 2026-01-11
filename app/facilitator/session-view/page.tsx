@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { UUID } from "crypto";
 import supabase from "@/actions/supabase/client";
-import { participant_session_update } from "@/api/supabase/queries/sessions";
+import {
+  finishSession,
+  participant_session_update,
+} from "@/api/supabase/queries/sessions";
 import { ParticipantSession } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import { Button, Container, Main } from "./styles";
@@ -21,35 +24,42 @@ interface ParticipantWithProfile {
 
 export default function FacilitatorSessionView() {
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get("sessionId");
+  const sessionId = searchParams.get("sessionId") as UUID | null;
   const { profile } = useProfile();
+  const router = useRouter();
 
   const [participants, setParticipants] = useState<ParticipantWithProfile[]>(
     [],
   );
-  const [allDone, setAllDone] = useState(false);
   const [currentPhase, setCurrentPhase] = useState(1);
-  const hasAdvancedRef = useRef(false);
+  const [allDone, setAllDone] = useState(false);
   const [isAdvancing, setIsAdvancing] = useState(false);
-  const router = useRouter();
 
   async function advancePhase() {
-    if (isAdvancing) return;
+    if (!sessionId || isAdvancing) return;
 
     setIsAdvancing(true);
-    const { error, data } = await supabase.rpc("advance_phase", {
+
+    const { data, error } = await supabase.rpc("advance_phase", {
       p_session_id: sessionId,
       p_current_phase_num: currentPhase,
     });
 
-    console.log("Advancing", data);
-
     if (error) {
       console.error("Failed to advance phase:", error);
       setIsAdvancing(false);
-    } else if (!data) {
-      router.push("/sessions/session-finish/");
+      return;
     }
+
+    if (!data) {
+      try {
+        await finishSession(sessionId);
+        router.push("/sessions/session-finish/");
+      } catch (err) {
+        console.error("Failed to finish session:", err);
+      }
+    }
+
     setIsAdvancing(false);
   }
 
@@ -60,32 +70,32 @@ export default function FacilitatorSessionView() {
       try {
         const psData = await participant_session_update(sessionId as UUID);
 
-        const participantsWithProfiles: ParticipantWithProfile[] = [];
+        const enriched: ParticipantWithProfile[] = [];
 
         for (const p of psData ?? []) {
-          const { data: profileData, error: profileError } = await supabase
+          const { data: profileData, error } = await supabase
             .from("profile")
             .select("first_name,last_name")
             .eq("id", p.user_id)
             .single();
 
-          if (profileError) throw profileError;
+          if (error) throw error;
 
-          participantsWithProfiles.push({
+          enriched.push({
             user_id: p.user_id,
             role_id: p.role_id,
             session_id: p.session_id,
-            phase_index: p.phase_index,
+            phase_index: p.phase_index ?? 1,
             is_finished: p.is_finished,
             first_name: profileData.first_name,
             last_name: profileData.last_name,
           });
         }
 
-        setParticipants(participantsWithProfiles);
+        setParticipants(enriched);
 
-        if (participantsWithProfiles.length > 0) {
-          setCurrentPhase(participantsWithProfiles[0].phase_index);
+        if (enriched.length > 0) {
+          setCurrentPhase(enriched[0].phase_index);
         }
       } catch (err) {
         console.error("Failed to load participants:", err);
@@ -99,7 +109,7 @@ export default function FacilitatorSessionView() {
     if (!sessionId) return;
 
     const channel = supabase
-      .channel(`participant-is-finished-updates-sesh_${sessionId}`)
+      .channel(`participant-session-${sessionId}`)
       .on(
         "postgres_changes",
         {
@@ -109,55 +119,43 @@ export default function FacilitatorSessionView() {
           filter: `session_id=eq.${sessionId}`,
         },
         async payload => {
-          const updatedRow = payload.new as ParticipantSession;
+          const updated = payload.new as ParticipantSession;
 
           const { data: profileData } = await supabase
             .from("profile")
             .select("first_name,last_name")
-            .eq("id", updatedRow.user_id)
+            .eq("id", updated.user_id)
             .single();
-
-          const updatedParticipant: ParticipantWithProfile = {
-            user_id: updatedRow.user_id,
-            role_id: updatedRow.role_id,
-            session_id: updatedRow.session_id,
-            phase_index: updatedRow.phase_index ?? 1,
-            is_finished: updatedRow.is_finished,
-            first_name: profileData?.first_name,
-            last_name: profileData?.last_name,
-          };
 
           setParticipants(prev =>
             prev.map(p =>
-              p.user_id === updatedParticipant.user_id ? updatedParticipant : p,
+              p.user_id === updated.user_id
+                ? {
+                    ...p,
+                    phase_index: updated.phase_index ?? 1,
+                    is_finished: updated.is_finished,
+                    first_name: profileData?.first_name ?? p.first_name,
+                    last_name: profileData?.last_name ?? p.last_name,
+                  }
+                : p,
             ),
           );
 
-          setCurrentPhase(updatedParticipant.phase_index);
+          setCurrentPhase(updated.phase_index ?? 1);
         },
       )
       .subscribe();
 
-    return () => void supabase.removeChannel(channel);
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [sessionId]);
 
-  useEffect(() => {
-    hasAdvancedRef.current = false;
-  }, [currentPhase]);
-
-  useEffect(() => {
-    if (!allDone || hasAdvancedRef.current || !sessionId) return;
-
-    hasAdvancedRef.current = true;
-
-    advancePhase();
-  }, [allDone, sessionId, currentPhase]);
-
-  // Check if all participants, but not facilitator are done
   useEffect(() => {
     if (!profile?.id || participants.length === 0) return;
 
     const nonFacilitators = participants.filter(p => p.user_id !== profile.id);
+
     setAllDone(nonFacilitators.every(p => p.is_finished));
   }, [participants, profile?.id]);
 
@@ -166,28 +164,36 @@ export default function FacilitatorSessionView() {
       <Container>
         <h1 style={{ textAlign: "center" }}>Phase {currentPhase}</h1>
         <h3>Session ID: {sessionId}</h3>
+
         <div>
-          <h3>Unfinished Participants:</h3>
+          <h3>Unfinished Participants</h3>
           {participants
             .filter(p => p.user_id !== profile?.id && !p.is_finished)
             .map(p => (
-              <div key={p.user_id}>{`${p.first_name} ${p.last_name}`}</div>
+              <div key={p.user_id}>
+                {p.first_name} {p.last_name}
+              </div>
             ))}
         </div>
 
         <div>
-          <h3>Finished Participants:</h3>
+          <h3>Finished Participants</h3>
           {participants
             .filter(p => p.user_id !== profile?.id && p.is_finished)
             .map(p => (
-              <div key={p.user_id}>{`${p.first_name} ${p.last_name}`}</div>
+              <div key={p.user_id}>
+                {p.first_name} {p.last_name}
+              </div>
             ))}
         </div>
+
         <Button onClick={advancePhase} disabled={isAdvancing}>
-          Force Advance
+          {isAdvancing ? "Advancing..." : "Force Advance"}
         </Button>
 
-        {allDone && <h3>All participants are finished!</h3>}
+        {allDone && (
+          <h3 style={{ marginTop: "1rem" }}>All participants are finished</h3>
+        )}
       </Container>
     </Main>
   );

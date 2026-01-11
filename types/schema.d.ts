@@ -78,7 +78,7 @@ export interface Session {
 
 export interface Phase {
   phase_id: UUID; // phase_id
-  session_id: UUID | null;
+  template_id: UUID | null;
   phase_name: string | null;
   phase_number: number;
   phase_description: string | null;

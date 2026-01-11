@@ -21,9 +21,7 @@ export default function TemplateSideBar({
 
   return (
     <div>
-      <SideNavNewTemplateButton
-        onClick={() => router.push("/invites/add-participants")}
-      >
+      <SideNavNewTemplateButton onClick={() => router.push("/templates")}>
         <Image src={Plus} alt="+" width={10} height={10} /> New Template
       </SideNavNewTemplateButton>
       <SideNavTemplatesContainer>

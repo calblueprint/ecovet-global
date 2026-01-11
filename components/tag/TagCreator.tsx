@@ -94,7 +94,7 @@ export function TagCreator({
 
   useEffect(() => {
     getTags();
-  });
+  }, [user_group_id]);
 
   return (
     <StyledTagCreator>

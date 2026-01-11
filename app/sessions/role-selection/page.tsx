@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { UUID } from "crypto";
 import {
   assignParticipantToSession,
@@ -11,7 +12,7 @@ import {
 } from "@/api/supabase/queries/sessions";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import { useProfile } from "@/utils/ProfileProvider";
-import { Button, Main, SmallButton } from "./styles";
+import { Button, Container, Main, SmallButton } from "./styles";
 
 interface ParticipantRole {
   participant: UUID | null;
@@ -28,10 +29,10 @@ interface ParticipantName {
   name: string;
 }
 
-const TEMPLATE_ID = "89dfd6e4-fb1d-456b-b7cc-7577eb02fce6";
-
 export default function RoleSelectionPage() {
   const { profile, loading } = useProfile();
+  const searchParams = useSearchParams();
+  const templateId = searchParams.get("templateId");
 
   const [roles, setRoles] = useState<RoleName[]>([]);
   const [participants, setParticipants] = useState<ParticipantName[]>([]);
@@ -49,12 +50,12 @@ export default function RoleSelectionPage() {
 
     async function loadData() {
       try {
-        if (!profile?.user_group_id) {
+        if (!profile?.user_group_id || !templateId) {
           return;
         }
 
         const [rolesData, participantsData] = await Promise.all([
-          fetchRoles(TEMPLATE_ID),
+          fetchRoles(templateId),
           fetchParticipants(profile?.user_group_id),
         ]);
 
@@ -67,7 +68,7 @@ export default function RoleSelectionPage() {
     }
 
     loadData();
-  }, [loading, profile]);
+  }, [loading, profile, templateId]);
 
   const handleChange = (
     index: number,
@@ -90,7 +91,7 @@ export default function RoleSelectionPage() {
   };
 
   const handleStartGame = async () => {
-    if (!profile?.id || !profile.user_group_id) return;
+    if (!profile?.id || !profile.user_group_id || !templateId) return;
 
     setStarting(true);
     setMessage(null);
@@ -105,7 +106,7 @@ export default function RoleSelectionPage() {
       }
 
       const sessionId = (await createSession(
-        TEMPLATE_ID,
+        templateId,
         profile.user_group_id,
       )) as UUID;
 
@@ -127,53 +128,68 @@ export default function RoleSelectionPage() {
 
   return (
     <Main>
-      <h1 style={{ marginBottom: "2rem" }}>Role Selection</h1>
+      <Container>
+        <Link
+          style={{ alignSelf: "flex-start", marginLeft: "3rem" }}
+          href={`/sessions/${templateId}`}
+        >
+          ← Back
+        </Link>
 
-      {roleSelection.map((pair, index) => {
-        const selectedParticipants = roleSelection
-          .map(p => p.participant)
-          .filter((p, i) => p && i !== index);
+        <h1 style={{ marginTop: "1rem", marginBottom: "1rem" }}>
+          Role Selection
+        </h1>
 
-        const availableParticipants = participants.filter(
-          p => !selectedParticipants.includes(p.id) && p.id !== profile?.id,
-        );
+        {roleSelection.map((pair, index) => {
+          const selectedParticipants = roleSelection
+            .map(p => p.participant)
+            .filter((p, i) => p && i !== index);
 
-        return (
-          <div
-            key={index}
-            style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}
-          >
-            <InputDropdown
-              label={`Participant ${index + 1}`}
-              options={new Map(availableParticipants.map(p => [p.id, p.name]))}
-              placeholder="Select participant"
-              onChange={val => handleChange(index, "participant", val as UUID)}
-            />
+          const availableParticipants = participants.filter(
+            p => !selectedParticipants.includes(p.id) && p.id !== profile?.id,
+          );
 
-            <InputDropdown
-              label="Role"
-              options={new Map(roles.map(r => [r.id, r.name]))}
-              placeholder="Select role"
-              onChange={val => handleChange(index, "role", val as UUID)}
-            />
-
+          return (
             <div
-              onClick={() => deleteParticipant(index)}
-              style={{ cursor: "pointer", paddingTop: "7px" }}
+              key={index}
+              style={{ display: "flex", gap: "1rem", marginBottom: ".5rem" }}
             >
-              ✕
+              <InputDropdown
+                label={`Participant ${index + 1}`}
+                options={
+                  new Map(availableParticipants.map(p => [p.id, p.name]))
+                }
+                placeholder="Select participant"
+                onChange={val =>
+                  handleChange(index, "participant", val as UUID)
+                }
+              />
+
+              <InputDropdown
+                label="Role"
+                options={new Map(roles.map(r => [r.id, r.name]))}
+                placeholder="Select role"
+                onChange={val => handleChange(index, "role", val as UUID)}
+              />
+
+              <div
+                onClick={() => deleteParticipant(index)}
+                style={{ cursor: "pointer", paddingTop: "7px" }}
+              >
+                ✕
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
 
-      <SmallButton onClick={addParticipant}>+ Add Participant</SmallButton>
+        <SmallButton onClick={addParticipant}>+ Add Participant</SmallButton>
 
-      <Button onClick={handleStartGame} disabled={starting}>
-        {starting ? "Starting Game…" : "Start Game"}
-      </Button>
+        <Button onClick={handleStartGame} disabled={starting}>
+          {starting ? "Starting Game…" : "Start Game"}
+        </Button>
 
-      {message && <p>{message}</p>}
+        {message && <p>{message}</p>}
+      </Container>
     </Main>
   );
 }
