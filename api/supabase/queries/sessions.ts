@@ -1,6 +1,6 @@
 import { UUID } from "crypto";
 import supabase from "@/actions/supabase/client";
-import { ParticipantSession, Prompt, RolePhase } from "@/types/schema";
+import { Prompt, RolePhase } from "@/types/schema";
 
 export async function fetchRoles(templateId: string) {
   const { data, error } = await supabase
@@ -95,13 +95,40 @@ export async function createSession(templateId: string, userGroupId: string) {
   return data.session_id;
 }
 
-export async function participant_session_update(
+export type SessionParticipant = {
+  user_id: UUID;
+  role_id: UUID | null;
+  session_id: UUID;
+  phase_index: number | null;
+  is_finished: boolean;
+  profile: {
+    first_name: string;
+    last_name: string;
+  };
+};
+
+// x.profile?.first_name and x.profile?.first_name
+// returns SessionParticipant[]
+export async function sessionParticipants(
   session_id: UUID,
-): Promise<ParticipantSession[]> {
+): Promise<SessionParticipant[]> {
   const { data, error } = await supabase
     .from("participant_session")
-    .select("*")
-    .eq("session_id", session_id);
+    .select(
+      `
+      user_id,
+      role_id,
+      session_id,
+      phase_index,
+      is_finished,
+      profile (
+        first_name,
+        last_name
+      )
+    `,
+    )
+    .eq("session_id", session_id)
+    .returns<SessionParticipant[]>();
 
   if (error) throw error;
 
