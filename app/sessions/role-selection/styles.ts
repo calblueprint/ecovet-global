@@ -1,3 +1,4 @@
+import Link from "next/link";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 
@@ -51,4 +52,20 @@ export const SmallButton = styled.button`
   border-radius: 4px;
   cursor: pointer;
   margin-bottom: 0.5rem;
+`;
+
+export const Heading1 = styled.h1`
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+`;
+
+export const Key = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+`;
+
+export const BackLink = styled(Link)`
+  align-self: flex-start;
+  margin-left: 3rem;
 `;

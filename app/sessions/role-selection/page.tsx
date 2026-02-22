@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { UUID } from "crypto";
 import {
@@ -12,7 +11,15 @@ import {
 } from "@/api/supabase/queries/sessions";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import { useProfile } from "@/utils/ProfileProvider";
-import { Button, Container, Main, SmallButton } from "./styles";
+import {
+  BackLink,
+  Button,
+  Container,
+  Heading1,
+  Key,
+  Main,
+  SmallButton,
+} from "./styles";
 
 interface ParticipantRole {
   participant: UUID | null;
@@ -129,16 +136,14 @@ export default function RoleSelectionPage() {
   return (
     <Main>
       <Container>
-        <Link
+        <BackLink
           style={{ alignSelf: "flex-start", marginLeft: "3rem" }}
           href={`/sessions/${templateId}`}
         >
           ← Back
-        </Link>
+        </BackLink>
 
-        <h1 style={{ marginTop: "1rem", marginBottom: "1rem" }}>
-          Role Selection
-        </h1>
+        <Heading1>Role Selection</Heading1>
 
         {roleSelection.map((pair, index) => {
           const selectedParticipants = roleSelection
@@ -150,10 +155,7 @@ export default function RoleSelectionPage() {
           );
 
           return (
-            <div
-              key={index}
-              style={{ display: "flex", gap: "1rem", marginBottom: ".5rem" }}
-            >
+            <Key key={index}>
               <InputDropdown
                 label={`Participant ${index + 1}`}
                 options={
@@ -178,7 +180,7 @@ export default function RoleSelectionPage() {
               >
                 ✕
               </div>
-            </div>
+            </Key>
           );
         })}
 
