@@ -151,16 +151,16 @@ export async function fetchSessionById(userId: string) {
     .from("participant_session")
     .select("session_id, session:session_id!inner(is_finished)")
     .eq("user_id", userId)
-    .filter("session.is_finished", "eq", false)
-    .maybeSingle();
+    .eq("session.is_finished", false)
+    .order("created_at", { ascending: false });
   console.log(data);
-
+  //order by most recent session added
   if (error) {
     console.error("Error fetching active session for user:", error.message);
     return null;
   }
 
-  return data?.session_id ?? null;
+  return data[0]?.session_id ?? null;
 }
 
 export async function handleProfileSubmit(profile: {
