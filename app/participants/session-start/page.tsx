@@ -55,7 +55,7 @@ export default function ParticipantWaitingPage() {
           event: "INSERT",
           schema: "public",
           table: "participant_session",
-          filter: `profile_id=eq.${profile.id}`,
+          filter: `user_id=eq.${profile.id}`,
         },
         payload => {
           console.log(payload);
