@@ -61,3 +61,19 @@ export async function submitNewUserGroup(user_group: string) {
   }
   return id;
 }
+
+export async function fetchUserGroupSessions(user_group_id: UUID) {
+  const { data, error } = await supabase
+    .from("session")
+    .select(
+      "session_id, template_id, usergroup_id, session_name, is_async, after_action_report_id, is_finished",
+    )
+    .eq("user_group_id", user_group_id);
+
+  if (error) {
+    console.error("Error fetching sessions for user group:", error.message);
+    return [];
+  }
+
+  return data;
+}
