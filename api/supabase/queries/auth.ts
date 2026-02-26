@@ -33,10 +33,12 @@ export async function signInWithMagicLink(email: string) {
 }
 
 export async function checkIfUserExists(email: string): Promise<boolean> {
+  const lowerCaseEmail = email.toLowerCase();
+
   const { data, error } = await supabase
     .from("profile")
     .select("*")
-    .eq("email", email)
+    .eq("email", lowerCaseEmail)
     .maybeSingle();
   if (error) {
     console.error("Error checking if user exists:", error.message);
@@ -47,10 +49,12 @@ export async function checkIfUserExists(email: string): Promise<boolean> {
 
 /* returns True if there is an unaccepted invite given an email*/
 export async function checkInvites(email: string) {
+  const lowerCaseEmail = email.toLowerCase();
+
   const { data, error } = await supabase
     .from("invite")
     .select("*")
-    .eq("email", email)
+    .eq("email", lowerCaseEmail)
     .maybeSingle();
 
   if (error) {

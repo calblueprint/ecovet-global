@@ -54,6 +54,7 @@ export default function Login() {
       if (await checkIfUserExists(email)) {
         throw new Error("You already have an account, please sign in.");
       }
+
       const inviteStatus = await checkInvites(email);
       switch (inviteStatus) {
         case "no_invite":
@@ -70,12 +71,15 @@ export default function Login() {
         default:
           throw new Error("Unknown invitation status.");
       }
+
       if (password !== confirmPassword) {
         throw new Error("Passwords do not match");
       }
+
       const { data, error } = await supabase.auth.updateUser({
         password: password,
       });
+
       if (error) {
         throw new Error(
           "An error occurred during sign up: " +
