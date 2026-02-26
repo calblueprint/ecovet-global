@@ -100,7 +100,7 @@ export default function TemplateBuilder({
     setActiveId(nextActive);
   }
 
-  function renameRole(role_id: UUID | number, newLabel: string) {
+  function _renameRole(role_id: UUID | number, newLabel: string) {
     if (localStore == null) return;
 
     update(draft => {

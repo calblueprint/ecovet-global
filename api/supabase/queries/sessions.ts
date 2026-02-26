@@ -1,6 +1,6 @@
 import { UUID } from "crypto";
 import supabase from "@/actions/supabase/client";
-import { Prompt, RolePhase } from "@/types/schema";
+import { ParticipantSession, Prompt, RolePhase } from "@/types/schema";
 
 export async function fetchRoles(templateId: string) {
   const { data, error } = await supabase
@@ -110,8 +110,9 @@ export type SessionParticipant = {
 // x.profile?.first_name and x.profile?.first_name
 // returns SessionParticipant[]
 export async function sessionParticipants(
-  session_id: UUID,
-): Promise<SessionParticipant[]> {
+  session_id: string, //dt: @esha, i had to change this to a string for my api,
+  // but if we need to change it back to UUID, i need to ask how to change the parameter type in the api route as well
+): Promise<ParticipantSession[]> {
   const { data, error } = await supabase
     .from("participant_session")
     .select(
@@ -128,7 +129,7 @@ export async function sessionParticipants(
     `,
     )
     .eq("session_id", session_id)
-    .returns<SessionParticipant[]>();
+    .returns<ParticipantSession[]>();
 
   if (error) throw error;
 

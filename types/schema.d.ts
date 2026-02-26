@@ -44,6 +44,11 @@ export interface ParticipantSession {
   phase_index: number;
   is_finished: boolean;
   session_id: UUID;
+  profile: {
+    first_name: string; //dt: @esha, i had to add this as the sessionParticipants was updated, but this was not added yet.
+    last_name: string;
+    email: string;
+  };
 }
 export interface Role {
   role_id: UUID; // role_id
@@ -74,6 +79,7 @@ export interface Session {
   is_async: boolean;
   phase_id: UUID;
   after_action_report_id?: UUID;
+  is_finished: boolean;
 }
 
 export interface Phase {
