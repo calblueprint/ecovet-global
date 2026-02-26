@@ -109,6 +109,7 @@ type PromptUpdatable = Omit<Prompt, "prompt_id", "role_phase_id">;
 
 export interface PromptAnswer {
   prompt_response_id: UUID; // prompt_answer_id
+  session_id: UUID;
   user_id: UUID;
   prompt_id: UUID;
   prompt_answer: string;
