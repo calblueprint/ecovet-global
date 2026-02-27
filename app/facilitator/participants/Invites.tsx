@@ -1,11 +1,10 @@
 "use state";
 
+import type { Invite, UUID } from "@/types/schema";
 import { useCallback, useEffect, useState } from "react";
-import { UUID } from "crypto";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
-import { fetchInvites } from "@/api/supabase/queries/invites";
+import { fetchInvites } from "@/actions/supabase/queries/invites";
 import InviteComponent from "@/components/InviteComponent/InviteComponent";
-import { Invite } from "@/types/schema";
 import {
   GeneralList,
   GeneralTitle,

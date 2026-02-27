@@ -1,6 +1,9 @@
-import supabase from "@/api/supabase/createClient";
+"use server";
+
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { Invite } from "@/types/schema";
 
+const supabase = await getSupabaseServerClient();
 export async function sendPasswordResetEmail(email: string) {
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {

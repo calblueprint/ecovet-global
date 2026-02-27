@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   checkIfUserExists,
   sendPasswordResetEmail,
-} from "@/api/supabase/queries/auth";
+} from "@/actions/supabase/queries/auth";
 import {
   Button,
   Container,

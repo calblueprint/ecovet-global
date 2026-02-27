@@ -4,7 +4,7 @@ import { useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { checkProfileExists } from "@/api/supabase/queries/profile";
+import { checkProfileExists } from "@/actions/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
 import {
   Button,

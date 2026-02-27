@@ -1,9 +1,9 @@
 "use client";
 
+import type { Tag, Template, UUID } from "@/types/schema";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { UUID } from "crypto";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import {
   assignTagToTemplate,
@@ -11,15 +11,14 @@ import {
   getAllTags,
   getTagsForTemplate,
   removeTagFromTemplate,
-} from "@/api/supabase/queries/tag";
-import { fetchAllTemplates } from "@/api/supabase/queries/templates";
+} from "@/actions/supabase/queries/tag";
+import { fetchAllTemplates } from "@/actions/supabase/queries/templates";
 import img from "@/assets/images/NewTagPlus.png";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import { TagComponent } from "@/components/Tag/Tag";
 import { TagCreator } from "@/components/Tag/TagCreator";
 import COLORS from "@/styles/colors";
-import { Tag, Template } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
   ContentWrapper,

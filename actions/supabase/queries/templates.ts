@@ -1,14 +1,16 @@
-import { UUID } from "crypto";
+"use server";
+
+import type { Template, UUID } from "@/types/schema";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 import {
   PhaseUpdatable,
   PromptUpdatable,
   RolePhaseUpdatable,
   RoleUpdatable,
-  Template,
   TemplateUpdatable,
 } from "@/types/schema";
-import supabase from "../createClient";
 
+const supabase = await getSupabaseServerClient();
 export async function createTemplates( // create templates with inputs, but lowk most can be null as well
   templateID: UUID,
   template_name: string | null = null,

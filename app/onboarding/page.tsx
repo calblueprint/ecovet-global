@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import supabase from "@/actions/supabase/client";
-import { handleProfileSubmit } from "@/api/supabase/queries/profile";
+import { handleProfileSubmit } from "@/actions/supabase/queries/profile";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
   Button,

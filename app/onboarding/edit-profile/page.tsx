@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { handleProfileSubmit } from "@/api/supabase/queries/profile";
+import { handleProfileSubmit } from "@/actions/supabase/queries/profile";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
   Button,

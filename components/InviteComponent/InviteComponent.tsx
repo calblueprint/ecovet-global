@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, useState } from "react";
-import { submitNewInvite } from "@/api/supabase/queries/invites";
+import { submitNewInvite } from "@/actions/supabase/queries/invites";
 import {
   AddInviteFormDiv,
   AddInviteMain,

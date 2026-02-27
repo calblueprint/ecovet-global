@@ -1,15 +1,14 @@
 "use client";
 
+import type { ParticipantSession, UUID } from "@/types/schema";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { UUID } from "crypto";
 import supabase from "@/actions/supabase/client";
 import {
   finishSession,
   SessionParticipant,
   sessionParticipants,
-} from "@/api/supabase/queries/sessions";
-import { ParticipantSession } from "@/types/schema";
+} from "@/actions/supabase/queries/sessions";
 import { useProfile } from "@/utils/ProfileProvider";
 import { Button, Container, Main } from "./styles";
 

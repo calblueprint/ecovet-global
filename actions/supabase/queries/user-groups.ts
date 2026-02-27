@@ -1,6 +1,9 @@
-import { UUID } from "crypto";
-import supabase from "../createClient";
+"use server";
 
+import type { UUID } from "@/types/schema";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
+
+const supabase = await getSupabaseServerClient();
 export async function fetchUserGroups() {
   try {
     // Pull data

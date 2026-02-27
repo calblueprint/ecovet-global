@@ -1,13 +1,12 @@
 "use client";
 
+import type { Invite, Profile, UserGroup, UUID } from "@/types/schema";
 import { useCallback, useEffect, useState } from "react";
-import { UUID } from "crypto";
-import { fetchInvites } from "@/api/supabase/queries/invites";
+import { fetchInvites } from "@/actions/supabase/queries/invites";
 import {
   fetchUserGroupById,
   fetchUserGroupMembers,
-} from "@/api/supabase/queries/user-groups";
-import { Invite, Profile, UserGroup } from "@/types/schema";
+} from "@/actions/supabase/queries/user-groups";
 import {
   GeneralList,
   GeneralTitle,

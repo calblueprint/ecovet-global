@@ -1,7 +1,9 @@
-import { UUID } from "crypto";
-import supabase from "@/actions/supabase/client";
-import { Prompt, RolePhase } from "@/types/schema";
+"use server";
 
+import type { Prompt, RolePhase, UUID } from "@/types/schema";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
+
+const supabase = await getSupabaseServerClient();
 export async function fetchRoles(templateId: string) {
   const { data, error } = await supabase
     .from("role")
@@ -186,7 +188,7 @@ export async function fetchPhases(sessionId: string) {
 export async function fetchRolePhases(
   roleId: UUID,
   phaseId: UUID,
-): Promise<RolePhase> {
+): Promise<RolePhase | null> {
   const { data, error } = await supabase
     .from("role_phase")
     .select("*")

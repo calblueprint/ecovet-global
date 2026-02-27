@@ -1,4 +1,9 @@
-import type { UUID } from "crypto";
+import type {
+  Tables,
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+} from "@/types/database.types";
 
 // ENUM for Emails.user_email
 export type EmailType = "PLACEHOLDER";
@@ -9,148 +14,67 @@ export type UserType = "Admin" | "Facilitator" | "Participant";
 // ENUM for status
 export type StatusType = "Pending" | "Accepted" | "Cancelled";
 
-/* SCHEMA */
-//org_id --> user_group_id
-export interface UserGroup {
-  user_group_id: UUID; // user_group_id
-  user_group_name: string;
-  num_users: number;
-}
+export type UUID = string;
 
-export interface User {
-  id: UUID; // user_id
-  user_email: string;
-}
+/* ============================
+   Database Row Types
+   (Single Source of Truth)
+============================ */
 
-export interface Email {
-  id: UUID; // email_id
-  email_type: EmailType;
-  profile_id: UUID;
-}
+export type UserGroup = Tables<"user_group">;
+export type Profile = Tables<"profile">;
+export type ParticipantSession = Tables<"participant_session">;
+export type Role = Tables<"role">;
+export type Template = Tables<"template">;
+export type Session = Tables<"session">;
+export type Phase = Tables<"phase">;
+export type RolePhase = Tables<"role_phase">;
+export type Prompt = Tables<"prompt">;
+export type Tag = Tables<"tag">;
+export type TemplateTag = Tables<"template_tag">;
+export type Invite = Tables<"invite">;
 
-export interface Profile {
-  id: UUID; // user_id
-  user_type: UserType;
-  user_group_id: UUID;
-  first_name: string;
-  last_name: string;
-  country: string;
-  org_role: string;
-  email: string;
-}
-export interface ParticipantSession {
-  user_id: UUID;
-  role_id: UUID | null; //null if facilitator
-  phase_index: number;
-  is_finished: boolean;
-  session_id: UUID;
-}
-export interface Role {
-  role_id: UUID; // role_id
-  role_name: string;
-  role_description: string | null;
-  template_id: UUID;
-}
-type RoleUpdatable = Omit<Role, "template_id", "role_id">;
+/* ============================
+   Insert / Update Helpers
+============================ */
 
-export interface Template {
-  template_id: UUID; // template_id
-  template_name: string | null;
-  accessible_to_all: boolean | null;
-  user_group_id: UUID | null;
-  objective: string | null;
-  summary: string | null;
-  setting: string | null;
-  current_activity: string | null;
-  timestamp: string;
-}
-type TemplateUpdatable = Omit<Template, "template_id">;
+export type RoleUpdatable = TablesUpdate<"role">;
+export type TemplateUpdatable = TablesUpdate<"template">;
+export type PhaseUpdatable = TablesUpdate<"phase">;
+export type RolePhaseUpdatable = TablesUpdate<"role_phase">;
+export type PromptUpdatable = TablesUpdate<"prompt">;
+export type EditablePhase = Omit<Tables<"phase">, "session_id">;
 
-export interface Session {
-  session_id: UUID; // session_id
-  template_id: UUID;
-  user_group_id: UUID;
-  session_name: string;
-  is_async: boolean;
-  phase_id: UUID;
-  after_action_report_id?: UUID;
-}
-
-export interface Phase {
-  phase_id: UUID; // phase_id
-  template_id: UUID | null;
-  phase_name: string | null;
-  phase_number: number;
-  phase_description: string | null;
-  is_finished: boolean | null;
-}
-type PhaseUpdatable = Omit<Phase, "phase_id">;
-
-export interface RolePhase {
-  role_phase_id: UUID;
-  phase_id: UUID;
-  role_id: UUID;
-  description: string | null;
-}
-type RolePhaseUpdatable = Omit<
-  RolePhase,
-  "role_phase_id",
-  "phase_id",
-  "role_id"
->;
-
-export interface Prompt {
-  prompt_id: UUID; // prompt_id
-  user_id: UUID | null;
-  role_phase_id: UUID;
-  prompt_text: string | null;
-}
-type PromptUpdatable = Omit<Prompt, "prompt_id", "role_phase_id">;
+/* ============================
+   App-Only Types
+   (NOT direct DB rows)
+============================ */
 
 export interface PromptAnswer {
-  prompt_response_id: UUID; // prompt_answer_id
+  prompt_response_id: UUID;
   session_id: UUID;
   user_id: UUID;
   prompt_id: UUID;
   prompt_answer: string;
 }
 
-export type localStore = {
+export type LocalStore = {
   templateID: UUID;
   rolesById: Record<number | UUID, Role | Template>;
   roleIds: (number | UUID)[];
-  phasesById: Record<UUID, Phase>;
+  phasesById: Record<UUID, EditablePhase>;
   phaseIds: UUID[];
   rolePhasesById: Record<UUID, RolePhase>;
-  rolePhaseIndex: Record<UUID, Record<UUID, UUID>>; // first UUID is role id, second is phase id, and third is rolephase id
+  rolePhaseIndex: Record<UUID, Record<UUID, UUID>>;
   promptById: Record<UUID, Prompt>;
   promptIndex: Record<UUID, UUID[]>;
 };
 
-export type roleFormInput = {
+export type RoleFormInput = {
   role: Role;
   rolePhases: Record<UUID, RolePhase>;
   rolePhaseIndex: Record<UUID, UUID>;
   promptById: Record<UUID, Prompt>;
-  promptIndex: Record<UUID, UUID[]>; // rolephase uuid mapping to a list of prompt uuids
-  phasesById: Record<UUID, Phase>;
+  promptIndex: Record<UUID, UUID[]>;
+  phasesById: Record<UUID, EditablePhase>;
 };
-export interface Tag {
-  tag_id: UUID;
-  name: string;
-  user_group_id: UUID;
-  number: number; // (number of templates with this tag)
-  color: string; // might want to change to check COLOR type
-}
-export interface TemplateTag {
-  template_id: UUID;
-  tag_id: UUID;
-}
-export interface Invite {
-  invite_id: UUID;
-  user_group_id: UUID;
-  invited_by_user_id: UUID;
-  email: string;
-  user_type: string;
-  status: string;
-}

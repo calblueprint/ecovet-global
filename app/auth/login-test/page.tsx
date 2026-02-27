@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { makeAdmin } from "@/api/supabase/queries/profile";
+import { makeAdmin } from "@/actions/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
 import {
   Button,

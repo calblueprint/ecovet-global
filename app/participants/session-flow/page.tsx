@@ -1,8 +1,8 @@
 "use client";
 
+import type { Phase, Prompt, RolePhase, UUID } from "@/types/schema";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { UUID } from "crypto";
 import supabase from "@/actions/supabase/client";
 import {
   createPromptAnswer,
@@ -10,8 +10,7 @@ import {
   fetchPrompts,
   fetchRole,
   fetchRolePhases,
-} from "@/api/supabase/queries/sessions";
-import { Phase, Prompt, RolePhase } from "@/types/schema";
+} from "@/actions/supabase/queries/sessions";
 import { useProfile } from "@/utils/ProfileProvider";
 import NextButton from "../ParticipantNextButton";
 import {

@@ -1,6 +1,9 @@
-import { UUID } from "crypto";
-import supabase from "@/api/supabase/createClient";
+"use server";
 
+import type { UUID } from "@/types/schema";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
+
+const supabase = await getSupabaseServerClient();
 async function getInviteByEmail(email: string) {
   const { data, error } = await supabase
     .from("invite")
@@ -87,21 +90,6 @@ export async function fetchExpandedProfileByUserId(user_id: UUID) {
   if (profile == null) {
     return null;
   }
-
-  const expandedProfile = {
-    id: profile.id,
-    user_group_schema: await fetchUserGroupById(profile.user_group_id),
-    phase_schema: await fetchPhaseById(profile.phase_id),
-    role_schema: await fetchRoleById(profile.role_id),
-    user_type: profile.user_type,
-    is_finished: profile.is_finished,
-    first_name: profile.first_name,
-    last_name: profile.last_name,
-    country: profile.country,
-    org_role: profile.org_role,
-  };
-
-  return expandedProfile;
 }
 
 export async function fetchUserGroupById(user_group_id: UUID) {

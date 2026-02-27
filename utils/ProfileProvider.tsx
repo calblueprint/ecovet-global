@@ -1,7 +1,7 @@
 "use client";
 
+import type { UUID } from "@/types/schema";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { UUID } from "crypto";
 import supabase from "../actions/supabase/client";
 
 type Profile = {

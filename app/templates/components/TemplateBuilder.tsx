@@ -1,14 +1,14 @@
+import type { UUID } from "@/types/schema";
 import { useState } from "react";
 import Link from "next/link";
-import { UUID } from "crypto";
 import {
   createPhases,
   createPrompts,
   createRolePhases,
   createRoles,
   createTemplates,
-} from "@/api/supabase/queries/templates";
-import { localStore, Prompt, Role, Template } from "@/types/schema";
+} from "@/actions/supabase/queries/templates";
+import { LocalStore, Prompt, Role, Template } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import RoleForm from "./RoleForm";
 import {
@@ -28,13 +28,13 @@ import {
 import TemplateOverviewForm from "./TemplateOverviewForm";
 
 export default function TemplateBuilder({
-  localStore,
+  LocalStore,
   onFinish,
   update,
 }: {
-  localStore: localStore | null;
+  LocalStore: LocalStore | null;
   onFinish: () => void;
-  update: (updater: (draft: localStore) => void) => void;
+  update: (updater: (draft: LocalStore) => void) => void;
 }) {
   const [activeId, setActiveId] = useState<UUID | number>(1); // current 'tab' or role
   const [saving, setSaving] = useState(false); //nice 'saving' to let user know supabase push is still happening and when finished
@@ -46,7 +46,7 @@ export default function TemplateBuilder({
   }
 
   function addRole(): void {
-    if (localStore == null) return;
+    if (LocalStore == null) return;
     const newRoleID = createUUID();
 
     update(draft => {
@@ -75,13 +75,13 @@ export default function TemplateBuilder({
   }
 
   function removeRole(role_id: UUID | number): void {
-    if (localStore == null || typeof role_id == "number") return; //if role_id is '1', the current tab is Scenario Overivew and therefore should not be removed
+    if (LocalStore == null || typeof role_id == "number") return; //if role_id is '1', the current tab is Scenario Overivew and therefore should not be removed
 
     let nextActive: UUID | number = 1;
-    const idx = localStore.roleIds.indexOf(role_id);
+    const idx = LocalStore.roleIds.indexOf(role_id);
     if (idx !== -1) {
       nextActive =
-        localStore.roleIds[idx + 1] ?? localStore.roleIds[idx - 1] ?? 1;
+        LocalStore.roleIds[idx + 1] ?? LocalStore.roleIds[idx - 1] ?? 1;
     }
     update(draft => {
       delete draft.rolesById[role_id];
@@ -101,7 +101,7 @@ export default function TemplateBuilder({
   }
 
   function renameRole(role_id: UUID | number, newLabel: string) {
-    if (localStore == null) return;
+    if (LocalStore == null) return;
 
     update(draft => {
       if (typeof role_id === "number") {
@@ -113,7 +113,7 @@ export default function TemplateBuilder({
   }
 
   function addPhase(): void {
-    if (!localStore) return;
+    if (!LocalStore) return;
     const newPhaseID = createUUID();
 
     update(draft => {
@@ -144,7 +144,7 @@ export default function TemplateBuilder({
   }
 
   function removePhase(phase_id: UUID | null = null): void {
-    if (localStore?.phaseIds.length == 0 || localStore == null) {
+    if (LocalStore?.phaseIds.length == 0 || LocalStore == null) {
       return;
     }
 
@@ -180,7 +180,7 @@ export default function TemplateBuilder({
   }
 
   function addPrompt(rolePhaseID: UUID): void {
-    if (localStore == null) return;
+    if (LocalStore == null) return;
 
     update(draft => {
       const newPromptID = createUUID();
@@ -189,13 +189,14 @@ export default function TemplateBuilder({
         user_id: null,
         role_phase_id: rolePhaseID,
         prompt_text: "",
+        prompt_type: "text",
       };
       draft.promptIndex[rolePhaseID].push(newPromptID);
     });
   }
 
   function removePrompt(rolePhaseID: UUID, promptID: UUID): void {
-    if (localStore == null) return;
+    if (LocalStore == null) return;
 
     update(draft => {
       const i = draft.promptIndex[rolePhaseID].indexOf(promptID);
@@ -206,7 +207,7 @@ export default function TemplateBuilder({
   }
 
   function setActiveUpdate(id: UUID | number, field: string, next: string) {
-    if (!localStore) return;
+    if (!LocalStore) return;
 
     if (typeof id === "number") {
       update(draft => {
@@ -239,8 +240,8 @@ export default function TemplateBuilder({
   async function saveTemplate(): Promise<void> {
     setSaving(true);
 
-    if (localStore == null) return;
-    const saveStore: localStore = structuredClone(localStore);
+    if (LocalStore == null) return;
+    const saveStore: LocalStore = structuredClone(LocalStore);
 
     const realtemplateID = await createTemplates(
       saveStore.templateID,
@@ -299,7 +300,7 @@ export default function TemplateBuilder({
       await createPrompts(
         promptID,
         null,
-        prompt.role_phase_id,
+        prompt.role_phase_id ?? "",
         prompt.prompt_text,
       );
     }
@@ -311,8 +312,8 @@ export default function TemplateBuilder({
     <div>
       <TabsHeader>
         <TabsLeft>
-          {localStore?.roleIds.map(t => {
-            const roleOrTemplate = localStore.rolesById[t];
+          {LocalStore?.roleIds.map(t => {
+            const roleOrTemplate = LocalStore.rolesById[t];
             const isTemplate = typeof t === "number";
 
             return (
@@ -371,7 +372,7 @@ export default function TemplateBuilder({
             }}
           >
             <PhasesLabel>Phases:</PhasesLabel>
-            <PhasesCount>{localStore?.phaseIds.length ?? 0}</PhasesCount>
+            <PhasesCount>{LocalStore?.phaseIds.length ?? 0}</PhasesCount>
             <PhasesStepper>
               <StepButton aria-label="Increase phases" onClick={addPhase}>
                 ▲
@@ -379,7 +380,7 @@ export default function TemplateBuilder({
               <StepButton
                 aria-label="Decrease phases"
                 onClick={() => removePhase()}
-                disabled={(localStore?.phaseIds.length ?? 0) === 0}
+                disabled={(LocalStore?.phaseIds.length ?? 0) === 0}
               >
                 ▼
               </StepButton>
@@ -394,23 +395,23 @@ export default function TemplateBuilder({
       </TabsHeader>
 
       <div>
-        {localStore?.roleIds.map(t =>
+        {LocalStore?.roleIds.map(t =>
           t === activeId ? (
             <PanelCard key={`panel-${String(t)}`}>
               {typeof activeId === "number" ? (
                 <TemplateOverviewForm
-                  value={localStore.rolesById[activeId] as Template}
+                  value={LocalStore.rolesById[activeId] as Template}
                   onChange={setActiveUpdate}
                 />
               ) : (
                 <RoleForm
                   value={{
-                    role: localStore.rolesById[activeId] as Role,
-                    rolePhases: localStore.rolePhasesById,
-                    rolePhaseIndex: localStore.rolePhaseIndex[activeId],
-                    promptById: localStore.promptById,
-                    promptIndex: localStore.promptIndex,
-                    phasesById: localStore.phasesById,
+                    role: LocalStore.rolesById[activeId] as Role,
+                    rolePhases: LocalStore.rolePhasesById,
+                    rolePhaseIndex: LocalStore.rolePhaseIndex[activeId],
+                    promptById: LocalStore.promptById,
+                    promptIndex: LocalStore.promptIndex,
+                    phasesById: LocalStore.phasesById,
                   }}
                   onChange={setActiveUpdate}
                 />

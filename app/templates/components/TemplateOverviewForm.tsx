@@ -1,4 +1,4 @@
-import { Template } from "@/types/schema";
+import type { Template } from "@/types/schema";
 import { BigInput, FieldCard, FieldLegend, FormStack } from "./styles";
 
 export default function TemplateOverviewForm({

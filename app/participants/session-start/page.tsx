@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import supabase from "@/actions/supabase/client";
-import { fetchSessionById } from "@/api/supabase/queries/profile";
-import { fetchSessionName } from "@/api/supabase/queries/sessions";
+import { fetchSessionById } from "@/actions/supabase/queries/profile";
+import { fetchSessionName } from "@/actions/supabase/queries/sessions";
 import ParticipantsNavBar from "@/components/ParticipantsNavBar/ParticipantsNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
 import { Button, Container, Heading2, Label, Main } from "./styles";
@@ -30,7 +30,7 @@ export default function ParticipantWaitingPage() {
       const session = await fetchSessionName(sessionId);
 
       setSessionId(sessionId);
-      setSessionName(session.session_name);
+      setSessionName(session.session_name ?? "No Session Name");
       setStatus(`You were invited as a participant.`);
       setSessionExists(true);
     }

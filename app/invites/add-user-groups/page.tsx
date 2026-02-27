@@ -2,7 +2,7 @@
 
 import { SetStateAction, useState } from "react";
 import { useRouter } from "next/navigation";
-import { submitNewUserGroup } from "@/api/supabase/queries/user-groups";
+import { submitNewUserGroup } from "@/actions/supabase/queries/user-groups";
 import {
   AddUserGroupsMain,
   ErrorBanner,
