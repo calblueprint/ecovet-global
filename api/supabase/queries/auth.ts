@@ -39,11 +39,12 @@ export async function checkIfUserExists(email: string): Promise<boolean> {
     .from("profile")
     .select("*")
     .eq("email", lowerCaseEmail)
-    .maybeSingle();
+    .limit(1);
   if (error) {
     console.error("Error checking if user exists:", error.message);
     return false;
   }
+
   return data !== null;
 }
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { checkIfUserExists } from "@/api/supabase/queries/auth";
 import { makeAdmin } from "@/api/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
 import {
@@ -22,6 +23,11 @@ export default function Login() {
   const sessionHandler = useSession();
 
   const handleSignUp = async () => {
+    if (await checkIfUserExists(email)) {
+      console.log("User already exists with email:", email);
+      throw new Error("You already have an account, please sign in.");
+    }
+
     const { data, error } = await sessionHandler.signUp(email, password);
     if (error) {
       throw new Error(
