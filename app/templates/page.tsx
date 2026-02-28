@@ -3,8 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { produce } from "immer";
+import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import { localStore, Template } from "@/types/schema";
+import { SideNavContainer } from "../facilitator/styles";
 import TemplateBuilder from "./components/TemplateBuilder";
+import TemplateBuilderSideBar from "./components/TemplateBuilderSidebar";
 import { TemplateMainBox } from "./styles";
 
 const createInitialStore = (): localStore => {
@@ -51,28 +54,35 @@ export default function NewTemplatePage() {
   }
 
   return (
-    <TemplateMainBox>
-      <Link href="/facilitator/template-list">← Back</Link>
-      <h1
-        contentEditable
-        suppressContentEditableWarning
-        className="text-5xl font-extrabold mb-4 outline-none"
-        onBlur={e => {
-          const value = e.currentTarget.textContent?.trim();
+    <>
+      <TopNavBar />
 
-          updateLocalStore(draft => {
-            (draft.rolesById[1] as Template).template_name =
-              value && value.length > 0 ? value : "New Template";
-          });
-        }}
-      >
-        {template.template_name}
-      </h1>
-      <TemplateBuilder
-        localStore={newTemp}
-        onFinish={resetTemplate}
-        update={updateLocalStore}
-      />
-    </TemplateMainBox>
+      <SideNavContainer>
+        <TemplateBuilderSideBar />
+      </SideNavContainer>
+
+      <TemplateMainBox>
+        <h1
+          contentEditable
+          suppressContentEditableWarning
+          className="text-5xl font-extrabold mb-4 outline-none"
+          onBlur={e => {
+            const value = e.currentTarget.textContent?.trim();
+
+            updateLocalStore(draft => {
+              (draft.rolesById[1] as Template).template_name =
+                value && value.length > 0 ? value : "New Template";
+            });
+          }}
+        >
+          {template.template_name}
+        </h1>
+        <TemplateBuilder
+          localStore={newTemp}
+          onFinish={resetTemplate}
+          update={updateLocalStore}
+        />
+      </TemplateMainBox>
+    </>
   );
 }

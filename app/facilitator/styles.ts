@@ -119,6 +119,7 @@ export const SortButton = styled.button`
     color: #555;
   }
 `;
+
 export const SideNavContainer = styled.div`
   display: flex;
   padding: 1rem;
