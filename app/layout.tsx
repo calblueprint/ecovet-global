@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Public_Sans } from "next/font/google";
 import StyledComponentsRegistry from "@/lib/registry";
 import "@/styles/global.css";
 import { Suspense } from "react";
@@ -10,6 +10,12 @@ import { AuthContextProvider } from "../utils/AuthProvider";
 const sans = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
+});
+
+const publicSans = Public_Sans({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
 });
 
 // site metadata - what shows up on embeds
