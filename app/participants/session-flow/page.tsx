@@ -12,7 +12,7 @@ import {
   fetchRolePhases,
 } from "@/actions/supabase/queries/sessions";
 import { useProfile } from "@/utils/ProfileProvider";
-import NextButton from "../ParticipantNextButton";
+import NextButton from "../components/ParticipantNextButton";
 import {
   Container,
   Main,

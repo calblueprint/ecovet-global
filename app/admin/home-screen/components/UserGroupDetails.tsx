@@ -13,7 +13,7 @@ import {
   Heading3,
   Heading4,
   MainDiv,
-} from "../styles";
+} from "@/app/admin/styles";
 
 export default function UserGroupDetails({
   user_group_id,

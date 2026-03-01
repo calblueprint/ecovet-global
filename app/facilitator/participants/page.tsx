@@ -4,9 +4,9 @@ import React, { useState } from "react";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
 import { ContentWrapper, LayoutWrapper, SideNavContainer } from "../styles";
-import Invites from "./Invites";
-import Participants from "./Participants";
-import ParticipantSideBar from "./ParticipantSideBar";
+import Invites from "./components/Invites";
+import Participants from "./components/Participants";
+import ParticipantSideBar from "./components/ParticipantSideBar";
 
 export default function ParticipantsPage() {
   const [filterMode, setFilterMode] = useState<"all" | "invites">("all");

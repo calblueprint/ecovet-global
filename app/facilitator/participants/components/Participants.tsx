@@ -10,7 +10,7 @@ import {
   Heading3,
   MainDiv,
   SortButton,
-} from "../styles";
+} from "../../styles";
 
 export default function Participants({
   user_group_id,

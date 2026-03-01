@@ -11,7 +11,7 @@ import {
   Heading3,
   MainDiv,
   SortButton,
-} from "../styles";
+} from "../../styles";
 
 export default function Invites({ user_group_id }: { user_group_id: string }) {
   const [invites, setInvites] = useState<Invite[]>([]);

@@ -9,7 +9,7 @@ import {
   Heading3,
   MainDiv,
   NumUsers,
-} from "../styles";
+} from "@/app/admin/styles";
 
 export default function UserGroups({
   onSelectGroup,

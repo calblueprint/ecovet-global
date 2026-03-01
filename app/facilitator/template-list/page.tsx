@@ -33,8 +33,8 @@ import {
   SideNavContainer,
   SortButton,
 } from "../styles";
+import TemplateSideBar from "./components/TemplateSidebar";
 import { AddNewTagPlus, AssociatedTags, NewTag, TemplateTag } from "./styles";
-import TemplateSideBar from "./TemplateSidebar";
 
 type TemplateWithTags = Template & {
   associated_tags: Tag[];
