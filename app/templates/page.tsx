@@ -74,21 +74,6 @@ export default function NewTemplatePage() {
         </SideNavContainer>
 
         <TemplateMainBox>
-          <h1
-            contentEditable
-            suppressContentEditableWarning
-            className="text-5xl font-extrabold mb-4 outline-none"
-            onBlur={e => {
-              const value = e.currentTarget.textContent?.trim();
-
-              updateLocalStore(draft => {
-                (draft.rolesById[1] as Template).template_name =
-                  value && value.length > 0 ? value : "New Template";
-              });
-            }}
-          >
-            {template.template_name}
-          </h1>
           <TemplateBuilder
             activeId={activeId}
             setActiveId={setActiveId}

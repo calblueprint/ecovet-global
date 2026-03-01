@@ -8,6 +8,8 @@ import COLORS from "@/styles/colors";
 import { Flex } from "@/styles/containers";
 import { B2, Caption } from "@/styles/text";
 import { localStore, Role, Template } from "@/types/schema";
+import EditablePhase from "./EditablePhase";
+import RoleEntry from "./RoleEntry";
 import { SideBarEntry, SideBarItem, SideBarSection } from "./styles";
 
 export default function TemplateBuilderSideBar({
@@ -131,31 +133,26 @@ export default function TemplateBuilderSideBar({
             />
           </Flex>
 
-          {localStore?.phaseIds.map((phaseId, i) => {
-            const phase = localStore?.phasesById[phaseId];
+          <Flex $direction="column" $gap="4px">
+            {localStore?.phaseIds.map((phaseId, i) => {
+              const phase = localStore?.phasesById[phaseId];
+              const onUpdate = (value: string) => {
+                updateLocalStore(draft => {
+                  draft.phasesById[phaseId].phase_name =
+                    value && value.length > 0 ? value : `Phase ${i + 1}`;
+                });
+              };
 
-            return (
-              <SideBarItem key={phaseId}>
-                <Flex $gap="8px" $direction="row">
-                  <Caption $color={COLORS.black70}>{i + 1}</Caption>
-                  <Caption
-                    contentEditable
-                    suppressContentEditableWarning
-                    onBlur={e => {
-                      const value = e.currentTarget.textContent?.trim();
-
-                      updateLocalStore(draft => {
-                        draft.phasesById[phaseId].phase_name =
-                          value && value.length > 0 ? value : `Phase ${i + 1}`;
-                      });
-                    }}
-                  >
-                    {phase?.phase_name}
-                  </Caption>
-                </Flex>
-              </SideBarItem>
-            );
-          })}
+              return (
+                <EditablePhase
+                  index={i}
+                  key={phaseId}
+                  name={phase?.phase_name ?? `Phase ${i + 1}`}
+                  onUpdate={onUpdate}
+                />
+              );
+            })}
+          </Flex>
         </SideBarEntry>
       </SideBarSection>
 
@@ -178,9 +175,12 @@ export default function TemplateBuilderSideBar({
             const role = localStore.rolesById[roleId] as Role;
 
             return (
-              <SideBarItem key={roleId} onClick={() => setActiveId(roleId)}>
-                <Caption $color={COLORS.black70}>{role.role_name}</Caption>
-              </SideBarItem>
+              <RoleEntry
+                key={roleId}
+                role={role}
+                localStore={localStore}
+                setActiveId={setActiveId}
+              />
             );
           })}
         </SideBarEntry>
