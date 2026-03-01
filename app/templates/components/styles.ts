@@ -2,6 +2,11 @@ import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Flex } from "@/styles/containers";
 
+export const LayoutWrapper = styled.div`
+  display: flex;
+  width: 100%;
+`;
+
 //----------------------------------------------------------------------------------------
 //-----------------------------------   TABS STYLING   -----------------------------------
 //----------------------------------------------------------------------------------------
@@ -316,4 +321,23 @@ export const SectionH2 = styled.h2`
 
   padding: 2px 8px;
   line-height: 1.1;
+`;
+
+export const SideBarEntry = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+export const SideBarSection = styled.div`
+  width: 100%;
+  display: flex;
+  gap: 16px;
+  flex-direction: column;
+  padding: 12px;
+  border-bottom: 1px solid ${COLORS.oat_medium};
+`;
+
+export const SideBarItem = styled.div`
+  padding: 4px;
 `;

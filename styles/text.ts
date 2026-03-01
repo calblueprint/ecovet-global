@@ -53,7 +53,7 @@ export const B2 = styled.p<TextProps>`
   font-size: 0.875rem;
 `;
 
-export const caption = styled.p<TextProps>`
+export const Caption = styled.p<TextProps>`
   ${TextStyles}
   font-weight: ${({ $fontWeight }) => $fontWeight || "500"};
   font-size: 0.75rem;

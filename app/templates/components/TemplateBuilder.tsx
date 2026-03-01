@@ -28,15 +28,18 @@ import {
 import TemplateOverviewForm from "./TemplateOverviewForm";
 
 export default function TemplateBuilder({
+  activeId,
+  setActiveId,
   localStore,
   onFinish,
   update,
 }: {
+  activeId: UUID | number;
+  setActiveId: (id: UUID | number) => void;
   localStore: localStore | null;
   onFinish: () => void;
   update: (updater: (draft: localStore) => void) => void;
 }) {
-  const [activeId, setActiveId] = useState<UUID | number>(1); // current 'tab' or role
   const [saving, setSaving] = useState(false); //nice 'saving' to let user know supabase push is still happening and when finished
   const { profile } = useProfile();
 
