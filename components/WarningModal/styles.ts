@@ -33,14 +33,14 @@ export const cancelButton: CSSProperties = {
 };
 
 export const deleteButton: CSSProperties = {
-    borderRadius: "0.25rem",
-    background: "var(--Dark-Electric-Blue, #476C77)",
-    color: "var(--White-100, #FFF)",
-    padding: "0.5rem 2rem",
-    gap: "0.625rem",
-    fontFamily: "Public Sans",
-    fontSize: "0.8rem",
-    fontStyle: "normal",
-    fontWeight: 700,
-    lineHeight: "normal",
+  borderRadius: "0.25rem",
+  background: "var(--Dark-Electric-Blue, #476C77)",
+  color: "var(--White-100, #FFF)",
+  padding: "0.5rem 2rem",
+  gap: "0.625rem",
+  fontFamily: "Public Sans",
+  fontSize: "0.8rem",
+  fontStyle: "normal",
+  fontWeight: 700,
+  lineHeight: "normal",
 };
