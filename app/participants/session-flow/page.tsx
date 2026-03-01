@@ -114,8 +114,6 @@ export default function ParticipantFlowPage() {
         );
 
         if (currentPhaseIndex < mostRecentPhaseIndex) {
-          console.log("role_phase_id phase_id: ", rolePhase.phase_id);
-
           const responses = await fetchPromptResponses(
             userId,
             sessionId,
@@ -203,8 +201,6 @@ export default function ParticipantFlowPage() {
 
     try {
       for (let i = 0; i < answers.length; i++) {
-        console.log("Saving answer index", i);
-
         const answer = answers[i];
         if (!answer.trim()) continue;
 
