@@ -119,10 +119,12 @@ export const SortButton = styled.button`
     color: #555;
   }
 `;
+
 export const SideNavContainer = styled.div`
   display: flex;
   padding: 1rem;
   width: 12rem;
+  min-width: 180px;
   align-items: flex-start;
   flex-direction: column;
   background-color: ${COLORS.oat_light};

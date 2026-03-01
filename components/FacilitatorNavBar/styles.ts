@@ -10,6 +10,7 @@ export const TopNavContainer = styled.div`
   align-items: center;
   flex-direction: row;
   background-color: ${COLORS.oat_light};
+  border-bottom: 1px solid ${COLORS.oat_medium};
   height: 3rem;
   gap: 2rem;
 `;

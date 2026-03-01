@@ -6,9 +6,9 @@ import { Sans } from "@/styles/fonts";
 export const TemplateMainBox = styled(Flex).attrs({
   $direction: "column",
 })`
-  width: calc(100vw - 300px);
   min-height: 100vh;
-  margin: 80px 150px 40px 150px;
+  padding-top: 48px;
+  margin: 0rem 10rem;
   box-sizing: border-box;
   gap: 23px;
 `;
