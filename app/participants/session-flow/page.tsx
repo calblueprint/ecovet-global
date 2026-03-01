@@ -37,6 +37,14 @@ export default function ParticipantFlowPage() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState<string[]>([]);
+  const [completedPrompts, setCompletedPrompts] = useState<Set<string>>(
+    new Set(),
+  );
+  // DT: We use a set to store the index of prompts that hvae been completed (defined by blurred)
+  const totalPrompts = prompts.length;
+  const completedCount = completedPrompts.size;
+  const progressPercentage =
+    totalPrompts > 0 ? Math.round((completedCount / totalPrompts) * 100) : 0;
   const isLastPhase = currentPhaseIndex === phases.length - 1;
 
   const currentPhase = phases[currentPhaseIndex];
@@ -127,6 +135,7 @@ export default function ParticipantFlowPage() {
 
   useEffect(() => {
     setAnswers(Array(prompts.length).fill(""));
+    setCompletedPrompts(new Set());
   }, [prompts]);
 
   function handleInputAnswer(index: number, value: string) {
@@ -136,6 +145,30 @@ export default function ParticipantFlowPage() {
   }
 
   async function submitAnswers() {
+    if (!userId || !sessionId) return;
+    const updatedCompletedPrompts = new Set(completedPrompts);
+
+    for (let i = 0; i < answers.length; i++) {
+      const answer = answers[i];
+      const promptId = prompts[i].prompt_id;
+
+      if (!answer.trim()) continue;
+      updatedCompletedPrompts.add(promptId);
+
+      if (!userId) continue;
+      await createPromptAnswer(
+        userId,
+        sessionId!,
+        currentPhase.phase_id,
+        promptId,
+        answer,
+      );
+    }
+    setCompletedPrompts(updatedCompletedPrompts);
+  }
+
+  async function saveAnswers() {
+    if (!userId || !sessionId) return;
     for (let i = 0; i < answers.length; i++) {
       const answer = answers[i];
 
@@ -143,7 +176,13 @@ export default function ParticipantFlowPage() {
       const promptId = prompts[i].prompt_id;
 
       if (!userId) continue;
-      await createPromptAnswer(userId, promptId, answer);
+      await createPromptAnswer(
+        userId,
+        promptId,
+        answer,
+        sessionId,
+        currentPhase.phase_id,
+      );
     }
   }
 
@@ -167,10 +206,13 @@ export default function ParticipantFlowPage() {
               Role description: {rolePhase.description}
             </RolePhaseDescription>
           )}
-
+          <div>
+            Progress: {completedCount} / {totalPrompts} completed (
+            {progressPercentage}%)
+          </div>
           <PromptCard>
             {prompts.map((prompt, index) => (
-              <div key={index}>
+              <div key={prompt.prompt_id}>
                 <PromptText>{prompt.prompt_text}</PromptText>
 
                 <StyledTextarea
@@ -178,6 +220,25 @@ export default function ParticipantFlowPage() {
                   onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                     handleInputAnswer(index, e.target.value)
                   }
+                  onBlur={async () => {
+                    const value = answers[index]?.trim();
+                    if (!value || !userId || !sessionId) return;
+                    const promptId = prompts[index].prompt_id;
+
+                    await createPromptAnswer(
+                      userId,
+                      promptId,
+                      value,
+                      sessionId,
+                      currentPhase.phase_id,
+                    );
+
+                    setCompletedPrompts(prev => {
+                      const updated = new Set(prev);
+                      updated.add(promptId);
+                      return updated;
+                    });
+                  }}
                   minRows={3}
                   placeholder="Type your answer..."
                 />
@@ -192,6 +253,7 @@ export default function ParticipantFlowPage() {
               session_id={sessionId as UUID}
               isLastPhase={isLastPhase}
               currentPhaseIndex={currentPhaseIndex}
+              phase_id={currentPhase.phase_id as UUID}
               onClick={submitAnswers}
             />
           )}

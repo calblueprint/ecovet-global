@@ -256,20 +256,32 @@ export async function createPromptAnswer(
   userId: string,
   promptId: string,
   answer: string,
+  sessionId: string,
+  phaseId: string,
 ) {
   const { data, error } = await supabase
     .from("prompt_response")
-    .insert([
-      {
-        prompt_response_id: crypto.randomUUID(),
-        user_id: userId,
-        prompt_id: promptId,
-        prompt_answer: answer,
-      },
-    ])
+    .upsert(
+      [
+        {
+          prompt_response_id: crypto.randomUUID(),
+          session_id: sessionId,
+          phase_id: phaseId,
+          user_id: userId,
+          prompt_id: promptId,
+          prompt_answer: answer,
+        },
+      ],
+      { onConflict: "user_id,prompt_id,session_id" },
+    )
     .select("prompt_response_id");
   if (error) {
-    console.error("Error creating prompt answer:", error);
+    console.error(
+      "Error creating prompt answer:",
+      JSON.stringify(error, null, 2),
+    );
+  } else {
+    console.log("Insert success:", data);
   }
   return data;
 }

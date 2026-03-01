@@ -10,6 +10,7 @@ interface NextButtonProps {
   user_id: UUID;
   role_id: UUID;
   session_id: UUID;
+  phase_id: UUID;
   isLastPhase: boolean;
   currentPhaseIndex: number;
   onClick: () => void;
