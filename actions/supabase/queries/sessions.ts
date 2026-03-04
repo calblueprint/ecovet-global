@@ -3,8 +3,8 @@
 import type { Prompt, RolePhase, UUID } from "@/types/schema";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
-const supabase = await getSupabaseServerClient();
 export async function fetchRoles(templateId: string) {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("role")
     .select("role_name, role_id")
@@ -19,6 +19,7 @@ export async function fetchRoles(templateId: string) {
 }
 
 export async function fetchParticipants(userGroupId: string) {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("profile")
     .select("first_name, last_name, id")
@@ -33,6 +34,7 @@ export async function fetchParticipants(userGroupId: string) {
 }
 
 export async function fetchTemplateId(session_id: string) {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("session")
     .select("template_id")
@@ -43,6 +45,7 @@ export async function fetchTemplateId(session_id: string) {
 }
 
 export async function fetchSessionName(session_id: string) {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("session")
     .select("session_name")
@@ -57,6 +60,7 @@ export async function assignParticipantToSession(
   sessionId: UUID,
   roleId: UUID | null,
 ) {
+  const supabase = await getSupabaseServerClient();
   console.log(userId, sessionId, roleId);
   const { error } = await supabase.from("participant_session").upsert(
     {
@@ -77,6 +81,7 @@ export async function assignParticipantToSession(
 }
 
 export async function createSession(templateId: string, userGroupId: string) {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("session")
     .insert([
@@ -114,6 +119,7 @@ export type SessionParticipant = {
 export async function sessionParticipants(
   session_id: UUID,
 ): Promise<SessionParticipant[]> {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("participant_session")
     .select(
@@ -142,6 +148,7 @@ export async function setIsFinished(
   roleId: UUID,
   sessionId: UUID,
 ): Promise<void> {
+  const supabase = await getSupabaseServerClient();
   console.log(userId, roleId, sessionId);
 
   const { data, error } = await supabase
@@ -162,6 +169,7 @@ export async function setIsFinished(
 }
 
 export async function fetchPhases(sessionId: string) {
+  const supabase = await getSupabaseServerClient();
   const { data: session, error: sessionError } = await supabase
     .from("session")
     .select("template_id")
@@ -189,6 +197,7 @@ export async function fetchRolePhases(
   roleId: UUID,
   phaseId: UUID,
 ): Promise<RolePhase | null> {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("role_phase")
     .select("*")
@@ -202,6 +211,7 @@ export async function fetchRolePhases(
 }
 
 export async function fetchPrompts(rolePhaseId: UUID): Promise<Prompt[]> {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("prompt")
     .select("*")
@@ -213,6 +223,7 @@ export async function fetchPrompts(rolePhaseId: UUID): Promise<Prompt[]> {
 }
 
 export async function assignSession(userId: string, sessionId: string) {
+  const supabase = await getSupabaseServerClient();
   const { error } = await supabase
     .from("profile")
     .update({ session_id: sessionId })
@@ -223,6 +234,7 @@ export async function assignSession(userId: string, sessionId: string) {
 }
 
 export async function finishSession(sessionId: string) {
+  const supabase = await getSupabaseServerClient();
   if (!sessionId) throw new Error("Missing sessionId");
 
   const { error: sessionError } = await supabase
@@ -242,6 +254,7 @@ export async function fetchRole(
   userId: string,
   sessionId: string,
 ): Promise<string | null> {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("participant_session")
     .select("role_id")
@@ -259,6 +272,7 @@ export async function createPromptAnswer(
   promptId: string,
   answer: string,
 ) {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("prompt_response")
     .insert([

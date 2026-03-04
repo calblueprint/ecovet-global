@@ -3,10 +3,10 @@
 import type { UUID } from "@/types/schema";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
-const supabase = await getSupabaseServerClient();
 export async function fetchUserGroups() {
   try {
     // Pull data
+    const supabase = await getSupabaseServerClient();
     const { data, error } = await supabase.from("user_group").select("*");
 
     if (error) throw error;
@@ -20,6 +20,7 @@ export async function fetchUserGroups() {
 export async function fetchUserGroupById(user_group_id: UUID) {
   try {
     // Pull data
+    const supabase = await getSupabaseServerClient();
     const { data, error } = await supabase
       .from("user_group")
       .select("*")
@@ -37,6 +38,7 @@ export async function fetchUserGroupById(user_group_id: UUID) {
 export async function fetchUserGroupMembers(user_group_id: UUID) {
   try {
     // Pull data
+    const supabase = await getSupabaseServerClient();
     const { data, error } = await supabase
       .from("profile")
       .select("*")
@@ -52,6 +54,7 @@ export async function fetchUserGroupMembers(user_group_id: UUID) {
 
 export async function submitNewUserGroup(user_group: string) {
   const id = crypto.randomUUID();
+  const supabase = await getSupabaseServerClient();
   const { error } = await supabase
     .from("user_group")
     .upsert(
