@@ -3,11 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { produce } from "immer";
-import { localStore, Template } from "@/types/schema";
+import { LocalStore, Template } from "@/types/schema";
 import TemplateBuilder from "./components/TemplateBuilder";
 import { TemplateMainBox } from "./styles";
 
-const createInitialStore = (): localStore => {
+const createInitialStore = (): LocalStore => {
   const templateID =
     crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
 
@@ -37,12 +37,12 @@ const createInitialStore = (): localStore => {
 };
 
 export default function NewTemplatePage() {
-  const [newTemp, setNewTemp] = useState<localStore>(() =>
+  const [newTemp, setNewTemp] = useState<LocalStore>(() =>
     createInitialStore(),
   );
   const template = newTemp?.rolesById[1] as Template;
 
-  function updateLocalStore(updater: (draft: localStore) => void) {
+  function updateLocalStore(updater: (draft: LocalStore) => void) {
     setNewTemp(prev => produce(prev, updater));
   }
 
@@ -69,7 +69,7 @@ export default function NewTemplatePage() {
         {template.template_name}
       </h1>
       <TemplateBuilder
-        localStore={newTemp}
+        LocalStore={newTemp}
         onFinish={resetTemplate}
         update={updateLocalStore}
       />

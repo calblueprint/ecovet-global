@@ -1,7 +1,9 @@
-import { UUID } from "crypto";
-import { Tag, Template } from "@/types/schema";
-import supabase from "../createClient";
+"use server";
 
+import type { Tag, Template, UUID } from "@/types/schema";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
+
+const supabase = await getSupabaseServerClient();
 export type CreateTagParams = {
   name: string;
   user_group_id: string;

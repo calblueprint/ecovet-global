@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import Participants from "@/app/facilitator/participants/Participants";
+import Participants from "@/app/facilitator/participants/components/Participants";
 import NavBar from "@/components/NavBar/NavBar";
 import { useProfile } from "@/utils/ProfileProvider";
 import { ContentWrapper, LayoutWrapper, SideNavContainer } from "../styles";
-import UserGroupDetails from "./UserGroupDetails";
-import UserGroups from "./UserGroups";
-import UserGroupSideBar from "./UserGroupSideBar";
+import UserGroupDetails from "./components/UserGroupDetails";
+import UserGroups from "./components/UserGroups";
+import UserGroupSideBar from "./components/UserGroupSideBar";
 
 export default function AdminPage() {
   const [filterMode, setFilterMode] = useState<
