@@ -51,7 +51,7 @@ export type EditablePhase = Omit<Tables<"phase">, "session_id">;
 ============================ */
 
 export interface PromptAnswer {
-  prompt_response_id: UUID;
+  prompt_response_id: UUID; // prompt_answer_id
   session_id: UUID;
   user_id: UUID;
   prompt_id: UUID;
