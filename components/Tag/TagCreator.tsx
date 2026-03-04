@@ -98,6 +98,16 @@ export function TagCreator({
     getTags();
   }, [user_group_id]);
 
+  //   Change to this later
+  /// useEffect(() => {
+  //   async function getTags() {
+  //     const pulledTags = await getAllTags(user_group_id);
+  //     setTags(pulledTags);
+  //   }
+
+  //   getTags();
+  // }, [user_group_id]);
+
   return (
     <StyledTagCreator>
       <NewTag onClick={addNewTag}>

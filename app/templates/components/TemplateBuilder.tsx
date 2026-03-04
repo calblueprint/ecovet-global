@@ -100,17 +100,18 @@ export default function TemplateBuilder({
     setActiveId(nextActive);
   }
 
-  function renameRole(role_id: UUID | number, newLabel: string) {
-    if (LocalStore == null) return;
+  // function renameRole(role_id: UUID | number, newLabel: string) {
+  //   if (LocalStore == null) return;
 
-    update(draft => {
-      if (typeof role_id === "number") {
-        (draft.rolesById[role_id] as Template).template_name = newLabel;
-      } else {
-        (draft.rolesById[role_id] as Role).role_name = newLabel;
-      }
-    });
-  }
+  //   update(draft => {
+  //     if (typeof role_id === "number") {
+  //       (draft.rolesById[role_id] as Template).template_name = newLabel;
+  //     } else {
+  //       (draft.rolesById[role_id] as Role).role_name = newLabel;
+  //     }
+  //   });
+  // }
+  //
 
   function addPhase(): void {
     if (!LocalStore) return;
