@@ -8,7 +8,7 @@ import {
   SideNavButton,
   SideNavNewTemplateButton,
   SideNavTemplatesContainer,
-} from "../styles";
+} from "../../styles";
 
 export default function TemplateSideBar({
   filterMode,

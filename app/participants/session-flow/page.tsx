@@ -1,8 +1,14 @@
 "use client";
 
+import type {
+  Phase,
+  Prompt,
+  PromptAnswer,
+  RolePhase,
+  UUID,
+} from "@/types/schema";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { UUID } from "crypto";
 import supabase from "@/actions/supabase/client";
 import {
   createPromptAnswer,
@@ -12,10 +18,9 @@ import {
   fetchPrompts,
   fetchRole,
   fetchRolePhases,
-} from "@/api/supabase/queries/sessions";
-import { Phase, Prompt, PromptAnswer, RolePhase } from "@/types/schema";
+} from "@/actions/supabase/queries/sessions";
 import { useProfile } from "@/utils/ProfileProvider";
-import NextButton from "../ParticipantNextButton";
+import NextButton from "../components/ParticipantNextButton";
 import {
   Container,
   Main,
@@ -134,7 +139,7 @@ export default function ParticipantFlowPage() {
     }
 
     loadResponses();
-  }, [userId, sessionId, rolePhase, prompts]);
+  }, [userId, sessionId, rolePhase, prompts, currentPhaseIndex]);
 
   function sortResponsesByPromptOrder(
     prompts: Prompt[],

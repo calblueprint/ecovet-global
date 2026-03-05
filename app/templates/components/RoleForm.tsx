@@ -1,5 +1,5 @@
-import { UUID } from "crypto";
-import { roleFormInput, RolePhase } from "@/types/schema";
+import type { RolePhase, UUID } from "@/types/schema";
+import { RoleFormInput } from "@/types/schema";
 import {
   BigInput,
   FieldCard,
@@ -18,7 +18,7 @@ export default function RoleForm({
   value,
   onChange,
 }: {
-  value: roleFormInput;
+  value: RoleFormInput;
   onChange: (id: UUID, field: string, v: string) => void;
 }) {
   const rolePhases: RolePhase[] = [];

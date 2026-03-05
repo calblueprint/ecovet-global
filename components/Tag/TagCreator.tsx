@@ -1,14 +1,20 @@
 "use client";
 
+import type { Tables } from "@/types/database.types";
+import type { UUID } from "@/types/schema";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { UUID } from "crypto";
-import { createTag, getAllTags, renameTag } from "@/api/supabase/queries/tag";
+import {
+  createTag,
+  getAllTags,
+  renameTag,
+} from "@/actions/supabase/queries/tag";
 import img from "@/assets/images/NewTagPlus.png";
 import COLORS from "@/styles/colors";
-import { Tag } from "@/types/schema";
 import { AddNewTagPlus, NewTag, SidebarTag, StyledTagCreator } from "./styles";
 import { TagComponent } from "./Tag";
+
+export type Tag = Tables<"tag">;
 
 type TagCreatorProps = {
   user_group_id: UUID;
@@ -91,6 +97,16 @@ export function TagCreator({
   useEffect(() => {
     getTags();
   }, [user_group_id]);
+
+  //   Change to this later
+  /// useEffect(() => {
+  //   async function getTags() {
+  //     const pulledTags = await getAllTags(user_group_id);
+  //     setTags(pulledTags);
+  //   }
+
+  //   getTags();
+  // }, [user_group_id]);
 
   return (
     <StyledTagCreator>

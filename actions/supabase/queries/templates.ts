@@ -1,13 +1,14 @@
-import { UUID } from "crypto";
+"use server";
+
+import type { Template, UUID } from "@/types/schema";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 import {
   PhaseUpdatable,
   PromptUpdatable,
   RolePhaseUpdatable,
   RoleUpdatable,
-  Template,
   TemplateUpdatable,
 } from "@/types/schema";
-import supabase from "../createClient";
 
 export async function createTemplates( // create templates with inputs, but lowk most can be null as well
   templateID: UUID,
@@ -19,6 +20,7 @@ export async function createTemplates( // create templates with inputs, but lowk
   current_activity: string | null = null,
   user_group_id: UUID | null = null,
 ): Promise<UUID> {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("template")
     .insert({
@@ -42,6 +44,7 @@ export async function updateTemplates( // NOTE: not using anymore but didn't wan
   template_id: UUID,
   updates: Partial<TemplateUpdatable>,
 ): Promise<void> {
+  const supabase = await getSupabaseServerClient();
   const { error } = await supabase
     .from("template")
     .update(updates)
@@ -52,6 +55,7 @@ export async function updateTemplates( // NOTE: not using anymore but didn't wan
 
 export async function deleteTemplates(template_id: UUID): Promise<void> {
   // NOTE: not using anymore but didn't want to remove in case needed in future
+  const supabase = await getSupabaseServerClient();
   const { error } = await supabase
     .from("template")
     .delete()
@@ -68,6 +72,7 @@ export async function createPhases(
   phase_description: string | null = null,
   phase_number: number,
 ): Promise<UUID> {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("phase")
     .insert({
@@ -89,6 +94,7 @@ export async function updatePhases( // NOTE: not using anymore but didn't want t
   phase_id: UUID,
   updates: Partial<PhaseUpdatable>,
 ): Promise<void> {
+  const supabase = await getSupabaseServerClient();
   const { error } = await supabase
     .from("phase")
     .update(updates)
@@ -99,6 +105,7 @@ export async function updatePhases( // NOTE: not using anymore but didn't want t
 
 export async function deletePhases(phase_id: UUID): Promise<void> {
   // NOTE: not using anymore but didn't want to remove in case needed in future
+  const supabase = await getSupabaseServerClient();
   const { error } = await supabase
     .from("phase")
     .delete()
@@ -113,6 +120,7 @@ export async function createRoles(
   role_name: string | null = null,
   role_description: string | null = null,
 ): Promise<UUID> {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("role")
     .insert({
@@ -132,6 +140,7 @@ export async function updateRoles( // NOTE: not using anymore but didn't want to
   role_id: UUID,
   updates: Partial<RoleUpdatable>,
 ): Promise<void> {
+  const supabase = await getSupabaseServerClient();
   const { error } = await supabase
     .from("role")
     .update(updates)
@@ -142,6 +151,7 @@ export async function updateRoles( // NOTE: not using anymore but didn't want to
 
 export async function deleteRoles(role_id: UUID): Promise<void> {
   // NOTE: not using anymore but didn't want to remove in case needed in future
+  const supabase = await getSupabaseServerClient();
   const { error } = await supabase.from("role").delete().eq("role_id", role_id);
 
   if (error) throw error;
@@ -153,6 +163,7 @@ export async function createRolePhases(
   role_id: UUID,
   description: string | null,
 ): Promise<UUID> {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("role_phase")
     .insert({
@@ -172,6 +183,7 @@ export async function updateRolePhases( // NOTE: not using anymore but didn't wa
   role_phase_id: UUID,
   updates: Partial<RolePhaseUpdatable>,
 ): Promise<void> {
+  const supabase = await getSupabaseServerClient();
   const { error } = await supabase
     .from("role_phase")
     .update(updates)
@@ -182,6 +194,7 @@ export async function updateRolePhases( // NOTE: not using anymore but didn't wa
 
 export async function deleteRolePhase(role_phase_id: UUID): Promise<void> {
   // NOTE: not using anymore but didn't want to remove in case needed in future
+  const supabase = await getSupabaseServerClient();
   const { error } = await supabase
     .from("role_phase")
     .delete()
@@ -196,6 +209,7 @@ export async function createPrompts(
   role_phase_id: UUID,
   prompt_text: string | null,
 ): Promise<UUID> {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("prompt")
     .insert({
@@ -215,6 +229,7 @@ export async function updatePrompts( // NOTE: not using anymore but didn't want 
   prompt_id: UUID,
   updates: Partial<PromptUpdatable>,
 ): Promise<void> {
+  const supabase = await getSupabaseServerClient();
   const { error } = await supabase
     .from("prompt")
     .update(updates)
@@ -225,6 +240,7 @@ export async function updatePrompts( // NOTE: not using anymore but didn't want 
 
 export async function deletePrompts(prompt_id: UUID): Promise<void> {
   // NOTE: not using anymore but didn't want to remove in case needed in future
+  const supabase = await getSupabaseServerClient();
   const { error } = await supabase
     .from("prompt")
     .delete()
@@ -236,6 +252,7 @@ export async function deletePrompts(prompt_id: UUID): Promise<void> {
 export async function fetchTemplate(
   template_id: UUID,
 ): Promise<Template | null> {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("template")
     .select("*")
@@ -251,6 +268,7 @@ export async function fetchTemplate(
 export async function fetchAllTemplates() {
   try {
     // Pull data
+    const supabase = await getSupabaseServerClient();
     const { data, error } = await supabase.from("template").select("*");
 
     if (error) throw error;
