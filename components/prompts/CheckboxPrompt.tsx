@@ -1,5 +1,6 @@
+import { Button, Checkbox, TextField } from "@mui/material";
 import { OptionsProps } from "./BuildPromptRenderer";
-import { CheckboxPromptStyled } from "./styles";
+import { CheckboxPromptStyled, McqOptionStyled, TextFieldStyled, DeleteMcqOptionButton } from "./styles";
 
 export default function CheckboxPrompt({
   options,
@@ -8,40 +9,38 @@ export default function CheckboxPrompt({
   updateOptionText,
 }: OptionsProps) {
   function handleAddNewOption() {
-    addNewOption?.("New option");
+    addNewOption?.("");
   }
 
   return (
     <CheckboxPromptStyled>
-      <button onClick={handleAddNewOption}>+ Add Option</button>
-
       {options.map(opt => (
-        <div
-          key={opt.option_number}
-          style={{ display: "flex", gap: "8px", alignItems: "center" }}
-        >
-          <input
-            type="checkbox"
-            // checked={opt.is_correct}
-            // onChange={() => toggleCorrect?.(opt.option_number)}
-          />
+        <div key={opt.option_number}>
+          <McqOptionStyled>
+            <Checkbox />
 
-          <input
-            value={opt.option_text}
-            placeholder="Enter option text"
-            onChange={e =>
-              updateOptionText?.(opt.option_number, e.target.value)
-            }
-          />
+            <TextFieldStyled>
+              <TextField
+                size="small"
+                placeholder="Enter option text"
+                value={opt.option_text}
+                onChange={e => updateOptionText?.(opt.option_number, e.target.value)}
+              />
+            </TextFieldStyled>
 
-          <button
-            onClick={() => deleteOption?.(opt.option_number)}
-            style={{ marginLeft: "8px" }}
-          >
-            Delete
-          </button>
+            <DeleteMcqOptionButton>
+              <Button
+                color="error"
+                onClick={() => deleteOption?.(opt.option_number)}
+              >
+                Delete
+              </Button>
+            </DeleteMcqOptionButton>
+          </McqOptionStyled>
         </div>
       ))}
+
+      <Button onClick={handleAddNewOption}>+ Add Option</Button>
     </CheckboxPromptStyled>
   );
 }

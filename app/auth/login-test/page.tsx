@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { addEmailtoProfile, makeAdmin } from "@/api/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
 import {
   Button,
@@ -13,7 +12,7 @@ import {
   Main,
   SignInTag,
   WelcomeTag,
-} from "../styles";
+} from "./styles";
 
 export default function Login() {
   const router = useRouter();
@@ -22,21 +21,34 @@ export default function Login() {
   const sessionHandler = useSession();
 
   const handleSignUp = async () => {
-    const { data, error } = await sessionHandler.signUp(email, password);
+    const res = await fetch("/api/create-admin/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const { data, error } = await res.json();
+
     if (error) {
       throw new Error(
-        "An error occurred during sign up: " +
-          error.message +
-          "with email" +
-          email,
+        "An error occurred during admin creation: " + error.message,
       );
     }
-    const userId = data.user?.id;
-    if (!userId) {
-      throw new Error("Signup succeeded but user ID was missing.");
+
+    console.log("Admin created:", data);
+
+    const { error: signInError } = await sessionHandler.signInWithEmail(
+      email,
+      password,
+    );
+
+    if (signInError) {
+      throw new Error(signInError.message);
     }
-    await addEmailtoProfile(userId, email);
-    await makeAdmin(userId);
+
+    router.push("/test-page");
   };
 
   const signInWithEmail = async () => {
@@ -68,45 +80,46 @@ export default function Login() {
   };
 
   return (
-    <>
-      <Main>
-        <WelcomeTag>Test Admin Portal</WelcomeTag>
-        <SignInTag>Sign up to be admin, no password requirements</SignInTag>
-        Email address
-        <EmailAddressDiv>
+    <Main>
+      <WelcomeTag>Test Admin Portal</WelcomeTag>
+      <SignInTag>Sign up to be admin, no password requirements</SignInTag>
+      Email address
+      <EmailAddressDiv>
+        <InputFields>
           <Input
             name="email"
             placeholder="Email Address"
             onChange={e => setEmail(e.target.value)}
             value={email}
           />
-        </EmailAddressDiv>
-        Type your password here:
-        <InputFields>
-          <Input
-            type="password"
-            name="password"
-            onChange={e => setPassword(e.target.value)}
-            value={password}
-            placeholder="password"
-          />
         </InputFields>
-        <Button type="button" onClick={handleSignUp}>
-          {" "}
-          Sign up{" "}
-        </Button>
-        <Button type="button" onClick={signInWithEmail}>
-          {" "}
-          Sign in{" "}
-        </Button>
-        <Button type="button" onClick={signOut}>
-          {" "}
-          Sign out{" "}
-        </Button>
-        I apologize for this styling. But please click{" "}
-        <Link href="/auth/reset-password"> here </Link> if you forgot your
+      </EmailAddressDiv>
+      Type your password here:
+      <InputFields>
+        <Input
+          type="password"
+          name="password"
+          onChange={e => setPassword(e.target.value)}
+          value={password}
+          placeholder="password"
+        />
+      </InputFields>
+      <Button type="button" onClick={handleSignUp}>
+        {" "}
+        Sign up{" "}
+      </Button>
+      <Button type="button" onClick={signInWithEmail}>
+        {" "}
+        Sign in{" "}
+      </Button>
+      <Button type="button" onClick={signOut}>
+        {" "}
+        Sign out{" "}
+      </Button>
+      <div>
+        Click <Link href="/auth/reset-password"> here </Link> if you forgot your
         password.
-      </Main>
-    </>
+      </div>
+    </Main>
   );
 }

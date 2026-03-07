@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { PromptType } from "@/types/schema";
 import CheckboxPrompt from "./CheckboxPrompt";
 import MultipleChoicePrompt from "./MultipleChoicePrompt";
-import { PromptRendererStyled, QuestionHeader } from "./styles";
-import TextPrompt from "./TextPrompt";
+import { PromptRendererStyled, QuestionHeaderStyled, PromptTypeDropdownStyled, TextFieldStyled, QuestionNumberStyled } from "./styles";
+import { FormControl, Select, MenuItem } from "@mui/material";
 
 // Options staged in state, only converted to PromptOptions on submit
 export type StagedOption = {
@@ -37,7 +37,7 @@ export default function PromptRenderer({
 }: PromptRendererProps) {
   const [prompt_type, setPromptType] = useState<PromptType>("text");
   const [options, setOptions] = useState<StagedOption[]>([]);
-  const [question, setQuestion] = useState("Untitled Question");
+  const [question, setQuestion] = useState("");
 
   // Notify parent whenever prompt state changes
   useEffect(() => {
@@ -89,7 +89,7 @@ export default function PromptRenderer({
 
   const optionsField =
     prompt_type === "text" ? (
-      <TextPrompt options={options} updateOptionText={updateOptionText} />
+      <></>
     ) : prompt_type === "multiple_choice" ? (
       <MultipleChoicePrompt
         options={options}
@@ -107,23 +107,38 @@ export default function PromptRenderer({
     );
 
   return (
-    <PromptRendererStyled>
-      <QuestionHeader
-        type="text"
-        value={question}
-        onChange={e => setQuestion(e.target.value)}
-      />
+    <FormControl fullWidth >
+    <PromptRendererStyled>      
+      <QuestionNumberStyled>
+        Question {prompt_id}
+      </QuestionNumberStyled>
+      
+      <QuestionHeaderStyled>
+        <TextFieldStyled
+          type="text"
+          placeholder="Type Question..." 
+          value={question}
+          onChange={e => setQuestion(e.target.value)}
+        />
 
-      <select
-        value={prompt_type}
-        onChange={e => handleChangePromptType(e.target.value as PromptType)}
-      >
-        <option value="text">Text</option>
-        <option value="multiple_choice">Multiple Choice</option>
-        <option value="checkbox">Checkbox</option>
-      </select>
+        <PromptTypeDropdownStyled>
+        <Select
+          value={prompt_type}
+          onChange={e =>
+            handleChangePromptType(e.target.value as PromptType)
+          }
+          size="small"
+        >
+          <MenuItem value="text">Text</MenuItem>
+          <MenuItem value="multiple_choice">Multiple Choice</MenuItem>
+          <MenuItem value="checkbox">Checkbox</MenuItem>
+        </Select>
+        </PromptTypeDropdownStyled>
+
+      </QuestionHeaderStyled>
 
       {optionsField}
     </PromptRendererStyled>
+    </FormControl>
   );
 }

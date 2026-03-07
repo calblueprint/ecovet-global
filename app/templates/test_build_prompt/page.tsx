@@ -7,6 +7,16 @@ import PromptRenderer, {
   StagedOption,
 } from "@/components/prompts/BuildPromptRenderer";
 import { PromptType } from "@/types/schema";
+import {
+  Button,
+  Typography,
+  Paper,
+  TextField
+} from "@mui/material";
+import { FacilitatorPromptBuilderStyled, TitleStyled, PhaseDescriptionFieldStyled } from "./styles";
+import TopNavBar from "@/components/NavBar/NavBar";
+import TemplateSideBar from "@/app/facilitator/template-list/components/TemplateSidebar";
+import { LayoutWrapper, SideNavContainer } from "@/app/facilitator/styles";
 
 type Data = {
   question: string;
@@ -21,6 +31,7 @@ export type StagedPrompt = {
 
 export default function TestPage() {
   const [prompts, setPrompts] = useState<StagedPrompt[]>([]);
+  const [phaseNumber, setPhaseNumber] = useState(1);
 
   function handleUpdate(prompt_number: number, data: Data) {
     console.log("Prompt Updated:", { prompt_number, ...data });
@@ -69,48 +80,68 @@ export default function TestPage() {
   }
 
   return (
-    <div style={{ padding: "40px", display: "flex", gap: "40px" }}>
-      {/* LEFT SIDE */}
-      <div style={{ flex: 1 }}>
-        <h1>Prompt Builder Test Page</h1>
+      <>
+      <TopNavBar/>
+      <LayoutWrapper>
+        <SideNavContainer>
+      <TemplateSideBar filterMode="all" setFilterMode={() => ""} />
+      </SideNavContainer>
+    
 
-        <button onClick={addEmptyPrompt}>➕ Add New Prompt</button>
+      <FacilitatorPromptBuilderStyled>
+        {/* LEFT SIDE */}
 
-        <div style={{ marginTop: "20px" }}>
-          {prompts.map(p => (
-            <div key={p.prompt_number} style={{ marginBottom: "20px" }}>
-              <PromptRenderer
-                prompt_id={p.prompt_number} // local temp ID
-                onUpdate={handleUpdate}
-              />
-            </div>
-          ))}
+        <TitleStyled>
+          <Typography variant="h4"> 
+            Phase {phaseNumber}
+          </Typography>
+
+          <PhaseDescriptionFieldStyled>
+            <TextField
+              variant="standard"
+              placeholder="Enter phase description here..."
+            />
+          </PhaseDescriptionFieldStyled>
+        </TitleStyled>
+
+        {prompts.map(p => (
+          <PromptRenderer
+            key={p.prompt_number}
+            prompt_id={p.prompt_number}
+            onUpdate={handleUpdate}
+          />
+        ))}
+
+        <div>
+          <Button variant="contained" onClick={addEmptyPrompt}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <rect y="4.44434" width="10" height="1.11111" fill="#476C77"/>
+              <rect x="5.55566" width="10" height="1.11111" transform="rotate(90 5.55566 0)" fill="#476C77"/>
+            </svg>
+            Add New Prompt
+          </Button>
+
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleSubmit}
+          >
+            Submit All
+          </Button>
         </div>
+    
+        {/* RIGHT SIDE */}
+        {/* <Box flex={1}>
+          <Paper sx={{ p: 3, bgcolor: "#111", color: "#0f0", minHeight: 400 }}>
+            <Typography variant="h6">Live Data</Typography>
 
-        <button
-          style={{ marginTop: "20px", padding: "10px 20px" }}
-          onClick={handleSubmit}
-        >
-          Submit All
-        </button>
-      </div>
-
-      {/* RIGHT SIDE */}
-      <div style={{ flex: 1 }}>
-        <h2>Live Data</h2>
-        <pre
-          style={{
-            background: "#111",
-            color: "#0f0",
-            padding: "20px",
-            minHeight: "400px",
-            borderRadius: "8px",
-            overflow: "auto",
-          }}
-        >
-          {JSON.stringify(prompts, null, 2)}
-        </pre>
-      </div>
-    </div>
+            <pre style={{ overflow: "auto" }}>
+              {JSON.stringify(prompts, null, 2)}
+            </pre>
+          </Paper>
+        </Box> */}
+      </FacilitatorPromptBuilderStyled>
+    </LayoutWrapper>
+    </>
   );
 }

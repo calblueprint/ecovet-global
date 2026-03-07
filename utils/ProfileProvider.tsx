@@ -1,12 +1,13 @@
 "use client";
 
+import type { UUID } from "@/types/schema";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import supabase from "../actions/supabase/client";
 
 type Profile = {
   id: string;
   user_type: string | null;
-  user_group_id: string | null;
+  user_group_id: UUID | null;
   first_name: string | null;
   last_name: string | null;
   country: string | null;

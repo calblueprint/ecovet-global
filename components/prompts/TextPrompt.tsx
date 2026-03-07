@@ -1,4 +1,5 @@
-import TextareaAutosize from "@mui/material/TextareaAutosize";
+
+import { TextField } from "@mui/material";
 import { OptionsProps } from "./BuildPromptRenderer";
 
 export default function TextPrompt({
@@ -8,9 +9,9 @@ export default function TextPrompt({
   const value = options[0]?.option_text ?? "";
 
   return (
-    <TextareaAutosize
+    <TextField
       value={value}
-      placeholder="User will type their answer here..."
+      placeholder="Type your answer here..."
       onChange={e => updateOptionText?.(1, e.target.value)}
     />
   );
