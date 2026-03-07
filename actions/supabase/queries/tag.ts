@@ -1,6 +1,7 @@
-import { UUID } from "crypto";
-import { Tag, Template } from "@/types/schema";
-import supabase from "../createClient";
+"use server";
+
+import type { Tag, Template, UUID } from "@/types/schema";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export type CreateTagParams = {
   name: string;
@@ -10,6 +11,7 @@ export type CreateTagParams = {
 };
 
 export async function createTag(params: CreateTagParams): Promise<UUID> {
+  const supabase = await getSupabaseServerClient();
   // inserts a new tag into the tag table, returns the tag_id
   const { name, user_group_id, number, color } = params;
 
@@ -31,6 +33,7 @@ export async function createTag(params: CreateTagParams): Promise<UUID> {
   return data.tag_id;
 }
 export async function deleteTag(tag_id: UUID): Promise<boolean> {
+  const supabase = await getSupabaseServerClient();
   const { error } = await supabase.from("tag").delete().eq("tag_id", tag_id);
 
   if (error) {
@@ -41,6 +44,7 @@ export async function deleteTag(tag_id: UUID): Promise<boolean> {
 }
 
 export async function getAllTags(user_group_id: UUID): Promise<Tag[]> {
+  const supabase = await getSupabaseServerClient();
   // Fetches all tags and numbers for your user-group-id (for populating dropdowns)
   const { data, error } = await supabase
     .from("tag")
@@ -58,6 +62,7 @@ export async function assignTagToTemplate(
   templateId: UUID,
   tagId: UUID,
 ): Promise<boolean> {
+  const supabase = await getSupabaseServerClient();
   // Adds a new row to template_tag
   const { error } = await supabase.from("template_tag").insert({
     template_id: templateId,
@@ -75,6 +80,7 @@ export async function removeTagFromTemplate(
   templateId: UUID,
   tagId: UUID,
 ): Promise<boolean> {
+  const supabase = await getSupabaseServerClient();
   // Deletes a row from template_tag
   const { error } = await supabase
     .from("template_tag")
@@ -95,6 +101,7 @@ export async function getTagsForTemplate(
   templateId: string,
   userGroupId: string,
 ): Promise<Tag[]> {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("template_tag")
     .select(
@@ -123,6 +130,7 @@ export async function getTagsForTemplate(
 type tagTemplate = { template: Template };
 
 export async function getTemplatesforTag(tagId: UUID): Promise<Template[]> {
+  const supabase = await getSupabaseServerClient();
   // Returns all template names associated with a specific tag
   const { data, error } = await supabase
     .from("template_tag")
@@ -146,6 +154,7 @@ export async function renameTag(
   tag_id: UUID,
   new_name: string,
 ): Promise<boolean> {
+  const supabase = await getSupabaseServerClient();
   const { error } = await supabase
     .from("tag")
     .update({ name: new_name })

@@ -1,19 +1,26 @@
 "use client";
 
+import type {
+  Phase,
+  Prompt,
+  PromptAnswer,
+  RolePhase,
+  UUID,
+} from "@/types/schema";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { UUID } from "crypto";
 import supabase from "@/actions/supabase/client";
 import {
   createPromptAnswer,
+  fetchMostRecentPhase,
   fetchPhases,
+  fetchPromptResponses,
   fetchPrompts,
   fetchRole,
   fetchRolePhases,
-} from "@/api/supabase/queries/sessions";
-import { Phase, Prompt, RolePhase } from "@/types/schema";
+} from "@/actions/supabase/queries/sessions";
 import { useProfile } from "@/utils/ProfileProvider";
-import NextButton from "../ParticipantNextButton";
+import NextButton from "../components/ParticipantNextButton";
 import {
   Container,
   Main,
@@ -61,6 +68,13 @@ export default function ParticipantFlowPage() {
 
         const fetchedRoleId = await fetchRole(userId, sessionId);
         setRoleId(fetchedRoleId as string);
+
+        // Set currentPhaseIndex to most recent phase
+        const mostRecentPhaseIndex = await fetchMostRecentPhase(
+          userId,
+          sessionId,
+        );
+        setCurrentPhaseIndex(mostRecentPhaseIndex);
       } catch (err) {
         console.error("Error loading session data:", err);
       } finally {
@@ -95,6 +109,56 @@ export default function ParticipantFlowPage() {
   }, [currentPhase, roleId]);
 
   useEffect(() => {
+    if (!userId || !sessionId || !rolePhase || prompts.length === 0) return;
+
+    async function loadResponses() {
+      if (!userId || !sessionId || !rolePhase) return;
+
+      try {
+        const mostRecentPhaseIndex = await fetchMostRecentPhase(
+          userId,
+          sessionId,
+        );
+        console.log(
+          "currentPhaseIndex ",
+          currentPhaseIndex,
+          "mostRecentPhaseIndex ",
+          mostRecentPhaseIndex,
+        );
+
+        if (currentPhaseIndex < mostRecentPhaseIndex) {
+          const responses = await fetchPromptResponses(
+            userId,
+            sessionId,
+            rolePhase.phase_id,
+          );
+
+          console.log("responses ", responses);
+
+          if (!responses) return;
+
+          const ordered = sortResponsesByPromptOrder(prompts, responses);
+          const answerStrings = ordered.map(r => r?.prompt_answer ?? "");
+          setAnswers(answerStrings);
+        }
+      } catch (err) {
+        console.error("Response load failed:", err);
+      }
+    }
+
+    loadResponses();
+  }, [userId, sessionId, rolePhase, prompts, currentPhaseIndex]);
+
+  function sortResponsesByPromptOrder(
+    prompts: Prompt[],
+    responses: PromptAnswer[],
+  ) {
+    const responseMap = new Map(responses.map(r => [r.prompt_id, r]));
+
+    return prompts.map(prompt => responseMap.get(prompt.prompt_id) ?? null);
+  }
+
+  useEffect(() => {
     if (!userId || !sessionId) return;
 
     console.log(
@@ -119,7 +183,7 @@ export default function ParticipantFlowPage() {
 
           if (newPhaseIndex == null) return;
 
-          const arrayIndex = newPhaseIndex - 1;
+          const arrayIndex = newPhaseIndex;
           console.log("Mapped to array index:", arrayIndex);
 
           setCurrentPhaseIndex(arrayIndex);

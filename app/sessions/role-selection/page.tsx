@@ -1,14 +1,14 @@
 "use client";
 
+import type { UUID } from "@/types/schema";
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { UUID } from "crypto";
 import {
   assignParticipantToSession,
   createSession,
   fetchParticipants,
   fetchRoles,
-} from "@/api/supabase/queries/sessions";
+} from "@/actions/supabase/queries/sessions";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
