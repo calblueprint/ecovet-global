@@ -2,21 +2,20 @@
 
 import { useState } from "react";
 import { UUID } from "crypto";
+import { Button, TextField, Typography } from "@mui/material";
 import { addNewOption, addNewPrompt } from "@/actions/supabase/queries/prompt";
+import { LayoutWrapper, SideNavContainer } from "@/app/facilitator/styles";
+import TemplateSideBar from "@/app/facilitator/template-list/components/TemplateSidebar";
+import TopNavBar from "@/components/NavBar/NavBar";
 import PromptRenderer, {
   StagedOption,
 } from "@/components/prompts/BuildPromptRenderer";
 import { PromptType } from "@/types/schema";
 import {
-  Button,
-  Typography,
-  Paper,
-  TextField
-} from "@mui/material";
-import { FacilitatorPromptBuilderStyled, TitleStyled, PhaseDescriptionFieldStyled } from "./styles";
-import TopNavBar from "@/components/NavBar/NavBar";
-import TemplateSideBar from "@/app/facilitator/template-list/components/TemplateSidebar";
-import { LayoutWrapper, SideNavContainer } from "@/app/facilitator/styles";
+  FacilitatorPromptBuilderStyled,
+  PhaseDescriptionFieldStyled,
+  TitleStyled,
+} from "./styles";
 
 type Data = {
   question: string;
@@ -31,7 +30,7 @@ export type StagedPrompt = {
 
 export default function TestPage() {
   const [prompts, setPrompts] = useState<StagedPrompt[]>([]);
-  const [phaseNumber, setPhaseNumber] = useState(1);
+  const phaseNumber = 1;
 
   function handleUpdate(prompt_number: number, data: Data) {
     console.log("Prompt Updated:", { prompt_number, ...data });
@@ -80,58 +79,63 @@ export default function TestPage() {
   }
 
   return (
-      <>
-      <TopNavBar/>
+    <>
+      <TopNavBar />
       <LayoutWrapper>
         <SideNavContainer>
-      <TemplateSideBar filterMode="all" setFilterMode={() => ""} />
-      </SideNavContainer>
-    
+          <TemplateSideBar filterMode="all" setFilterMode={() => ""} />
+        </SideNavContainer>
 
-      <FacilitatorPromptBuilderStyled>
-        {/* LEFT SIDE */}
+        <FacilitatorPromptBuilderStyled>
+          {/* LEFT SIDE */}
 
-        <TitleStyled>
-          <Typography variant="h4"> 
-            Phase {phaseNumber}
-          </Typography>
+          <TitleStyled>
+            <Typography variant="h4">Phase {phaseNumber}</Typography>
 
-          <PhaseDescriptionFieldStyled>
-            <TextField
-              variant="standard"
-              placeholder="Enter phase description here..."
+            <PhaseDescriptionFieldStyled>
+              <TextField
+                variant="standard"
+                placeholder="Enter phase description here..."
+              />
+            </PhaseDescriptionFieldStyled>
+          </TitleStyled>
+
+          {prompts.map(p => (
+            <PromptRenderer
+              key={p.prompt_number}
+              prompt_id={p.prompt_number}
+              onUpdate={handleUpdate}
             />
-          </PhaseDescriptionFieldStyled>
-        </TitleStyled>
+          ))}
 
-        {prompts.map(p => (
-          <PromptRenderer
-            key={p.prompt_number}
-            prompt_id={p.prompt_number}
-            onUpdate={handleUpdate}
-          />
-        ))}
+          <div>
+            <Button variant="contained" onClick={addEmptyPrompt}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="10"
+                height="10"
+                viewBox="0 0 10 10"
+                fill="none"
+              >
+                <rect y="4.44434" width="10" height="1.11111" fill="#476C77" />
+                <rect
+                  x="5.55566"
+                  width="10"
+                  height="1.11111"
+                  transform="rotate(90 5.55566 0)"
+                  fill="#476C77"
+                />
+              </svg>
+              Add New Prompt
+            </Button>
 
-        <div>
-          <Button variant="contained" onClick={addEmptyPrompt}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10" fill="none">
-              <rect y="4.44434" width="10" height="1.11111" fill="#476C77"/>
-              <rect x="5.55566" width="10" height="1.11111" transform="rotate(90 5.55566 0)" fill="#476C77"/>
-            </svg>
-            Add New Prompt
-          </Button>
+            <Button variant="contained" color="success" onClick={handleSubmit}>
+              Submit All
+            </Button>
+          </div>
 
-          <Button
-            variant="contained"
-            color="success"
-            onClick={handleSubmit}
-          >
-            Submit All
-          </Button>
-        </div>
-    
-        {/* RIGHT SIDE */}
-        {/* <Box flex={1}>
+          {/* RIGHT SIDE */}
+          {/* <Box flex={1}>
           <Paper sx={{ p: 3, bgcolor: "#111", color: "#0f0", minHeight: 400 }}>
             <Typography variant="h6">Live Data</Typography>
 
@@ -140,8 +144,8 @@ export default function TestPage() {
             </pre>
           </Paper>
         </Box> */}
-      </FacilitatorPromptBuilderStyled>
-    </LayoutWrapper>
+        </FacilitatorPromptBuilderStyled>
+      </LayoutWrapper>
     </>
   );
 }

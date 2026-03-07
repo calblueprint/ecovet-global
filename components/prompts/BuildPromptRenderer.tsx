@@ -1,11 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { FormControl, MenuItem, Select } from "@mui/material";
 import { PromptType } from "@/types/schema";
 import CheckboxPrompt from "./CheckboxPrompt";
 import MultipleChoicePrompt from "./MultipleChoicePrompt";
-import { PromptRendererStyled, QuestionHeaderStyled, PromptTypeDropdownStyled, TextFieldStyled, QuestionNumberStyled } from "./styles";
-import { FormControl, Select, MenuItem } from "@mui/material";
+import {
+  PromptRendererStyled,
+  PromptTypeDropdownStyled,
+  QuestionHeaderStyled,
+  QuestionNumberStyled,
+  TextFieldStyled,
+} from "./styles";
 
 // Options staged in state, only converted to PromptOptions on submit
 export type StagedOption = {
@@ -42,13 +48,13 @@ export default function PromptRenderer({
   // Notify parent whenever prompt state changes
   useEffect(() => {
     onUpdate(prompt_id, { question, prompt_type, options });
-  }, [question, prompt_type, options]);
+  }, [question, prompt_type, options, onUpdate, prompt_id]);
 
   useEffect(() => {
     if (prompt_type === "text" && options.length === 0) {
       addNewOption("");
     }
-  }, [prompt_type]);
+  }, [prompt_type, options.length]);
 
   function handleChangePromptType(newType: PromptType) {
     // clear all options
@@ -107,38 +113,35 @@ export default function PromptRenderer({
     );
 
   return (
-    <FormControl fullWidth >
-    <PromptRendererStyled>      
-      <QuestionNumberStyled>
-        Question {prompt_id}
-      </QuestionNumberStyled>
-      
-      <QuestionHeaderStyled>
-        <TextFieldStyled
-          type="text"
-          placeholder="Type Question..." 
-          value={question}
-          onChange={e => setQuestion(e.target.value)}
-        />
+    <FormControl fullWidth>
+      <PromptRendererStyled>
+        <QuestionNumberStyled>Question {prompt_id}</QuestionNumberStyled>
 
-        <PromptTypeDropdownStyled>
-        <Select
-          value={prompt_type}
-          onChange={e =>
-            handleChangePromptType(e.target.value as PromptType)
-          }
-          size="small"
-        >
-          <MenuItem value="text">Text</MenuItem>
-          <MenuItem value="multiple_choice">Multiple Choice</MenuItem>
-          <MenuItem value="checkbox">Checkbox</MenuItem>
-        </Select>
-        </PromptTypeDropdownStyled>
+        <QuestionHeaderStyled>
+          <TextFieldStyled
+            type="text"
+            placeholder="Type Question..."
+            value={question}
+            onChange={e => setQuestion(e.target.value)}
+          />
 
-      </QuestionHeaderStyled>
+          <PromptTypeDropdownStyled>
+            <Select
+              value={prompt_type}
+              onChange={e =>
+                handleChangePromptType(e.target.value as PromptType)
+              }
+              size="small"
+            >
+              <MenuItem value="text">Text</MenuItem>
+              <MenuItem value="multiple_choice">Multiple Choice</MenuItem>
+              <MenuItem value="checkbox">Checkbox</MenuItem>
+            </Select>
+          </PromptTypeDropdownStyled>
+        </QuestionHeaderStyled>
 
-      {optionsField}
-    </PromptRendererStyled>
+        {optionsField}
+      </PromptRendererStyled>
     </FormControl>
   );
 }
