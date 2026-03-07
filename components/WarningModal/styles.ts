@@ -1,7 +1,8 @@
 import { CSSProperties } from "react";
+import COLORS from "@/styles/colors";
 
 export const dialogTitle: CSSProperties = {
-  color: "var(--Black-100, #0F0F0F)",
+  color: COLORS.black,
   fontFamily: "Public Sans",
   fontSize: "1.2rem",
   fontStyle: "normal",
@@ -10,7 +11,7 @@ export const dialogTitle: CSSProperties = {
 };
 
 export const dialogCaption: CSSProperties = {
-  color: "var(--Black-100, #0F0F0F)",
+  color: COLORS.black,
   fontFamily: "Public Sans",
   fontSize: "1.0rem",
   fontStyle: "normal",
@@ -21,8 +22,8 @@ export const dialogCaption: CSSProperties = {
 export const cancelButton: CSSProperties = {
   borderRadius: "0.25rem",
   border: "1px solid var(--Oat-Medium, #EEE)",
-  background: "#FFF",
-  color: "var(--Black-70, #4B4A49)",
+  background: COLORS.white,
+  color: COLORS.black,
   padding: "0.5rem 2rem",
   gap: "0.625rem",
   fontFamily: "Public Sans",
@@ -34,8 +35,8 @@ export const cancelButton: CSSProperties = {
 
 export const deleteButton: CSSProperties = {
   borderRadius: "0.25rem",
-  background: "var(--Dark-Electric-Blue, #476C77)",
-  color: "var(--White-100, #FFF)",
+  background: COLORS.teal,
+  color: COLORS.white,
   padding: "0.5rem 2rem",
   gap: "0.625rem",
   fontFamily: "Public Sans",
