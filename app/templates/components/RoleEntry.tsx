@@ -7,8 +7,10 @@ import COLORS from "@/styles/colors";
 import { Flex } from "@/styles/containers";
 import { Caption } from "@/styles/text";
 import { localStore, Role } from "@/types/schema";
+import { SelectedPage } from "../page";
 import { SideBarItem } from "./styles";
 
+// TODO: add remove role shit
 export default function RoleEntry({
   role,
   localStore,
@@ -16,7 +18,7 @@ export default function RoleEntry({
 }: {
   role: Role;
   localStore: localStore;
-  setActiveId: (id: number | UUID) => void;
+  setActiveId: React.Dispatch<React.SetStateAction<SelectedPage>>;
 }) {
   const [selected, setSelected] = useState(false);
 
@@ -31,6 +33,7 @@ export default function RoleEntry({
             height={6}
             onClick={() => setSelected(s => !s)}
           />
+
           <Caption $color={COLORS.black70}>{role.role_name}</Caption>
         </Flex>
 

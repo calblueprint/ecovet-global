@@ -8,6 +8,7 @@ import COLORS from "@/styles/colors";
 import { Flex } from "@/styles/containers";
 import { B2, Caption } from "@/styles/text";
 import { localStore, Role, Template } from "@/types/schema";
+import { SelectedPage } from "../page";
 import EditablePhase from "./EditablePhase";
 import RoleEntry from "./RoleEntry";
 import { SideBarEntry, SideBarItem, SideBarSection } from "./styles";
@@ -18,7 +19,7 @@ export default function TemplateBuilderSideBar({
   updateLocalStore,
 }: {
   localStore: localStore | null;
-  setActiveId: (id: number | UUID) => void;
+  setActiveId: React.Dispatch<React.SetStateAction<SelectedPage>>;
   updateLocalStore: (updater: (draft: localStore) => void) => void;
 }) {
   const router = useRouter();
@@ -73,6 +74,7 @@ export default function TemplateBuilderSideBar({
       };
       draft.roleIds.push(newRoleID);
       draft.rolePhaseIndex[newRoleID] = {}; //initialize rolePhaseIndex dict for this role
+
       for (const phaseID of draft.phaseIds) {
         //when creating roles when phases already exist, automatically add rolePhases for role
         const newRolePhaseID = createUUID();
@@ -86,7 +88,8 @@ export default function TemplateBuilderSideBar({
         draft.promptIndex[newRolePhaseID] = []; //similiar to rolePhaseIndex dict but for prompts
       }
     });
-    setActiveId(newRoleID);
+
+    setActiveId({ roleId: newRoleID, phaseId: null });
   }
 
   return (
@@ -115,7 +118,11 @@ export default function TemplateBuilderSideBar({
         <SideBarEntry>
           <Caption>Global</Caption>
 
-          <SideBarItem onClick={() => setActiveId(TEMPLATE_INDEX)}>
+          <SideBarItem
+            onClick={() =>
+              setActiveId({ roleId: TEMPLATE_INDEX, phaseId: null })
+            }
+          >
             <Caption $color={COLORS.black70}>Scenario Overview</Caption>
           </SideBarItem>
         </SideBarEntry>

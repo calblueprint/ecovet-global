@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Flex } from "@/styles/containers";
+import { B2, H3 } from "@/styles/text";
 
 export const LayoutWrapper = styled.div`
   display: flex;
@@ -227,16 +228,25 @@ export const GhostButton = styled.button`
 export const FormStack = styled(Flex).attrs({
   $direction: "column",
   $gap: "20px",
-})`
-  padding-right: 150px;
+})``;
+
+export const RoleHeader = styled(Flex)`
+  justify-content: space-between;
+  align-items: center;
 `;
 
-export const FieldCard = styled.fieldset`
-  position: relative;
-  border: 1px solid ${COLORS.black20};
-  border-radius: 4px;
-  padding: 10px;
-  margin-bottom: 10px;
+export const FieldCard = styled.div`
+  display: flex;
+  padding: 16px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 16px;
+  align-self: stretch;
+
+  border-radius: 8px;
+  border: 1px solid ${COLORS.oat_medium};
+  background: ${COLORS.oat_light};
 `;
 
 export const PhaseCard = styled.div``;
@@ -276,11 +286,10 @@ export const RemoveQuestionButton = styled.button`
 `;
 
 /** Legend text */
-export const FieldLegend = styled.legend`
-  font-family: "Public Sans", system-ui, sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: #c7c6c3;
+export const FieldLegend = styled(B2)`
+  color: ${COLORS.black70};
+  font-weight: 700;
+  line-height: 150%;
 `;
 
 export const QuestionCard = styled.fieldset`
@@ -291,20 +300,28 @@ export const QuestionCard = styled.fieldset`
   padding: 10px;
   margin-bottom: 10px;
 `;
+
 /* Big comfortable text area (used for description/prompts) */
-export const BigInput = styled.input.attrs({ type: "text" })`
-  width: calc(100% - 20px);
-  margin: 5px;
-  border: none;
-  resize: none;
-  font: inherit;
-  line-height: 1.4;
-  &:focus {
-    outline: none;
-    box-shadow: none;
-    border-color: inherit;
+export const BigInput = styled.input.attrs({
+  type: "text",
+})`
+  display: flex;
+  padding: 10px 12px;
+  align-items: center;
+  gap: 10px;
+  flex: 1 0 0;
+  align-self: stretch;
+  font-size: 0.75rem;
+
+  border-radius: 4px;
+  border: 1px solid ${COLORS.oat_medium};
+  background: ${COLORS.white};
+
+  ::placeholder {
+    color: ${COLORS.black20};
   }
 `;
+// TODO: placeholder color not working
 
 /* Section heading like “Phase 1” */
 export const SectionH2 = styled.h2`

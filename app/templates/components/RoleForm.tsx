@@ -1,4 +1,6 @@
 import { UUID } from "crypto";
+import COLORS from "@/styles/colors";
+import { B2, Caption, H3 } from "@/styles/text";
 import { roleFormInput, RolePhase } from "@/types/schema";
 import {
   BigInput,
@@ -11,14 +13,17 @@ import {
   QuestionCard,
   RemovePhaseButton,
   RemoveQuestionButton,
+  RoleHeader,
   SectionH2,
 } from "./styles";
 
 export default function RoleForm({
   value,
+  // rolePhaseId,
   onChange,
 }: {
   value: roleFormInput;
+  // rolePhaseId: UUID;
   onChange: (id: UUID, field: string, v: string) => void;
 }) {
   const rolePhases: RolePhase[] = [];
@@ -28,8 +33,16 @@ export default function RoleForm({
 
   return (
     <FormStack>
+      <RoleHeader>
+        <H3 $color={COLORS.black100} $fontWeight="700">
+          Phase 1
+        </H3>
+        <B2 $color={COLORS.black70}>{value.role.role_name}</B2>
+      </RoleHeader>
+
       <FieldCard>
         <FieldLegend>Role description</FieldLegend>
+
         <BigInput
           name="role_description"
           placeholder="Role description"
@@ -60,7 +73,7 @@ export default function RoleForm({
             <FieldLegend>Description</FieldLegend>
             <BigInput
               name="role_phase_description"
-              placeholder="Description"
+              placeholder="Type here..."
               value={rolePhase.description ?? ""}
               onChange={e =>
                 onChange(rolePhase.role_phase_id, "description", e.target.value)
@@ -75,7 +88,7 @@ export default function RoleForm({
                 <FieldLegend>Question {j + 1}</FieldLegend>
                 <BigInput
                   name="prompt"
-                  placeholder="Prompt"
+                  placeholder="Type here..."
                   value={value.promptById[promptID].prompt_text ?? ""}
                   onChange={e =>
                     onChange(promptID, "prompt_text", e.target.value)

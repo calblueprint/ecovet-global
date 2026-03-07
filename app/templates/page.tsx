@@ -41,8 +41,16 @@ const createInitialStore = (): localStore => {
   };
 };
 
+export type SelectedPage = {
+  roleId: UUID | number;
+  phaseId: UUID | null;
+};
+
 export default function NewTemplatePage() {
-  const [activeId, setActiveId] = useState<UUID | number>(1); // current 'tab' or role
+  const [activeId, setActiveId] = useState<SelectedPage>({
+    roleId: 1,
+    phaseId: null,
+  });
   const [newTemp, setNewTemp] = useState<localStore>(() =>
     createInitialStore(),
   );

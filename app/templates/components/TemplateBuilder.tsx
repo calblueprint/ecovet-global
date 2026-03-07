@@ -14,6 +14,7 @@ import RoleForm from "./RoleForm";
 import { PanelCard, SubmitButton } from "./styles";
 import TemplateOverviewForm from "./TemplateOverviewForm";
 
+// TODO: add an active phase id
 export default function TemplateBuilder({
   activeId,
   setActiveId,
@@ -60,6 +61,7 @@ export default function TemplateBuilder({
     setActiveId(nextActive);
   }
 
+  // TODO: move to sidebar
   function renameRole(role_id: UUID | number, newLabel: string) {
     if (localStore == null) return;
 
