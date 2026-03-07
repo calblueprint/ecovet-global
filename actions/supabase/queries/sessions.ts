@@ -307,24 +307,25 @@ export async function createPromptAnswer(
     .upsert(
       [
         {
-          prompt_response_id: crypto.randomUUID(), // used only if insert
-          user_id: userId,
-          prompt_id: promptId,
+          prompt_response_id: crypto.randomUUID(),
           session_id: sessionId,
           phase_id: phaseId,
+          user_id: userId,
+          prompt_id: promptId,
           prompt_answer: answer,
         },
       ],
-      {
-        onConflict: "user_id,prompt_id,session_id,phase_id", // conflict target
-        // "user_id + prompt_id" must have a unique constraint in DB
-        // Supabase/Postgres will update existing rows instead of inserting duplicates
-      },
+      { onConflict: "user_id,prompt_id,session_id" },
     )
     .select("prompt_response_id");
 
   if (error) {
-    console.error("Error upserting prompt answer:", error);
+    console.error(
+      "Error creating prompt answer:",
+      JSON.stringify(error, null, 2),
+    );
+  } else {
+    console.log("Insert success:", data);
   }
   return data;
 }
