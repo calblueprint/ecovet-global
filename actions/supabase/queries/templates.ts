@@ -7,6 +7,7 @@ import {
   PromptUpdatable,
   RolePhaseUpdatable,
   RoleUpdatable,
+  Tag,
   TemplateUpdatable,
 } from "@/types/schema";
 
@@ -277,4 +278,27 @@ export async function fetchAllTemplates() {
   } catch (error) {
     console.log("Error fetching templates from supabase API: ", error);
   }
+}
+
+export async function fetchTemplatesWithTags() {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase.from("template").select(`
+      *,
+      template_tag (
+        tag (
+          tag_id,
+          name,
+          color,
+          number,
+          user_group_id
+        )
+      )
+    `);
+
+  if (error) throw error;
+
+  return data?.map(t => ({
+    ...t,
+    associated_tags: t.template_tag.map((tt: { tag: Tag }) => tt.tag),
+  }));
 }
