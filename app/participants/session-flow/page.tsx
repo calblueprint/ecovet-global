@@ -155,7 +155,6 @@ export default function ParticipantFlowPage() {
       if (!answer.trim()) continue;
       updatedCompletedPrompts.add(promptId);
 
-      if (!userId) continue;
       await createPromptAnswer(
         userId,
         sessionId!,
