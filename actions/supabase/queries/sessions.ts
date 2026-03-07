@@ -1,6 +1,6 @@
 "use server";
 
-import type { Prompt, RolePhase, UUID } from "@/types/schema";
+import type { Prompt, PromptAnswer, RolePhase, UUID } from "@/types/schema";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function fetchRoles(templateId: string) {
@@ -193,6 +193,33 @@ export async function fetchPhases(sessionId: string) {
   return phases ?? [];
 }
 
+// Can merge with fetchRole so that we dont have to call twice
+export async function fetchMostRecentPhase(
+  userId: string,
+  sessionId: string,
+): Promise<number> {
+  console.log("userId", userId, "sessionId", sessionId);
+  const supabase = await getSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("participant_session")
+    .select("phase_index")
+    .eq("session_id", sessionId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("fetchMostRecentPhase error:", error);
+    throw new Error("Failed to fetch user's most recent phase", error);
+  }
+
+  if (!data) {
+    throw new Error("No phase id found");
+  }
+
+  return data.phase_index;
+}
+
 export async function fetchRolePhases(
   roleId: UUID,
   phaseId: UUID,
@@ -270,22 +297,54 @@ export async function fetchRole(
 export async function createPromptAnswer(
   userId: string,
   promptId: string,
+  sessionId: UUID,
+  phaseId: UUID,
   answer: string,
 ) {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("prompt_response")
-    .insert([
+    .upsert(
+      [
+        {
+          prompt_response_id: crypto.randomUUID(), // used only if insert
+          user_id: userId,
+          prompt_id: promptId,
+          session_id: sessionId,
+          phase_id: phaseId,
+          prompt_answer: answer,
+        },
+      ],
       {
-        prompt_response_id: crypto.randomUUID(),
-        user_id: userId,
-        prompt_id: promptId,
-        prompt_answer: answer,
+        onConflict: "user_id,prompt_id,session_id,phase_id", // conflict target
+        // "user_id + prompt_id" must have a unique constraint in DB
+        // Supabase/Postgres will update existing rows instead of inserting duplicates
       },
-    ])
+    )
     .select("prompt_response_id");
+
   if (error) {
-    console.error("Error creating prompt answer:", error);
+    console.error("Error upserting prompt answer:", error);
   }
   return data;
+}
+
+export async function fetchPromptResponses(
+  userId: string,
+  sessionId: string,
+  phaseId: UUID,
+): Promise<PromptAnswer[] | null> {
+  const supabase = await getSupabaseServerClient();
+  // Fetch all response to for user for session for the phase
+  const { data, error } = await supabase
+    .from("prompt_response")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("session_id", sessionId)
+    .eq("phase_id", phaseId);
+  if (error) {
+    console.error("Error fetching prompts:", error);
+  }
+
+  return data ?? [];
 }

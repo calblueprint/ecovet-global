@@ -30,6 +30,7 @@ export type Session = Tables<"session">;
 export type Phase = Tables<"phase">;
 export type RolePhase = Tables<"role_phase">;
 export type Prompt = Tables<"prompt">;
+export type PromptAnswer = Tables<"prompt_response">;
 export type Tag = Tables<"tag">;
 export type TemplateTag = Tables<"template_tag">;
 export type Invite = Tables<"invite">;
@@ -49,14 +50,6 @@ export type EditablePhase = Omit<Tables<"phase">, "session_id">;
    App-Only Types
    (NOT direct DB rows)
 ============================ */
-
-export interface PromptAnswer {
-  prompt_response_id: UUID; // prompt_answer_id
-  session_id: UUID;
-  user_id: UUID;
-  prompt_id: UUID;
-  prompt_answer: string;
-}
 
 export type LocalStore = {
   templateID: UUID;

@@ -90,7 +90,6 @@ export async function fetchProfileByUserId(user_id: UUID) {
 }
 
 export async function fetchExpandedProfileByUserId(user_id: UUID) {
-  const supabase = await getSupabaseServerClient();
   const profile = await fetchProfileByUserId(user_id);
   if (profile == null) {
     return null;
