@@ -51,6 +51,13 @@ export type EditablePhase = Omit<Tables<"phase">, "session_id">;
    (NOT direct DB rows)
 ============================ */
 
+export type ParticipantSessionWithProfile = ParticipantSession & {
+  profile: {
+    first_name: string;
+    last_name: string;
+  };
+};
+
 export type LocalStore = {
   templateID: UUID;
   rolesById: Record<number | UUID, Role | Template>;

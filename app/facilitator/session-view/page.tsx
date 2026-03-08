@@ -4,6 +4,7 @@ import type { ParticipantSession, UUID } from "@/types/schema";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import supabase from "@/actions/supabase/client";
+import { fetchProfilesByUserIds } from "@/actions/supabase/queries/profile";
 import {
   finishSession,
   SessionParticipant,
@@ -58,7 +59,7 @@ export default function FacilitatorSessionView() {
       try {
         const psData = await sessionParticipants(sessionId as UUID);
 
-        setParticipants(psData ?? []);
+        setParticipants(psData);
         console.log("Participants:", psData);
 
         if (psData && psData.length > 0) {

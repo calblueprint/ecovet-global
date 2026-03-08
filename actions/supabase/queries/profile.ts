@@ -204,3 +204,16 @@ export async function checkProfileExists(id: string) {
     return true;
   }
 }
+
+export async function fetchProfilesByUserIds(user_ids: UUID[]) {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("profile")
+    .select("id, first_name, last_name")
+    .in("id", user_ids);
+  if (error) {
+    console.error("Error fetching profiles: ", error);
+    return [];
+  }
+  return data;
+}

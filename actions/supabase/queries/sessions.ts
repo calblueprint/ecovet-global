@@ -1,6 +1,14 @@
 "use server";
 
-import type { Prompt, PromptAnswer, RolePhase, UUID } from "@/types/schema";
+import type {
+  ParticipantSession,
+  ParticipantSessionWithProfile,
+  Prompt,
+  PromptAnswer,
+  RolePhase,
+  Session,
+  UUID,
+} from "@/types/schema";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function fetchRoles(templateId: string) {
@@ -114,11 +122,9 @@ export type SessionParticipant = {
   };
 };
 
-// x.profile?.first_name and x.profile?.first_name
-// returns SessionParticipant[]
 export async function sessionParticipants(
   session_id: UUID,
-): Promise<SessionParticipant[]> {
+): Promise<ParticipantSessionWithProfile[]> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("participant_session")
@@ -136,10 +142,36 @@ export async function sessionParticipants(
     `,
     )
     .eq("session_id", session_id)
-    .returns<SessionParticipant[]>();
+    .returns<ParticipantSessionWithProfile[]>();
 
   if (error) throw error;
 
+  return data ?? [];
+}
+
+export async function sessionParticipantsBulk(
+  session_ids: UUID[],
+): Promise<ParticipantSessionWithProfile[]> {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("participant_session")
+    .select(
+      `
+      user_id,
+      role_id,
+      session_id,
+      phase_index,
+      is_finished,
+      profile (
+      first_name,
+      last_name
+      )
+    `,
+    )
+    .in("session_id", session_ids)
+    .returns<ParticipantSessionWithProfile[]>();
+
+  if (error) throw error;
   return data ?? [];
 }
 
@@ -343,6 +375,21 @@ export async function fetchPromptResponses(
     .eq("user_id", userId)
     .eq("session_id", sessionId)
     .eq("phase_id", phaseId);
+  if (error) {
+    console.error("Error fetching prompts:", error);
+  }
+
+  return data ?? [];
+}
+
+export async function fetchSessionsbyUserGroup(
+  userGroupId: string,
+): Promise<Session[] | null> {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("session")
+    .select("*")
+    .eq("user_group_id", userGroupId);
   if (error) {
     console.error("Error fetching prompts:", error);
   }

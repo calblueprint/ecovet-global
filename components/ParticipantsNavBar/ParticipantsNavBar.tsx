@@ -29,9 +29,9 @@ const TopNavBar = () => {
             Current Exercises
           </TopNavButton>
         </Link>
-        <Link href="/participant/past-exercises">
+        <Link href="/participants/past-exercises">
           <TopNavButton
-            $active={pathname.startsWith("/participant/past-exercises")}
+            $active={pathname.startsWith("/participants/past-exercises")}
           >
             Past Exercises
           </TopNavButton>{" "}
