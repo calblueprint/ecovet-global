@@ -1,6 +1,6 @@
+import type { UUID } from "@/types/schema";
 import { useState } from "react";
 import Image from "next/image";
-import { UUID } from "crypto";
 import cross from "@/assets/images/DeleteTagCross.svg";
 import COLORS from "@/styles/colors";
 import { ColorDot, DeleteButton, StyledTag, StyledTagName } from "./styles";

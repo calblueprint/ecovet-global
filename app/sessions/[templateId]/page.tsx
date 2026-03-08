@@ -1,11 +1,10 @@
 "use client";
 
+import type { Template, UUID } from "@/types/schema";
 import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { UUID } from "crypto";
-import { fetchTemplate } from "@/api/supabase/queries/templates";
-import { Template } from "@/types/schema";
+import { fetchTemplate } from "@/actions/supabase/queries/templates";
 import { Button, Container, Heading2, Heading3, Main } from "../styles";
 
 export default function Sessions() {

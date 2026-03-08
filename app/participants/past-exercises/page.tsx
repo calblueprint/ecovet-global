@@ -1,66 +1,52 @@
 "use client";
 
-import type { ParticipantSession, Session } from "@/types/schema";
+import type { ParticipantSessionWithProfile, Session } from "@/types/schema";
 import { useEffect, useState } from "react";
+import {
+  fetchSessionsbyUserGroup,
+  sessionParticipantsBulk,
+} from "@/actions/supabase/queries/sessions";
+import { useProfile } from "@/utils/ProfileProvider";
 
 export default function PastSessionsPage() {
+  const { profile } = useProfile();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [participantsBySession, setParticipantsBySession] = useState<
-    Record<string, ParticipantSession[]>
+    Record<string, ParticipantSessionWithProfile[]>
   >({});
-  const [loading, setLoading] = useState(true);
-  // const [DEBUG_SESSION_ID] = "0385b601-78cf-4997-9a2d-9fb137637203";
 
   useEffect(() => {
-    async function fetchSessions() {
-      try {
-        const response = await fetch(
-          "/api/queries/user-groups/fetchUserGroupSessions",
-        );
-        const data = await response.json();
-        setSessions(data);
-      } catch (error) {
-        console.error("Error fetching past sessions:", error);
-      } finally {
-        setLoading(false);
+    if (!profile?.user_group_id) return;
+
+    (async () => {
+      const sessions = await fetchSessionsbyUserGroup(profile.user_group_id!);
+      if (!sessions) {
+        return;
       }
-    }
+      setSessions(sessions);
 
-    fetchSessions();
-  }, []);
-
-  useEffect(() => {
-    async function fetchParticipants() {
-      const entries = await Promise.all(
-        sessions.map(async session => {
-          const res = await fetch(
-            `/api/sessions/${session.session_id}/participants`,
-          );
-          const data = await res.json();
-
-          return [session.session_id, data] as const;
-        }),
+      const participantsData = await sessionParticipantsBulk(
+        sessions.map(s => s.session_id),
       );
+      setParticipantsBySession(
+        participantsData.reduce<
+          Record<string, ParticipantSessionWithProfile[]>
+        >((acc, p) => {
+          if (!acc[p.session_id]) acc[p.session_id] = [];
+          acc[p.session_id].push(p);
+          return acc;
+        }, {}),
+      );
+    })();
+  }, [profile]);
 
-      setParticipantsBySession(Object.fromEntries(entries));
-    }
-
-    if (sessions.length > 0) {
-      fetchParticipants();
-    }
-  }, [sessions]);
-
-  const activeSessions = sessions.filter(session => session.is_finished);
-  const archivedSessions = sessions.filter(session => !session.is_finished);
-
-  if (loading) {
-    return <div>Loading past sessions...</div>;
-  }
+  const activeSessions = sessions.filter(s => !s.is_finished);
+  const archivedSessions = sessions.filter(s => s.is_finished);
 
   return (
     <div>
       <h1>Active Sessions</h1>
-      {activeSessions.filter(session => !session.is_finished).length === 0 ? (
+      {activeSessions.length === 0 ? (
         <p>No active sessions found.</p>
       ) : (
         <ul>
@@ -71,20 +57,21 @@ export default function PastSessionsPage() {
               <div>{session.template_id}</div>
 
               <ul>
-                {participantsBySession[session.session_id]?.map(p => (
-                  <li key={p.session_id}>
-                    <div>
-                      : {p.profile.first_name} {p.profile.last_name}
-                    </div>
-                  </li>
-                ))}
+                {participantsBySession[session.session_id]?.map(
+                  (p: ParticipantSessionWithProfile) => (
+                    <li key={p.user_id}>
+                      {p.profile.first_name} {p.profile.last_name}
+                    </li>
+                  ),
+                )}
               </ul>
             </li>
           ))}
         </ul>
       )}
-      <h1> Archived Sessions</h1>
-      {archivedSessions.filter(session => session.is_finished).length === 0 ? (
+
+      <h1>Archived Sessions</h1>
+      {archivedSessions.length === 0 ? (
         <p>No archived sessions found.</p>
       ) : (
         <ul>
@@ -95,13 +82,13 @@ export default function PastSessionsPage() {
               <div>{session.template_id}</div>
 
               <ul>
-                {participantsBySession[session.session_id]?.map(p => (
-                  <li key={p.session_id}>
-                    <div>
-                      : {p.profile.first_name} {p.profile.last_name}
-                    </div>
-                  </li>
-                ))}
+                {participantsBySession[session.session_id]?.map(
+                  (p: ParticipantSessionWithProfile) => (
+                    <li key={p.user_id}>
+                      {p.profile.first_name} {p.profile.last_name}
+                    </li>
+                  ),
+                )}
               </ul>
             </li>
           ))}

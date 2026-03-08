@@ -1,10 +1,10 @@
 "use client";
 
+import type { UUID } from "@/types/schema";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { UUID } from "crypto";
-import { setIsFinished } from "@/api/supabase/queries/sessions";
-import { Button } from "./styles";
+import { setIsFinished } from "@/actions/supabase/queries/sessions";
+import { Button } from "../styles";
 
 interface NextButtonProps {
   user_id: UUID;
