@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useState } from "react";
 import { UUID } from "crypto";
 import { produce } from "immer";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";

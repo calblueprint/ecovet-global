@@ -1,13 +1,44 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Flex } from "@/styles/containers";
-import { B2, H3 } from "@/styles/text";
+import { B2, Caption, H3 } from "@/styles/text";
 
 export const LayoutWrapper = styled.div`
   display: flex;
   width: 100%;
 `;
 
+export const PhaseCaption = styled(Caption)`
+  color: ${COLORS.black70};
+  font-weight: 400;
+`;
+
+export const RoleFlex = styled(Flex)`
+  gap: 0.5rem;
+  direction: row;
+`;
+
+export const PhaseTemplateHeader = styled(H3)`
+  color: ${COLORS.black100};
+  font-weight: 700;
+`;
+
+export const RoleTemplateName = styled(B2)`
+  color: ${COLORS.black70};
+`;
+
+export const RoleDescriptionTemplate = styled(B2)`
+  color: ${COLORS.black40};
+`;
+
+export const SidebarCaption = styled(Caption)`
+  color: ${COLORS.black40};
+`;
+
+export const SidebarTemplateName = styled(B2)`
+  font-weight: 700;
+  color: ${COLORS.black70};
+`;
 //----------------------------------------------------------------------------------------
 //-----------------------------------   TABS STYLING   -----------------------------------
 //----------------------------------------------------------------------------------------

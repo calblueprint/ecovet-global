@@ -6,6 +6,7 @@ import {
   FieldCard,
   FieldLegend,
   FormStack,
+  PhaseTemplateHeader,
   RoleHeader,
   RoleHeaderContainer,
 } from "./styles";
@@ -21,9 +22,7 @@ export default function TemplateOverviewForm({
     <FormStack>
       <RoleHeaderContainer>
         <RoleHeader>
-          <H3 $color={COLORS.black100} $fontWeight="700">
-            Scenario Overview
-          </H3>
+          <PhaseTemplateHeader>Scenario Overview</PhaseTemplateHeader>
         </RoleHeader>
       </RoleHeaderContainer>
 

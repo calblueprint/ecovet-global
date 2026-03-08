@@ -1,6 +1,6 @@
 import COLORS from "@/styles/colors";
 import { Caption } from "@/styles/text";
-import { PhaseEntry } from "./styles";
+import { PhaseCaption, PhaseEntry } from "./styles";
 
 export default function EditablePhase({
   name,
@@ -13,12 +13,8 @@ export default function EditablePhase({
 }) {
   return (
     <PhaseEntry>
-      <Caption $color={COLORS.black70} $fontWeight={400}>
-        {index + 1}
-      </Caption>
-      <Caption
-        $color={COLORS.black70}
-        $fontWeight={400}
+      <PhaseCaption>{index + 1}</PhaseCaption>
+      <PhaseCaption
         contentEditable
         suppressContentEditableWarning
         onBlur={e => {
@@ -27,7 +23,7 @@ export default function EditablePhase({
         }}
       >
         {name}
-      </Caption>
+      </PhaseCaption>
     </PhaseEntry>
   );
 }

@@ -1,7 +1,7 @@
 import { UUID } from "crypto";
 import COLORS from "@/styles/colors";
 import { B2, H3 } from "@/styles/text";
-import { Phase, roleFormInput, RolePhase } from "@/types/schema";
+import { Phase, roleFormInput } from "@/types/schema";
 import {
   BigInput,
   FieldCard,
@@ -9,9 +9,12 @@ import {
   FormStack,
   GhostButton,
   PhaseCard,
+  PhaseTemplateHeader,
+  RoleDescriptionTemplate,
   RoleHeader,
   RoleHeaderContainer,
   RolePhaseDescriptionInput,
+  RoleTemplateName,
 } from "./styles";
 
 export default function RoleForm({
@@ -31,19 +34,17 @@ export default function RoleForm({
     <FormStack>
       <RoleHeaderContainer>
         <RoleHeader>
-          <H3 $color={COLORS.black100} $fontWeight="700">
-            {phase.phase_name}
-          </H3>
-          <B2 $color={COLORS.black70}>{value.role.role_name}</B2>
+          <PhaseTemplateHeader>{phase.phase_name}</PhaseTemplateHeader>
+          <RoleTemplateName>{value.role.role_name}</RoleTemplateName>
         </RoleHeader>
 
-        <B2 $color={COLORS.black40}>
+        <RoleDescriptionTemplate>
           <RolePhaseDescriptionInput
             placeholder="Enter phase description here..."
             value={rolePhase.description ?? ""}
             onChange={e => onChange(rolePhaseId, "description", e.target.value)}
           ></RolePhaseDescriptionInput>
-        </B2>
+        </RoleDescriptionTemplate>
       </RoleHeaderContainer>
 
       <PhaseCard key={rolePhase.role_phase_id}>

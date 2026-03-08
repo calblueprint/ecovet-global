@@ -13,13 +13,16 @@ import EditablePhase from "./EditablePhase";
 import RoleEntry from "./RoleEntry";
 import {
   HeaderWithPlus,
+  PhaseCaption,
   PhaseList,
   RoleList,
   Selectable,
+  SidebarCaption,
   SidebarContainer,
   SideBarEntry,
   SideBarHeader,
   SideBarSection,
+  SidebarTemplateName,
   TabbedList,
 } from "./styles";
 
@@ -118,10 +121,8 @@ export default function TemplateBuilderSideBar({
     <SidebarContainer>
       <SideBarSection $isFirst={true}>
         <SideBarHeader>
-          <Caption $color={COLORS.black40}>← Catalogue</Caption>
-          <B2
-            $fontWeight={700}
-            $color={COLORS.black70}
+          <SidebarCaption>← Catalogue</SidebarCaption>
+          <SidebarTemplateName
             contentEditable
             suppressContentEditableWarning
             onBlur={e => {
@@ -134,7 +135,7 @@ export default function TemplateBuilderSideBar({
             }}
           >
             {template.template_name}
-          </B2>
+          </SidebarTemplateName>
         </SideBarHeader>
       </SideBarSection>
 
@@ -148,9 +149,7 @@ export default function TemplateBuilderSideBar({
                 setActiveIds({ roleId: TEMPLATE_INDEX, rolePhaseId: null })
               }
             >
-              <Caption $color={COLORS.black70} $fontWeight={400}>
-                Scenario Overview
-              </Caption>
+              <PhaseCaption>Scenario Overview</PhaseCaption>
             </Selectable>
           </TabbedList>
         </SideBarEntry>

@@ -9,8 +9,10 @@ import { Caption } from "@/styles/text";
 import { localStore, Role } from "@/types/schema";
 import { ActiveIds } from "../page";
 import {
+  PhaseCaption,
   RoleEntryContainer,
   RoleEntryHeader,
+  RoleFlex,
   Selectable,
   TabbedList,
 } from "./styles";
@@ -39,9 +41,7 @@ export default function RoleEntry({
           onClick={() => setSelected(s => !s)}
         />
 
-        <Caption
-          $color={COLORS.black70}
-          $fontWeight={400}
+        <PhaseCaption
           contentEditable
           suppressContentEditableWarning
           onBlur={e => {
@@ -50,7 +50,7 @@ export default function RoleEntry({
           }}
         >
           {role.role_name}
-        </Caption>
+        </PhaseCaption>
       </RoleEntryHeader>
 
       {selected && (
@@ -70,14 +70,10 @@ export default function RoleEntry({
                     });
                   }}
                 >
-                  <Flex $gap="8px" $direction="row">
-                    <Caption $color={COLORS.black70} $fontWeight={400}>
-                      {phase.phase_number}
-                    </Caption>
-                    <Caption $color={COLORS.black70} $fontWeight={400}>
-                      {phase.phase_name}
-                    </Caption>
-                  </Flex>
+                  <RoleFlex>
+                    <PhaseCaption>{phase.phase_number}</PhaseCaption>
+                    <PhaseCaption>{phase.phase_name}</PhaseCaption>
+                  </RoleFlex>
                 </Selectable>
               );
             },
