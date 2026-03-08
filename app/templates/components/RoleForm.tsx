@@ -48,41 +48,29 @@ export default function RoleForm({
         </B2>
       </RoleHeaderContainer>
 
-      {/* TODO: change to phase description */}
-      <FieldCard>
-        <FieldLegend>Role description</FieldLegend>
-
-        <BigInput
-          name="role_description"
-          placeholder="Role description"
-          value={value.role.role_description ?? ""}
-          onChange={e =>
-            onChange(value.role.role_id, "role_description", e.target.value)
-          }
-        />
-      </FieldCard>
-
       <PhaseCard key={rolePhase.role_phase_id}>
         {(value.promptIndex[rolePhase.role_phase_id] ?? []).map(
           (promptID, j) => (
-            <QuestionCard key={promptID}>
+            <FieldCard key={promptID}>
               <FieldLegend>Question {j + 1}</FieldLegend>
               <BigInput
                 name="prompt"
-                placeholder="Type here..."
+                placeholder="Type question..."
                 value={value.promptById[promptID].prompt_text ?? ""}
                 onChange={e =>
                   onChange(promptID, "prompt_text", e.target.value)
                 }
               />
-              <RemoveQuestionButton
-                onClick={() =>
-                  onChange(promptID, "remove_prompt", rolePhase.role_phase_id)
-                }
-              >
-                Remove
-              </RemoveQuestionButton>
-            </QuestionCard>
+
+              {/* TODO: remove perhaps */}
+              {/* <RemoveQuestionButton */}
+              {/*   onClick={() => */}
+              {/*     onChange(promptID, "remove_prompt", rolePhase.role_phase_id) */}
+              {/*   } */}
+              {/* > */}
+              {/*   Remove */}
+              {/* </RemoveQuestionButton> */}
+            </FieldCard>
           ),
         )}
 

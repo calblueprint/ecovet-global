@@ -257,7 +257,11 @@ export const FieldCard = styled.div`
   background: ${COLORS.oat_light};
 `;
 
-export const PhaseCard = styled.div``;
+export const PhaseCard = styled.div`
+  display: flex;
+  gap: 2.5rem;
+  flex-direction: column;
+`;
 
 export const PhaseHeader = styled(Flex).attrs({ $align: "center" })`
   gap: 4px;
