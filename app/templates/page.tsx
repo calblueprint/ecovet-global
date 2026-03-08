@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { UUID } from "crypto";
 import { produce } from "immer";
-import { LocalStore, Template } from "@/types/schema";
+import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
+import { localStore, Template } from "@/types/schema";
+import { SideNavContainer } from "../facilitator/styles";
+import { LayoutWrapper } from "./components/styles";
 import TemplateBuilder from "./components/TemplateBuilder";
+import TemplateBuilderSideBar from "./components/TemplateBuilderSidebar";
 import { TemplateMainBox } from "./styles";
 
 const createInitialStore = (): LocalStore => {
@@ -36,8 +40,17 @@ const createInitialStore = (): LocalStore => {
   };
 };
 
+export type ActiveIds = {
+  roleId: UUID | number;
+  rolePhaseId: UUID | null;
+};
+
 export default function NewTemplatePage() {
-  const [newTemp, setNewTemp] = useState<LocalStore>(() =>
+  const [activeIds, setActiveIds] = useState<ActiveIds>({
+    roleId: 1,
+    rolePhaseId: null,
+  });
+  const [newTemp, setNewTemp] = useState<localStore>(() =>
     createInitialStore(),
   );
   const template = newTemp?.rolesById[1] as Template;
@@ -51,28 +64,28 @@ export default function NewTemplatePage() {
   }
 
   return (
-    <TemplateMainBox>
-      <Link href="/facilitator/template-list">← Back</Link>
-      <h1
-        contentEditable
-        suppressContentEditableWarning
-        className="text-5xl font-extrabold mb-4 outline-none"
-        onBlur={e => {
-          const value = e.currentTarget.textContent?.trim();
+    <>
+      <TopNavBar />
 
-          updateLocalStore(draft => {
-            (draft.rolesById[1] as Template).template_name =
-              value && value.length > 0 ? value : "New Template";
-          });
-        }}
-      >
-        {template.template_name}
-      </h1>
-      <TemplateBuilder
-        LocalStore={newTemp}
-        onFinish={resetTemplate}
-        update={updateLocalStore}
-      />
-    </TemplateMainBox>
+      <LayoutWrapper>
+        <SideNavContainer>
+          <TemplateBuilderSideBar
+            localStore={newTemp}
+            updateLocalStore={updateLocalStore}
+            setActiveIds={setActiveIds}
+          />
+        </SideNavContainer>
+
+        <TemplateMainBox>
+          <TemplateBuilder
+            activeIds={activeIds}
+            setActiveIds={setActiveIds}
+            localStore={newTemp}
+            onFinish={resetTemplate}
+            update={updateLocalStore}
+          />
+        </TemplateMainBox>
+      </LayoutWrapper>
+    </>
   );
 }

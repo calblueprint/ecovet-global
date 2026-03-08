@@ -1,7 +1,44 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Flex } from "@/styles/containers";
+import { B2, Caption, H3 } from "@/styles/text";
 
+export const LayoutWrapper = styled.div`
+  display: flex;
+  width: 100%;
+`;
+
+export const PhaseCaption = styled(Caption)`
+  color: ${COLORS.black70};
+  font-weight: 400;
+`;
+
+export const RoleFlex = styled(Flex)`
+  gap: 0.5rem;
+  direction: row;
+`;
+
+export const PhaseTemplateHeader = styled(H3)`
+  color: ${COLORS.black100};
+  font-weight: 700;
+`;
+
+export const RoleTemplateName = styled(B2)`
+  color: ${COLORS.black70};
+`;
+
+export const RoleDescriptionTemplate = styled(B2)`
+  color: ${COLORS.black40};
+`;
+
+export const SidebarCaption = styled(Caption)`
+  color: ${COLORS.black40};
+`;
+
+export const SidebarTemplateName = styled(B2)`
+  font-weight: 700;
+  color: ${COLORS.black70};
+`;
 //----------------------------------------------------------------------------------------
 //-----------------------------------   TABS STYLING   -----------------------------------
 //----------------------------------------------------------------------------------------
@@ -222,19 +259,40 @@ export const GhostButton = styled.button`
 export const FormStack = styled(Flex).attrs({
   $direction: "column",
   $gap: "20px",
+})``;
+
+export const RoleHeader = styled(Flex)`
+  justify-content: space-between;
+  align-items: center;
+`;
+
+export const RoleHeaderContainer = styled(Flex).attrs({
+  $direction: "column",
+  $gap: "1rem",
 })`
-  padding-right: 150px;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid ${COLORS.oat_medium};
 `;
 
-export const FieldCard = styled.fieldset`
-  position: relative;
-  border: 1px solid ${COLORS.black20};
-  border-radius: 4px;
-  padding: 10px;
-  margin-bottom: 10px;
+export const FieldCard = styled.div`
+  display: flex;
+  padding: 16px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 16px;
+  align-self: stretch;
+
+  border-radius: 8px;
+  border: 1px solid ${COLORS.oat_medium};
+  background: ${COLORS.oat_light};
 `;
 
-export const PhaseCard = styled.div``;
+export const PhaseCard = styled.div`
+  display: flex;
+  gap: 2.5rem;
+  flex-direction: column;
+`;
 
 export const PhaseHeader = styled(Flex).attrs({ $align: "center" })`
   gap: 4px;
@@ -271,11 +329,10 @@ export const RemoveQuestionButton = styled.button`
 `;
 
 /** Legend text */
-export const FieldLegend = styled.legend`
-  font-family: "Public Sans", system-ui, sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  color: #c7c6c3;
+export const FieldLegend = styled(B2)`
+  color: ${COLORS.black70};
+  font-weight: 700;
+  line-height: 150%;
 `;
 
 export const QuestionCard = styled.fieldset`
@@ -286,19 +343,33 @@ export const QuestionCard = styled.fieldset`
   padding: 10px;
   margin-bottom: 10px;
 `;
+
 /* Big comfortable text area (used for description/prompts) */
-export const BigInput = styled.input.attrs({ type: "text" })`
-  width: calc(100% - 20px);
-  margin: 5px;
-  border: none;
-  resize: none;
-  font: inherit;
-  line-height: 1.4;
-  &:focus {
-    outline: none;
-    box-shadow: none;
-    border-color: inherit;
+export const BigInput = styled.input.attrs({
+  type: "text",
+})`
+  display: flex;
+  padding: 10px 12px;
+  align-items: center;
+  gap: 10px;
+  flex: 1 0 0;
+  align-self: stretch;
+  font-size: 0.75rem;
+
+  border-radius: 4px;
+  border: 1px solid ${COLORS.oat_medium};
+  background: ${COLORS.white};
+
+  ::placeholder {
+    color: ${COLORS.black20};
   }
+`;
+// TODO: placeholder color not working
+
+export const RolePhaseDescriptionInput = styled.input.attrs({ type: "text" })`
+  border: none;
+  font-style: italic;
+  width: 100%;
 `;
 
 /* Section heading like “Phase 1” */
@@ -317,3 +388,76 @@ export const SectionH2 = styled.h2`
   padding: 2px 8px;
   line-height: 1.1;
 `;
+
+export const SidebarContainer = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
+export const SideBarEntry = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+export const SideBarSection = styled.div<{ $isFirst?: boolean }>`
+  width: 100%;
+  display: flex;
+  gap: 16px;
+  flex-direction: column;
+  padding-top: ${({ $isFirst }) => ($isFirst ? "0" : "12px")};
+  padding-bottom: 12px;
+  padding-right: 12px;
+  border-bottom: 1px solid ${COLORS.oat_medium};
+`;
+
+export const SideBarHeader = styled.div`
+  display: flex;
+  gap: 0.375rem;
+  flex-direction: column;
+`;
+
+export const Selectable = styled.div`
+  cursor: pointer;
+`;
+
+export const HeaderWithPlus = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+export const PhaseList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+`;
+
+export const TabbedList = styled(PhaseList)`
+  padding-top: 0.35rem;
+  padding-left: 12px;
+  font-weight: 400;
+`;
+
+export const RoleEntryContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+`;
+
+export const RoleList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+`;
+
+export const RoleEntryHeader = styled(Flex).attrs({
+  $align: "center",
+  $gap: "4px",
+})``;
+
+export const PhaseEntry = styled(Flex).attrs({
+  $align: "center",
+  $gap: "8px",
+})``;

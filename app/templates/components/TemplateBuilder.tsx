@@ -10,68 +10,31 @@ import {
 } from "@/actions/supabase/queries/templates";
 import { LocalStore, Prompt, Role, Template } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
+import { ActiveIds } from "../page";
 import RoleForm from "./RoleForm";
-import {
-  NewTabButton,
-  PanelCard,
-  PhasesControl,
-  PhasesCount,
-  PhasesLabel,
-  PhasesStepper,
-  StepButton,
-  SubmitButton,
-  TabButton,
-  TabsHeader,
-  TabsLeft,
-  TabsRight,
-} from "./styles";
+import { PanelCard, SubmitButton } from "./styles";
 import TemplateOverviewForm from "./TemplateOverviewForm";
 
+// TODO: add an active phase id
 export default function TemplateBuilder({
-  LocalStore,
+  activeIds,
+  setActiveIds,
+  localStore,
   onFinish,
   update,
 }: {
-  LocalStore: LocalStore | null;
+  activeIds: ActiveIds;
+  setActiveIds: React.Dispatch<React.SetStateAction<ActiveIds>>;
+  localStore: localStore | null;
   onFinish: () => void;
   update: (updater: (draft: LocalStore) => void) => void;
 }) {
-  const [activeId, setActiveId] = useState<UUID | number>(1); // current 'tab' or role
   const [saving, setSaving] = useState(false); //nice 'saving' to let user know supabase push is still happening and when finished
   const { profile } = useProfile();
+  const TEMPLATE_INDEX = 1;
 
   function createUUID(): UUID {
-    //helper function to create new UUIDs
     return crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
-  }
-
-  function addRole(): void {
-    if (LocalStore == null) return;
-    const newRoleID = createUUID();
-
-    update(draft => {
-      draft.rolesById[newRoleID] = {
-        role_id: newRoleID,
-        role_name: "New Role",
-        role_description: "",
-        template_id: draft.templateID,
-      };
-      draft.roleIds.push(newRoleID);
-      draft.rolePhaseIndex[newRoleID] = {}; //initialize rolePhaseIndex dict for this role
-      for (const phaseID of draft.phaseIds) {
-        //when creating roles when phases already exist, automatically add rolePhases for role
-        const newRolePhaseID = createUUID();
-        draft.rolePhaseIndex[newRoleID][phaseID] = newRolePhaseID;
-        draft.rolePhasesById[newRolePhaseID] = {
-          role_phase_id: newRolePhaseID,
-          phase_id: phaseID,
-          role_id: newRoleID,
-          description: null,
-        };
-        draft.promptIndex[newRolePhaseID] = []; //similiar to rolePhaseIndex dict but for prompts
-      }
-    });
-    setActiveId(newRoleID);
   }
 
   function removeRole(role_id: UUID | number): void {
@@ -97,51 +60,8 @@ export default function TemplateBuilder({
       }
       delete draft.rolePhaseIndex[role_id];
     });
-    setActiveId(nextActive);
-  }
 
-  // function renameRole(role_id: UUID | number, newLabel: string) {
-  //   if (LocalStore == null) return;
-
-  //   update(draft => {
-  //     if (typeof role_id === "number") {
-  //       (draft.rolesById[role_id] as Template).template_name = newLabel;
-  //     } else {
-  //       (draft.rolesById[role_id] as Role).role_name = newLabel;
-  //     }
-  //   });
-  // }
-  //
-
-  function addPhase(): void {
-    if (!LocalStore) return;
-    const newPhaseID = createUUID();
-
-    update(draft => {
-      const phaseNumber = draft.phaseIds.length + 1;
-      draft.phasesById[newPhaseID] = {
-        phase_id: newPhaseID,
-        template_id: draft.templateID,
-        phase_name: `Phase ${phaseNumber}`,
-        phase_number: phaseNumber,
-        phase_description: null,
-        is_finished: null,
-      };
-      draft.phaseIds.push(newPhaseID);
-
-      for (const role of draft.roleIds) {
-        if (typeof role === "number") continue;
-        const newRolePhaseID = createUUID();
-        draft.rolePhasesById[newRolePhaseID] = {
-          role_phase_id: newRolePhaseID,
-          phase_id: newPhaseID,
-          role_id: role,
-          description: null,
-        };
-        draft.rolePhaseIndex[role][newPhaseID] = newRolePhaseID;
-        draft.promptIndex[newRolePhaseID] = [];
-      }
-    });
+    setActiveIds({ roleId: nextActive, rolePhaseId: null });
   }
 
   function removePhase(phase_id: UUID | null = null): void {
@@ -309,118 +229,51 @@ export default function TemplateBuilder({
     onFinish();
   }
 
+  const rolePhases = Object.entries(
+    localStore?.rolePhaseIndex[activeIds.roleId as UUID] || {},
+  ).map(([_, rolePhaseID]) => rolePhaseID);
+
   return (
     <div>
-      <TabsHeader>
-        <TabsLeft>
-          {LocalStore?.roleIds.map(t => {
-            const roleOrTemplate = LocalStore.rolesById[t];
-            const isTemplate = typeof t === "number";
-
-            return (
-              <TabButton
-                key={String(t)}
-                $active={activeId === t}
-                onClick={() => setActiveId(t)}
-              >
-                {isTemplate ? (
-                  "Scenario Overview"
-                ) : (
-                  <>
-                    <span
-                      contentEditable
-                      suppressContentEditableWarning
-                      className="outline-none"
-                      onBlur={e => {
-                        const value =
-                          e.currentTarget.textContent?.trim() || "New Role";
-                        update(draft => {
-                          (draft.rolesById[t] as Role).role_name = value;
-                        });
-                      }}
-                    >
-                      {(roleOrTemplate as Role).role_name}
-                    </span>
-                    <span
-                      role="button"
-                      style={{
-                        marginLeft: 10,
-                        background: "transparent",
-                        border: "none",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                      }}
-                      onClick={() => removeRole(t)}
-                    >
-                      ×
-                    </span>
-                  </>
-                )}
-              </TabButton>
-            );
-          })}
-
-          <NewTabButton onClick={addRole}>+</NewTabButton>
-        </TabsLeft>
-
-        <TabsRight>
-          <PhasesControl
-            role="group"
-            aria-label="Phases control"
-            onKeyDown={e => {
-              if (e.key === "ArrowUp") addPhase();
-              if (e.key === "ArrowDown") removePhase();
-            }}
-          >
-            <PhasesLabel>Phases:</PhasesLabel>
-            <PhasesCount>{LocalStore?.phaseIds.length ?? 0}</PhasesCount>
-            <PhasesStepper>
-              <StepButton aria-label="Increase phases" onClick={addPhase}>
-                ▲
-              </StepButton>
-              <StepButton
-                aria-label="Decrease phases"
-                onClick={() => removePhase()}
-                disabled={(LocalStore?.phaseIds.length ?? 0) === 0}
-              >
-                ▼
-              </StepButton>
-            </PhasesStepper>
-          </PhasesControl>
-          <Link href="/facilitator/template-list">
-            <SubmitButton onClick={saveTemplate}>
-              {saving ? "Saving..." : "Submit Template"}
-            </SubmitButton>
-          </Link>
-        </TabsRight>
-      </TabsHeader>
-
       <div>
-        {LocalStore?.roleIds.map(t =>
-          t === activeId ? (
-            <PanelCard key={`panel-${String(t)}`}>
-              {typeof activeId === "number" ? (
-                <TemplateOverviewForm
-                  value={LocalStore.rolesById[activeId] as Template}
-                  onChange={setActiveUpdate}
-                />
-              ) : (
-                <RoleForm
-                  value={{
-                    role: LocalStore.rolesById[activeId] as Role,
-                    rolePhases: LocalStore.rolePhasesById,
-                    rolePhaseIndex: LocalStore.rolePhaseIndex[activeId],
-                    promptById: LocalStore.promptById,
-                    promptIndex: LocalStore.promptIndex,
-                    phasesById: LocalStore.phasesById,
-                  }}
-                  onChange={setActiveUpdate}
-                />
-              )}
-            </PanelCard>
-          ) : null,
+        {localStore && (
+          <PanelCard key={`panel-${String(activeIds.roleId)}`}>
+            {activeIds.roleId == TEMPLATE_INDEX || rolePhases.length == 0 ? (
+              <TemplateOverviewForm
+                value={localStore.rolesById[TEMPLATE_INDEX] as Template}
+                onChange={setActiveUpdate}
+              />
+            ) : (
+              <RoleForm
+                value={{
+                  role: localStore.rolesById[activeIds.roleId] as Role,
+                  rolePhases: localStore.rolePhasesById,
+                  rolePhaseIndex:
+                    localStore.rolePhaseIndex[activeIds.roleId as UUID],
+                  promptById: localStore.promptById,
+                  promptIndex: localStore.promptIndex,
+                  phasesById: localStore.phasesById,
+                }}
+                rolePhaseId={activeIds.rolePhaseId || rolePhases[0]}
+                phase={
+                  localStore.phasesById[
+                    localStore.rolePhasesById[
+                      activeIds.rolePhaseId || rolePhases[0]
+                    ].phase_id
+                  ]
+                }
+                onChange={setActiveUpdate}
+              />
+            )}
+          </PanelCard>
         )}
       </div>
+
+      <Link href="/facilitator/template-list">
+        <SubmitButton onClick={saveTemplate}>
+          {saving ? "Saving..." : "Submit Template"}
+        </SubmitButton>
+      </Link>
     </div>
   );
 }

@@ -4,11 +4,13 @@ import type { UUID } from "@/types/schema";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 async function getInviteByEmail(email: string) {
+  const lowerCaseEmail = email.toLowerCase();
+
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("invite")
     .select("user_group_id, user_type")
-    .eq("email", email)
+    .eq("email", lowerCaseEmail)
     .single();
 
   if (error) {
@@ -24,6 +26,8 @@ async function getInviteByEmail(email: string) {
 }
 
 export async function addInviteInfoToProfile(userId: string, email: string) {
+  const lowerCaseEmail = email.toLowerCase();
+  const invite = await getInviteByEmail(lowerCaseEmail);
   const supabase = await getSupabaseServerClient();
   const invite = await getInviteByEmail(email);
 
@@ -31,7 +35,7 @@ export async function addInviteInfoToProfile(userId: string, email: string) {
     id: userId,
     user_group_id: invite.user_group_id,
     user_type: invite.user_type,
-    email: email,
+    email: lowerCaseEmail,
   });
 
   if (error) {
@@ -40,11 +44,13 @@ export async function addInviteInfoToProfile(userId: string, email: string) {
   }
 }
 export async function markInviteAccepted(email: string) {
+  const lowerCaseEmail = email.toLowerCase();
+
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("invite")
     .update({ status: "Accepted" })
-    .eq("email", email)
+    .eq("email", lowerCaseEmail)
     .select();
 
   if (error) {
@@ -60,11 +66,13 @@ export async function markInviteAccepted(email: string) {
 }
 
 export async function makeAdmin(userId: string, email: string) {
+  const lowerCaseEmail = email.toLowerCase();
+
   const supabase = await getSupabaseServerClient();
   const { error } = await supabase.from("profile").upsert({
     id: userId,
     user_type: "Admin",
-    email: email,
+    email: lowerCaseEmail,
     user_group_id: "0b73ed2d-61c3-472e-b361-edaa88f27622",
   });
 

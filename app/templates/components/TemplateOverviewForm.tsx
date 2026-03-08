@@ -1,5 +1,15 @@
-import type { Template } from "@/types/schema";
-import { BigInput, FieldCard, FieldLegend, FormStack } from "./styles";
+import COLORS from "@/styles/colors";
+import { H3 } from "@/styles/text";
+import { Template } from "@/types/schema";
+import {
+  BigInput,
+  FieldCard,
+  FieldLegend,
+  FormStack,
+  PhaseTemplateHeader,
+  RoleHeader,
+  RoleHeaderContainer,
+} from "./styles";
 
 export default function TemplateOverviewForm({
   value,
@@ -10,6 +20,12 @@ export default function TemplateOverviewForm({
 }) {
   return (
     <FormStack>
+      <RoleHeaderContainer>
+        <RoleHeader>
+          <PhaseTemplateHeader>Scenario Overview</PhaseTemplateHeader>
+        </RoleHeader>
+      </RoleHeaderContainer>
+
       <FieldCard>
         <FieldLegend>Summary</FieldLegend>
         <BigInput
