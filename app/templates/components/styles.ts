@@ -235,6 +235,14 @@ export const RoleHeader = styled(Flex)`
   align-items: center;
 `;
 
+export const RoleHeaderContainer = styled(Flex).attrs({
+  $direction: "column",
+  $gap: "1rem",
+})`
+  padding-bottom: 1rem;
+  border-bottom: 1px solid ${COLORS.oat_medium};
+`;
+
 export const FieldCard = styled.div`
   display: flex;
   padding: 16px;
@@ -322,6 +330,12 @@ export const BigInput = styled.input.attrs({
   }
 `;
 // TODO: placeholder color not working
+
+export const RolePhaseDescriptionInput = styled.input.attrs({ type: "text" })`
+  border: none;
+  font-style: italic;
+  width: 100%;
+`;
 
 /* Section heading like “Phase 1” */
 export const SectionH2 = styled.h2`

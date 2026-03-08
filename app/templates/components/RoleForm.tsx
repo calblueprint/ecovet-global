@@ -12,6 +12,8 @@ import {
   QuestionCard,
   RemoveQuestionButton,
   RoleHeader,
+  RoleHeaderContainer,
+  RolePhaseDescriptionInput,
 } from "./styles";
 
 export default function RoleForm({
@@ -29,12 +31,22 @@ export default function RoleForm({
 
   return (
     <FormStack>
-      <RoleHeader>
-        <H3 $color={COLORS.black100} $fontWeight="700">
-          Phase {phase.phase_number}
-        </H3>
-        <B2 $color={COLORS.black70}>{value.role.role_name}</B2>
-      </RoleHeader>
+      <RoleHeaderContainer>
+        <RoleHeader>
+          <H3 $color={COLORS.black100} $fontWeight="700">
+            {phase.phase_name}
+          </H3>
+          <B2 $color={COLORS.black70}>{value.role.role_name}</B2>
+        </RoleHeader>
+
+        <B2 $color={COLORS.black40}>
+          <RolePhaseDescriptionInput
+            placeholder="Enter phase description here..."
+            value={rolePhase.description ?? ""}
+            onChange={e => onChange(rolePhaseId, "description", e.target.value)}
+          ></RolePhaseDescriptionInput>
+        </B2>
+      </RoleHeaderContainer>
 
       {/* TODO: change to phase description */}
       <FieldCard>
@@ -51,19 +63,6 @@ export default function RoleForm({
       </FieldCard>
 
       <PhaseCard key={rolePhase.role_phase_id}>
-        <FieldCard>
-          <FieldLegend>Description</FieldLegend>
-          <BigInput
-            name="role_phase_description"
-            placeholder="Type here..."
-            value={rolePhase.description ?? ""}
-            onChange={e =>
-              onChange(rolePhase.role_phase_id, "description", e.target.value)
-            }
-          />
-        </FieldCard>
-
-        {/* Prompts list */}
         {(value.promptIndex[rolePhase.role_phase_id] ?? []).map(
           (promptID, j) => (
             <QuestionCard key={promptID}>
