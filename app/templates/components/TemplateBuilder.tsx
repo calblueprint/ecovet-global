@@ -1,14 +1,14 @@
+import type { UUID } from "@/types/schema";
 import { useState } from "react";
 import Link from "next/link";
-import { UUID } from "crypto";
 import {
   createPhases,
   createPrompts,
   createRolePhases,
   createRoles,
   createTemplates,
-} from "@/api/supabase/queries/templates";
-import { localStore, Prompt, Role, Template } from "@/types/schema";
+} from "@/actions/supabase/queries/templates";
+import { LocalStore, Prompt, Role, Template } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import { ActiveIds } from "../page";
 import RoleForm from "./RoleForm";
@@ -27,7 +27,7 @@ export default function TemplateBuilder({
   setActiveIds: React.Dispatch<React.SetStateAction<ActiveIds>>;
   localStore: localStore | null;
   onFinish: () => void;
-  update: (updater: (draft: localStore) => void) => void;
+  update: (updater: (draft: LocalStore) => void) => void;
 }) {
   const [saving, setSaving] = useState(false); //nice 'saving' to let user know supabase push is still happening and when finished
   const { profile } = useProfile();
@@ -38,13 +38,13 @@ export default function TemplateBuilder({
   }
 
   function removeRole(role_id: UUID | number): void {
-    if (localStore == null || typeof role_id == "number") return; //if role_id is '1', the current tab is Scenario Overivew and therefore should not be removed
+    if (LocalStore == null || typeof role_id == "number") return; //if role_id is '1', the current tab is Scenario Overivew and therefore should not be removed
 
     let nextActive: UUID | number = 1;
-    const idx = localStore.roleIds.indexOf(role_id);
+    const idx = LocalStore.roleIds.indexOf(role_id);
     if (idx !== -1) {
       nextActive =
-        localStore.roleIds[idx + 1] ?? localStore.roleIds[idx - 1] ?? 1;
+        LocalStore.roleIds[idx + 1] ?? LocalStore.roleIds[idx - 1] ?? 1;
     }
     update(draft => {
       delete draft.rolesById[role_id];
@@ -65,7 +65,7 @@ export default function TemplateBuilder({
   }
 
   function removePhase(phase_id: UUID | null = null): void {
-    if (localStore?.phaseIds.length == 0 || localStore == null) {
+    if (LocalStore?.phaseIds.length == 0 || LocalStore == null) {
       return;
     }
 
@@ -101,7 +101,7 @@ export default function TemplateBuilder({
   }
 
   function addPrompt(rolePhaseID: UUID): void {
-    if (localStore == null) return;
+    if (LocalStore == null) return;
 
     update(draft => {
       const newPromptID = createUUID();
@@ -110,13 +110,14 @@ export default function TemplateBuilder({
         user_id: null,
         role_phase_id: rolePhaseID,
         prompt_text: "",
+        prompt_type: "text",
       };
       draft.promptIndex[rolePhaseID].push(newPromptID);
     });
   }
 
   function removePrompt(rolePhaseID: UUID, promptID: UUID): void {
-    if (localStore == null) return;
+    if (LocalStore == null) return;
 
     update(draft => {
       const i = draft.promptIndex[rolePhaseID].indexOf(promptID);
@@ -127,7 +128,7 @@ export default function TemplateBuilder({
   }
 
   function setActiveUpdate(id: UUID | number, field: string, next: string) {
-    if (!localStore) return;
+    if (!LocalStore) return;
 
     if (typeof id === "number") {
       update(draft => {
@@ -160,8 +161,8 @@ export default function TemplateBuilder({
   async function saveTemplate(): Promise<void> {
     setSaving(true);
 
-    if (localStore == null) return;
-    const saveStore: localStore = structuredClone(localStore);
+    if (LocalStore == null) return;
+    const saveStore: LocalStore = structuredClone(LocalStore);
 
     const realtemplateID = await createTemplates(
       saveStore.templateID,
@@ -220,7 +221,7 @@ export default function TemplateBuilder({
       await createPrompts(
         promptID,
         null,
-        prompt.role_phase_id,
+        prompt.role_phase_id ?? "",
         prompt.prompt_text,
       );
     }

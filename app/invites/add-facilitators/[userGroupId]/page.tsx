@@ -3,7 +3,7 @@
 import { ChangeEvent, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { submitNewInvite } from "@/api/supabase/queries/invites";
+import { submitNewInvite } from "@/actions/supabase/queries/invites";
 import {
   AddFacilitatorButton,
   AddFacilitatorFormDiv,

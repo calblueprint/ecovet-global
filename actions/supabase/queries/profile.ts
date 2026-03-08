@@ -1,9 +1,12 @@
-import { UUID } from "crypto";
-import supabase from "@/api/supabase/createClient";
+"use server";
+
+import type { UUID } from "@/types/schema";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 async function getInviteByEmail(email: string) {
   const lowerCaseEmail = email.toLowerCase();
 
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("invite")
     .select("user_group_id, user_type")
@@ -25,6 +28,8 @@ async function getInviteByEmail(email: string) {
 export async function addInviteInfoToProfile(userId: string, email: string) {
   const lowerCaseEmail = email.toLowerCase();
   const invite = await getInviteByEmail(lowerCaseEmail);
+  const supabase = await getSupabaseServerClient();
+  const invite = await getInviteByEmail(email);
 
   const { error } = await supabase.from("profile").insert({
     id: userId,
@@ -41,6 +46,7 @@ export async function addInviteInfoToProfile(userId: string, email: string) {
 export async function markInviteAccepted(email: string) {
   const lowerCaseEmail = email.toLowerCase();
 
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("invite")
     .update({ status: "Accepted" })
@@ -62,6 +68,7 @@ export async function markInviteAccepted(email: string) {
 export async function makeAdmin(userId: string, email: string) {
   const lowerCaseEmail = email.toLowerCase();
 
+  const supabase = await getSupabaseServerClient();
   const { error } = await supabase.from("profile").upsert({
     id: userId,
     user_type: "Admin",
@@ -76,6 +83,7 @@ export async function makeAdmin(userId: string, email: string) {
 }
 
 export async function fetchProfileByUserId(user_id: UUID) {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("profile")
     .select("*")
@@ -94,24 +102,10 @@ export async function fetchExpandedProfileByUserId(user_id: UUID) {
   if (profile == null) {
     return null;
   }
-
-  const expandedProfile = {
-    id: profile.id,
-    user_group_schema: await fetchUserGroupById(profile.user_group_id),
-    phase_schema: await fetchPhaseById(profile.phase_id),
-    role_schema: await fetchRoleById(profile.role_id),
-    user_type: profile.user_type,
-    is_finished: profile.is_finished,
-    first_name: profile.first_name,
-    last_name: profile.last_name,
-    country: profile.country,
-    org_role: profile.org_role,
-  };
-
-  return expandedProfile;
 }
 
 export async function fetchUserGroupById(user_group_id: UUID) {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("user_group")
     .select("*")
@@ -126,6 +120,7 @@ export async function fetchUserGroupById(user_group_id: UUID) {
 }
 
 export async function fetchPhaseById(phase_id: UUID) {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("phase")
     .select("*")
@@ -140,6 +135,7 @@ export async function fetchPhaseById(phase_id: UUID) {
 }
 
 export async function fetchRoleById(role_id: UUID) {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("role")
     .select("*")
@@ -154,6 +150,7 @@ export async function fetchRoleById(role_id: UUID) {
 }
 
 export async function fetchSessionById(userId: string) {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("participant_session")
     .select("session_id, session:session_id!inner(is_finished)")
@@ -177,6 +174,7 @@ export async function handleProfileSubmit(profile: {
   country: string;
   org_role: string;
 }) {
+  const supabase = await getSupabaseServerClient();
   try {
     const { error } = await supabase.from("profile").upsert(profile);
 
@@ -192,6 +190,7 @@ export async function handleProfileSubmit(profile: {
 
 // returns True is the Profile does NOT exist, and False if it does
 export async function checkProfileExists(id: string) {
+  const supabase = await getSupabaseServerClient();
   try {
     const { error } = await supabase
       .from("profile")
@@ -212,4 +211,17 @@ export async function checkProfileExists(id: string) {
     console.error("Error in checkProfileExists:", err);
     return true;
   }
+}
+
+export async function fetchProfilesByUserIds(user_ids: UUID[]) {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("profile")
+    .select("id, first_name, last_name")
+    .in("id", user_ids);
+  if (error) {
+    console.error("Error fetching profiles: ", error);
+    return [];
+  }
+  return data;
 }

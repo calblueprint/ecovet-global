@@ -1,17 +1,16 @@
 "use client";
 
+import type { Profile, UUID } from "@/types/schema";
 import { useCallback, useEffect, useState } from "react";
-import { UUID } from "crypto";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
-import { fetchUserGroupMembers } from "@/api/supabase/queries/user-groups";
-import { Profile } from "@/types/schema";
+import { fetchUserGroupMembers } from "@/actions/supabase/queries/user-groups";
 import {
   GeneralList,
   GeneralTitle,
   Heading3,
   MainDiv,
   SortButton,
-} from "../styles";
+} from "../../styles";
 
 export default function Participants({
   user_group_id,

@@ -1,9 +1,12 @@
-import { UUID } from "crypto";
-import supabase from "../createClient";
+"use server";
+
+import type { UUID } from "@/types/schema";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function fetchUserGroups() {
   try {
     // Pull data
+    const supabase = await getSupabaseServerClient();
     const { data, error } = await supabase.from("user_group").select("*");
 
     if (error) throw error;
@@ -17,6 +20,7 @@ export async function fetchUserGroups() {
 export async function fetchUserGroupById(user_group_id: UUID) {
   try {
     // Pull data
+    const supabase = await getSupabaseServerClient();
     const { data, error } = await supabase
       .from("user_group")
       .select("*")
@@ -34,6 +38,7 @@ export async function fetchUserGroupById(user_group_id: UUID) {
 export async function fetchUserGroupMembers(user_group_id: UUID) {
   try {
     // Pull data
+    const supabase = await getSupabaseServerClient();
     const { data, error } = await supabase
       .from("profile")
       .select("*")
@@ -49,6 +54,7 @@ export async function fetchUserGroupMembers(user_group_id: UUID) {
 
 export async function submitNewUserGroup(user_group: string) {
   const id = crypto.randomUUID();
+  const supabase = await getSupabaseServerClient();
   const { error } = await supabase
     .from("user_group")
     .upsert(
@@ -60,4 +66,21 @@ export async function submitNewUserGroup(user_group: string) {
     console.error("Error inserting new user group:", error.message);
   }
   return id;
+}
+
+export async function fetchUserGroupSessions(user_group_id: UUID) {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("session")
+    .select(
+      "session_id, template_id, usergroup_id, session_name, is_async, after_action_report_id, is_finished",
+    )
+    .eq("user_group_id", user_group_id);
+
+  if (error) {
+    console.error("Error fetching sessions for user group:", error.message);
+    return [];
+  }
+
+  return data;
 }

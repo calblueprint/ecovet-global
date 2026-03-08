@@ -30,17 +30,22 @@ export default function Login() {
     const { data, error } = await sessionHandler.signUp(email, password);
     if (error) {
       throw new Error(
-        "An error occurred during sign up: " +
-          error.message +
-          "with email" +
-          email,
+        "An error occurred during admin creation: " + error.message,
       );
     }
-    const userId = data.user?.id;
-    if (!userId) {
-      throw new Error("Signup succeeded but user ID was missing.");
+
+    console.log("Admin created:", data);
+
+    const { error: signInError } = await sessionHandler.signInWithEmail(
+      email,
+      password,
+    );
+
+    if (signInError) {
+      throw new Error(signInError.message);
     }
-    await makeAdmin(userId, email);
+
+    router.push("/test-page");
   };
 
   const signInWithEmail = async () => {

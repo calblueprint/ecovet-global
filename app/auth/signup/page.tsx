@@ -5,11 +5,14 @@ import { FiCheck, FiEye, FiEyeOff, FiX } from "react-icons/fi";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import supabase from "@/actions/supabase/client";
-import { checkIfUserExists, checkInvites } from "@/api/supabase/queries/auth";
+import {
+  checkIfUserExists,
+  checkInvites,
+} from "@/actions/supabase/queries/auth";
 import {
   addInviteInfoToProfile,
   markInviteAccepted,
-} from "@/api/supabase/queries/profile";
+} from "@/actions/supabase/queries/profile";
 import {
   Button,
   Container,

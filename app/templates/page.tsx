@@ -11,7 +11,7 @@ import TemplateBuilder from "./components/TemplateBuilder";
 import TemplateBuilderSideBar from "./components/TemplateBuilderSidebar";
 import { TemplateMainBox } from "./styles";
 
-const createInitialStore = (): localStore => {
+const createInitialStore = (): LocalStore => {
   const templateID =
     crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
 
@@ -55,7 +55,7 @@ export default function NewTemplatePage() {
   );
   const template = newTemp?.rolesById[1] as Template;
 
-  function updateLocalStore(updater: (draft: localStore) => void) {
+  function updateLocalStore(updater: (draft: LocalStore) => void) {
     setNewTemp(prev => produce(prev, updater));
   }
 
