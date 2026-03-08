@@ -6,7 +6,7 @@ import {
   SideNavButton,
   SideNavNewTemplateButton,
   SideNavTemplatesContainer,
-} from "../styles";
+} from "../../styles";
 
 export default function ParticipantSideBar({
   filterMode,

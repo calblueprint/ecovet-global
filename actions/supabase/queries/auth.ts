@@ -1,7 +1,10 @@
-import supabase from "@/api/supabase/createClient";
+"use server";
+
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { Invite } from "@/types/schema";
 
 export async function sendPasswordResetEmail(email: string) {
+  const supabase = await getSupabaseServerClient();
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/change-password`,
@@ -18,6 +21,7 @@ export async function sendPasswordResetEmail(email: string) {
 }
 
 export async function signInWithMagicLink(email: string) {
+  const supabase = await getSupabaseServerClient();
   const { error } = await supabase.auth.signInWithOtp({
     email: email,
     options: {
@@ -33,6 +37,7 @@ export async function signInWithMagicLink(email: string) {
 }
 
 export async function checkIfUserExists(email: string): Promise<boolean> {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("profile")
     .select("*")
@@ -47,6 +52,7 @@ export async function checkIfUserExists(email: string): Promise<boolean> {
 
 /* returns True if there is an unaccepted invite given an email*/
 export async function checkInvites(email: string) {
+  const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("invite")
     .select("*")
