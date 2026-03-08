@@ -43,13 +43,13 @@ const createInitialStore = (): localStore => {
 
 export type ActiveIds = {
   roleId: UUID | number;
-  phaseId: UUID | null;
+  rolePhaseId: UUID | null;
 };
 
 export default function NewTemplatePage() {
   const [activeIds, setActiveIds] = useState<ActiveIds>({
     roleId: 1,
-    phaseId: null,
+    rolePhaseId: null,
   });
   const [newTemp, setNewTemp] = useState<localStore>(() =>
     createInitialStore(),

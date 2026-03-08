@@ -89,7 +89,7 @@ export default function TemplateBuilderSideBar({
       }
     });
 
-    setActiveIds({ roleId: newRoleID, phaseId: null });
+    setActiveIds({ roleId: newRoleID, rolePhaseId: null });
   }
 
   return (
@@ -120,7 +120,7 @@ export default function TemplateBuilderSideBar({
 
           <SideBarItem
             onClick={() =>
-              setActiveIds({ roleId: TEMPLATE_INDEX, phaseId: null })
+              setActiveIds({ roleId: TEMPLATE_INDEX, rolePhaseId: null })
             }
           >
             <Caption $color={COLORS.black70}>Scenario Overview</Caption>

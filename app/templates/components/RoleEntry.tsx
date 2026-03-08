@@ -39,19 +39,20 @@ export default function RoleEntry({
 
         <Flex $gap="4px" $direction="column" $pl="12px">
           {selected &&
-            Object.entries(localStore?.rolePhasesById).map(
-              ([rolePhaseId, rolePhase]) => {
+            Object.entries(localStore?.rolePhaseIndex[role.role_id]).map(
+              ([_, rolePhaseId]) => {
+                const rolePhase = localStore?.rolePhasesById[rolePhaseId];
                 const phase = localStore?.phasesById[rolePhase.phase_id];
 
                 return (
                   <SideBarItem
                     key={rolePhaseId}
-                    onClick={() =>
+                    onClick={() => {
                       setActiveIds({
                         roleId: role.role_id,
-                        phaseId: rolePhaseId as UUID,
-                      })
-                    }
+                        rolePhaseId: rolePhaseId as UUID,
+                      });
+                    }}
                   >
                     <Flex $gap="8px" $direction="row">
                       <Caption $color={COLORS.black70}>

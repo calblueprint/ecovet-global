@@ -1,7 +1,7 @@
 import { UUID } from "crypto";
 import COLORS from "@/styles/colors";
 import { B2, H3 } from "@/styles/text";
-import { roleFormInput, RolePhase } from "@/types/schema";
+import { Phase, roleFormInput, RolePhase } from "@/types/schema";
 import {
   BigInput,
   FieldCard,
@@ -16,21 +16,22 @@ import {
 
 export default function RoleForm({
   value,
-  phaseId,
+  rolePhaseId,
+  phase,
   onChange,
 }: {
   value: roleFormInput;
-  phaseId: UUID;
+  rolePhaseId: UUID;
+  phase: Phase;
   onChange: (id: UUID, field: string, v: string) => void;
 }) {
-  const rolePhase = value.rolePhases[phaseId];
-  console.log(rolePhase, phaseId, value.rolePhases);
+  const rolePhase = value.rolePhases[rolePhaseId];
 
   return (
     <FormStack>
       <RoleHeader>
         <H3 $color={COLORS.black100} $fontWeight="700">
-          Phase 1
+          Phase {phase.phase_number}
         </H3>
         <B2 $color={COLORS.black70}>{value.role.role_name}</B2>
       </RoleHeader>

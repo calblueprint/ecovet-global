@@ -61,7 +61,7 @@ export default function TemplateBuilder({
       delete draft.rolePhaseIndex[role_id];
     });
 
-    setActiveIds({ roleId: nextActive, phaseId: null });
+    setActiveIds({ roleId: nextActive, rolePhaseId: null });
   }
 
   // TODO: move to sidebar
@@ -244,7 +244,6 @@ export default function TemplateBuilder({
   const rolePhases = Object.entries(
     localStore?.rolePhaseIndex[activeIds.roleId as UUID] || {},
   ).map(([_, rolePhaseID]) => rolePhaseID);
-  console.log(rolePhases);
 
   return (
     <div>
@@ -267,7 +266,14 @@ export default function TemplateBuilder({
                   promptIndex: localStore.promptIndex,
                   phasesById: localStore.phasesById,
                 }}
-                phaseId={activeIds.phaseId || rolePhases[0]}
+                rolePhaseId={activeIds.rolePhaseId || rolePhases[0]}
+                phase={
+                  localStore.phasesById[
+                    localStore.rolePhasesById[
+                      activeIds.rolePhaseId || rolePhases[0]
+                    ].phase_id
+                  ]
+                }
                 onChange={setActiveUpdate}
               />
             )}
