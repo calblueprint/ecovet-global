@@ -11,7 +11,13 @@ import { localStore, Role, Template } from "@/types/schema";
 import { ActiveIds } from "../page";
 import EditablePhase from "./EditablePhase";
 import RoleEntry from "./RoleEntry";
-import { SideBarEntry, SideBarItem, SideBarSection } from "./styles";
+import {
+  Selectable,
+  SideBarEntry,
+  SideBarHeader,
+  SideBarItem,
+  SideBarSection,
+} from "./styles";
 
 export default function TemplateBuilderSideBar({
   localStore,
@@ -107,9 +113,11 @@ export default function TemplateBuilderSideBar({
   return (
     <div>
       <SideBarSection>
-        <Flex $gap="6px" $direction="column">
-          <Caption $color={COLORS.black40}>←Catalogue</Caption>
+        <SideBarHeader>
+          <Caption $color={COLORS.black40}>← Catalogue</Caption>
           <B2
+            $fontWeight={700}
+            $color={COLORS.black70}
             contentEditable
             suppressContentEditableWarning
             onBlur={e => {
@@ -123,20 +131,22 @@ export default function TemplateBuilderSideBar({
           >
             {template.template_name}
           </B2>
-        </Flex>
+        </SideBarHeader>
       </SideBarSection>
 
       <SideBarSection>
         <SideBarEntry>
           <Caption>Global</Caption>
 
-          <SideBarItem
-            onClick={() =>
-              setActiveIds({ roleId: TEMPLATE_INDEX, rolePhaseId: null })
-            }
-          >
-            <Caption $color={COLORS.black70}>Scenario Overview</Caption>
-          </SideBarItem>
+          <Selectable>
+            <SideBarItem
+              onClick={() =>
+                setActiveIds({ roleId: TEMPLATE_INDEX, rolePhaseId: null })
+              }
+            >
+              <Caption $color={COLORS.black70}>Scenario Overview</Caption>
+            </SideBarItem>
+          </Selectable>
         </SideBarEntry>
 
         <SideBarEntry>

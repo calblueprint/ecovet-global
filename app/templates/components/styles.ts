@@ -361,7 +361,7 @@ export const SectionH2 = styled.h2`
 export const SideBarEntry = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.5rem;
 `;
 
 export const SideBarSection = styled.div`
@@ -373,6 +373,16 @@ export const SideBarSection = styled.div`
   border-bottom: 1px solid ${COLORS.oat_medium};
 `;
 
+export const SideBarHeader = styled.div`
+  display: flex;
+  gap: 0.375rem;
+  flex-direction: column;
+`;
+
 export const SideBarItem = styled.div`
   padding: 4px;
+`;
+
+export const Selectable = styled.div`
+  cursor: pointer;
 `;

@@ -8,7 +8,7 @@ import { Flex } from "@/styles/containers";
 import { Caption } from "@/styles/text";
 import { localStore, Role } from "@/types/schema";
 import { ActiveIds } from "../page";
-import { SideBarItem } from "./styles";
+import { Selectable, SideBarItem } from "./styles";
 
 // TODO: add remove role shit
 export default function RoleEntry({
@@ -57,24 +57,25 @@ export default function RoleEntry({
                 const phase = localStore?.phasesById[rolePhase.phase_id];
 
                 return (
-                  <SideBarItem
-                    key={rolePhaseId}
-                    onClick={() => {
-                      setActiveIds({
-                        roleId: role.role_id,
-                        rolePhaseId: rolePhaseId as UUID,
-                      });
-                    }}
-                  >
-                    <Flex $gap="8px" $direction="row">
-                      <Caption $color={COLORS.black70}>
-                        {phase.phase_number}
-                      </Caption>
-                      <Caption $color={COLORS.black70}>
-                        {phase.phase_name}
-                      </Caption>
-                    </Flex>
-                  </SideBarItem>
+                  <Selectable key={rolePhaseId}>
+                    <SideBarItem
+                      onClick={() => {
+                        setActiveIds({
+                          roleId: role.role_id,
+                          rolePhaseId: rolePhaseId as UUID,
+                        });
+                      }}
+                    >
+                      <Flex $gap="8px" $direction="row">
+                        <Caption $color={COLORS.black70}>
+                          {phase.phase_number}
+                        </Caption>
+                        <Caption $color={COLORS.black70}>
+                          {phase.phase_name}
+                        </Caption>
+                      </Flex>
+                    </SideBarItem>
+                  </Selectable>
                 );
               },
             )}

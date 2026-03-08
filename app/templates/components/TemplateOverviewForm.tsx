@@ -1,5 +1,14 @@
+import COLORS from "@/styles/colors";
+import { H3 } from "@/styles/text";
 import { Template } from "@/types/schema";
-import { BigInput, FieldCard, FieldLegend, FormStack } from "./styles";
+import {
+  BigInput,
+  FieldCard,
+  FieldLegend,
+  FormStack,
+  RoleHeader,
+  RoleHeaderContainer,
+} from "./styles";
 
 export default function TemplateOverviewForm({
   value,
@@ -10,6 +19,14 @@ export default function TemplateOverviewForm({
 }) {
   return (
     <FormStack>
+      <RoleHeaderContainer>
+        <RoleHeader>
+          <H3 $color={COLORS.black100} $fontWeight="700">
+            Scenario Overview
+          </H3>
+        </RoleHeader>
+      </RoleHeaderContainer>
+
       <FieldCard>
         <FieldLegend>Summary</FieldLegend>
         <BigInput
