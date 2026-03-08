@@ -1,7 +1,6 @@
 "use server";
 
 import type {
-  ParticipantSession,
   ParticipantSessionWithProfile,
   Prompt,
   PromptAnswer,

@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
-import { Sans } from "@/styles/fonts";
 
 export const WarningDialog = styled.div`
   width: 25rem;

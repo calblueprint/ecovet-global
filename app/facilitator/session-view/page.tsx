@@ -4,7 +4,6 @@ import type { ParticipantSession, UUID } from "@/types/schema";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import supabase from "@/actions/supabase/client";
-import { fetchProfilesByUserIds } from "@/actions/supabase/queries/profile";
 import {
   finishSession,
   SessionParticipant,
