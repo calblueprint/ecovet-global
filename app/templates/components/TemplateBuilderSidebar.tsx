@@ -92,6 +92,18 @@ export default function TemplateBuilderSideBar({
     setActiveIds({ roleId: newRoleID, rolePhaseId: null });
   }
 
+  function renameRole(role_id: UUID | number, newLabel: string) {
+    if (localStore == null) return;
+
+    updateLocalStore(draft => {
+      if (typeof role_id === "number") {
+        (draft.rolesById[role_id] as Template).template_name = newLabel;
+      } else {
+        (draft.rolesById[role_id] as Role).role_name = newLabel;
+      }
+    });
+  }
+
   return (
     <div>
       <SideBarSection>
@@ -185,6 +197,7 @@ export default function TemplateBuilderSideBar({
               <RoleEntry
                 key={roleId}
                 role={role}
+                onRenameRole={newLabel => renameRole(roleId, newLabel)}
                 localStore={localStore}
                 setActiveIds={setActiveIds}
               />

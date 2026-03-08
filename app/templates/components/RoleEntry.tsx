@@ -13,10 +13,12 @@ import { SideBarItem } from "./styles";
 // TODO: add remove role shit
 export default function RoleEntry({
   role,
+  onRenameRole,
   localStore,
   setActiveIds,
 }: {
   role: Role;
+  onRenameRole: (newName: string) => void;
   localStore: localStore;
   setActiveIds: React.Dispatch<React.SetStateAction<ActiveIds>>;
 }) {
@@ -34,7 +36,17 @@ export default function RoleEntry({
             onClick={() => setSelected(s => !s)}
           />
 
-          <Caption $color={COLORS.black70}>{role.role_name}</Caption>
+          <Caption
+            $color={COLORS.black70}
+            contentEditable
+            suppressContentEditableWarning
+            onBlur={e => {
+              const value = e.currentTarget.textContent?.trim();
+              onRenameRole(value && value.length > 0 ? value : role.role_name);
+            }}
+          >
+            {role.role_name}
+          </Caption>
         </Flex>
 
         <Flex $gap="4px" $direction="column" $pl="12px">
