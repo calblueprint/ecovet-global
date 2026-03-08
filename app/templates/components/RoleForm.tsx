@@ -9,8 +9,6 @@ import {
   FormStack,
   GhostButton,
   PhaseCard,
-  QuestionCard,
-  RemoveQuestionButton,
   RoleHeader,
   RoleHeaderContainer,
   RolePhaseDescriptionInput,
@@ -61,15 +59,6 @@ export default function RoleForm({
                   onChange(promptID, "prompt_text", e.target.value)
                 }
               />
-
-              {/* TODO: remove perhaps */}
-              {/* <RemoveQuestionButton */}
-              {/*   onClick={() => */}
-              {/*     onChange(promptID, "remove_prompt", rolePhase.role_phase_id) */}
-              {/*   } */}
-              {/* > */}
-              {/*   Remove */}
-              {/* </RemoveQuestionButton> */}
             </FieldCard>
           ),
         )}

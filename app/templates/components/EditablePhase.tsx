@@ -1,6 +1,6 @@
 import COLORS from "@/styles/colors";
-import { Flex } from "@/styles/containers";
 import { Caption } from "@/styles/text";
+import { PhaseEntry } from "./styles";
 
 export default function EditablePhase({
   name,
@@ -12,7 +12,7 @@ export default function EditablePhase({
   onUpdate: (newName: string) => void;
 }) {
   return (
-    <Flex $gap="8px" $direction="row">
+    <PhaseEntry>
       <Caption $color={COLORS.black70} $fontWeight={400}>
         {index + 1}
       </Caption>
@@ -28,6 +28,6 @@ export default function EditablePhase({
       >
         {name}
       </Caption>
-    </Flex>
+    </PhaseEntry>
   );
 }

@@ -24,7 +24,6 @@ export default function Login() {
 
   const handleSignUp = async () => {
     if (await checkIfUserExists(email)) {
-      console.log("User already exists with email:", email);
       throw new Error("You already have an account, please sign in.");
     }
 

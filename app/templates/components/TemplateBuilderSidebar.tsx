@@ -161,7 +161,6 @@ export default function TemplateBuilderSideBar({
 
             <Selectable>
               <Image
-                style={{ cursor: "pointer" }}
                 alt="add phase"
                 src={img}
                 width={8}

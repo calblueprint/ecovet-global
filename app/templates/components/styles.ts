@@ -425,3 +425,8 @@ export const RoleEntryHeader = styled(Flex).attrs({
   $align: "center",
   $gap: "4px",
 })``;
+
+export const PhaseEntry = styled(Flex).attrs({
+  $align: "center",
+  $gap: "8px",
+})``;
