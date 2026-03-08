@@ -8,18 +8,18 @@ import COLORS from "@/styles/colors";
 import { Flex } from "@/styles/containers";
 import { B2, Caption } from "@/styles/text";
 import { localStore, Role, Template } from "@/types/schema";
-import { SelectedPage } from "../page";
+import { ActiveIds } from "../page";
 import EditablePhase from "./EditablePhase";
 import RoleEntry from "./RoleEntry";
 import { SideBarEntry, SideBarItem, SideBarSection } from "./styles";
 
 export default function TemplateBuilderSideBar({
   localStore,
-  setActiveId,
+  setActiveIds,
   updateLocalStore,
 }: {
   localStore: localStore | null;
-  setActiveId: React.Dispatch<React.SetStateAction<SelectedPage>>;
+  setActiveIds: React.Dispatch<React.SetStateAction<ActiveIds>>;
   updateLocalStore: (updater: (draft: localStore) => void) => void;
 }) {
   const router = useRouter();
@@ -89,7 +89,7 @@ export default function TemplateBuilderSideBar({
       }
     });
 
-    setActiveId({ roleId: newRoleID, phaseId: null });
+    setActiveIds({ roleId: newRoleID, phaseId: null });
   }
 
   return (
@@ -120,7 +120,7 @@ export default function TemplateBuilderSideBar({
 
           <SideBarItem
             onClick={() =>
-              setActiveId({ roleId: TEMPLATE_INDEX, phaseId: null })
+              setActiveIds({ roleId: TEMPLATE_INDEX, phaseId: null })
             }
           >
             <Caption $color={COLORS.black70}>Scenario Overview</Caption>
@@ -186,7 +186,7 @@ export default function TemplateBuilderSideBar({
                 key={roleId}
                 role={role}
                 localStore={localStore}
-                setActiveId={setActiveId}
+                setActiveIds={setActiveIds}
               />
             );
           })}

@@ -1,6 +1,6 @@
 import { UUID } from "crypto";
 import COLORS from "@/styles/colors";
-import { B2, Caption, H3 } from "@/styles/text";
+import { B2, H3 } from "@/styles/text";
 import { roleFormInput, RolePhase } from "@/types/schema";
 import {
   BigInput,
@@ -9,27 +9,22 @@ import {
   FormStack,
   GhostButton,
   PhaseCard,
-  PhaseHeader,
   QuestionCard,
-  RemovePhaseButton,
   RemoveQuestionButton,
   RoleHeader,
-  SectionH2,
 } from "./styles";
 
 export default function RoleForm({
   value,
-  // rolePhaseId,
+  phaseId,
   onChange,
 }: {
   value: roleFormInput;
-  // rolePhaseId: UUID;
+  phaseId: UUID;
   onChange: (id: UUID, field: string, v: string) => void;
 }) {
-  const rolePhases: RolePhase[] = [];
-  for (const [, rolePhaseID] of Object.entries(value.rolePhaseIndex)) {
-    rolePhases.push(value.rolePhases[rolePhaseID]);
-  }
+  const rolePhase = value.rolePhases[phaseId];
+  console.log(rolePhase, phaseId, value.rolePhases);
 
   return (
     <FormStack>
@@ -40,6 +35,7 @@ export default function RoleForm({
         <B2 $color={COLORS.black70}>{value.role.role_name}</B2>
       </RoleHeader>
 
+      {/* TODO: change to phase description */}
       <FieldCard>
         <FieldLegend>Role description</FieldLegend>
 
@@ -53,71 +49,55 @@ export default function RoleForm({
         />
       </FieldCard>
 
-      {rolePhases.map((rolePhase, i) => (
-        <PhaseCard key={rolePhase.role_phase_id}>
-          <PhaseHeader>
-            <SectionH2>
-              Phase{" "}
-              {value.phasesById[rolePhase.phase_id]?.phase_number ?? i + 1}
-            </SectionH2>
-            <RemovePhaseButton
-              onClick={() =>
-                onChange(rolePhase.phase_id, "remove_phase", rolePhase.phase_id)
-              }
-            >
-              🗑️
-            </RemovePhaseButton>
-          </PhaseHeader>
-
-          <FieldCard>
-            <FieldLegend>Description</FieldLegend>
-            <BigInput
-              name="role_phase_description"
-              placeholder="Type here..."
-              value={rolePhase.description ?? ""}
-              onChange={e =>
-                onChange(rolePhase.role_phase_id, "description", e.target.value)
-              }
-            />
-          </FieldCard>
-
-          {/* Prompts list */}
-          {(value.promptIndex[rolePhase.role_phase_id] ?? []).map(
-            (promptID, j) => (
-              <QuestionCard key={promptID}>
-                <FieldLegend>Question {j + 1}</FieldLegend>
-                <BigInput
-                  name="prompt"
-                  placeholder="Type here..."
-                  value={value.promptById[promptID].prompt_text ?? ""}
-                  onChange={e =>
-                    onChange(promptID, "prompt_text", e.target.value)
-                  }
-                />
-                <RemoveQuestionButton
-                  onClick={() =>
-                    onChange(promptID, "remove_prompt", rolePhase.role_phase_id)
-                  }
-                >
-                  Remove
-                </RemoveQuestionButton>
-              </QuestionCard>
-            ),
-          )}
-
-          <GhostButton
-            onClick={() =>
-              onChange(
-                rolePhase.role_phase_id,
-                "add_prompt",
-                rolePhase.role_phase_id,
-              )
+      <PhaseCard key={rolePhase.role_phase_id}>
+        <FieldCard>
+          <FieldLegend>Description</FieldLegend>
+          <BigInput
+            name="role_phase_description"
+            placeholder="Type here..."
+            value={rolePhase.description ?? ""}
+            onChange={e =>
+              onChange(rolePhase.role_phase_id, "description", e.target.value)
             }
-          >
-            + New Prompt
-          </GhostButton>
-        </PhaseCard>
-      ))}
+          />
+        </FieldCard>
+
+        {/* Prompts list */}
+        {(value.promptIndex[rolePhase.role_phase_id] ?? []).map(
+          (promptID, j) => (
+            <QuestionCard key={promptID}>
+              <FieldLegend>Question {j + 1}</FieldLegend>
+              <BigInput
+                name="prompt"
+                placeholder="Type here..."
+                value={value.promptById[promptID].prompt_text ?? ""}
+                onChange={e =>
+                  onChange(promptID, "prompt_text", e.target.value)
+                }
+              />
+              <RemoveQuestionButton
+                onClick={() =>
+                  onChange(promptID, "remove_prompt", rolePhase.role_phase_id)
+                }
+              >
+                Remove
+              </RemoveQuestionButton>
+            </QuestionCard>
+          ),
+        )}
+
+        <GhostButton
+          onClick={() =>
+            onChange(
+              rolePhase.role_phase_id,
+              "add_prompt",
+              rolePhase.role_phase_id,
+            )
+          }
+        >
+          + New Prompt
+        </GhostButton>
+      </PhaseCard>
     </FormStack>
   );
 }

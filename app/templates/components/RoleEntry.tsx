@@ -7,23 +7,23 @@ import COLORS from "@/styles/colors";
 import { Flex } from "@/styles/containers";
 import { Caption } from "@/styles/text";
 import { localStore, Role } from "@/types/schema";
-import { SelectedPage } from "../page";
+import { ActiveIds } from "../page";
 import { SideBarItem } from "./styles";
 
 // TODO: add remove role shit
 export default function RoleEntry({
   role,
   localStore,
-  setActiveId,
+  setActiveIds,
 }: {
   role: Role;
   localStore: localStore;
-  setActiveId: React.Dispatch<React.SetStateAction<SelectedPage>>;
+  setActiveIds: React.Dispatch<React.SetStateAction<ActiveIds>>;
 }) {
   const [selected, setSelected] = useState(false);
 
   return (
-    <SideBarItem key={role.role_id} onClick={() => setActiveId(role.role_id)}>
+    <SideBarItem key={role.role_id}>
       <Flex $gap="4px" $direction="column">
         <Flex $gap="4px" $direction="row" $align="center">
           <Image
@@ -39,20 +39,32 @@ export default function RoleEntry({
 
         <Flex $gap="4px" $direction="column" $pl="12px">
           {selected &&
-            localStore?.phaseIds.map((phaseId, i) => {
-              const phase = localStore?.phasesById[phaseId];
+            Object.entries(localStore?.rolePhasesById).map(
+              ([rolePhaseId, rolePhase]) => {
+                const phase = localStore?.phasesById[rolePhase.phase_id];
 
-              return (
-                <SideBarItem key={phaseId}>
-                  <Flex $gap="8px" $direction="row">
-                    <Caption $color={COLORS.black70}>{i + 1}</Caption>
-                    <Caption $color={COLORS.black70}>
-                      {phase?.phase_name}
-                    </Caption>
-                  </Flex>
-                </SideBarItem>
-              );
-            })}
+                return (
+                  <SideBarItem
+                    key={rolePhaseId}
+                    onClick={() =>
+                      setActiveIds({
+                        roleId: role.role_id,
+                        phaseId: rolePhaseId as UUID,
+                      })
+                    }
+                  >
+                    <Flex $gap="8px" $direction="row">
+                      <Caption $color={COLORS.black70}>
+                        {phase.phase_number}
+                      </Caption>
+                      <Caption $color={COLORS.black70}>
+                        {phase.phase_name}
+                      </Caption>
+                    </Flex>
+                  </SideBarItem>
+                );
+              },
+            )}
         </Flex>
       </Flex>
     </SideBarItem>

@@ -41,13 +41,13 @@ const createInitialStore = (): localStore => {
   };
 };
 
-export type SelectedPage = {
+export type ActiveIds = {
   roleId: UUID | number;
   phaseId: UUID | null;
 };
 
 export default function NewTemplatePage() {
-  const [activeId, setActiveId] = useState<SelectedPage>({
+  const [activeIds, setActiveIds] = useState<ActiveIds>({
     roleId: 1,
     phaseId: null,
   });
@@ -64,10 +64,6 @@ export default function NewTemplatePage() {
     setNewTemp(createInitialStore());
   }
 
-  useEffect(() => {
-    console.log(newTemp);
-  }, [newTemp]);
-
   return (
     <>
       <TopNavBar />
@@ -77,14 +73,14 @@ export default function NewTemplatePage() {
           <TemplateBuilderSideBar
             localStore={newTemp}
             updateLocalStore={updateLocalStore}
-            setActiveId={setActiveId}
+            setActiveIds={setActiveIds}
           />
         </SideNavContainer>
 
         <TemplateMainBox>
           <TemplateBuilder
-            activeId={activeId}
-            setActiveId={setActiveId}
+            activeIds={activeIds}
+            setActiveIds={setActiveIds}
             localStore={newTemp}
             onFinish={resetTemplate}
             update={updateLocalStore}

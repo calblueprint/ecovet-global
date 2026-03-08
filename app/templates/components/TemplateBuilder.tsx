@@ -10,26 +10,28 @@ import {
 } from "@/api/supabase/queries/templates";
 import { localStore, Prompt, Role, Template } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
+import { ActiveIds } from "../page";
 import RoleForm from "./RoleForm";
 import { PanelCard, SubmitButton } from "./styles";
 import TemplateOverviewForm from "./TemplateOverviewForm";
 
 // TODO: add an active phase id
 export default function TemplateBuilder({
-  activeId,
-  setActiveId,
+  activeIds,
+  setActiveIds,
   localStore,
   onFinish,
   update,
 }: {
-  activeId: UUID | number;
-  setActiveId: (id: UUID | number) => void;
+  activeIds: ActiveIds;
+  setActiveIds: React.Dispatch<React.SetStateAction<ActiveIds>>;
   localStore: localStore | null;
   onFinish: () => void;
   update: (updater: (draft: localStore) => void) => void;
 }) {
   const [saving, setSaving] = useState(false); //nice 'saving' to let user know supabase push is still happening and when finished
   const { profile } = useProfile();
+  const TEMPLATE_INDEX = 1;
 
   function createUUID(): UUID {
     return crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
@@ -58,7 +60,8 @@ export default function TemplateBuilder({
       }
       delete draft.rolePhaseIndex[role_id];
     });
-    setActiveId(nextActive);
+
+    setActiveIds({ roleId: nextActive, phaseId: null });
   }
 
   // TODO: move to sidebar
@@ -238,26 +241,33 @@ export default function TemplateBuilder({
     onFinish();
   }
 
+  const rolePhases = Object.entries(
+    localStore?.rolePhaseIndex[activeIds.roleId as UUID] || {},
+  ).map(([_, rolePhaseID]) => rolePhaseID);
+  console.log(rolePhases);
+
   return (
     <div>
       <div>
         {localStore && (
-          <PanelCard key={`panel-${String(activeId)}`}>
-            {typeof activeId === "number" ? (
+          <PanelCard key={`panel-${String(activeIds.roleId)}`}>
+            {activeIds.roleId == TEMPLATE_INDEX || rolePhases.length == 0 ? (
               <TemplateOverviewForm
-                value={localStore.rolesById[activeId] as Template}
+                value={localStore.rolesById[TEMPLATE_INDEX] as Template}
                 onChange={setActiveUpdate}
               />
             ) : (
               <RoleForm
                 value={{
-                  role: localStore.rolesById[activeId] as Role,
+                  role: localStore.rolesById[activeIds.roleId] as Role,
                   rolePhases: localStore.rolePhasesById,
-                  rolePhaseIndex: localStore.rolePhaseIndex[activeId],
+                  rolePhaseIndex:
+                    localStore.rolePhaseIndex[activeIds.roleId as UUID],
                   promptById: localStore.promptById,
                   promptIndex: localStore.promptIndex,
                   phasesById: localStore.phasesById,
                 }}
+                phaseId={activeIds.phaseId || rolePhases[0]}
                 onChange={setActiveUpdate}
               />
             )}
