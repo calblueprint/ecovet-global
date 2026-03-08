@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
+import { Sans } from "@/styles/fonts";
 
 export const WarningDialog = styled.div`
   width: 25rem;
@@ -9,13 +10,12 @@ export const WarningDialog = styled.div`
   align-items: flex-start;
   gap: 1rem;
   border-radius: 0.5rem;
-  background: ${COLORS["white"]};
+  background: ${COLORS.white};
   box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.1);
 `;
 
 export const WarningTitle = styled.h2`
-  color: ${COLORS["black"]};
-  font-family: "Public Sans";
+  color: ${COLORS.black};
   font-size: 0.875rem;
   font-style: normal;
   font-weight: 700;
@@ -23,12 +23,11 @@ export const WarningTitle = styled.h2`
 };`;
 
 export const WarningCaption = styled.p`
-  color: ${COLORS["black"]};
-  font-family: "Public Sans";
+  color: ${COLORS.black};
   font-size: 0.75rem;
   font-style: normal;
   font-weight: 500;
-  line-height: 150%; /* 1.125rem */
+  line-height: 150%;
 };`;
 
 export const ButtonContainer = styled.div`
@@ -45,10 +44,9 @@ export const CancelButton = styled.button`
   align-items: center;
   gap: 0.625rem;
   border-radius: 0.25rem;
-  border: 1px solid ${COLORS["oat_medium"]};
-  background: ${COLORS["white"]};
-  color: ${COLORS["black70"]};
-  font-family: "Public Sans";
+  border: 1px solid ${COLORS.oat_medium};
+  background: ${COLORS.white};
+  color: ${COLORS.black70};
   font-size: 0.625rem;
   font-style: normal;
   font-weight: 700;
@@ -62,10 +60,9 @@ export const DeleteButton = styled.button`
   align-items: center;
   gap: 0.625rem;
   border-radius: 0.25rem;
-  border: 1px solid ${COLORS["teal"]};
-  background: ${COLORS["teal"]};
-  color: ${COLORS["white"]};
-  font-family: "Public Sans";
+  border: 1px solid ${COLORS.teal};
+  background: ${COLORS.teal};
+  color: ${COLORS.white};
   font-size: 0.625rem;
   font-style: normal;
   font-weight: 700;
