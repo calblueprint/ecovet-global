@@ -12,11 +12,15 @@ import { ActiveIds } from "../page";
 import EditablePhase from "./EditablePhase";
 import RoleEntry from "./RoleEntry";
 import {
+  HeaderWithPlus,
+  PhaseList,
+  RoleList,
   Selectable,
+  SidebarContainer,
   SideBarEntry,
   SideBarHeader,
-  SideBarItem,
   SideBarSection,
+  TabbedList,
 } from "./styles";
 
 export default function TemplateBuilderSideBar({
@@ -111,8 +115,8 @@ export default function TemplateBuilderSideBar({
   }
 
   return (
-    <div>
-      <SideBarSection>
+    <SidebarContainer>
+      <SideBarSection $isFirst={true}>
         <SideBarHeader>
           <Caption $color={COLORS.black40}>← Catalogue</Caption>
           <B2
@@ -138,31 +142,36 @@ export default function TemplateBuilderSideBar({
         <SideBarEntry>
           <Caption>Global</Caption>
 
-          <Selectable>
-            <SideBarItem
+          <TabbedList>
+            <Selectable
               onClick={() =>
                 setActiveIds({ roleId: TEMPLATE_INDEX, rolePhaseId: null })
               }
             >
-              <Caption $color={COLORS.black70}>Scenario Overview</Caption>
-            </SideBarItem>
-          </Selectable>
+              <Caption $color={COLORS.black70} $fontWeight={400}>
+                Scenario Overview
+              </Caption>
+            </Selectable>
+          </TabbedList>
         </SideBarEntry>
 
         <SideBarEntry>
-          <Flex $align="center" $justify="between" $direction="row">
+          <HeaderWithPlus>
             <Caption>Phases</Caption>
-            <Image
-              style={{ cursor: "pointer" }}
-              alt="add phase"
-              src={img}
-              width={8}
-              height={8}
-              onClick={addPhase}
-            />
-          </Flex>
 
-          <Flex $direction="column" $gap="4px">
+            <Selectable>
+              <Image
+                style={{ cursor: "pointer" }}
+                alt="add phase"
+                src={img}
+                width={8}
+                height={8}
+                onClick={addPhase}
+              />
+            </Selectable>
+          </HeaderWithPlus>
+
+          <PhaseList>
             {localStore?.phaseIds.map((phaseId, i) => {
               const phase = localStore?.phasesById[phaseId];
               const onUpdate = (value: string) => {
@@ -181,40 +190,43 @@ export default function TemplateBuilderSideBar({
                 />
               );
             })}
-          </Flex>
+          </PhaseList>
         </SideBarEntry>
       </SideBarSection>
 
       <SideBarSection>
         <SideBarEntry>
-          <Flex $align="center" $justify="between" $direction="row">
+          <HeaderWithPlus>
             <Caption>Roles</Caption>
-            <Image
-              style={{ cursor: "pointer" }}
-              alt="add phase"
-              src={img}
-              width={8}
-              height={8}
-              onClick={addRole}
-            />
-          </Flex>
-
-          {localStore?.roleIds.map(roleId => {
-            if (roleId === TEMPLATE_INDEX) return null;
-            const role = localStore.rolesById[roleId] as Role;
-
-            return (
-              <RoleEntry
-                key={roleId}
-                role={role}
-                onRenameRole={newLabel => renameRole(roleId, newLabel)}
-                localStore={localStore}
-                setActiveIds={setActiveIds}
+            <Selectable>
+              <Image
+                alt="add phase"
+                src={img}
+                width={8}
+                height={8}
+                onClick={addRole}
               />
-            );
-          })}
+            </Selectable>
+          </HeaderWithPlus>
+
+          <RoleList>
+            {localStore?.roleIds.map(roleId => {
+              if (roleId === TEMPLATE_INDEX) return null;
+              const role = localStore.rolesById[roleId] as Role;
+
+              return (
+                <RoleEntry
+                  key={roleId}
+                  role={role}
+                  onRenameRole={newLabel => renameRole(roleId, newLabel)}
+                  localStore={localStore}
+                  setActiveIds={setActiveIds}
+                />
+              );
+            })}
+          </RoleList>
         </SideBarEntry>
       </SideBarSection>
-    </div>
+    </SidebarContainer>
   );
 }

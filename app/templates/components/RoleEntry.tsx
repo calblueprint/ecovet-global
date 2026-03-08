@@ -8,9 +8,13 @@ import { Flex } from "@/styles/containers";
 import { Caption } from "@/styles/text";
 import { localStore, Role } from "@/types/schema";
 import { ActiveIds } from "../page";
-import { Selectable, SideBarItem } from "./styles";
+import {
+  RoleEntryContainer,
+  RoleEntryHeader,
+  Selectable,
+  TabbedList,
+} from "./styles";
 
-// TODO: add remove role shit
 export default function RoleEntry({
   role,
   onRenameRole,
@@ -25,62 +29,61 @@ export default function RoleEntry({
   const [selected, setSelected] = useState(false);
 
   return (
-    <SideBarItem key={role.role_id}>
-      <Flex $gap="4px" $direction="column">
-        <Flex $gap="4px" $direction="row" $align="center">
-          <Image
-            alt="expand/collapse arrow"
-            src={selected ? DownArrow : RightArrow}
-            width={6}
-            height={6}
-            onClick={() => setSelected(s => !s)}
-          />
+    <RoleEntryContainer>
+      <RoleEntryHeader>
+        <Image
+          alt="expand/collapse arrow"
+          src={selected ? DownArrow : RightArrow}
+          width={6}
+          height={6}
+          onClick={() => setSelected(s => !s)}
+        />
 
-          <Caption
-            $color={COLORS.black70}
-            contentEditable
-            suppressContentEditableWarning
-            onBlur={e => {
-              const value = e.currentTarget.textContent?.trim();
-              onRenameRole(value && value.length > 0 ? value : role.role_name);
-            }}
-          >
-            {role.role_name}
-          </Caption>
-        </Flex>
+        <Caption
+          $color={COLORS.black70}
+          $fontWeight={400}
+          contentEditable
+          suppressContentEditableWarning
+          onBlur={e => {
+            const value = e.currentTarget.textContent?.trim();
+            onRenameRole(value && value.length > 0 ? value : role.role_name);
+          }}
+        >
+          {role.role_name}
+        </Caption>
+      </RoleEntryHeader>
 
-        <Flex $gap="4px" $direction="column" $pl="12px">
-          {selected &&
-            Object.entries(localStore?.rolePhaseIndex[role.role_id]).map(
-              ([_, rolePhaseId]) => {
-                const rolePhase = localStore?.rolePhasesById[rolePhaseId];
-                const phase = localStore?.phasesById[rolePhase.phase_id];
+      {selected && (
+        <TabbedList>
+          {Object.entries(localStore?.rolePhaseIndex[role.role_id]).map(
+            ([_, rolePhaseId]) => {
+              const rolePhase = localStore?.rolePhasesById[rolePhaseId];
+              const phase = localStore?.phasesById[rolePhase.phase_id];
 
-                return (
-                  <Selectable key={rolePhaseId}>
-                    <SideBarItem
-                      onClick={() => {
-                        setActiveIds({
-                          roleId: role.role_id,
-                          rolePhaseId: rolePhaseId as UUID,
-                        });
-                      }}
-                    >
-                      <Flex $gap="8px" $direction="row">
-                        <Caption $color={COLORS.black70}>
-                          {phase.phase_number}
-                        </Caption>
-                        <Caption $color={COLORS.black70}>
-                          {phase.phase_name}
-                        </Caption>
-                      </Flex>
-                    </SideBarItem>
-                  </Selectable>
-                );
-              },
-            )}
-        </Flex>
-      </Flex>
-    </SideBarItem>
+              return (
+                <Selectable
+                  key={rolePhaseId}
+                  onClick={() => {
+                    setActiveIds({
+                      roleId: role.role_id,
+                      rolePhaseId: rolePhaseId as UUID,
+                    });
+                  }}
+                >
+                  <Flex $gap="8px" $direction="row">
+                    <Caption $color={COLORS.black70} $fontWeight={400}>
+                      {phase.phase_number}
+                    </Caption>
+                    <Caption $color={COLORS.black70} $fontWeight={400}>
+                      {phase.phase_name}
+                    </Caption>
+                  </Flex>
+                </Selectable>
+              );
+            },
+          )}
+        </TabbedList>
+      )}
+    </RoleEntryContainer>
   );
 }

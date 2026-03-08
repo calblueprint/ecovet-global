@@ -122,7 +122,8 @@ export const SortButton = styled.button`
 
 export const SideNavContainer = styled.div`
   display: flex;
-  padding: 1rem;
+  padding: 0.75rem 1rem;
+  padding-right: 0;
   width: 12rem;
   min-width: 180px;
   align-items: flex-start;
