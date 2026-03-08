@@ -50,7 +50,7 @@ export default function ParticipantsPage() {
   };
 
   if (!profile?.user_group_id) {
-    return <div>Retrieving your profile...</div>;
+    return <div>Loading! Give it a sec...</div>;
   }
 
   return (
