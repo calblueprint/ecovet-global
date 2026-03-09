@@ -31,7 +31,8 @@ export const QuestionNumberStyled = styled.div`
 
 export const QuestionHeaderStyled = styled.div`
   display: flex;
-  align-items: center;
+  align-items: stretch;
+  justify-content: space-between
   width: 100%;
   gap: 12px;
   box-sizing: border-box;
@@ -57,7 +58,7 @@ export const TextFieldStyled = styled(TextField)`
     font-size: 10px;
     font-family: ${Sans.style.fontFamily};
     font-weight: 500;
-    color: ${COLORS.black20};
+    color: ${COLORS.black70};
   }
 
   .MuiFormControl-root {
@@ -85,7 +86,9 @@ export const PromptTypeDropdownStyled = styled.div`
   height: 100%;
 `;
 
-export const MultipleChoicePromptStyled = styled.div``;
+export const MultipleChoicePromptStyled = styled.div`
+  width: 100%;
+`;
 
 export const McqOptionStyled = styled.div`
   display: flex;
@@ -98,13 +101,17 @@ export const McqOptionStyled = styled.div`
 export const DeleteMcqOptionButton = styled.div`
   padding-right: 20px;
   padding-left: 30px;
+  margin-left: auto;
 `;
 
-export const CheckboxPromptStyled = styled.div``;
+export const CheckboxPromptStyled = styled.div`
+  width: 100%;
+`;
 
 export const AddNewOptionStyled = styled.div`
   display: flex;
   align-items: center;
+  justify-contet: space-between;
   gap: 8px;
   align-self: stretch;
 `;

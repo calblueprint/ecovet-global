@@ -58,7 +58,7 @@ export default function FacilitatorSessionView() {
       try {
         const psData = await sessionParticipants(sessionId as UUID);
 
-        setParticipants(psData ?? []);
+        setParticipants(psData);
         console.log("Participants:", psData);
 
         if (psData && psData.length > 0) {

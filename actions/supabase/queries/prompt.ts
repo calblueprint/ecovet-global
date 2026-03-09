@@ -1,5 +1,4 @@
-import { UUID } from "crypto";
-import { PromptType } from "@/types/schema";
+import { PromptType, UUID } from "@/types/schema";
 import supabase from "../client";
 
 export async function getOptionsForPrompt(prompt_id: UUID) {
