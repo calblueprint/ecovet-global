@@ -3,8 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { checkIfUserExists } from "@/api/supabase/queries/auth";
-import { makeAdmin } from "@/api/supabase/queries/profile";
+import { checkIfUserExists } from "@/actions/supabase/queries/auth";
 import { useSession } from "@/utils/AuthProvider";
 import {
   Button,

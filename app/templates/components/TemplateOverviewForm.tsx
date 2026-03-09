@@ -1,5 +1,3 @@
-import COLORS from "@/styles/colors";
-import { H3 } from "@/styles/text";
 import { Template } from "@/types/schema";
 import {
   BigInput,
