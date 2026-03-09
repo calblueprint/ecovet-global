@@ -16,6 +16,7 @@ import { PanelCard, SubmitButton } from "./styles";
 import TemplateOverviewForm from "./TemplateOverviewForm";
 
 // TODO: add an active phase id
+// TODO: add an active phase id
 export default function TemplateBuilder({
   activeIds,
   setActiveIds,
@@ -60,6 +61,8 @@ export default function TemplateBuilder({
       }
       delete draft.rolePhaseIndex[role_id];
     });
+
+    setActiveIds({ roleId: nextActive, rolePhaseId: null });
 
     setActiveIds({ roleId: nextActive, rolePhaseId: null });
   }
