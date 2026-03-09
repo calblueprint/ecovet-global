@@ -45,6 +45,7 @@ export const QuestionHeaderStyled = styled.div`
 export const TextFieldStyled = styled(TextField)`
   flex: 1;
   min-width: 0;
+  width: 100%;
   height: fit-content;
 
   border-radius: 4px;

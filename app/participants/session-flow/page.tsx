@@ -1,6 +1,6 @@
 "use client";
 
-import type { Phase, Prompt, RolePhase, UUID } from "@/types/schema";
+import type { Phase, Prompt, PromptOption, RolePhase, UUID } from "@/types/schema";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import supabase from "@/actions/supabase/client";
@@ -23,6 +23,13 @@ import {
   RolePhaseDescription,
   StyledTextarea,
 } from "./styles";
+import { getOptionsForPrompt } from "@/actions/supabase/queries/prompt";
+import PromptRenderer from "@/components/prompts/PromptRenderer";
+
+export interface PromptWithOption {
+  prompt: Prompt
+  options: PromptOption[];
+}
 
 export default function ParticipantFlowPage() {
   const { userId } = useProfile();
@@ -33,9 +40,10 @@ export default function ParticipantFlowPage() {
   const [phases, setPhases] = useState<Phase[]>([]);
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
   const [rolePhase, setRolePhase] = useState<RolePhase | null>(null);
-  const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [promptsWithOptions, setPromptsWithOptions] = useState<PromptWithOption[]>([]);
   const [loading, setLoading] = useState(true);
-  const [answers, setAnswers] = useState<string[]>([]);
+  const [answers, setAnswers] = useState<(string | string[])[]>([]);
+
   const isLastPhase = currentPhaseIndex === phases.length - 1;
 
   const currentPhase = phases[currentPhaseIndex];
@@ -62,6 +70,12 @@ export default function ParticipantFlowPage() {
     loadData();
   }, [userId, sessionId]);
 
+  // Load Options if prompt is an mcq or checkbox
+  async function loadPromptOptions(prompt_id: string) {
+    const pulled_options = await getOptionsForPrompt(prompt_id);
+    return pulled_options ?? [];
+  }
+
   useEffect(() => {
     if (!currentPhase || !roleId) return;
 
@@ -71,14 +85,27 @@ export default function ParticipantFlowPage() {
         setRolePhase(rp);
 
         if (rp) {
-          const p = await fetchPrompts(rp.role_phase_id);
-          setPrompts(p);
+          const prompts = await fetchPrompts(rp.role_phase_id);
+
+          const buffer: PromptWithOption[] = await Promise.all(
+            prompts.map(async(p) => {
+              const pulled_options = await loadPromptOptions(p.prompt_id);
+
+              return {
+                prompt: p,
+                options: pulled_options,
+              }
+            })
+          )
+
+          setPromptsWithOptions(buffer);
+
         } else {
-          setPrompts([]);
+          setPromptsWithOptions([]);
         }
       } catch (err) {
         console.error("Error setting prompts:", err);
-        setPrompts([]);
+        setPromptsWithOptions([]);
       }
     }
 
@@ -125,24 +152,37 @@ export default function ParticipantFlowPage() {
   }, [userId, sessionId, phases]);
 
   useEffect(() => {
-    setAnswers(Array(prompts.length).fill(""));
-  }, [prompts]);
+    setAnswers(Array(promptsWithOptions.length).fill(""));
+  }, [promptsWithOptions]);
 
-  function handleInputAnswer(index: number, value: string) {
-    const updated = [...answers];
-    updated[index] = value;
-    setAnswers(updated);
+  function handleInputAnswer(index: number, value: string | string[]) {
+    setAnswers((prev) => {
+      const copy = [...prev];
+      copy[index] = value;
+      return copy;
+    });
   }
 
   async function submitAnswers() {
     for (let i = 0; i < answers.length; i++) {
       const answer = answers[i];
+      const promptId = promptsWithOptions[i].prompt.prompt_id;
 
-      if (!answer.trim()) continue;
-      const promptId = prompts[i].prompt_id;
+      if (!userId || !answer) continue;
 
-      if (!userId) continue;
-      await createPromptAnswer(userId, promptId, answer);
+      // TEXT or MCQ
+      if (typeof answer === "string") {
+        if (!answer.trim()) continue;
+
+        await createPromptAnswer(userId, promptId, answer);
+      }
+
+      // CHECKBOX (multiple answers)
+      if (Array.isArray(answer)) {
+        for (const optionId of answer) {
+          await createPromptAnswer(userId, promptId, optionId);
+        }
+      }
     }
   }
 
@@ -168,6 +208,54 @@ export default function ParticipantFlowPage() {
           )}
 
           <PromptCard>
+            {/* {promptsWithOptions.map((pWithOpts, index) => (
+              <div key={index}>
+                <PromptText>{pWithOpts.prompt.prompt_text}</PromptText>
+
+                <StyledTextarea
+                  value={answers[index]}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    handleInputAnswer(index, e.target.value)
+                  }
+                  minRows={3}
+                  placeholder="Type your answer..."
+                />
+              </div>
+            ))} */}
+            {promptsWithOptions.map((pWithOpts, index) => (
+              <PromptRenderer
+                key={pWithOpts.prompt.prompt_id}
+                promptWithOption={pWithOpts}
+                answer={answers[index]}
+                onAnswer={(value) => handleInputAnswer(index, value)}
+              />
+            ))}
+          </PromptCard>
+
+          {roleId && userId && sessionId && (
+            <NextButton
+              user_id={userId as UUID}
+              role_id={roleId as UUID}
+              session_id={sessionId as UUID}
+              isLastPhase={isLastPhase}
+              currentPhaseIndex={currentPhaseIndex}
+              onClick={submitAnswers}
+            />
+          )}
+
+          {currentPhaseIndex === phases.length && <div>End of phases</div>}
+        </ParticipantFlowMain>
+
+        <ParticipantFlowMain>
+          <PhaseHeading>Phase {currentPhaseIndex + 1}</PhaseHeading>
+
+          {rolePhase && (
+            <RolePhaseDescription>
+              Role description: {rolePhase.description}
+            </RolePhaseDescription>
+          )}
+
+          {/* <PromptCard>
             {prompts.map((prompt, index) => (
               <div key={index}>
                 <PromptText>{prompt.prompt_text}</PromptText>
@@ -182,7 +270,7 @@ export default function ParticipantFlowPage() {
                 />
               </div>
             ))}
-          </PromptCard>
+          </PromptCard> */}
 
           {roleId && userId && sessionId && (
             <NextButton

@@ -1,57 +1,50 @@
 "use client";
 
-// Just leaving this here for future reference when we need to render prompts for participants.
-import { useEffect, useState } from "react";
-import { UUID } from "crypto";
-import { getOptionsForPrompt } from "@/actions/supabase/queries/prompt";
-import { PromptOption, PromptType } from "@/types/schema";
-
-// import CheckboxPrompt from "./CheckboxPrompt";
-// import MultipleChoicePrompt from "./MultipleChoicePrompt";
-// import { PromptRendererStyled, QuestionHeader } from "./styles";
-// import TextPrompt from "./TextPrompt";
+import { PromptWithOption } from "@/app/participants/session-flow/page";
+import TextPromptParticipant from "@/app/participants/components/TextPromptParticipant";
+import MultipleChoicePromptParticipant from "@/app/participants/components/MultipleChoicePromptParticipant";
+import CheckboxPromptParticipant from "@/app/participants/components/CheckboxPromptParticipant";
 
 type PromptRendererProps = {
-  prompt_id: UUID;
-  prompt_type: PromptType;
-  question: string;
+  promptWithOption: PromptWithOption;
+  answer: string | string[];
+  onAnswer: (value: string | string[]) => void;
 };
 
-export interface OptionsProps {
-  options: PromptOption[];
-}
-
 export default function PromptRenderer({
-  prompt_id,
-  prompt_type,
-  question,
+  promptWithOption,
+  answer,
+  onAnswer,
 }: PromptRendererProps) {
-  const [options, setOptions] = useState<PromptOption[]>([]);
 
-  // pull prompt options
-  async function loadPromptOptions() {
-    const pulled_options = await getOptionsForPrompt(prompt_id);
-    setOptions(pulled_options ?? []);
-  }
-
-  useEffect(() => {
-    loadPromptOptions();
-  }, [prompt_id]);
-
-  //   const optionsField =
-  //     prompt_type === "text" ? (
-  //       <TextPrompt options={options} />
-  //     ) : prompt_type === "multiple_choice" ? (
-  //       <MultipleChoicePrompt options={options} />
-  //     ) : (
-  //       <CheckboxPrompt options={options} />
-  //     );
+  const { prompt, options } = promptWithOption;
 
   return (
-    // <PromptRendererStyled>
-    //   <QuestionHeader>{question}</QuestionHeader>
-    //   {optionsField}
-    // </PromptRendererStyled>
-    <></>
+    <div>
+      <p>{prompt.prompt_text}</p>
+
+      {prompt.prompt_type === "text" && (
+        <TextPromptParticipant
+          value={(answer as string) || ""}
+          onChange={onAnswer}
+        />
+      )}
+
+      {prompt.prompt_type === "multiple_choice" && (
+        <MultipleChoicePromptParticipant
+          options={options}
+          value={(answer as string) || ""}
+          onChange={onAnswer}
+        />
+      )}
+
+      {prompt.prompt_type === "checkbox" && (
+        <CheckboxPromptParticipant
+          options={options}
+          value={(answer as string[]) || []}
+          onChange={onAnswer}
+        />
+      )}
+    </div>
   );
 }

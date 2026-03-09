@@ -6,17 +6,20 @@ import { Sans } from "@/styles/fonts";
 export const ParticipantFlowMain = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 2rem 0;
+  justify-content: top;
+  padding: 40px 0;
   width: 100%;
+  height: 100%;
 `;
 
 export const Container = styled.div`
   background-color: ${COLORS.white};
-  width: 30rem;
+  width: 100%;
+  height: 100%;
   display: flex;
-  flex-direction: column;
-  gap: 2.25rem;
+  flex-direction: row;
+  gap: 120px;
+  padding: 80px 120px;
 `;
 
 export const PromptCard = styled.div`
