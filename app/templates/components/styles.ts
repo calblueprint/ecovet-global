@@ -264,7 +264,7 @@ export const FormStack = styled(Flex).attrs({
 export const RoleHeader = styled(Flex)`
   justify-content: space-between;
   align-items: center;
-`;
+})`;
 
 export const RoleHeaderContainer = styled(Flex).attrs({
   $direction: "column",
@@ -377,6 +377,8 @@ export const BigInput = styled.input.attrs({
 
 export const RolePhaseDescriptionInput = styled.input.attrs({ type: "text" })`
   border: none;
+  font-style: italic;
+  width: 100%;
   font-style: italic;
   width: 100%;
 `;

@@ -23,6 +23,8 @@ import RoleForm from "./RoleForm";
 import { PanelCard, SubmitButton } from "./styles";
 import TemplateOverviewForm from "./TemplateOverviewForm";
 
+// TODO: add an active phase id
+// TODO: add an active phase id
 export default function TemplateBuilder({
   activeIds,
   setActiveIds,
@@ -42,7 +44,6 @@ export default function TemplateBuilder({
 
   function removeRole(role_id: UUID | number): void {
     if (localStore == null || typeof role_id == "number") return;
-
     let nextActive: UUID | number = 1;
     const idx = localStore.roleIds.indexOf(role_id);
     if (idx !== -1) {
