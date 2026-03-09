@@ -1,12 +1,8 @@
 import { useState } from "react";
 import Image from "next/image";
-import { UUID } from "crypto";
 import DownArrow from "@/assets/images/DownArrow.svg";
 import RightArrow from "@/assets/images/RightArrow.svg";
-import COLORS from "@/styles/colors";
-import { Flex } from "@/styles/containers";
-import { Caption } from "@/styles/text";
-import { localStore, Role } from "@/types/schema";
+import { LocalStore, Role, UUID } from "@/types/schema";
 import { ActiveIds } from "../page";
 import {
   PhaseCaption,
@@ -25,7 +21,7 @@ export default function RoleEntry({
 }: {
   role: Role;
   onRenameRole: (newName: string) => void;
-  localStore: localStore;
+  localStore: LocalStore;
   setActiveIds: React.Dispatch<React.SetStateAction<ActiveIds>>;
 }) {
   const [selected, setSelected] = useState(false);
@@ -46,7 +42,9 @@ export default function RoleEntry({
           suppressContentEditableWarning
           onBlur={e => {
             const value = e.currentTarget.textContent?.trim();
-            onRenameRole(value && value.length > 0 ? value : role.role_name);
+            onRenameRole(
+              value && value.length > 0 ? value : (role.role_name ?? ""),
+            );
           }}
         >
           {role.role_name}

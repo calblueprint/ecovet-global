@@ -1,7 +1,4 @@
-import { UUID } from "crypto";
-import COLORS from "@/styles/colors";
-import { B2, H3 } from "@/styles/text";
-import { Phase, roleFormInput } from "@/types/schema";
+import { EditablePhase, RoleFormInput, UUID } from "@/types/schema";
 import {
   BigInput,
   FieldCard,
@@ -23,9 +20,9 @@ export default function RoleForm({
   phase,
   onChange,
 }: {
-  value: roleFormInput;
+  value: RoleFormInput;
   rolePhaseId: UUID;
-  phase: Phase;
+  phase: EditablePhase;
   onChange: (id: UUID, field: string, v: string) => void;
 }) {
   const rolePhase = value.rolePhases[rolePhaseId];
@@ -63,19 +60,18 @@ export default function RoleForm({
             </FieldCard>
           ),
         )}
-
-        <GhostButton
-          onClick={() =>
-            onChange(
-              rolePhase.role_phase_id,
-              "add_prompt",
-              rolePhase.role_phase_id,
-            )
-          }
-        >
-          + New Prompt
-        </GhostButton>
       </PhaseCard>
+      <GhostButton
+        onClick={() =>
+          onChange(
+            rolePhase.role_phase_id,
+            "add_prompt",
+            rolePhase.role_phase_id,
+          )
+        }
+      >
+        + New Prompt
+      </GhostButton>
     </FormStack>
   );
 }

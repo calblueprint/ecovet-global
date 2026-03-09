@@ -2,12 +2,9 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { UUID } from "crypto";
 import img from "@/assets/images/BlackPlus.svg";
-import COLORS from "@/styles/colors";
-import { Flex } from "@/styles/containers";
-import { B2, Caption } from "@/styles/text";
-import { localStore, Role, Template } from "@/types/schema";
+import { Caption } from "@/styles/text";
+import { LocalStore, Role, Template, UUID } from "@/types/schema";
 import { ActiveIds } from "../page";
 import EditablePhase from "./EditablePhase";
 import RoleEntry from "./RoleEntry";
@@ -31,9 +28,9 @@ export default function TemplateBuilderSideBar({
   setActiveIds,
   updateLocalStore,
 }: {
-  localStore: localStore | null;
+  localStore: LocalStore | null;
   setActiveIds: React.Dispatch<React.SetStateAction<ActiveIds>>;
-  updateLocalStore: (updater: (draft: localStore) => void) => void;
+  updateLocalStore: (updater: (draft: LocalStore) => void) => void;
 }) {
   const router = useRouter();
   const TEMPLATE_INDEX = 1;

@@ -37,8 +37,9 @@ export async function signInWithMagicLink(email: string) {
 }
 
 export async function checkIfUserExists(email: string): Promise<boolean> {
-  const lowerCaseEmail = email.toLowerCase();
   const supabase = await getSupabaseServerClient();
+  const lowerCaseEmail = email.toLowerCase();
+
   const { data, error } = await supabase
     .from("profile")
     .select("*")
@@ -54,6 +55,7 @@ export async function checkIfUserExists(email: string): Promise<boolean> {
 
 /* returns True if there is an unaccepted invite given an email*/
 export async function checkInvites(email: string) {
+  const supabase = await getSupabaseServerClient();
   const lowerCaseEmail = email.toLowerCase();
 
   const { data, error } = await supabase

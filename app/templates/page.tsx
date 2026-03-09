@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { UUID } from "crypto";
 import { produce } from "immer";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
-import { localStore, Template } from "@/types/schema";
+import { LocalStore, Template, UUID } from "@/types/schema";
 import { SideNavContainer } from "../facilitator/styles";
 import { LayoutWrapper } from "./components/styles";
 import TemplateBuilder from "./components/TemplateBuilder";
@@ -50,7 +49,7 @@ export default function NewTemplatePage() {
     roleId: 1,
     rolePhaseId: null,
   });
-  const [newTemp, setNewTemp] = useState<localStore>(() =>
+  const [newTemp, setNewTemp] = useState<LocalStore>(() =>
     createInitialStore(),
   );
   const template = newTemp?.rolesById[1] as Template;

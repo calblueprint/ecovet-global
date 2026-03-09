@@ -29,7 +29,6 @@ export async function addInviteInfoToProfile(userId: string, email: string) {
   const lowerCaseEmail = email.toLowerCase();
   const invite = await getInviteByEmail(lowerCaseEmail);
   const supabase = await getSupabaseServerClient();
-  const invite = await getInviteByEmail(email);
 
   const { error } = await supabase.from("profile").insert({
     id: userId,

@@ -16,6 +16,7 @@ import { PanelCard, SubmitButton } from "./styles";
 import TemplateOverviewForm from "./TemplateOverviewForm";
 
 // TODO: add an active phase id
+// TODO: add an active phase id
 export default function TemplateBuilder({
   activeIds,
   setActiveIds,
@@ -25,7 +26,7 @@ export default function TemplateBuilder({
 }: {
   activeIds: ActiveIds;
   setActiveIds: React.Dispatch<React.SetStateAction<ActiveIds>>;
-  localStore: localStore | null;
+  localStore: LocalStore | null;
   onFinish: () => void;
   update: (updater: (draft: LocalStore) => void) => void;
 }) {
@@ -38,13 +39,13 @@ export default function TemplateBuilder({
   }
 
   function removeRole(role_id: UUID | number): void {
-    if (LocalStore == null || typeof role_id == "number") return; //if role_id is '1', the current tab is Scenario Overivew and therefore should not be removed
+    if (localStore == null || typeof role_id == "number") return; //if role_id is '1', the current tab is Scenario Overivew and therefore should not be removed
 
     let nextActive: UUID | number = 1;
-    const idx = LocalStore.roleIds.indexOf(role_id);
+    const idx = localStore.roleIds.indexOf(role_id);
     if (idx !== -1) {
       nextActive =
-        LocalStore.roleIds[idx + 1] ?? LocalStore.roleIds[idx - 1] ?? 1;
+        localStore.roleIds[idx + 1] ?? localStore.roleIds[idx - 1] ?? 1;
     }
     update(draft => {
       delete draft.rolesById[role_id];
@@ -62,10 +63,12 @@ export default function TemplateBuilder({
     });
 
     setActiveIds({ roleId: nextActive, rolePhaseId: null });
+
+    setActiveIds({ roleId: nextActive, rolePhaseId: null });
   }
 
   function removePhase(phase_id: UUID | null = null): void {
-    if (LocalStore?.phaseIds.length == 0 || LocalStore == null) {
+    if (localStore?.phaseIds.length == 0 || localStore == null) {
       return;
     }
 
@@ -101,7 +104,7 @@ export default function TemplateBuilder({
   }
 
   function addPrompt(rolePhaseID: UUID): void {
-    if (LocalStore == null) return;
+    if (localStore == null) return;
 
     update(draft => {
       const newPromptID = createUUID();
@@ -117,7 +120,7 @@ export default function TemplateBuilder({
   }
 
   function removePrompt(rolePhaseID: UUID, promptID: UUID): void {
-    if (LocalStore == null) return;
+    if (localStore == null) return;
 
     update(draft => {
       const i = draft.promptIndex[rolePhaseID].indexOf(promptID);
@@ -128,7 +131,7 @@ export default function TemplateBuilder({
   }
 
   function setActiveUpdate(id: UUID | number, field: string, next: string) {
-    if (!LocalStore) return;
+    if (!localStore) return;
 
     if (typeof id === "number") {
       update(draft => {
@@ -161,8 +164,8 @@ export default function TemplateBuilder({
   async function saveTemplate(): Promise<void> {
     setSaving(true);
 
-    if (LocalStore == null) return;
-    const saveStore: LocalStore = structuredClone(LocalStore);
+    if (localStore == null) return;
+    const saveStore: LocalStore = structuredClone(localStore);
 
     const realtemplateID = await createTemplates(
       saveStore.templateID,
