@@ -3,8 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { UUID } from "crypto";
-import { fetchPhases, fetchPrompts, fetchRolePhases, fetchTemplateId } from "@/api/supabase/queries/sessions";
-import { fetchTemplate } from "@/api/supabase/queries/templates";
+import { fetchProfileByUserId } from "@/actions/supabase/queries/profile";
+import {
+  fetchPhases,
+  fetchPrompts,
+  fetchRolePhases,
+  fetchTemplateId,
+} from "@/actions/supabase/queries/sessions";
+import { fetchTemplate } from "@/actions/supabase/queries/templates";
 import { Phase, Profile, Prompt, RolePhase, Template } from "@/types/schema";
 import {
   ButtonText,
@@ -18,19 +24,17 @@ import {
   Main,
   OverviewHeader,
   PhaseDescriptionWrapper,
+  PhaseHeader,
 } from "./styles";
-import { fetchProfileByUserId } from "@/api/supabase/queries/profile";
-
 
 export default function ScenarioOverview() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const { userId } = useParams<{ userId: string }>();
 
-  
   const [templateInfo, setTemplateInfo] = useState<Template | null>(null);
   const [phases, setPhases] = useState<Phase[]>([]);
   const [phaseInd, setPhaseInd] = useState(-1);
-  const [rolePhase, setRolePhase] = useState<RolePhase>();
+  const [rolePhase, setRolePhase] = useState<RolePhase | null>();
   const [roleId, setRoleId] = useState<string>("");
   const [profile, setProfile] = useState<Profile | null>(null);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
@@ -43,7 +47,7 @@ export default function ScenarioOverview() {
     setPhases(await fetchPhases(sessionId));
     setProfile(await fetchProfileByUserId(userId as UUID));
     if (!profile) return;
-    setRoleId(profile.role_id);
+    setRoleId(profile.role_id ?? "");
   }, [sessionId]);
 
   useEffect(() => {
@@ -52,9 +56,9 @@ export default function ScenarioOverview() {
 
   async function nextPhase() {
     if (phaseInd >= phases.length) return;
-    setPhaseInd(phaseInd+1);
+    setPhaseInd(phaseInd + 1);
     // get template
-    setRolePhase(await fetchRolePhases(roleId as UUID, phases[phaseInd].phase_id));
+    setRolePhase(await fetchRolePhases(roleId, phases[phaseInd].phase_id));
     if (!roleId) return;
     setPrompts(await fetchPrompts(rolePhase as unknown as UUID));
   }
@@ -63,16 +67,20 @@ export default function ScenarioOverview() {
     <Main>
       <ContentDiv>
         <PhaseDescriptionWrapper phase={phaseInd > -1}>
-          <ContentBody40>{phaseInd + 1} of {phases.length}</ContentBody40>
-          <OverviewHeader>Phase {phaseInd + 1}</OverviewHeader>
+          <ContentBody40>
+            {phaseInd + 1} of {phases.length}
+          </ContentBody40>
+          <PhaseHeader>Phase {phaseInd + 1}</PhaseHeader>
           <ContentBubble>
             <ContentHeader>Context</ContentHeader>
             <ContentBody>
-              {phases.length > 0 ? phases[phaseInd].phase_description : "no phase"}
+              {phases.length > 0
+                ? phases[phaseInd].phase_description
+                : "no phase"}
             </ContentBody>
           </ContentBubble>
         </PhaseDescriptionWrapper>
-        <OverviewHeader>Scenario Overview</OverviewHeader>
+        <OverviewHeader phase={phaseInd == -1}>Scenario Overview</OverviewHeader>
         <ContentBubble>
           <ContentHeader>Summary</ContentHeader>
           <ContentBody>
@@ -86,7 +94,10 @@ export default function ScenarioOverview() {
           </ContentBody>
         </ContentBubble>
         <ContinueButtonDiv>
-          <ContinueButton onClick={nextPhase} disabled={phaseInd >= phases.length}>
+          <ContinueButton
+            onClick={nextPhase}
+            disabled={phaseInd >= phases.length}
+          >
             <ButtonText>Continue</ButtonText>
           </ContinueButton>
         </ContinueButtonDiv>
@@ -94,8 +105,9 @@ export default function ScenarioOverview() {
       <ContentDiv>
         <ContentBubble>
           <ContentHeader>Placeholder Styling</ContentHeader>
-          {prompts.map(prompt => <ContentBody>{prompt.prompt_text}
-          </ContentBody>)}
+          {prompts.map(prompt => (
+            <ContentBody>{prompt.prompt_text}</ContentBody>
+          ))}
         </ContentBubble>
       </ContentDiv>
     </Main>

@@ -22,12 +22,23 @@ export const ContentDiv = styled.div`
   align-items: flex-start;
   gap: 2rem;
 `;
-export const PhaseDescriptionWrapper = styled.div<{ phase?: boolean }>`
+
+export const PhaseDescriptionWrapper = styled.div<{ phase? : boolean }>`
   display: ${({ phase }) => (phase ? "flex" : "none")};
   flex-direction: column;
 `;
 
-export const OverviewHeader = styled.h2`
+export const OverviewHeader = styled.h2<{ phase? : boolean}>`
+  align-self: stretch;
+  color: ${COLORS.black};
+  font-family: ${Sans.style.fontFamily};
+  font-size: ${({ phase }) => (phase ? "2rem" : "1.5rem")};
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+`;
+
+export const PhaseHeader = styled.h2`
   align-self: stretch;
   color: ${COLORS.black};
   font-family: ${Sans.style.fontFamily};
@@ -35,6 +46,7 @@ export const OverviewHeader = styled.h2`
   font-style: normal;
   font-weight: 700;
   line-height: normal;
+  padding: 0.5rem 0 2rem 0;
 `;
 
 export const ContentBubble = styled.div`
@@ -77,7 +89,6 @@ export const ContentBody40 = styled.p`
   font-weight: 500;
   line-height: 1.125rem;
 `;
-
 
 export const ContinueButtonDiv = styled.div`
   display: flex;
