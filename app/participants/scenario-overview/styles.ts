@@ -24,9 +24,11 @@ export const ContentDiv = styled.div`
 `;
 
 export const PhaseDescriptionWrapper = styled.div<{ phase? : boolean }>`
+
   display: ${({ phase }) => (phase ? "flex" : "none")};
   flex-direction: column;
 `;
+
 
 export const OverviewHeader = styled.h2<{ phase? : boolean}>`
   align-self: stretch;
@@ -39,6 +41,7 @@ export const OverviewHeader = styled.h2<{ phase? : boolean}>`
 `;
 
 export const PhaseHeader = styled.h2`
+
   align-self: stretch;
   color: ${COLORS.black};
   font-family: ${Sans.style.fontFamily};
@@ -47,6 +50,7 @@ export const PhaseHeader = styled.h2`
   font-weight: 700;
   line-height: normal;
   padding: 0.5rem 0 2rem 0;
+
 `;
 
 export const ContentBubble = styled.div`
@@ -89,6 +93,7 @@ export const ContentBody40 = styled.p`
   font-weight: 500;
   line-height: 1.125rem;
 `;
+
 
 export const ContinueButtonDiv = styled.div`
   display: flex;

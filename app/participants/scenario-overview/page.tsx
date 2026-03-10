@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { UUID } from "crypto";
+
 import { fetchProfileByUserId } from "@/actions/supabase/queries/profile";
 import {
   fetchPhases,
@@ -11,6 +12,7 @@ import {
   fetchTemplateId,
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
+
 import { Phase, Profile, Prompt, RolePhase, Template } from "@/types/schema";
 import {
   ButtonText,
@@ -35,6 +37,7 @@ export default function ScenarioOverview() {
   const [phases, setPhases] = useState<Phase[]>([]);
   const [phaseInd, setPhaseInd] = useState(-1);
   const [rolePhase, setRolePhase] = useState<RolePhase | null>();
+
   const [roleId, setRoleId] = useState<string>("");
   const [profile, setProfile] = useState<Profile | null>(null);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
@@ -47,7 +50,9 @@ export default function ScenarioOverview() {
     setPhases(await fetchPhases(sessionId));
     setProfile(await fetchProfileByUserId(userId as UUID));
     if (!profile) return;
+
     setRoleId(profile.role_id ?? "");
+
   }, [sessionId]);
 
   useEffect(() => {
@@ -59,6 +64,7 @@ export default function ScenarioOverview() {
     setPhaseInd(phaseInd + 1);
     // get template
     setRolePhase(await fetchRolePhases(roleId, phases[phaseInd].phase_id));
+
     if (!roleId) return;
     setPrompts(await fetchPrompts(rolePhase as unknown as UUID));
   }
@@ -105,6 +111,7 @@ export default function ScenarioOverview() {
       <ContentDiv>
         <ContentBubble>
           <ContentHeader>Placeholder Styling</ContentHeader>
+
           {prompts.map(prompt => (
             <ContentBody>{prompt.prompt_text}</ContentBody>
           ))}
