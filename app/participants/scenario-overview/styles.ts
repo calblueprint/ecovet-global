@@ -8,7 +8,7 @@ export const Main = styled.main`
   min-height: 100vh;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
+  flex-direction: row;
   background-color: ${COLORS.white};
   background: ${COLORS.white};
 `;
@@ -19,6 +19,10 @@ export const ContentDiv = styled.div`
   flex-direction: column;
   align-items: flex-start;
   gap: 2rem;
+`;
+export const PhaseDescriptionWrapper = styled.div<{ phase?: boolean }>`
+  display: ${({ phase }) => (phase ? "flex" : "none")};
+  flex-direction: column;
 `;
 
 export const OverviewHeader = styled.h2`
@@ -61,6 +65,17 @@ export const ContentBody = styled.p`
   font-weight: 500;
   line-height: 1.125rem;
 `;
+
+export const ContentBody40 = styled.p`
+  color: ${COLORS.black40};
+
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1.125rem;
+`;
+
 
 export const ContinueButtonDiv = styled.div`
   display: flex;
