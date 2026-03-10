@@ -15,7 +15,6 @@ import { fetchTemplate } from "@/actions/supabase/queries/templates";
 
 import { Phase, Profile, Prompt, RolePhase, Template } from "@/types/schema";
 import {
-  ButtonText,
   ContentBody,
   ContentBody40,
   ContentBubble,
@@ -103,8 +102,7 @@ export default function ScenarioOverview() {
           <ContinueButton
             onClick={nextPhase}
             disabled={phaseInd >= phases.length}
-          >
-            <ButtonText>Continue</ButtonText>
+          >Continue
           </ContinueButton>
         </ContinueButtonDiv>
       </ContentDiv>

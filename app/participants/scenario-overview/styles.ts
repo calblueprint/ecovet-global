@@ -102,18 +102,9 @@ export const ContinueButtonDiv = styled.div`
   align-items: flex-end;
   gap: 10.625rem;
   align-self: stretch;
+  
 `;
 
-export const ButtonText = styled.p`
-  color: ${COLORS.white};
-  text-align: center;
-
-  font-family: ${Sans.style.fontFamily};
-  font-size: 0.75rem;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 1.125rem;
-`;
 
 export const ContinueButton = styled.button`
   display: flex;
@@ -125,4 +116,12 @@ export const ContinueButton = styled.button`
   border-radius: 0.25rem;
   background: ${COLORS.darkElectricBlue};
   border: ${COLORS.darkElectricBlue};
+  color: ${COLORS.white};
+  text-align: center;
+
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1.125rem;
 `;
