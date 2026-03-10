@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { UUID } from "crypto";
-import { fetchPhases, fetchTemplateId } from "@/api/supabase/queries/sessions";
+import { fetchPhases, fetchPrompts, fetchRolePhases, fetchTemplateId } from "@/api/supabase/queries/sessions";
 import { fetchTemplate } from "@/api/supabase/queries/templates";
-import { Phase, Template } from "@/types/schema";
+import { Phase, Profile, Prompt, RolePhase, Template } from "@/types/schema";
 import {
   ButtonText,
   ContentBody,
@@ -19,15 +19,21 @@ import {
   OverviewHeader,
   PhaseDescriptionWrapper,
 } from "./styles";
+import { fetchProfileByUserId } from "@/api/supabase/queries/profile";
 
 
 export default function ScenarioOverview() {
   const { sessionId } = useParams<{ sessionId: string }>();
+  const { userId } = useParams<{ userId: string }>();
 
   
   const [templateInfo, setTemplateInfo] = useState<Template | null>(null);
   const [phases, setPhases] = useState<Phase[]>([]);
   const [phaseInd, setPhaseInd] = useState(-1);
+  const [rolePhase, setRolePhase] = useState<RolePhase>();
+  const [roleId, setRoleId] = useState<string>("");
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [prompts, setPrompts] = useState<Prompt[]>([]);
 
   const loadData = useCallback(async () => {
     if (!sessionId) return;
@@ -35,15 +41,22 @@ export default function ScenarioOverview() {
     const template = await fetchTemplate(templateId as unknown as UUID);
     setTemplateInfo(template);
     setPhases(await fetchPhases(sessionId));
+    setProfile(await fetchProfileByUserId(userId as UUID));
+    if (!profile) return;
+    setRoleId(profile.role_id);
   }, [sessionId]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  function nextPhase() {
+  async function nextPhase() {
     if (phaseInd >= phases.length) return;
     setPhaseInd(phaseInd+1);
+    // get template
+    setRolePhase(await fetchRolePhases(roleId as UUID, phases[phaseInd].phase_id));
+    if (!roleId) return;
+    setPrompts(await fetchPrompts(rolePhase as unknown as UUID));
   }
 
   return (
@@ -79,7 +92,11 @@ export default function ScenarioOverview() {
         </ContinueButtonDiv>
       </ContentDiv>
       <ContentDiv>
-        
+        <ContentBubble>
+          <ContentHeader>Placeholder Styling</ContentHeader>
+          {prompts.map(prompt => <ContentBody>{prompt.prompt_text}
+          </ContentBody>)}
+        </ContentBubble>
       </ContentDiv>
     </Main>
   );

@@ -3,6 +3,7 @@ import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
 
 export const Main = styled.main`
+  padding: 7.5rem 5rem;
   display: flex;
   height: 100vh;
   min-height: 100vh;
@@ -11,6 +12,7 @@ export const Main = styled.main`
   flex-direction: row;
   background-color: ${COLORS.white};
   background: ${COLORS.white};
+  gap: 7.5rem;
 `;
 
 export const ContentDiv = styled.div`
