@@ -206,3 +206,37 @@ export async function checkProfileExists(id: string) {
     return true;
   }
 }
+
+export async function fetchSessionByUserAndSessionId(sessionId: UUID, userId: UUID) {
+  const { data, error } = await supabase
+    .from("participant_session")
+    .select("role_id")
+    .eq("user_id", userId)
+    .eq("session_id", sessionId)
+    .eq("session.is_finished", false)
+    .order("created_at", { ascending: false });
+  if (error) {
+    console.error("Error fetching active session for user:", error.message);
+    return null;
+  }
+
+  return data[0]?.role_id ?? null;
+}
+
+export async function fetchRoleBySessionId(sessionId: UUID, userId: UUID) {
+  
+  let role_id = await fetchSessionByUserAndSessionId(sessionId, userId);
+
+  const { data, error } = await supabase
+    .from("role")
+    .select("role_id")
+    .eq("role_id", role_id)
+  //order by most recent session added
+  if (error) {
+    console.error("Error fetching active session for user:", error.message);
+    return null;
+  }
+
+  return data;
+
+}

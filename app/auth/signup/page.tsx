@@ -18,12 +18,15 @@ import {
   Heading2,
   Input,
   InputFields,
+  InputLabel,
+  InputWrapper,
   IntroText,
   Main,
   PasswordCheckBox,
   PasswordConfirmDiv,
   PasswordDiv,
   PasswordRule,
+  PasswordText,
   SignInTag,
   VisibilityToggle,
   WelcomeTag,
@@ -115,21 +118,26 @@ export default function Login() {
         </IntroText>
         <InputFields>
           <EmailAddressDiv>
+            <InputWrapper>
+            <InputLabel htmlFor="email">Email address</InputLabel>
             <Input
               name="email"
-              placeholder="Email Address"
+              placeholder=""
               onChange={(e: { target: { value: SetStateAction<string> } }) => {
                 setEmail(e.target.value);
                 setErrorMessage(null);
               }}
               value={email}
             />{" "}
+            </InputWrapper>
           </EmailAddressDiv>
           <PasswordDiv>
             <div style={{ position: "relative", width: "100%" }}>
+              <InputWrapper>
+              <InputLabel htmlFor="email">Password</InputLabel>
               <Input
                 name="password"
-                placeholder="Password"
+                placeholder=""
                 type={showPassword ? "text" : "password"}
                 onChange={(e: {
                   target: { value: SetStateAction<string> };
@@ -142,14 +150,17 @@ export default function Login() {
               >
                 {showPassword ? <FiEye size={18} /> : <FiEyeOff size={18} />}
               </VisibilityToggle>
+              </InputWrapper>
             </div>
           </PasswordDiv>
           <PasswordConfirmDiv>
             <div style={{ position: "relative", width: "100%" }}>
+              <InputWrapper>
+              <InputLabel htmlFor="email">Password Confirmation</InputLabel>
               <Input
                 name="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
-                placeholder="Password Confirmation"
+                placeholder=""
                 value={confirmPassword}
                 onChange={(e: { target: { value: SetStateAction<string> } }) =>
                   setConfirmPassword(e.target.value)
@@ -165,10 +176,11 @@ export default function Login() {
                   <FiEyeOff size={18} />
                 )}
               </VisibilityToggle>
+              </InputWrapper>
             </div>
           </PasswordConfirmDiv>
           <PasswordCheckBox>
-            Your password must contain:
+            <PasswordText>Your password must contain:</PasswordText>
             <ul>
               <PasswordRule $touched={passwordTouched} $valid={rules.length}>
                 {passwordTouched ? rules.length ? <FiCheck /> : <FiX /> : "•"}

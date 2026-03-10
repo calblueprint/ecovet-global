@@ -15,6 +15,8 @@ import {
   Heading2,
   Input,
   InputFields,
+  InputLabel,
+  InputWrapper,
   IntroText,
   Main,
   PasswordDiv,
@@ -73,6 +75,8 @@ export default function Login() {
           </IntroText>
           <InputFields>
             <EmailAddressDiv>
+              <InputWrapper>
+              <InputLabel htmlFor="email">Email address</InputLabel>
               <Input
                 name="email"
                 placeholder="Email Address"
@@ -82,6 +86,7 @@ export default function Login() {
                 }}
                 value={email}
               />
+              </InputWrapper>
             </EmailAddressDiv>
             <PasswordDiv>
               <div style={{ position: "relative", width: "100%" }}>

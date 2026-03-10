@@ -3,11 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import supabase from "@/actions/supabase/client";
-import { fetchSessionById } from "@/api/supabase/queries/profile";
+import { fetchRoleBySessionId, fetchSessionById } from "@/api/supabase/queries/profile";
 import { fetchSessionName } from "@/api/supabase/queries/sessions";
 import ParticipantsNavBar from "@/components/ParticipantsNavBar/ParticipantsNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
 import { Button, Container, Heading2, Label, Main } from "./styles";
+import { UUID } from "crypto";
 
 export default function ParticipantWaitingPage() {
   const { profile } = useProfile();
@@ -16,6 +17,7 @@ export default function ParticipantWaitingPage() {
   const [sessionName, setSessionName] = useState("");
   const [sessionExists, setSessionExists] = useState(false);
   const [sessionId, setSessionId] = useState("");
+  const [role, setRole] = useState("");
 
   const processedSessionRef = useRef<string | null>(null);
 
@@ -31,7 +33,9 @@ export default function ParticipantWaitingPage() {
 
       setSessionId(sessionId);
       setSessionName(session.session_name);
-      setStatus(`You were invited as a participant.`);
+      const role_name = await fetchRoleBySessionId(sessionId as UUID, profile?.id as UUID);
+      setRole(role_name?.[0]?.role_id ?? "");
+      setStatus(`You were invited as a` + role_name + '.');
       setSessionExists(true);
     }
 
