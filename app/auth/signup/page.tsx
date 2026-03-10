@@ -119,63 +119,65 @@ export default function Login() {
         <InputFields>
           <EmailAddressDiv>
             <InputWrapper>
-            <InputLabel htmlFor="email">Email address</InputLabel>
-            <Input
-              name="email"
-              placeholder=""
-              onChange={(e: { target: { value: SetStateAction<string> } }) => {
-                setEmail(e.target.value);
-                setErrorMessage(null);
-              }}
-              value={email}
-            />{" "}
+              <InputLabel htmlFor="email">Email address</InputLabel>
+              <Input
+                name="email"
+                placeholder=""
+                onChange={(e: {
+                  target: { value: SetStateAction<string> };
+                }) => {
+                  setEmail(e.target.value);
+                  setErrorMessage(null);
+                }}
+                value={email}
+              />{" "}
             </InputWrapper>
           </EmailAddressDiv>
           <PasswordDiv>
             <div style={{ position: "relative", width: "100%" }}>
               <InputWrapper>
-              <InputLabel htmlFor="email">Password</InputLabel>
-              <Input
-                name="password"
-                placeholder=""
-                type={showPassword ? "text" : "password"}
-                onChange={(e: {
-                  target: { value: SetStateAction<string> };
-                }) => (setPassword(e.target.value), setPasswordTouched(true))}
-                value={password}
-              />{" "}
-              <VisibilityToggle
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <FiEye size={18} /> : <FiEyeOff size={18} />}
-              </VisibilityToggle>
+                <InputLabel htmlFor="email">Password</InputLabel>
+                <Input
+                  name="password"
+                  placeholder=""
+                  type={showPassword ? "text" : "password"}
+                  onChange={(e: {
+                    target: { value: SetStateAction<string> };
+                  }) => (setPassword(e.target.value), setPasswordTouched(true))}
+                  value={password}
+                />{" "}
+                <VisibilityToggle
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <FiEye size={18} /> : <FiEyeOff size={18} />}
+                </VisibilityToggle>
               </InputWrapper>
             </div>
           </PasswordDiv>
           <PasswordConfirmDiv>
             <div style={{ position: "relative", width: "100%" }}>
               <InputWrapper>
-              <InputLabel htmlFor="email">Password Confirmation</InputLabel>
-              <Input
-                name="confirmPassword"
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder=""
-                value={confirmPassword}
-                onChange={(e: { target: { value: SetStateAction<string> } }) =>
-                  setConfirmPassword(e.target.value)
-                }
-              />
-              <VisibilityToggle
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? (
-                  <FiEye size={18} />
-                ) : (
-                  <FiEyeOff size={18} />
-                )}
-              </VisibilityToggle>
+                <InputLabel htmlFor="email">Password Confirmation</InputLabel>
+                <Input
+                  name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder=""
+                  value={confirmPassword}
+                  onChange={(e: {
+                    target: { value: SetStateAction<string> };
+                  }) => setConfirmPassword(e.target.value)}
+                />
+                <VisibilityToggle
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <FiEye size={18} />
+                  ) : (
+                    <FiEyeOff size={18} />
+                  )}
+                </VisibilityToggle>
               </InputWrapper>
             </div>
           </PasswordConfirmDiv>

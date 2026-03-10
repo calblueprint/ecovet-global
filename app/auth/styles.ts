@@ -169,15 +169,14 @@ export const PasswordCheckBox = styled.div`
   flex-direction: column;
   align-items: flex-start;
   gap: 0.5rem;
-  align-self: stretch;  
+  align-self: stretch;
   height: fit-content;
   font-family: ${Sans.style.fontFamily};
   font-size: 12px;
   font-style: normal;
   font-weight: 500;
   line-height: normal;
-  gap: 
-  ul {
+  gap: ul {
     list-style-type: disc;
     list-style-position: outside;
     // padding-left: 1.5rem;
@@ -217,13 +216,13 @@ export const PasswordRule = styled.li<{ $touched: boolean; $valid: boolean }>`
 `;
 
 export const PasswordText = styled.p`
-color: ${COLORS.black70};
-font-family: ${Sans.style.fontFamily};
-font-size: 0.75rem;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-align-self: stretch;
+  color: ${COLORS.black70};
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  align-self: stretch;
 `;
 
 export const Button = styled.button`

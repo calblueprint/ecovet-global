@@ -76,16 +76,16 @@ export default function Login() {
           <InputFields>
             <EmailAddressDiv>
               <InputWrapper>
-              <InputLabel htmlFor="email">Email address</InputLabel>
-              <Input
-                name="email"
-                placeholder="Email Address"
-                onChange={e => {
-                  setEmail(e.target.value);
-                  setErrorMessage(null);
-                }}
-                value={email}
-              />
+                <InputLabel htmlFor="email">Email address</InputLabel>
+                <Input
+                  name="email"
+                  placeholder="Email Address"
+                  onChange={e => {
+                    setEmail(e.target.value);
+                    setErrorMessage(null);
+                  }}
+                  value={email}
+                />
               </InputWrapper>
             </EmailAddressDiv>
             <PasswordDiv>

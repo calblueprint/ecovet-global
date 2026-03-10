@@ -20,11 +20,9 @@ import {
   PhaseDescriptionWrapper,
 } from "./styles";
 
-
 export default function ScenarioOverview() {
   const { sessionId } = useParams<{ sessionId: string }>();
 
-  
   const [templateInfo, setTemplateInfo] = useState<Template | null>(null);
   const [phases, setPhases] = useState<Phase[]>([]);
   const [phaseInd, setPhaseInd] = useState(-1);
@@ -43,19 +41,23 @@ export default function ScenarioOverview() {
 
   function nextPhase() {
     if (phaseInd >= phases.length) return;
-    setPhaseInd(phaseInd+1);
+    setPhaseInd(phaseInd + 1);
   }
 
   return (
     <Main>
       <ContentDiv>
         <PhaseDescriptionWrapper phase={phaseInd > -1}>
-          <ContentBody40>{phaseInd + 1} of {phases.length}</ContentBody40>
+          <ContentBody40>
+            {phaseInd + 1} of {phases.length}
+          </ContentBody40>
           <OverviewHeader>Phase {phaseInd + 1}</OverviewHeader>
           <ContentBubble>
             <ContentHeader>Context</ContentHeader>
             <ContentBody>
-              {phases.length > 0 ? phases[phaseInd].phase_description : "no phase"}
+              {phases.length > 0
+                ? phases[phaseInd].phase_description
+                : "no phase"}
             </ContentBody>
           </ContentBubble>
         </PhaseDescriptionWrapper>
@@ -73,14 +75,15 @@ export default function ScenarioOverview() {
           </ContentBody>
         </ContentBubble>
         <ContinueButtonDiv>
-          <ContinueButton onClick={nextPhase} disabled={phaseInd >= phases.length}>
+          <ContinueButton
+            onClick={nextPhase}
+            disabled={phaseInd >= phases.length}
+          >
             <ButtonText>Continue</ButtonText>
           </ContinueButton>
         </ContinueButtonDiv>
       </ContentDiv>
-      <ContentDiv>
-        /* TBD */
-      </ContentDiv>
+      <ContentDiv>/* TBD */</ContentDiv>
     </Main>
   );
 }
