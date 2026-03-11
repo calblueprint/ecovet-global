@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { UUID } from "crypto";
-
 import { fetchProfileByUserId } from "@/actions/supabase/queries/profile";
 import {
   fetchPhases,
@@ -12,8 +10,7 @@ import {
   fetchTemplateId,
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
-
-import { Phase, Profile, Prompt, RolePhase, Template } from "@/types/schema";
+import { Phase, Profile, Prompt, Template, UUID } from "@/types/schema";
 import {
   ContentBody,
   ContentBody40,
@@ -29,49 +26,46 @@ import {
 } from "./styles";
 
 export default function ScenarioOverview() {
-  const { sessionId } = useParams<{ sessionId: string }>();
-  const { userId } = useParams<{ userId: string }>();
+  const { sessionId, userId } = useParams();
 
   const [templateInfo, setTemplateInfo] = useState<Template | null>(null);
   const [phases, setPhases] = useState<Phase[]>([]);
   const [phaseInd, setPhaseInd] = useState(-1);
-  const [rolePhase, setRolePhase] = useState<RolePhase | null>();
 
   const [roleId, setRoleId] = useState<string>("");
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
 
   const loadData = useCallback(async () => {
     if (!sessionId) return;
+    console.log(sessionId);
     const templateId = await fetchTemplateId(sessionId as UUID);
-    const template = await fetchTemplate(templateId as unknown as UUID);
+    const template = await fetchTemplate(
+      templateId.template_id as unknown as UUID,
+    );
     setTemplateInfo(template);
-    setPhases(await fetchPhases(sessionId));
-    setProfile(await fetchProfileByUserId(userId as UUID));
-    if (!profile) return;
-
-    setRoleId(profile.role_id ?? "");
-
-  }, [sessionId]);
+    console.log(templateId);
+    setPhases(await fetchPhases(sessionId as UUID));
+    const fetchedProfile = await fetchProfileByUserId(userId as UUID);
+    if (!fetchedProfile) return;
+    setRoleId(fetchedProfile.role_id ?? "");
+  }, [sessionId, userId]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
 
   async function nextPhase() {
-    if (phaseInd >= phases.length) return;
-    setPhaseInd(phaseInd + 1);
-    // get template
-    setRolePhase(await fetchRolePhases(roleId, phases[phaseInd].phase_id));
-
-    if (!roleId) return;
-    setPrompts(await fetchPrompts(rolePhase as unknown as UUID));
+    if (phaseInd + 1 >= phases.length) return;
+    const nextInd = phaseInd + 1;
+    setPhaseInd(nextInd);
+    const rp = await fetchRolePhases(roleId, phases[nextInd].phase_id);
+    setPrompts(await fetchPrompts(rp?.role_id as UUID));
   }
 
   return (
     <Main>
       <ContentDiv>
-        <PhaseDescriptionWrapper phase={phaseInd > -1}>
+        <PhaseDescriptionWrapper $phase={phaseInd > -1}>
           <ContentBody40>
             {phaseInd + 1} of {phases.length}
           </ContentBody40>
@@ -79,13 +73,15 @@ export default function ScenarioOverview() {
           <ContentBubble>
             <ContentHeader>Context</ContentHeader>
             <ContentBody>
-              {phases.length > 0
+              {phases.length > 0 && phaseInd >= 0
                 ? phases[phaseInd].phase_description
                 : "no phase"}
             </ContentBody>
           </ContentBubble>
         </PhaseDescriptionWrapper>
-        <OverviewHeader phase={phaseInd == -1}>Scenario Overview</OverviewHeader>
+        <OverviewHeader $phase={phaseInd == -1}>
+          Scenario Overview
+        </OverviewHeader>
         <ContentBubble>
           <ContentHeader>Summary</ContentHeader>
           <ContentBody>
@@ -101,8 +97,9 @@ export default function ScenarioOverview() {
         <ContinueButtonDiv>
           <ContinueButton
             onClick={nextPhase}
-            disabled={phaseInd >= phases.length}
-          >Continue
+            disabled={phases.length === 0 || phaseInd >= phases.length - 1}
+          >
+            Continue
           </ContinueButton>
         </ContinueButtonDiv>
       </ContentDiv>
@@ -110,8 +107,10 @@ export default function ScenarioOverview() {
         <ContentBubble>
           <ContentHeader>Placeholder Styling</ContentHeader>
 
-          {prompts.map(prompt => (
-            <ContentBody>{prompt.prompt_text}</ContentBody>
+          {prompts.map((prompt, index) => (
+            <ContentBody key={prompt.prompt_id ?? index}>
+              {prompt.prompt_text}
+            </ContentBody>
           ))}
         </ContentBubble>
       </ContentDiv>

@@ -23,25 +23,23 @@ export const ContentDiv = styled.div`
   gap: 2rem;
 `;
 
-export const PhaseDescriptionWrapper = styled.div<{ phase? : boolean }>`
-
-  display: ${({ phase }) => (phase ? "flex" : "none")};
+export const PhaseDescriptionWrapper = styled.div<{ $phase?: boolean }>`
+  display: ${({ $phase }) => ($phase ? "flex" : "none")};
   flex-direction: column;
+  width: 100%;
 `;
 
-
-export const OverviewHeader = styled.h2<{ phase? : boolean}>`
+export const OverviewHeader = styled.h2<{ $phase?: boolean }>`
   align-self: stretch;
   color: ${COLORS.black};
   font-family: ${Sans.style.fontFamily};
-  font-size: ${({ phase }) => (phase ? "2rem" : "1.5rem")};
+  font-size: ${({ $phase }) => ($phase ? "2rem" : "1.5rem")};
   font-style: normal;
   font-weight: 700;
   line-height: normal;
 `;
 
 export const PhaseHeader = styled.h2`
-
   align-self: stretch;
   color: ${COLORS.black};
   font-family: ${Sans.style.fontFamily};
@@ -50,7 +48,6 @@ export const PhaseHeader = styled.h2`
   font-weight: 700;
   line-height: normal;
   padding: 0.5rem 0 2rem 0;
-
 `;
 
 export const ContentBubble = styled.div`
@@ -61,6 +58,7 @@ export const ContentBubble = styled.div`
   gap: 0.5rem;
   align-self: stretch;
   border-radius: 8px;
+  width: 100%;
   background: #f5f5f5;
 `;
 
@@ -81,6 +79,7 @@ export const ContentBody = styled.p`
   font-size: 0.75rem;
   font-style: normal;
   font-weight: 500;
+  width: 100%;
   line-height: 1.125rem;
 `;
 
@@ -94,7 +93,6 @@ export const ContentBody40 = styled.p`
   line-height: 1.125rem;
 `;
 
-
 export const ContinueButtonDiv = styled.div`
   display: flex;
   flex-direction: column;
@@ -102,9 +100,7 @@ export const ContinueButtonDiv = styled.div`
   align-items: flex-end;
   gap: 10.625rem;
   align-self: stretch;
-  
 `;
-
 
 export const ContinueButton = styled.button`
   display: flex;
