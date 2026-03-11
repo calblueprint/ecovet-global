@@ -253,7 +253,7 @@ export async function deletePrompts(prompt_id: UUID): Promise<void> {
 }
 
 export async function fetchTemplate(
-  template_id: UUID,
+  template_id: string,
 ): Promise<Template | null> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
@@ -265,6 +265,7 @@ export async function fetchTemplate(
     console.error("Error fetching template by template_id:", error);
     return null;
   }
+  console.log("this", data);
   return data;
 }
 
