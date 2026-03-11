@@ -10,12 +10,12 @@ import {
 } from "../../styles";
 
 export interface Participant {
-  id?: number;
-  name: string;
-  email: string;
-  role: string;
-  last_active: string;
-  invite_accepted: boolean;
+  id: string;
+  name?: string | null; // optional because database doesn't have it
+  email: string | null;
+  role: string | null;
+  last_active?: string | null; // optional because database doesn't have it
+  invite_accepted: string | null; // consider making boolean? leaving as string for now since that's how it's coming from the database
 }
 
 export default function ParticipantsList({
@@ -36,6 +36,7 @@ export default function ParticipantsList({
               </StyledTh>
               <StyledTh>Email</StyledTh>
               <StyledTh>Role</StyledTh>
+              <StyledTh>Status</StyledTh>
               <StyledTh>Last active</StyledTh>
             </tr>
           </StyledTableHead>
@@ -45,6 +46,7 @@ export default function ParticipantsList({
                 <StyledTd>{p.name}</StyledTd>
                 <StyledTd>{p.email}</StyledTd>
                 <StyledTd>{p.role}</StyledTd>
+                <StyledTd>{p.invite_accepted}</StyledTd>
                 <StyledTd>{p.last_active}</StyledTd>
               </StyledTableRow>
             ))}
