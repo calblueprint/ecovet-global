@@ -92,10 +92,7 @@ export default function ParticipantWaitingPage() {
 
           {sessionExists && (
             <Link
-              href={{
-                pathname: "/participants/session-flow",
-                query: { sessionId },
-              }}
+              href={`/participants/scenario-overview/${sessionId}/${profile?.id}`}
             >
               <Button>Start Session</Button>
             </Link>

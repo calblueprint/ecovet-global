@@ -164,15 +164,16 @@ export const SideNavTemplatesContainer = styled.div`
   width: 100%;
 `;
 
-export const SideNavButton = styled.button<{ selected: boolean }>`
+export const SideNavButton = styled.button<{ $selected: boolean }>`
   width: 100%;
   padding: 0.75rem 1.5rem;
   text-align: left;
   gap: 0.5em;
-  background-color: ${({ selected }) =>
-    selected ? COLORS.oat_dark : COLORS.oat_light};
+  background-color: ${({ $selected }: { $selected: boolean }) =>
+    $selected ? COLORS.oat_dark : COLORS.oat_light};
 
-  color: ${({ selected }) => (selected ? COLORS.black : COLORS.black70)};
+  color: ${({ $selected }: { $selected: boolean }) =>
+    $selected ? COLORS.black : COLORS.black70};
   border-radius: 0.25rem;
   border: none;
   font-family: ${Sans.style.fontFamily};
