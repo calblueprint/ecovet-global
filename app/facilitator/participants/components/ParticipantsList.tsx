@@ -1,4 +1,3 @@
-import React, { useMemo, useState } from "react";
 import Box from "@mui/material/Box";
 import {
   SortButton,
@@ -15,7 +14,7 @@ export interface Participant {
   email: string | null;
   role: string | null;
   last_active?: string | null; // optional because database doesn't have it
-  invite_accepted: string | null; // consider making boolean? leaving as string for now since that's how it's coming from the database
+  invite_accepted: boolean | null; // consider making boolean? leaving as string for now since that's how it's coming from the database
 }
 
 export default function ParticipantsList({
@@ -36,7 +35,7 @@ export default function ParticipantsList({
               </StyledTh>
               <StyledTh>Email</StyledTh>
               <StyledTh>Role</StyledTh>
-              <StyledTh>Status</StyledTh>
+              <StyledTh>Status (for testing)</StyledTh>
               <StyledTh>Last active</StyledTh>
             </tr>
           </StyledTableHead>
@@ -46,7 +45,8 @@ export default function ParticipantsList({
                 <StyledTd>{p.name}</StyledTd>
                 <StyledTd>{p.email}</StyledTd>
                 <StyledTd>{p.role}</StyledTd>
-                <StyledTd>{p.invite_accepted}</StyledTd>
+                <StyledTd>{String(p.invite_accepted)}</StyledTd>{" "}
+                {/* purely to see accepted vs pending in the site itself*/}
                 <StyledTd>{p.last_active}</StyledTd>
               </StyledTableRow>
             ))}

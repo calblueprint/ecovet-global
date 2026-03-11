@@ -36,7 +36,7 @@ export default function ParticipantsPage() {
       email: item.email,
       role: item.user_type,
       last_active: null, // same with last active
-      invite_accepted: item.status, // This controls the tab placement
+      invite_accepted: item.status === "Accepted", // This controls the tab placement, changed it from string to boolean
     }));
     setParticipants(formattedData);
   }, [profile?.user_group_id]);
