@@ -39,6 +39,20 @@ export async function addInviteInfoToProfile(userId: string, email: string) {
     throw new Error("Failed to create user profile");
   }
 }
+
+export async function getProfilesByEmails(emails: string[]) {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("profile")
+    .select("*")
+    .in("email", emails);
+  if (error) {
+    console.error("Error fetching profiles by emails:", error);
+    return [];
+  }
+  return data;
+}
+
 export async function markInviteAccepted(email: string) {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase

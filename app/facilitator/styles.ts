@@ -1,4 +1,3 @@
-import Tab from "@mui/material/Tab";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
@@ -170,59 +169,4 @@ export const SideNavNewTemplateButton = styled.button`
   font-weight: 500;
   color: ${COLORS.white};
   cursor: pointer;
-`;
-
-export const StyledTable = styled.table`
-  width: 100%;
-  text-align: left;
-  border-collapse: collapse;
-  font-family: ${Sans.style.fontFamily};
-`;
-
-export const StyledTableHead = styled.thead`
-  border-bottom: 1px solid ${COLORS.oat_medium};
-  color: ${COLORS.black40};
-  font-size: 14px;
-`;
-
-export const StyledTh = styled.th`
-  padding: 1rem 0;
-  font-weight: 500;
-`;
-
-export const StyledTableRow = styled.tr`
-  border-bottom: 1px solid ${COLORS.oat_light};
-  font-size: 14px;
-`;
-
-export const StyledTd = styled.td`
-  padding: 1.5rem 0;
-  color: ${COLORS.black70};
-  font-weight: 500;
-`;
-
-export const ListControlsWrapper = styled.div`
-  border-bottom: 1px solid ${COLORS.oat_medium};
-  margin-top: 2rem;
-  margin-bottom: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-export const ParticipantsSearchWrapper = styled(SearchBarStyled)`
-  width: 300px;
-  margin-bottom: 0;
-`;
-
-export const ParticipantsSearchInput = styled(SearchInput)`
-  margin-bottom: 0;
-  height: 2.25rem;
-`;
-
-export const StyledTab = styled(Tab)`
-  && {
-    text-transform: none;
-    font-weight: 600;
-  }
 `;

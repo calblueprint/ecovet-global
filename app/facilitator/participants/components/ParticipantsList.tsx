@@ -1,27 +1,28 @@
+import { useState } from "react";
 import Box from "@mui/material/Box";
+import { Participant } from "@/types/schema";
+import { SortButton } from "../../styles";
 import {
-  SortButton,
   StyledTable,
   StyledTableHead,
   StyledTableRow,
   StyledTd,
   StyledTh,
-} from "../../styles";
-
-export interface Participant {
-  id: string;
-  name?: string | null; // optional because database doesn't have it
-  email: string | null;
-  role: string | null;
-  last_active?: string | null; // optional because database doesn't have it
-  invite_accepted: boolean | null; // consider making boolean? leaving as string for now since that's how it's coming from the database
-}
+} from "../styles";
 
 export default function ParticipantsList({
   participants,
 }: {
   participants: Participant[];
 }) {
+  const [sortAsc, setSortAsc] = useState(true);
+
+  const sorted = [...participants].sort((a, b) => {
+    const nameA = a.name ?? "";
+    const nameB = b.name ?? "";
+    return sortAsc ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+  });
+
   return (
     <Box>
       {participants.length === 0 ? (
@@ -31,22 +32,22 @@ export default function ParticipantsList({
           <StyledTableHead>
             <tr>
               <StyledTh>
-                Name <SortButton>&darr;</SortButton>
+                Name{" "}
+                <SortButton onClick={() => setSortAsc(!sortAsc)}>
+                  {sortAsc ? "↓" : "↑"}
+                </SortButton>
               </StyledTh>
               <StyledTh>Email</StyledTh>
               <StyledTh>Role</StyledTh>
-              <StyledTh>Status (for testing)</StyledTh>
               <StyledTh>Last active</StyledTh>
             </tr>
           </StyledTableHead>
           <tbody>
-            {participants.map((p, index) => (
+            {sorted.map((p, index) => (
               <StyledTableRow key={p.id || index}>
-                <StyledTd>{p.name}</StyledTd>
+                <StyledTd>{p.name ?? "—"}</StyledTd>
                 <StyledTd>{p.email}</StyledTd>
                 <StyledTd>{p.role}</StyledTd>
-                <StyledTd>{String(p.invite_accepted)}</StyledTd>{" "}
-                {/* purely to see accepted vs pending in the site itself*/}
                 <StyledTd>{p.last_active}</StyledTd>
               </StyledTableRow>
             ))}

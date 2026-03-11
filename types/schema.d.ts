@@ -1,6 +1,5 @@
 import type {
   Tables,
-  Tables,
   TablesInsert,
   TablesUpdate,
 } from "@/types/database.types";
@@ -70,4 +69,13 @@ export type RoleFormInput = {
   promptById: Record<UUID, Prompt>;
   promptIndex: Record<UUID, UUID[]>;
   phasesById: Record<UUID, EditablePhase>;
+};
+
+export type Participant = {
+  id: UUID;
+  name?: string | null; // optional because database doesn't have it
+  email: string | null;
+  role: string | null;
+  last_active?: string | null; // optional because database doesn't have it
+  invite_accepted: boolean | null; // consider making boolean? leaving as string for now since that's how it's coming from the database
 };

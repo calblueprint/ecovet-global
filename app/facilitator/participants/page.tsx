@@ -1,12 +1,14 @@
 "use client";
 
-import type { Invite, UUID } from "@/types/schema";
+import type { Invite, Participant, UUID } from "@/types/schema";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Tabs from "@mui/material/Tabs";
 import { fetchInvites } from "@/actions/supabase/queries/invites";
+import { getProfilesByEmails } from "@/actions/supabase/queries/profile";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import InviteComponent from "@/components/InviteComponent/InviteComponent";
 import { useProfile } from "@/utils/ProfileProvider";
+import ParticipantsList from "./components/ParticipantsList";
 import {
   ContentWrapper,
   LayoutWrapper,
@@ -14,8 +16,7 @@ import {
   ParticipantsSearchInput,
   ParticipantsSearchWrapper,
   StyledTab,
-} from "../styles";
-import ParticipantsList, { Participant } from "./components/ParticipantsList";
+} from "./styles";
 
 export default function ParticipantsPage() {
   const [status, setStatus] = useState<"Accepted" | "Pending">("Accepted");
@@ -26,18 +27,27 @@ export default function ParticipantsPage() {
   const loadData = useCallback(async () => {
     if (!profile?.user_group_id) return;
 
-    const [data] = await Promise.all([
-      fetchInvites(profile.user_group_id as UUID),
-    ]);
+    const data = await fetchInvites(profile.user_group_id as UUID);
+    if (!data) return;
 
-    const formattedData: Participant[] = (data || []).map((item: Invite) => ({
-      id: item.invite_id,
-      name: null, // don't see name in the supabase so currently not including it
-      email: item.email,
-      role: item.user_type,
-      last_active: null, // same with last active
-      invite_accepted: item.status === "Accepted", // This controls the tab placement, changed it from string to boolean
-    }));
+    const emails = data.map(item => item.email).filter(Boolean) as string[];
+    const profiles = await getProfilesByEmails(emails);
+    const profileByEmail = Object.fromEntries(profiles.map(p => [p.email, p]));
+
+    const formattedData: Participant[] = data.map((item: Invite) => {
+      const p = profileByEmail[item.email ?? ""];
+      return {
+        id: item.invite_id,
+        name: p
+          ? `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || null
+          : null,
+        email: item.email,
+        role: item.user_type,
+        last_active: null,
+        invite_accepted: item.status === "Accepted",
+      };
+    });
+
     setParticipants(formattedData);
   }, [profile?.user_group_id]);
 
