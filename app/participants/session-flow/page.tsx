@@ -19,12 +19,17 @@ import {
   ParticipantFlowMain,
   PhaseHeading,
   PromptCard,
-  PromptText,
-  RolePhaseDescription,
-  StyledTextarea,
+  PhaseContextStyled,
+  SubheaderStyled,
+  ContextStyled,
+  ScenarioOverviewStyled,
+  ScenarioOverviewFieldsStyled,
+  ScenarioOverviewTitleStyled,
+  BodyTextStyled,
+  PromptQuestionTitleStyled,
 } from "./styles";
 import { getOptionsForPrompt } from "@/actions/supabase/queries/prompt";
-import PromptRenderer from "@/components/prompts/PromptRenderer";
+import PromptRenderer from "@/app/participants/components/PromptRenderer";
 
 export interface PromptWithOption {
   prompt: Prompt
@@ -198,32 +203,68 @@ export default function ParticipantFlowPage() {
   return (
     <Main>
       <Container>
-        <ParticipantFlowMain>
+        <PhaseContextStyled>
+          {currentPhaseIndex + 1} out of {phases.length}
           <PhaseHeading>Phase {currentPhaseIndex + 1}</PhaseHeading>
+          <ContextStyled>
+            <SubheaderStyled>Context</SubheaderStyled>
+            <BodyTextStyled>
+              <div>
+                Your office has been working around the clock tackling a new wave of COVID-19 spurred by a lack of compliance with public health precautions as people moved indoors during the colder months. Yesterday, the country reached all-time highs of 7,019 new cases and 144 deaths. Vaccines are expected to start becoming available in February, but only in limited amounts initially.
+              </div>
+              <div>
+                You receive a call from a rural field office that the local hospital has reported seeing over 100 patients with fever, headache and breathing difficulties last week. Due to limited lab supplies, only 37 of the patients could be tested. The swabs were sent to a private laboratory for analysis, and none of the tests were positive for COVID-19. Based on the symptoms and progression of the disease, doctors at the hospital believe the patients do have COVID-19, and they are concerned about the handling and testing protocols used for the samples. Upon checking CRVS, you find that the lab has not yet submitted the results for those tests.
+              </div>
+              <div>
+                You ask your colleague at the field office to visit the hospital and the laboratory to see if he can identify any issues with the test kits, sampling process, handling, or analysis protocols. He expresses concern about visiting the COVID ward at the hospital due to shortages of PPE.
+              </div>
+              <div>
+                A breakout of COVID-19 at PTCL headquarters in Islamabad has impacted Internet reliability, causing intermittent outages, particularly in the capital.
+              </div>
+            </BodyTextStyled>
+            <button>Hide</button>
+          </ContextStyled>
 
-          {rolePhase && (
+          <ScenarioOverviewStyled>
+            <ScenarioOverviewTitleStyled>
+              Scenario Overview
+            </ScenarioOverviewTitleStyled>
+
+            <ScenarioOverviewFieldsStyled>
+              <SubheaderStyled>Summary</SubheaderStyled>
+              {}
+            </ScenarioOverviewFieldsStyled>
+
+            <ScenarioOverviewFieldsStyled>
+              <SubheaderStyled>Setting</SubheaderStyled>
+              {}
+            </ScenarioOverviewFieldsStyled>
+            
+            <ScenarioOverviewFieldsStyled>
+              <SubheaderStyled>Current Activity</SubheaderStyled>
+              {}
+            </ScenarioOverviewFieldsStyled>
+
+          </ScenarioOverviewStyled>
+
+        </PhaseContextStyled>
+        
+        <ParticipantFlowMain>
+
+          <PromptQuestionTitleStyled>
+            Questions
+          </PromptQuestionTitleStyled>
+    
+          {/* {rolePhase && (
             <RolePhaseDescription>
               Role description: {rolePhase.description}
             </RolePhaseDescription>
-          )}
+          )} */}
 
           <PromptCard>
-            {/* {promptsWithOptions.map((pWithOpts, index) => (
-              <div key={index}>
-                <PromptText>{pWithOpts.prompt.prompt_text}</PromptText>
-
-                <StyledTextarea
-                  value={answers[index]}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                    handleInputAnswer(index, e.target.value)
-                  }
-                  minRows={3}
-                  placeholder="Type your answer..."
-                />
-              </div>
-            ))} */}
             {promptsWithOptions.map((pWithOpts, index) => (
               <PromptRenderer
+                index={index}
                 key={pWithOpts.prompt.prompt_id}
                 promptWithOption={pWithOpts}
                 answer={answers[index]}
@@ -231,46 +272,6 @@ export default function ParticipantFlowPage() {
               />
             ))}
           </PromptCard>
-
-          {roleId && userId && sessionId && (
-            <NextButton
-              user_id={userId as UUID}
-              role_id={roleId as UUID}
-              session_id={sessionId as UUID}
-              isLastPhase={isLastPhase}
-              currentPhaseIndex={currentPhaseIndex}
-              onClick={submitAnswers}
-            />
-          )}
-
-          {currentPhaseIndex === phases.length && <div>End of phases</div>}
-        </ParticipantFlowMain>
-
-        <ParticipantFlowMain>
-          <PhaseHeading>Phase {currentPhaseIndex + 1}</PhaseHeading>
-
-          {rolePhase && (
-            <RolePhaseDescription>
-              Role description: {rolePhase.description}
-            </RolePhaseDescription>
-          )}
-
-          {/* <PromptCard>
-            {prompts.map((prompt, index) => (
-              <div key={index}>
-                <PromptText>{prompt.prompt_text}</PromptText>
-
-                <StyledTextarea
-                  value={answers[index]}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                    handleInputAnswer(index, e.target.value)
-                  }
-                  minRows={3}
-                  placeholder="Type your answer..."
-                />
-              </div>
-            ))}
-          </PromptCard> */}
 
           {roleId && userId && sessionId && (
             <NextButton

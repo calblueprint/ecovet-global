@@ -3,14 +3,13 @@ import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
 
 export const Button = styled.button`
-  width: 100%;
   height: 45px;
   gap: 10rem;
+  padding: 8px 32px;
+  border-radius: 4px;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  align-self: stretch;
   background-color: ${COLORS.darkElectricBlue};
   font-family: ${Sans.style.fontFamily};
   font-size: 12px;
