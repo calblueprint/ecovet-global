@@ -89,7 +89,8 @@ export default function Login() {
               </InputWrapper>
             </EmailAddressDiv>
             <PasswordDiv>
-              <div style={{ position: "relative", width: "100%" }}>
+              <InputWrapper>
+                <InputLabel htmlFor="password">Password</InputLabel>
                 <Input
                   type={showPassword ? "text" : "password"}
                   name="password"
@@ -103,7 +104,7 @@ export default function Login() {
                 >
                   {showPassword ? <FiEye size={18} /> : <FiEyeOff size={18} />}
                 </VisibilityToggle>
-              </div>
+              </InputWrapper>
             </PasswordDiv>
             <ForgetPasswordTag>
               <Link href="/auth/reset-password"> Forget password? </Link>

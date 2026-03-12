@@ -40,14 +40,22 @@ export async function fetchTemplateId(session_id: string) {
   return data;
 }
 
-export async function fetchSessionName(session_id: string) {
-  const { data, error } = await supabase
+export async function fetchTemplateNameBySession(session_id: string) {
+  const { data: session, error: e1 } = await supabase
     .from("session")
-    .select("session_name")
+    .select("template_id")
     .eq("session_id", session_id)
     .single();
-  if (error) throw error;
-  return data;
+  if (e1) throw e1;
+
+  const { data: template, error: e2 } = await supabase
+    .from("template")
+    .select("template_name")
+    .eq("template_id", session.template_id)
+    .single();
+  if (e2) throw e2;
+
+  return template?.template_name ?? null;
 }
 
 export async function assignParticipantToSession(

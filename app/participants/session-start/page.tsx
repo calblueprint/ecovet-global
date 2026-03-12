@@ -8,7 +8,7 @@ import {
   fetchRoleBySessionId,
   fetchSessionById,
 } from "@/api/supabase/queries/profile";
-import { fetchSessionName } from "@/api/supabase/queries/sessions";
+import { fetchTemplateNameBySession } from "@/api/supabase/queries/sessions";
 import ParticipantsNavBar from "@/components/ParticipantsNavBar/ParticipantsNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
 import { Button, Container, Heading2, Label, Main } from "./styles";
@@ -20,7 +20,6 @@ export default function ParticipantWaitingPage() {
   const [sessionName, setSessionName] = useState("");
   const [sessionExists, setSessionExists] = useState(false);
   const [sessionId, setSessionId] = useState("");
-  const [role, setRole] = useState("");
 
   const processedSessionRef = useRef<string | null>(null);
 
@@ -32,16 +31,17 @@ export default function ParticipantWaitingPage() {
 
       processedSessionRef.current = sessionId;
 
-      const session = await fetchSessionName(sessionId);
+      const template_name = await fetchTemplateNameBySession(sessionId);
 
-      setSessionId(sessionId);
-      setSessionName(session.session_name);
-      const role_name = await fetchRoleBySessionId(
+      setSessionName(template_name);
+
+      const role_data = await fetchRoleBySessionId(
         sessionId as UUID,
         profile?.id as UUID,
       );
-      setRole(role_name?.[0]?.role_id ?? "");
-      setStatus(`You were invited as a` + role_name + ".");
+
+      const role_name = role_data?.role_name ?? "participant";
+      setStatus(`You were invited as the role: ` + role_name + ".");
       setSessionExists(true);
     }
 
@@ -98,7 +98,7 @@ export default function ParticipantWaitingPage() {
         <Container>
           <Heading2>{status}</Heading2>
 
-          {sessionName && <Label>{sessionName}</Label>}
+          {sessionName && <Label>{"Excercise: " + sessionName}</Label>}
 
           {sessionExists && (
             <Link
