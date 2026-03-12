@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { useProfile } from "@/utils/ProfileProvider";
 import { useRealtimeChat as useChat } from "@/utils/UseChat";
 
 export default function Chat({ roomId }: { roomId: string }) {
+  const { userId } = useProfile();
+
   const [userInput, setUserInput] = useState("");
   const { messages, sendMessage } = useChat({
     roomName: roomId,

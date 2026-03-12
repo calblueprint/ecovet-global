@@ -1,25 +1,28 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { UUID } from "node:crypto";
 import { supabase } from "@/lib/supabase/client";
-
-interface UseRealtimeChatProps {
-  roomName: string;
-  username: string;
-}
 
 export interface ChatMessage {
   id: string;
   content: string;
-  user: {
-    name: string;
-  };
+  sender: UUID;
+  senderName: string;
   createdAt: string;
 }
 
 const EVENT_MESSAGE_TYPE = "message";
 
-export function useRealtimeChat({ roomName, username }: UseRealtimeChatProps) {
+export function useRealtimeChat({
+  roomName,
+  userId,
+  username,
+}: {
+  roomName: string;
+  userId: UUID;
+  username: string;
+}) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [channel, setChannel] = useState<ReturnType<
     typeof supabase.channel
@@ -55,9 +58,8 @@ export function useRealtimeChat({ roomName, username }: UseRealtimeChatProps) {
       const message: ChatMessage = {
         id: crypto.randomUUID(),
         content,
-        user: {
-          name: username,
-        },
+        sender: userId,
+        senderName: username,
         createdAt: new Date().toISOString(),
       };
 

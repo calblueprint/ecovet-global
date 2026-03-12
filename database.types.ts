@@ -12,33 +12,83 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "13.0.5";
   };
-  graphql_public: {
-    Tables: {
-      [_ in never]: never;
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json;
-          operationName?: string;
-          query?: string;
-          variables?: Json;
-        };
-        Returns: Json;
-      };
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
   public: {
     Tables: {
+      chat_message: {
+        Row: {
+          created_at: string;
+          id: string;
+          message: string;
+          room_id: string | null;
+          sender: string | null;
+          sender_name: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          message: string;
+          room_id?: string | null;
+          sender?: string | null;
+          sender_name?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          message?: string;
+          room_id?: string | null;
+          sender?: string | null;
+          sender_name?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "chat_message_room_id_fkey";
+            columns: ["room_id"];
+            isOneToOne: false;
+            referencedRelation: "chat_room";
+            referencedColumns: ["room_id"];
+          },
+          {
+            foreignKeyName: "chat_message_sender_fkey";
+            columns: ["sender"];
+            isOneToOne: false;
+            referencedRelation: "profile";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      chat_room: {
+        Row: {
+          room_id: string;
+          session_id: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          room_id?: string;
+          session_id?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          room_id?: string;
+          session_id?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "chat_rooms_session_id_fkey";
+            columns: ["session_id"];
+            isOneToOne: false;
+            referencedRelation: "session";
+            referencedColumns: ["session_id"];
+          },
+          {
+            foreignKeyName: "chat_rooms_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profile";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       invite: {
         Row: {
           email: string | null;
@@ -747,9 +797,6 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       prompt_type: ["text", "multiple_choice", "checkbox"],
