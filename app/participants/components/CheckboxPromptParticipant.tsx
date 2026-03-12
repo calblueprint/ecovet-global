@@ -7,24 +7,46 @@ import { PromptOption } from "@/types/schema";
 const CheckboxParticipantStyled = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  width: 100%;
+
+  .MuiFormGroup-root {
+    gap: 8px;
+  }
 `;
 
-const McqOptionParticipantStyled = styled.div`
+const CheckboxOptionParticipantStyled = styled.div<{ $selected: boolean }>`
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 2px 0px;
   width: 100%;
+  border-radius: 8px;
+  background-color: ${({ $selected }) =>
+    $selected ? COLORS.lightEletricBlue : COLORS.oat_light};
+  border: 1px solid
+    ${({ $selected }) => ($selected ? COLORS.darkElectricBlue : "transparent")};
+
+  .MuiFormControlLabel-root {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .MuiCheckbox-root {
+    padding-left: 8px;
+  }
+
+  .MuiCheckbox-root.Mui-checked {
+    color: ${COLORS.darkElectricBlue};
+  }
 `;
 
-const OptionTextStyled = styled.span`
+const OptionTextStyled = styled.span<{ $selected: boolean }>`
   font-family: ${Sans.style.fontFamily};
   font-size: 12px;
   font-style: normal;
   font-weight: 500;
-  line-height: normal;
-  color: ${COLORS.black20};
+  line-height: 150%;
+  padding: 8px 0;
+  color: ${({ $selected }) => ($selected ? COLORS.black100 : COLORS.black70)};
 `;
 
 type Props = {
@@ -40,7 +62,7 @@ export default function CheckboxPromptParticipant({
 }: Props) {
   function toggle(id: string) {
     if (value.includes(id)) {
-      onChange(value.filter((v) => v !== id));
+      onChange(value.filter(v => v !== id));
     } else {
       onChange([...value, id]);
     }
@@ -48,20 +70,30 @@ export default function CheckboxPromptParticipant({
 
   return (
     <CheckboxParticipantStyled>
-      {options.map((o) => (
-        <McqOptionParticipantStyled key={o.option_id}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={value.includes(o.option_id)}
-                onChange={() => toggle(o.option_id)}
-              />
-            }
-            label={<OptionTextStyled>{o.option_text}</OptionTextStyled>}
-          />
-        </McqOptionParticipantStyled>
-      ))}
+      {options.map(o => {
+        const selected = value.includes(o.option_id);
+        return (
+          <CheckboxOptionParticipantStyled
+            key={o.option_id}
+            $selected={selected}
+          >
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={selected}
+                  onChange={() => toggle(o.option_id)}
+                />
+              }
+              label={
+                <OptionTextStyled $selected={selected}>
+                  {o.option_text}
+                </OptionTextStyled>
+              }
+            />
+          </CheckboxOptionParticipantStyled>
+        );
+      })}
     </CheckboxParticipantStyled>
   );
 }

@@ -1,10 +1,15 @@
 "use client";
 
-import { PromptWithOption } from "@/app/participants/session-flow/page";
-import TextPromptParticipant from "@/app/participants/components/TextPromptParticipant";
-import MultipleChoicePromptParticipant from "@/app/participants/components/MultipleChoicePromptParticipant";
 import CheckboxPromptParticipant from "@/app/participants/components/CheckboxPromptParticipant";
-import { PromptQuestionStyled, PromptQuestionArrowStyled, PromptQuestionContentStyled, PromptQuestionContentTitledStyled } from "../session-flow/styles";
+import MultipleChoicePromptParticipant from "@/app/participants/components/MultipleChoicePromptParticipant";
+import TextPromptParticipant from "@/app/participants/components/TextPromptParticipant";
+import { PromptWithOption } from "@/app/participants/session-flow/page";
+import {
+  PromptQuestionArrowStyled,
+  PromptQuestionContentStyled,
+  PromptQuestionContentTitledStyled,
+  PromptQuestionStyled,
+} from "../session-flow/styles";
 
 type PromptRendererProps = {
   index: number;
@@ -19,18 +24,20 @@ export default function PromptRenderer({
   answer,
   onAnswer,
 }: PromptRendererProps) {
-
   const { prompt, options } = promptWithOption;
 
-  const arrowString: string = '->';
-
+  const arrowString: string = "->";
 
   return (
     <PromptQuestionStyled>
-      <PromptQuestionArrowStyled>{index + 1} {arrowString} </PromptQuestionArrowStyled>
+      <PromptQuestionArrowStyled>
+        {index + 1} {arrowString}{" "}
+      </PromptQuestionArrowStyled>
 
       <PromptQuestionContentStyled>
-        <PromptQuestionContentTitledStyled>{prompt.prompt_text}</PromptQuestionContentTitledStyled>
+        <PromptQuestionContentTitledStyled>
+          {prompt.prompt_text}
+        </PromptQuestionContentTitledStyled>
 
         {prompt.prompt_type === "text" && (
           <TextPromptParticipant

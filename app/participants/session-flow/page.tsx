@@ -1,9 +1,10 @@
 "use client";
 
-import type { Phase, Prompt, PromptOption, RolePhase, UUID } from "@/types/schema";
+import type { Phase, Prompt, PromptOption, UUID } from "@/types/schema";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import supabase from "@/actions/supabase/client";
+import { getOptionsForPrompt } from "@/actions/supabase/queries/prompt";
 import {
   createPromptAnswer,
   fetchPhases,
@@ -11,28 +12,27 @@ import {
   fetchRole,
   fetchRolePhases,
 } from "@/actions/supabase/queries/sessions";
+import PromptRenderer from "@/app/participants/components/PromptRenderer";
 import { useProfile } from "@/utils/ProfileProvider";
 import NextButton from "../components/ParticipantNextButton";
 import {
+  BodyTextStyled,
   Container,
+  ContextStyled,
   Main,
   ParticipantFlowMain,
+  PhaseContextStyled,
   PhaseHeading,
   PromptCard,
-  PhaseContextStyled,
-  SubheaderStyled,
-  ContextStyled,
-  ScenarioOverviewStyled,
-  ScenarioOverviewFieldsStyled,
-  ScenarioOverviewTitleStyled,
-  BodyTextStyled,
   PromptQuestionTitleStyled,
+  ScenarioOverviewFieldsStyled,
+  ScenarioOverviewStyled,
+  ScenarioOverviewTitleStyled,
+  SubheaderStyled,
 } from "./styles";
-import { getOptionsForPrompt } from "@/actions/supabase/queries/prompt";
-import PromptRenderer from "@/app/participants/components/PromptRenderer";
 
 export interface PromptWithOption {
-  prompt: Prompt
+  prompt: Prompt;
   options: PromptOption[];
 }
 
@@ -44,8 +44,9 @@ export default function ParticipantFlowPage() {
   const [roleId, setRoleId] = useState<string | null>(null);
   const [phases, setPhases] = useState<Phase[]>([]);
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
-  const [rolePhase, setRolePhase] = useState<RolePhase | null>(null);
-  const [promptsWithOptions, setPromptsWithOptions] = useState<PromptWithOption[]>([]);
+  const [promptsWithOptions, setPromptsWithOptions] = useState<
+    PromptWithOption[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState<(string | string[])[]>([]);
 
@@ -86,25 +87,25 @@ export default function ParticipantFlowPage() {
 
     async function loadPhaseContent() {
       try {
+        console.log("Getting role phase id");
         const rp = await fetchRolePhases(roleId as UUID, currentPhase.phase_id);
-        setRolePhase(rp);
 
         if (rp) {
+          console.log("Getting prompts");
           const prompts = await fetchPrompts(rp.role_phase_id);
 
           const buffer: PromptWithOption[] = await Promise.all(
-            prompts.map(async(p) => {
+            prompts.map(async p => {
               const pulled_options = await loadPromptOptions(p.prompt_id);
 
               return {
                 prompt: p,
                 options: pulled_options,
-              }
-            })
-          )
+              };
+            }),
+          );
 
           setPromptsWithOptions(buffer);
-
         } else {
           setPromptsWithOptions([]);
         }
@@ -115,7 +116,7 @@ export default function ParticipantFlowPage() {
     }
 
     loadPhaseContent();
-  }, [currentPhase, roleId]);
+  }, [currentPhase, currentPhaseIndex, roleId]);
 
   useEffect(() => {
     if (!userId || !sessionId) return;
@@ -135,7 +136,18 @@ export default function ParticipantFlowPage() {
           filter: `session_id=eq.${sessionId}`,
         },
         payload => {
-          console.log("Realtime payload received:", payload);
+          console.log(
+            "OLD Realtime payload received:",
+            payload,
+            payload.old.is_finished,
+            payload.old.phase_index,
+          );
+          console.log(
+            "Realtime payload received:",
+            payload,
+            payload.new.is_finished,
+            payload.new.phase_index,
+          );
 
           const newPhaseIndex = payload.new.phase_index;
           console.log("New phase_index from DB:", newPhaseIndex);
@@ -161,7 +173,7 @@ export default function ParticipantFlowPage() {
   }, [promptsWithOptions]);
 
   function handleInputAnswer(index: number, value: string | string[]) {
-    setAnswers((prev) => {
+    setAnswers(prev => {
       const copy = [...prev];
       copy[index] = value;
       return copy;
@@ -210,21 +222,42 @@ export default function ParticipantFlowPage() {
             <SubheaderStyled>Context</SubheaderStyled>
             <BodyTextStyled>
               <div>
-                Your office has been working around the clock tackling a new wave of COVID-19 spurred by a lack of compliance with public health precautions as people moved indoors during the colder months. Yesterday, the country reached all-time highs of 7,019 new cases and 144 deaths. Vaccines are expected to start becoming available in February, but only in limited amounts initially.
+                Your office has been working around the clock tackling a new
+                wave of COVID-19 spurred by a lack of compliance with public
+                health precautions as people moved indoors during the colder
+                months. Yesterday, the country reached all-time highs of 7,019
+                new cases and 144 deaths. Vaccines are expected to start
+                becoming available in February, but only in limited amounts
+                initially.
               </div>
               <div>
-                You receive a call from a rural field office that the local hospital has reported seeing over 100 patients with fever, headache and breathing difficulties last week. Due to limited lab supplies, only 37 of the patients could be tested. The swabs were sent to a private laboratory for analysis, and none of the tests were positive for COVID-19. Based on the symptoms and progression of the disease, doctors at the hospital believe the patients do have COVID-19, and they are concerned about the handling and testing protocols used for the samples. Upon checking CRVS, you find that the lab has not yet submitted the results for those tests.
+                You receive a call from a rural field office that the local
+                hospital has reported seeing over 100 patients with fever,
+                headache and breathing difficulties last week. Due to limited
+                lab supplies, only 37 of the patients could be tested. The swabs
+                were sent to a private laboratory for analysis, and none of the
+                tests were positive for COVID-19. Based on the symptoms and
+                progression of the disease, doctors at the hospital believe the
+                patients do have COVID-19, and they are concerned about the
+                handling and testing protocols used for the samples. Upon
+                checking CRVS, you find that the lab has not yet submitted the
+                results for those tests.
               </div>
               <div>
-                You ask your colleague at the field office to visit the hospital and the laboratory to see if he can identify any issues with the test kits, sampling process, handling, or analysis protocols. He expresses concern about visiting the COVID ward at the hospital due to shortages of PPE.
+                You ask your colleague at the field office to visit the hospital
+                and the laboratory to see if he can identify any issues with the
+                test kits, sampling process, handling, or analysis protocols. He
+                expresses concern about visiting the COVID ward at the hospital
+                due to shortages of PPE.
               </div>
               <div>
-                A breakout of COVID-19 at PTCL headquarters in Islamabad has impacted Internet reliability, causing intermittent outages, particularly in the capital.
+                A breakout of COVID-19 at PTCL headquarters in Islamabad has
+                impacted Internet reliability, causing intermittent outages,
+                particularly in the capital.
               </div>
             </BodyTextStyled>
             <button>Hide</button>
           </ContextStyled>
-
           <ScenarioOverviewStyled>
             <ScenarioOverviewTitleStyled>
               Scenario Overview
@@ -239,22 +272,17 @@ export default function ParticipantFlowPage() {
               <SubheaderStyled>Setting</SubheaderStyled>
               {}
             </ScenarioOverviewFieldsStyled>
-            
+
             <ScenarioOverviewFieldsStyled>
               <SubheaderStyled>Current Activity</SubheaderStyled>
               {}
             </ScenarioOverviewFieldsStyled>
-
           </ScenarioOverviewStyled>
-
         </PhaseContextStyled>
-        
-        <ParticipantFlowMain>
 
-          <PromptQuestionTitleStyled>
-            Questions
-          </PromptQuestionTitleStyled>
-    
+        <ParticipantFlowMain>
+          <PromptQuestionTitleStyled>Questions</PromptQuestionTitleStyled>
+
           {/* {rolePhase && (
             <RolePhaseDescription>
               Role description: {rolePhase.description}
@@ -268,7 +296,7 @@ export default function ParticipantFlowPage() {
                 key={pWithOpts.prompt.prompt_id}
                 promptWithOption={pWithOpts}
                 answer={answers[index]}
-                onAnswer={(value) => handleInputAnswer(index, value)}
+                onAnswer={value => handleInputAnswer(index, value)}
               />
             ))}
           </PromptCard>

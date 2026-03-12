@@ -93,7 +93,7 @@ export const ContextStyled = styled.div`
   flex-direction: column;
   align-items: flex-start;
   align-self: stretch;
-  
+
   border-radius: 8px;
   background-color: ${COLORS.oat_medium};
 
@@ -128,7 +128,7 @@ export const ScenarioOverviewStyled = styled.h3`
   gap: 16px;
 `;
 
-export const ScenarioOverviewTitleStyled = styled.h4`
+export const ScenarioOverviewTitleStyled = styled.div`
   color: ${COLORS.black};
   padding: 0 0 16px 0;
 
@@ -151,7 +151,6 @@ export const ScenarioOverviewFieldsStyled = styled.div`
   border-radius: 8px;
   background-color: ${COLORS.oat_medium};
 `;
-         
 
 export const PromptQuestionTitleStyled = styled.div`
   color: ${COLORS.black};
@@ -169,17 +168,18 @@ export const NextButtonContainerStyled = styled.div`
   display: flex;
   justify-content: flex-end;
 `;
-  
+
 export const PromptQuestionStyled = styled.div`
   display: flex;
   flex-direction: row;
-  gap: 8px;  
+  gap: 8px;
+  width: 100%;
   color: ${COLORS.black70};
 `;
 
 export const PromptQuestionArrowStyled = styled.div`
   display: flex;
-  flex-shrink: 0; 
+  flex-shrink: 0;
   color: ${COLORS.black70};
 
   /* Body 1 */
@@ -194,6 +194,7 @@ export const PromptQuestionContentStyled = styled.div`
   display: flex;
   flex-direction: column;
   color: ${COLORS.black70};
+  width: 100%;
 `;
 
 export const PromptQuestionContentTitledStyled = styled.div`
