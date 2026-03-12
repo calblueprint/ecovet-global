@@ -1,5 +1,7 @@
-import { UUID } from "crypto";
-import supabase from "@/api/supabase/createClient";
+"use server";
+
+import type { UUID } from "@/types/schema";
+import supabase from "@/app/api/supabase/createClient";
 import { Invite, Profile, UserType } from "@/types/schema";
 import { signInWithMagicLink } from "./auth";
 

@@ -1,14 +1,13 @@
 "use client";
 
-import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import Plus from "@/assets/images/plus.svg";
 import {
   SideNavButton,
   SideNavNewTemplateButton,
   SideNavTemplatesContainer,
-} from "../styles";
+} from "@/app/admin/styles";
+import Plus from "@/assets/images/plus.svg";
 
 export default function UserGroupSideBar({
   filterMode,
@@ -27,7 +26,7 @@ export default function UserGroupSideBar({
       </SideNavNewTemplateButton>
       <SideNavTemplatesContainer>
         <SideNavButton
-          selected={filterMode === "all"}
+          $selected={filterMode === "all"}
           onClick={() => setFilterMode("all")}
         >
           All User Groups

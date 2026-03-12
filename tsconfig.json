@@ -4,6 +4,7 @@
     "types": [],
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
+    "typeRoots": ["./types", "./node_modules/@types"],
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -29,7 +30,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "eslint.config.mjs",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    "types/**/*.d.ts"
   ],
   "exclude": ["node_modules", "setup-scripts"]
 }

@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { produce } from "immer";
-import { localStore, Template } from "@/types/schema";
+import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
+import { LocalStore, Template, UUID } from "@/types/schema";
+import { SideNavContainer } from "../facilitator/styles";
+import { LayoutWrapper } from "./components/styles";
 import TemplateBuilder from "./components/TemplateBuilder";
+import TemplateBuilderSideBar from "./components/TemplateBuilderSidebar";
 import { TemplateMainBox } from "./styles";
 
-const createInitialStore = (): localStore => {
+const createInitialStore = (): LocalStore => {
   const templateID =
     crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
 
@@ -36,13 +39,22 @@ const createInitialStore = (): localStore => {
   };
 };
 
+export type ActiveIds = {
+  roleId: UUID | number;
+  rolePhaseId: UUID | null;
+};
+
 export default function NewTemplatePage() {
-  const [newTemp, setNewTemp] = useState<localStore>(() =>
+  const [activeIds, setActiveIds] = useState<ActiveIds>({
+    roleId: 1,
+    rolePhaseId: null,
+  });
+  const [newTemp, setNewTemp] = useState<LocalStore>(() =>
     createInitialStore(),
   );
   const template = newTemp?.rolesById[1] as Template;
 
-  function updateLocalStore(updater: (draft: localStore) => void) {
+  function updateLocalStore(updater: (draft: LocalStore) => void) {
     setNewTemp(prev => produce(prev, updater));
   }
 
@@ -51,28 +63,28 @@ export default function NewTemplatePage() {
   }
 
   return (
-    <TemplateMainBox>
-      <Link href="/facilitator/template-list">← Back</Link>
-      <h1
-        contentEditable
-        suppressContentEditableWarning
-        className="text-5xl font-extrabold mb-4 outline-none"
-        onBlur={e => {
-          const value = e.currentTarget.textContent?.trim();
+    <>
+      <TopNavBar />
 
-          updateLocalStore(draft => {
-            (draft.rolesById[1] as Template).template_name =
-              value && value.length > 0 ? value : "New Template";
-          });
-        }}
-      >
-        {template.template_name}
-      </h1>
-      <TemplateBuilder
-        localStore={newTemp}
-        onFinish={resetTemplate}
-        update={updateLocalStore}
-      />
-    </TemplateMainBox>
+      <LayoutWrapper>
+        <SideNavContainer>
+          <TemplateBuilderSideBar
+            localStore={newTemp}
+            updateLocalStore={updateLocalStore}
+            setActiveIds={setActiveIds}
+          />
+        </SideNavContainer>
+
+        <TemplateMainBox>
+          <TemplateBuilder
+            activeIds={activeIds}
+            setActiveIds={setActiveIds}
+            localStore={newTemp}
+            onFinish={resetTemplate}
+            update={updateLocalStore}
+          />
+        </TemplateMainBox>
+      </LayoutWrapper>
+    </>
   );
 }

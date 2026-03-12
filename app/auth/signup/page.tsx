@@ -5,11 +5,14 @@ import { FiCheck, FiEye, FiEyeOff, FiX } from "react-icons/fi";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import supabase from "@/actions/supabase/client";
-import { checkIfUserExists, checkInvites } from "@/api/supabase/queries/auth";
+import {
+  checkIfUserExists,
+  checkInvites,
+} from "@/actions/supabase/queries/auth";
 import {
   addInviteInfoToProfile,
   markInviteAccepted,
-} from "@/api/supabase/queries/profile";
+} from "@/actions/supabase/queries/profile";
 import {
   Button,
   Container,
@@ -57,6 +60,7 @@ export default function Login() {
       if (await checkIfUserExists(email)) {
         throw new Error("You already have an account, please sign in.");
       }
+
       const inviteStatus = await checkInvites(email);
       switch (inviteStatus) {
         case "no_invite":
@@ -73,12 +77,15 @@ export default function Login() {
         default:
           throw new Error("Unknown invitation status.");
       }
+
       if (password !== confirmPassword) {
         throw new Error("Passwords do not match");
       }
+
       const { data, error } = await supabase.auth.updateUser({
         password: password,
       });
+
       if (error) {
         throw new Error(
           "An error occurred during sign up: " +

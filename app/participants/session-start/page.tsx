@@ -7,8 +7,8 @@ import supabase from "@/actions/supabase/client";
 import {
   fetchRoleBySessionId,
   fetchSessionById,
-} from "@/api/supabase/queries/profile";
-import { fetchTemplateNameBySession } from "@/api/supabase/queries/sessions";
+} from "@/actions/supabase/queries/profile";
+import { fetchTemplateNameBySession } from "@/actions/supabase/queries/sessions";
 import ParticipantsNavBar from "@/components/ParticipantsNavBar/ParticipantsNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
 import { Button, Container, Heading2, Label, Main } from "./styles";
@@ -33,7 +33,7 @@ export default function ParticipantWaitingPage() {
 
       const template_name = await fetchTemplateNameBySession(sessionId);
 
-      setSessionName(template_name);
+      setSessionName(template_name ?? "no name");
 
       const role_data = await fetchRoleBySessionId(
         sessionId as UUID,

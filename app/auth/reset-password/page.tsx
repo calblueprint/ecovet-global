@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   checkIfUserExists,
   sendPasswordResetEmail,
-} from "@/api/supabase/queries/auth";
+} from "@/actions/supabase/queries/auth";
 import {
   Button,
   Container,
@@ -32,16 +32,18 @@ export default function ResetPassword() {
       if (!isEmailValid(email)) {
         throw new Error("Please enter a valid email address");
       }
+
       if (!(await checkIfUserExists(email))) {
         throw new Error(
           "No account exists with that email. Please sign up first.",
         );
       }
+
       const { error } = await sendPasswordResetEmail(email);
       if (error) {
         throw new Error("An error occurred: " + error);
-        return;
       }
+
       setSuccessMessage(
         "If an account with that email exists, a password reset link has been sent.",
       );

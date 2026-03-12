@@ -1,15 +1,15 @@
 "use client";
 
+import type { UserGroup } from "@/types/schema";
 import { useEffect, useState } from "react";
-import { fetchUserGroups } from "@/api/supabase/queries/user-groups";
-import { UserGroup } from "@/types/schema";
+import { fetchUserGroups } from "@/actions/supabase/queries/user-groups";
 import {
   GeneralListUser,
   GeneralTitle,
   Heading3,
   MainDiv,
   NumUsers,
-} from "../styles";
+} from "@/app/admin/styles";
 
 export default function UserGroups({
   onSelectGroup,
