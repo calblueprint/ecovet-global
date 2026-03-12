@@ -10,7 +10,7 @@ export default function Chat({ roomId }: { roomId: UUID }) {
   const { loading, chatMessages, sendMessage } = useChat({
     roomId: roomId,
     userId: userId ?? "unknown-user",
-    username: profile?.first_name ?? profile?.email ?? "Unknown User",
+    username: profile?.first_name ?? "Unknown User",
   });
 
   return (
