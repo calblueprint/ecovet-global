@@ -1,23 +1,25 @@
 import { useState } from "react";
+import { UUID } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import { useRealtimeChat as useChat } from "@/utils/UseChat";
 
-export default function Chat({ roomId }: { roomId: string }) {
-  const { userId } = useProfile();
+export default function Chat({ roomId }: { roomId: UUID }) {
+  const { userId, profile } = useProfile();
 
   const [userInput, setUserInput] = useState("");
-  const { messages, sendMessage } = useChat({
-    roomName: roomId,
-    username: "test user",
+  const { chatMessages, sendMessage } = useChat({
+    roomId: roomId,
+    userId: userId ?? "unknown-user-id",
+    username: profile?.first_name ?? "Unknown User",
   });
 
   return (
     <div>
       <h1>Chat Room: {roomId}</h1>
       <div>
-        {messages.map(message => (
-          <div key={message.id}>
-            <strong>{message.user.name}:</strong> {message.content}
+        {chatMessages.map(chatMessage => (
+          <div key={chatMessage.id}>
+            <strong>{chatMessage.sender_name}:</strong> {chatMessage.message}
           </div>
         ))}
       </div>

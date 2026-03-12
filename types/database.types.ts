@@ -14,6 +14,81 @@ export type Database = {
   };
   public: {
     Tables: {
+      chat_message: {
+        Row: {
+          created_at: string;
+          id: string;
+          message: string;
+          room_id: string | null;
+          sender: string | null;
+          sender_name: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          message: string;
+          room_id?: string | null;
+          sender?: string | null;
+          sender_name?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          message?: string;
+          room_id?: string | null;
+          sender?: string | null;
+          sender_name?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "chat_message_room_id_fkey";
+            columns: ["room_id"];
+            isOneToOne: false;
+            referencedRelation: "chat_room";
+            referencedColumns: ["room_id"];
+          },
+          {
+            foreignKeyName: "chat_message_sender_fkey";
+            columns: ["sender"];
+            isOneToOne: false;
+            referencedRelation: "profile";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      chat_room: {
+        Row: {
+          room_id: string;
+          session_id: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          room_id?: string;
+          session_id?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          room_id?: string;
+          session_id?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "chat_rooms_session_id_fkey";
+            columns: ["session_id"];
+            isOneToOne: false;
+            referencedRelation: "session";
+            referencedColumns: ["session_id"];
+          },
+          {
+            foreignKeyName: "chat_rooms_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profile";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       invite: {
         Row: {
           email: string | null;
@@ -48,10 +123,10 @@ export type Database = {
       };
       participant_session: {
         Row: {
-          created_at: string;
-          is_finished: boolean;
-          phase_index: number;
-          role_id: string;
+          created_at: string | null;
+          is_finished: boolean | null;
+          phase_index: number | null;
+          role_id: string | null;
           session_id: string;
           user_id: string;
         };
@@ -101,9 +176,9 @@ export type Database = {
           phase_description: string | null;
           phase_id: string;
           phase_name: string | null;
-          phase_number: number;
-          session_id: string;
-          template_id: string;
+          phase_number: number | null;
+          session_id: string | null;
+          template_id: string | null;
         };
         Insert: {
           is_finished?: boolean | null;
@@ -281,6 +356,7 @@ export type Database = {
       };
       prompt_response: {
         Row: {
+          phase_id: string | null;
           prompt_answer: string | null;
           prompt_id: string | null;
           prompt_option_id: string | null;
@@ -289,6 +365,7 @@ export type Database = {
           user_id: string;
         };
         Insert: {
+          phase_id?: string | null;
           prompt_answer?: string | null;
           prompt_id?: string | null;
           prompt_option_id?: string | null;
@@ -297,6 +374,7 @@ export type Database = {
           user_id?: string;
         };
         Update: {
+          phase_id?: string | null;
           prompt_answer?: string | null;
           prompt_id?: string | null;
           prompt_option_id?: string | null;
@@ -305,6 +383,13 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "prompt_response_phase_id_fkey";
+            columns: ["phase_id"];
+            isOneToOne: false;
+            referencedRelation: "phase";
+            referencedColumns: ["phase_id"];
+          },
           {
             foreignKeyName: "prompt_response_prompt_id_fkey";
             columns: ["prompt_id"];
@@ -401,8 +486,8 @@ export type Database = {
           phase_id: string | null;
           session_id: string;
           session_name: string | null;
-          template_id: string;
-          user_group_id: string;
+          template_id: string | null;
+          user_group_id: string | null;
         };
         Insert: {
           after_action_report_id?: string | null;
@@ -451,7 +536,7 @@ export type Database = {
       tag: {
         Row: {
           color: string | null;
-          name: string;
+          name: string | null;
           number: number | null;
           tag_id: string;
           user_group_id: string;
@@ -489,7 +574,7 @@ export type Database = {
           summary: string | null;
           template_id: string;
           template_name: string | null;
-          timestamp: string;
+          timestamp: string | null;
           user_group_id: string | null;
         };
         Insert: {

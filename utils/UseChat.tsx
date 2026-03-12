@@ -1,40 +1,53 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { UUID } from "node:crypto";
+import {
+  getMessageHistory,
+  persistChatMessage,
+} from "@/actions/supabase/queries/chat";
 import { supabase } from "@/lib/supabase/client";
-
-export interface ChatMessage {
-  id: string;
-  content: string;
-  sender: UUID;
-  senderName: string;
-  createdAt: string;
-}
+import { ChatMessage } from "@/types/schema";
 
 const EVENT_MESSAGE_TYPE = "message";
 
+type LocalChatMessage = Omit<ChatMessage, "created_at">;
+
 export function useRealtimeChat({
-  roomName,
+  roomId,
   userId,
   username,
 }: {
-  roomName: string;
-  userId: UUID;
+  roomId: string;
+  userId: string;
   username: string;
 }) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [chatMessages, setChatMessages] = useState<LocalChatMessage[]>([]);
   const [channel, setChannel] = useState<ReturnType<
     typeof supabase.channel
   > | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const newChannel = supabase.channel(roomName);
+    async function loadMessageHistory() {
+      try {
+        const messageHistory = await getMessageHistory(roomId, null, 100);
+        console.log("Loaded message history:", messageHistory);
+        setChatMessages(messageHistory);
+      } catch (error) {
+        console.error("Error loading message history:", error);
+        setChatMessages([]);
+      }
+    }
+
+    loadMessageHistory();
+    const newChannel = supabase.channel(roomId);
 
     newChannel
       .on("broadcast", { event: EVENT_MESSAGE_TYPE }, payload => {
-        setMessages(current => [...current, payload.payload as ChatMessage]);
+        setChatMessages(current => [
+          ...current,
+          payload.payload as ChatMessage,
+        ]);
       })
       .subscribe(async status => {
         if (status === "SUBSCRIBED") {
@@ -49,30 +62,33 @@ export function useRealtimeChat({
     return () => {
       supabase.removeChannel(newChannel);
     };
-  }, [roomName, username, supabase]);
+  }, [roomId, username, supabase]);
 
   const sendMessage = useCallback(
-    async (content: string) => {
+    async (message: string) => {
       if (!channel || !isConnected) return;
 
-      const message: ChatMessage = {
+      const chatMessage: LocalChatMessage = {
         id: crypto.randomUUID(),
-        content,
+        room_id: roomId,
+        message: message,
         sender: userId,
-        senderName: username,
-        createdAt: new Date().toISOString(),
+        sender_name: username,
       };
 
-      setMessages(current => [...current, message]);
+      setChatMessages(current => [...current, chatMessage]);
 
-      await channel.send({
-        type: "broadcast",
-        event: EVENT_MESSAGE_TYPE,
-        payload: message,
-      });
+      await Promise.all([
+        persistChatMessage(roomId, chatMessage.message, userId, username),
+        channel.send({
+          type: "broadcast",
+          event: EVENT_MESSAGE_TYPE,
+          payload: chatMessage,
+        }),
+      ]);
     },
     [channel, isConnected, username],
   );
 
-  return { messages, sendMessage, isConnected };
+  return { chatMessages, sendMessage, isConnected };
 }
