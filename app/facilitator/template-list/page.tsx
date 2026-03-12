@@ -1,7 +1,7 @@
 "use client";
 
 import type { Tag, Template, UUID } from "@/types/schema";
-import React, { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
@@ -9,10 +9,9 @@ import {
   assignTagToTemplate,
   deleteTag,
   getAllTags,
-  getTagsForTemplate,
   removeTagFromTemplate,
 } from "@/actions/supabase/queries/tag";
-import { fetchAllTemplates } from "@/actions/supabase/queries/templates";
+import { fetchTemplatesWithTags } from "@/actions/supabase/queries/templates";
 import img from "@/assets/images/NewTagPlus.png";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
@@ -52,9 +51,6 @@ export default function TemplateListPage() {
   );
   const [searchInput, setSearchInput] = useState("");
   const [templates, setTemplates] = useState<TemplateWithTags[]>([]);
-  const [filteredTemplates, setFilteredTemplates] = useState<
-    TemplateWithTags[]
-  >([]);
 
   const [sortKey, setSortKey] = useState<"name" | "date">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -71,41 +67,25 @@ export default function TemplateListPage() {
     if (!user_group_id) return;
 
     const load = async () => {
-      console.log(user_group_id);
-      const allTemplates = (await fetchAllTemplates()) || [];
-
-      let subset = allTemplates;
-
-      if (filterMode === "all") {
-        subset = allTemplates.filter(
-          t => t.accessible_to_all || t.user_group_id === user_group_id,
-        );
-      } else if (filterMode === "your") {
-        subset = allTemplates.filter(t => t.user_group_id === user_group_id);
-      } else {
-        subset = allTemplates.filter(t => t.accessible_to_all);
-      }
-
-      const withTags = await Promise.all(
-        subset.map(async t => ({
-          ...t,
-          associated_tags: await getTagsForTemplate(
-            t.template_id,
-            user_group_id,
-          ),
-        })),
-      );
-
-      setTemplates(withTags);
-      setFilteredTemplates(withTags);
+      const allTemplates = (await fetchTemplatesWithTags()) || [];
+      setTemplates(allTemplates);
     };
 
     load();
-  }, [filterMode, user_group_id, tagVersion]);
+  }, [user_group_id, tagVersion]);
 
-  /** Search + tag filter + sort */
-  useEffect(() => {
+  const filteredTemplates = useMemo(() => {
     let updated = [...templates];
+
+    if (filterMode === "all") {
+      updated = updated.filter(
+        t => t.accessible_to_all || t.user_group_id === user_group_id,
+      );
+    } else if (filterMode === "your") {
+      updated = updated.filter(t => t.user_group_id === user_group_id);
+    } else {
+      updated = updated.filter(t => t.accessible_to_all);
+    }
 
     if (selectedTagId) {
       updated = updated.filter(t =>
@@ -122,13 +102,23 @@ export default function TemplateListPage() {
         const r = (a.template_name ?? "").localeCompare(b.template_name ?? "");
         return sortOrder === "asc" ? r : -r;
       }
+
       const r =
         new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+
       return sortOrder === "asc" ? r : -r;
     });
 
-    setFilteredTemplates(updated);
-  }, [templates, searchInput, sortKey, sortOrder, selectedTagId]);
+    return updated;
+  }, [
+    templates,
+    filterMode,
+    selectedTagId,
+    searchInput,
+    sortKey,
+    sortOrder,
+    user_group_id,
+  ]);
 
   const toggleSort = (key: "name" | "date") => {
     if (sortKey === key) {

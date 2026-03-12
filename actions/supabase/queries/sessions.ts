@@ -1,6 +1,13 @@
 "use server";
 
-import type { Prompt, RolePhase, UUID } from "@/types/schema";
+import type {
+  ParticipantSessionWithProfile,
+  Prompt,
+  PromptAnswer,
+  RolePhase,
+  Session,
+  UUID,
+} from "@/types/schema";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function fetchRoles(templateId: string) {
@@ -44,15 +51,23 @@ export async function fetchTemplateId(session_id: string) {
   return data;
 }
 
-export async function fetchSessionName(session_id: string) {
+export async function fetchTemplateNameBySession(session_id: string) {
   const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
+  const { data: session, error: e1 } = await supabase
     .from("session")
-    .select("session_name")
+    .select("template_id")
     .eq("session_id", session_id)
     .single();
-  if (error) throw error;
-  return data;
+  if (e1) throw e1;
+
+  const { data: template, error: e2 } = await supabase
+    .from("template")
+    .select("template_name")
+    .eq("template_id", session.template_id)
+    .single();
+  if (e2) throw e2;
+
+  return template?.template_name ?? null;
 }
 
 export async function assignParticipantToSession(
@@ -114,11 +129,9 @@ export type SessionParticipant = {
   };
 };
 
-// x.profile?.first_name and x.profile?.first_name
-// returns SessionParticipant[]
 export async function sessionParticipants(
   session_id: UUID,
-): Promise<SessionParticipant[]> {
+): Promise<ParticipantSessionWithProfile[]> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("participant_session")
@@ -136,10 +149,36 @@ export async function sessionParticipants(
     `,
     )
     .eq("session_id", session_id)
-    .returns<SessionParticipant[]>();
+    .returns<ParticipantSessionWithProfile[]>();
 
   if (error) throw error;
 
+  return data ?? [];
+}
+
+export async function sessionParticipantsBulk(
+  session_ids: UUID[],
+): Promise<ParticipantSessionWithProfile[]> {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("participant_session")
+    .select(
+      `
+      user_id,
+      role_id,
+      session_id,
+      phase_index,
+      is_finished,
+      profile (
+      first_name,
+      last_name
+      )
+    `,
+    )
+    .in("session_id", session_ids)
+    .returns<ParticipantSessionWithProfile[]>();
+
+  if (error) throw error;
   return data ?? [];
 }
 
@@ -191,6 +230,33 @@ export async function fetchPhases(sessionId: string) {
   }
 
   return phases ?? [];
+}
+
+// Can merge with fetchRole so that we dont have to call twice
+export async function fetchMostRecentPhase(
+  userId: string,
+  sessionId: string,
+): Promise<number> {
+  console.log("userId", userId, "sessionId", sessionId);
+  const supabase = await getSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("participant_session")
+    .select("phase_index")
+    .eq("session_id", sessionId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("fetchMostRecentPhase error:", error);
+    throw new Error("Failed to fetch user's most recent phase", error);
+  }
+
+  if (!data) {
+    throw new Error("No phase id found");
+  }
+
+  return data.phase_index;
 }
 
 export async function fetchRolePhases(
@@ -270,22 +336,70 @@ export async function fetchRole(
 export async function createPromptAnswer(
   userId: string,
   promptId: string,
+  sessionId: UUID,
+  phaseId: UUID,
   answer: string,
 ) {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("prompt_response")
-    .insert([
-      {
-        prompt_response_id: crypto.randomUUID(),
-        user_id: userId,
-        prompt_id: promptId,
-        prompt_answer: answer,
-      },
-    ])
+    .upsert(
+      [
+        {
+          prompt_response_id: crypto.randomUUID(),
+          session_id: sessionId,
+          phase_id: phaseId,
+          user_id: userId,
+          prompt_id: promptId,
+          prompt_answer: answer,
+        },
+      ],
+      { onConflict: "user_id,prompt_id,session_id" },
+    )
     .select("prompt_response_id");
+
   if (error) {
-    console.error("Error creating prompt answer:", error);
+    console.error(
+      "Error creating prompt answer:",
+      JSON.stringify(error, null, 2),
+    );
+  } else {
+    console.log("Insert success:", data);
   }
   return data;
+}
+
+export async function fetchPromptResponses(
+  userId: string,
+  sessionId: string,
+  phaseId: UUID,
+): Promise<PromptAnswer[] | null> {
+  const supabase = await getSupabaseServerClient();
+  // Fetch all response to for user for session for the phase
+  const { data, error } = await supabase
+    .from("prompt_response")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("session_id", sessionId)
+    .eq("phase_id", phaseId);
+  if (error) {
+    console.error("Error fetching prompts:", error);
+  }
+
+  return data ?? [];
+}
+
+export async function fetchSessionsbyUserGroup(
+  userGroupId: string,
+): Promise<Session[] | null> {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("session")
+    .select("*")
+    .eq("user_group_id", userGroupId);
+  if (error) {
+    console.error("Error fetching prompts:", error);
+  }
+
+  return data ?? [];
 }

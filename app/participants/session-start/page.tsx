@@ -2,9 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { UUID } from "crypto";
 import supabase from "@/actions/supabase/client";
-import { fetchSessionById } from "@/actions/supabase/queries/profile";
-import { fetchSessionName } from "@/actions/supabase/queries/sessions";
+import {
+  fetchRoleBySessionId,
+  fetchSessionById,
+} from "@/actions/supabase/queries/profile";
+import { fetchTemplateNameBySession } from "@/actions/supabase/queries/sessions";
 import ParticipantsNavBar from "@/components/ParticipantsNavBar/ParticipantsNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
 import { Button, Container, Heading2, Label, Main } from "./styles";
@@ -27,11 +31,18 @@ export default function ParticipantWaitingPage() {
 
       processedSessionRef.current = sessionId;
 
-      const session = await fetchSessionName(sessionId);
+      const template_name = await fetchTemplateNameBySession(sessionId);
 
+      setSessionName(template_name ?? "no name");
       setSessionId(sessionId);
-      setSessionName(session.session_name ?? "No Session Name");
-      setStatus(`You were invited as a participant.`);
+
+      const role_data = await fetchRoleBySessionId(
+        sessionId as UUID,
+        profile?.id as UUID,
+      );
+
+      const role_name = role_data?.role_name ?? "participant";
+      setStatus(`You were invited as the role: ` + role_name + ".");
       setSessionExists(true);
     }
 
@@ -88,14 +99,11 @@ export default function ParticipantWaitingPage() {
         <Container>
           <Heading2>{status}</Heading2>
 
-          {sessionName && <Label>{sessionName}</Label>}
+          {sessionName && <Label>{"Excercise: " + sessionName}</Label>}
 
-          {sessionExists && (
+          {sessionExists && profile?.id && (
             <Link
-              href={{
-                pathname: "/participants/session-flow",
-                query: { sessionId },
-              }}
+              href={`/participants/scenario-overview/${sessionId}/${profile?.id}`}
             >
               <Button>Start Session</Button>
             </Link>
