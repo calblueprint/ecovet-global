@@ -226,6 +226,26 @@ export async function checkProfileExists(id: string) {
   }
 }
 
+export async function fetchRoleBySessionId(sessionId: UUID, userId: UUID) {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("participant_session")
+    .select("role_id, role(role_name)")
+    .eq("user_id", userId)
+    .eq("session_id", sessionId)
+    .single();
+  if (error) {
+    console.error("Error fetching role:", error.message);
+    return null;
+  }
+
+  const role = Array.isArray(data.role) ? data.role[0] : data.role;
+  return {
+    role_id: data.role_id,
+    role_name: (role as { role_name: string })?.role_name ?? null,
+  };
+}
+
 export async function fetchProfilesByUserIds(user_ids: UUID[]) {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
