@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import {
   getMessageHistory,
   persistChatMessage,
@@ -21,6 +21,8 @@ export function useRealtimeChat({
   userId: string;
   username: string;
 }) {
+  const [loading, startFetching] = useTransition();
+
   const [chatMessages, setChatMessages] = useState<LocalChatMessage[]>([]);
   const [channel, setChannel] = useState<ReturnType<
     typeof supabase.channel
@@ -28,7 +30,7 @@ export function useRealtimeChat({
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    async function loadMessageHistory() {
+    startFetching(async () => {
       try {
         const messageHistory = await getMessageHistory(roomId, null, 100);
         console.log("Loaded message history:", messageHistory);
@@ -37,9 +39,8 @@ export function useRealtimeChat({
         console.error("Error loading message history:", error);
         setChatMessages([]);
       }
-    }
+    });
 
-    loadMessageHistory();
     const newChannel = supabase.channel(roomId);
 
     newChannel
@@ -90,5 +91,5 @@ export function useRealtimeChat({
     [channel, isConnected, username],
   );
 
-  return { chatMessages, sendMessage, isConnected };
+  return { loading, chatMessages, sendMessage, isConnected };
 }

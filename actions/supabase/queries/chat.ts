@@ -40,7 +40,7 @@ export async function getMessageHistory(
       before ? "created_at" : "created_at",
       before ? before.toISOString() : new Date().toISOString(),
     )
-    .order("created_at", { ascending: false })
+    .order("created_at", { ascending: true })
     .limit(limit);
 
   if (error) {
