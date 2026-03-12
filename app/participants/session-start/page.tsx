@@ -34,6 +34,7 @@ export default function ParticipantWaitingPage() {
       const template_name = await fetchTemplateNameBySession(sessionId);
 
       setSessionName(template_name ?? "no name");
+      setSessionId(sessionId);
 
       const role_data = await fetchRoleBySessionId(
         sessionId as UUID,
@@ -100,7 +101,7 @@ export default function ParticipantWaitingPage() {
 
           {sessionName && <Label>{"Excercise: " + sessionName}</Label>}
 
-          {sessionExists && (
+          {sessionExists && profile?.id && (
             <Link
               href={`/participants/scenario-overview/${sessionId}/${profile?.id}`}
             >
