@@ -271,6 +271,7 @@ export async function createPromptAnswer(
   userId: string,
   promptId: string,
   answer: string,
+  isOption: boolean,
 ) {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
@@ -280,7 +281,8 @@ export async function createPromptAnswer(
         prompt_response_id: crypto.randomUUID(),
         user_id: userId,
         prompt_id: promptId,
-        prompt_answer: answer,
+        prompt_answer: isOption ? null : answer,
+        prompt_option_id: isOption ? answer : null,
       },
     ])
     .select("prompt_response_id");

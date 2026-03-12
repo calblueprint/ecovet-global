@@ -180,26 +180,38 @@ export default function ParticipantFlowPage() {
     });
   }
 
+  async function submitTextAnswer(promptId: string, answer: string) {
+    console.log("trying to submit string");
+    if (!userId || !answer.trim()) return;
+    await createPromptAnswer(userId, promptId, answer, false);
+  }
+
+  async function submitOptionAnswer(
+    promptId: string,
+    answer: string | string[],
+  ) {
+    console.log("trying to submit option");
+    if (!userId) return;
+    const optionIds = Array.isArray(answer) ? answer : [answer];
+    for (const optionId of optionIds) {
+      await createPromptAnswer(
+        userId,
+        promptId,
+        optionId,
+        true,
+      );
+    }
+  }
+
   async function submitAnswers() {
     for (let i = 0; i < answers.length; i++) {
       const answer = answers[i];
-      const promptId = promptsWithOptions[i].prompt.prompt_id;
-
+      const { prompt_id, prompt_type } = promptsWithOptions[i].prompt;
       if (!userId || !answer) continue;
 
-      // TEXT or MCQ
-      if (typeof answer === "string") {
-        if (!answer.trim()) continue;
-
-        await createPromptAnswer(userId, promptId, answer);
-      }
-
-      // CHECKBOX (multiple answers)
-      if (Array.isArray(answer)) {
-        for (const optionId of answer) {
-          await createPromptAnswer(userId, promptId, optionId);
-        }
-      }
+      if (prompt_type === "multiple_choice" || prompt_type === "checkbox")
+        await submitOptionAnswer(prompt_id, answer);
+      else await submitTextAnswer(prompt_id, answer as string);
     }
   }
 
@@ -207,10 +219,6 @@ export default function ParticipantFlowPage() {
     console.log("Loading or currentPhase not yet available");
     return <div>Loading phases...</div>;
   }
-
-  console.log("user id:", userId);
-  console.log("session id:", sessionId);
-  console.log("currentPhaseIndex:", currentPhaseIndex);
 
   return (
     <Main>
