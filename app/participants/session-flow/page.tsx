@@ -194,12 +194,7 @@ export default function ParticipantFlowPage() {
     if (!userId) return;
     const optionIds = Array.isArray(answer) ? answer : [answer];
     for (const optionId of optionIds) {
-      await createPromptAnswer(
-        userId,
-        promptId,
-        optionId,
-        true,
-      );
+      await createPromptAnswer(userId, promptId, optionId, true);
     }
   }
 
