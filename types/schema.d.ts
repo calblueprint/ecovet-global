@@ -33,6 +33,8 @@ export type Prompt = Tables<"prompt">;
 export type Tag = Tables<"tag">;
 export type TemplateTag = Tables<"template_tag">;
 export type Invite = Tables<"invite">;
+export type ChatRoom = Tables<"chat_room">;
+export type ChatMessage = Tables<"chat_message">;
 
 /* ============================
    Insert / Update Helpers
