@@ -26,7 +26,7 @@ export default function UserGroupSideBar({
       </SideNavNewTemplateButton>
       <SideNavTemplatesContainer>
         <SideNavButton
-          selected={filterMode === "all"}
+          $selected={filterMode === "all"}
           onClick={() => setFilterMode("all")}
         >
           All User Groups

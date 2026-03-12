@@ -15,6 +15,8 @@ import {
   Heading2,
   Input,
   InputFields,
+  InputLabel,
+  InputWrapper,
   IntroText,
   Main,
   PasswordDiv,
@@ -73,18 +75,22 @@ export default function Login() {
           </IntroText>
           <InputFields>
             <EmailAddressDiv>
-              <Input
-                name="email"
-                placeholder="Email Address"
-                onChange={e => {
-                  setEmail(e.target.value);
-                  setErrorMessage(null);
-                }}
-                value={email}
-              />
+              <InputWrapper>
+                <InputLabel htmlFor="email">Email address</InputLabel>
+                <Input
+                  name="email"
+                  placeholder="Email Address"
+                  onChange={e => {
+                    setEmail(e.target.value);
+                    setErrorMessage(null);
+                  }}
+                  value={email}
+                />
+              </InputWrapper>
             </EmailAddressDiv>
             <PasswordDiv>
-              <div style={{ position: "relative", width: "100%" }}>
+              <InputWrapper>
+                <InputLabel htmlFor="password">Password</InputLabel>
                 <Input
                   type={showPassword ? "text" : "password"}
                   name="password"
@@ -98,7 +104,7 @@ export default function Login() {
                 >
                   {showPassword ? <FiEye size={18} /> : <FiEyeOff size={18} />}
                 </VisibilityToggle>
-              </div>
+              </InputWrapper>
             </PasswordDiv>
             <ForgetPasswordTag>
               <Link href="/auth/reset-password"> Forget password? </Link>

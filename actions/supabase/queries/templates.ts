@@ -7,6 +7,7 @@ import {
   PromptUpdatable,
   RolePhaseUpdatable,
   RoleUpdatable,
+  Tag,
   TemplateUpdatable,
 } from "@/types/schema";
 
@@ -208,6 +209,7 @@ export async function createPrompts(
   user_id: UUID | null,
   role_phase_id: UUID,
   prompt_text: string | null,
+  prompt_type: "text" | "multiple_choice" | "checkbox" | null,
 ): Promise<UUID> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
@@ -217,6 +219,7 @@ export async function createPrompts(
       user_id: user_id,
       role_phase_id: role_phase_id,
       prompt_text: prompt_text,
+      prompt_type: prompt_type,
     })
     .select("prompt_id")
     .single();
@@ -250,7 +253,7 @@ export async function deletePrompts(prompt_id: UUID): Promise<void> {
 }
 
 export async function fetchTemplate(
-  template_id: UUID,
+  template_id: string,
 ): Promise<Template | null> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
@@ -262,6 +265,7 @@ export async function fetchTemplate(
     console.error("Error fetching template by template_id:", error);
     return null;
   }
+  console.log("this", data);
   return data;
 }
 
@@ -277,4 +281,27 @@ export async function fetchAllTemplates() {
   } catch (error) {
     console.log("Error fetching templates from supabase API: ", error);
   }
+}
+
+export async function fetchTemplatesWithTags() {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase.from("template").select(`
+      *,
+      template_tag (
+        tag (
+          tag_id,
+          name,
+          color,
+          number,
+          user_group_id
+        )
+      )
+    `);
+
+  if (error) throw error;
+
+  return data?.map(t => ({
+    ...t,
+    associated_tags: t.template_tag.map((tt: { tag: Tag }) => tt.tag),
+  }));
 }

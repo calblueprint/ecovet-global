@@ -21,12 +21,15 @@ import {
   Heading2,
   Input,
   InputFields,
+  InputLabel,
+  InputWrapper,
   IntroText,
   Main,
   PasswordCheckBox,
   PasswordConfirmDiv,
   PasswordDiv,
   PasswordRule,
+  PasswordText,
   SignInTag,
   VisibilityToggle,
   WelcomeTag,
@@ -57,6 +60,7 @@ export default function Login() {
       if (await checkIfUserExists(email)) {
         throw new Error("You already have an account, please sign in.");
       }
+
       const inviteStatus = await checkInvites(email);
       switch (inviteStatus) {
         case "no_invite":
@@ -73,12 +77,15 @@ export default function Login() {
         default:
           throw new Error("Unknown invitation status.");
       }
+
       if (password !== confirmPassword) {
         throw new Error("Passwords do not match");
       }
+
       const { data, error } = await supabase.auth.updateUser({
         password: password,
       });
+
       if (error) {
         throw new Error(
           "An error occurred during sign up: " +
@@ -118,60 +125,71 @@ export default function Login() {
         </IntroText>
         <InputFields>
           <EmailAddressDiv>
-            <Input
-              name="email"
-              placeholder="Email Address"
-              onChange={(e: { target: { value: SetStateAction<string> } }) => {
-                setEmail(e.target.value);
-                setErrorMessage(null);
-              }}
-              value={email}
-            />{" "}
+            <InputWrapper>
+              <InputLabel htmlFor="email">Email address</InputLabel>
+              <Input
+                name="email"
+                placeholder=""
+                onChange={(e: {
+                  target: { value: SetStateAction<string> };
+                }) => {
+                  setEmail(e.target.value);
+                  setErrorMessage(null);
+                }}
+                value={email}
+              />{" "}
+            </InputWrapper>
           </EmailAddressDiv>
           <PasswordDiv>
             <div style={{ position: "relative", width: "100%" }}>
-              <Input
-                name="password"
-                placeholder="Password"
-                type={showPassword ? "text" : "password"}
-                onChange={(e: {
-                  target: { value: SetStateAction<string> };
-                }) => (setPassword(e.target.value), setPasswordTouched(true))}
-                value={password}
-              />{" "}
-              <VisibilityToggle
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <FiEye size={18} /> : <FiEyeOff size={18} />}
-              </VisibilityToggle>
+              <InputWrapper>
+                <InputLabel htmlFor="email">Password</InputLabel>
+                <Input
+                  name="password"
+                  placeholder=""
+                  type={showPassword ? "text" : "password"}
+                  onChange={(e: {
+                    target: { value: SetStateAction<string> };
+                  }) => (setPassword(e.target.value), setPasswordTouched(true))}
+                  value={password}
+                />{" "}
+                <VisibilityToggle
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <FiEye size={18} /> : <FiEyeOff size={18} />}
+                </VisibilityToggle>
+              </InputWrapper>
             </div>
           </PasswordDiv>
           <PasswordConfirmDiv>
             <div style={{ position: "relative", width: "100%" }}>
-              <Input
-                name="confirmPassword"
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="Password Confirmation"
-                value={confirmPassword}
-                onChange={(e: { target: { value: SetStateAction<string> } }) =>
-                  setConfirmPassword(e.target.value)
-                }
-              />
-              <VisibilityToggle
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? (
-                  <FiEye size={18} />
-                ) : (
-                  <FiEyeOff size={18} />
-                )}
-              </VisibilityToggle>
+              <InputWrapper>
+                <InputLabel htmlFor="email">Password Confirmation</InputLabel>
+                <Input
+                  name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder=""
+                  value={confirmPassword}
+                  onChange={(e: {
+                    target: { value: SetStateAction<string> };
+                  }) => setConfirmPassword(e.target.value)}
+                />
+                <VisibilityToggle
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <FiEye size={18} />
+                  ) : (
+                    <FiEyeOff size={18} />
+                  )}
+                </VisibilityToggle>
+              </InputWrapper>
             </div>
           </PasswordConfirmDiv>
           <PasswordCheckBox>
-            Your password must contain:
+            <PasswordText>Your password must contain:</PasswordText>
             <ul>
               <PasswordRule $touched={passwordTouched} $valid={rules.length}>
                 {passwordTouched ? rules.length ? <FiCheck /> : <FiX /> : "•"}

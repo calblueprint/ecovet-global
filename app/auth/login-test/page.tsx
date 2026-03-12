@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { checkIfUserExists } from "@/actions/supabase/queries/auth";
 import { useSession } from "@/utils/AuthProvider";
 import {
   Button,
@@ -21,16 +22,11 @@ export default function Login() {
   const sessionHandler = useSession();
 
   const handleSignUp = async () => {
-    const res = await fetch("/api/create-admin/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    if (await checkIfUserExists(email)) {
+      throw new Error("You already have an account, please sign in.");
+    }
 
-    const { data, error } = await res.json();
-
+    const { data, error } = await sessionHandler.signUp(email, password);
     if (error) {
       throw new Error(
         "An error occurred during admin creation: " + error.message,
