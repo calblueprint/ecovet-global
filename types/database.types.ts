@@ -123,10 +123,10 @@ export type Database = {
       };
       participant_session: {
         Row: {
-          created_at: string | null;
-          is_finished: boolean | null;
-          phase_index: number | null;
-          role_id: string | null;
+          created_at: string;
+          is_finished: boolean;
+          phase_index: number;
+          role_id: string;
           session_id: string;
           user_id: string;
         };
@@ -176,9 +176,9 @@ export type Database = {
           phase_description: string | null;
           phase_id: string;
           phase_name: string | null;
-          phase_number: number | null;
-          session_id: string | null;
-          template_id: string | null;
+          phase_number: number;
+          session_id: string;
+          template_id: string;
         };
         Insert: {
           is_finished?: boolean | null;
@@ -356,7 +356,7 @@ export type Database = {
       };
       prompt_response: {
         Row: {
-          phase_id: string | null;
+          phase_id: string;
           prompt_answer: string | null;
           prompt_id: string | null;
           prompt_option_id: string | null;
@@ -365,7 +365,7 @@ export type Database = {
           user_id: string;
         };
         Insert: {
-          phase_id?: string | null;
+          phase_id?: string;
           prompt_answer?: string | null;
           prompt_id?: string | null;
           prompt_option_id?: string | null;
@@ -374,7 +374,7 @@ export type Database = {
           user_id?: string;
         };
         Update: {
-          phase_id?: string | null;
+          phase_id?: string;
           prompt_answer?: string | null;
           prompt_id?: string | null;
           prompt_option_id?: string | null;
@@ -486,8 +486,8 @@ export type Database = {
           phase_id: string | null;
           session_id: string;
           session_name: string | null;
-          template_id: string | null;
-          user_group_id: string | null;
+          template_id: string;
+          user_group_id: string;
         };
         Insert: {
           after_action_report_id?: string | null;
@@ -536,7 +536,7 @@ export type Database = {
       tag: {
         Row: {
           color: string | null;
-          name: string | null;
+          name: string;
           number: number | null;
           tag_id: string;
           user_group_id: string;
@@ -574,7 +574,7 @@ export type Database = {
           summary: string | null;
           template_id: string;
           template_name: string | null;
-          timestamp: string | null;
+          timestamp: string;
           user_group_id: string | null;
         };
         Insert: {
