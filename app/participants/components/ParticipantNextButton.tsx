@@ -4,6 +4,7 @@ import type { UUID } from "@/types/schema";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { setIsFinished } from "@/actions/supabase/queries/sessions";
+import { NextButtonContainerStyled } from "../session-flow/styles";
 import { Button } from "../styles";
 
 interface NextButtonProps {
@@ -49,12 +50,14 @@ export default function NextButton({
   }
 
   return (
-    <div>
-      <Button onClick={handleClick} disabled={clicked}>
-        {isLastPhase ? "Finish Game" : "Next"}
-      </Button>
-
-      {clicked && <span> waiting for others...</span>}
-    </div>
+    <NextButtonContainerStyled>
+      {clicked ? (
+        <span> waiting for others...</span>
+      ) : (
+        <Button onClick={handleClick} disabled={clicked}>
+          {isLastPhase ? "Finish Game" : "Next"}
+        </Button>
+      )}
+    </NextButtonContainerStyled>
   );
 }

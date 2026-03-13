@@ -4,14 +4,17 @@ import type {
   Phase,
   Prompt,
   PromptAnswer,
+  PromptOption,
   RolePhase,
   UUID,
 } from "@/types/schema";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import supabase from "@/actions/supabase/client";
+import { getOptionsForPrompt } from "@/actions/supabase/queries/prompt";
 import {
   createPromptAnswer,
+  deletePromptAnswers,
   fetchMostRecentPhase,
   fetchPhases,
   fetchPromptResponses,
@@ -19,36 +22,49 @@ import {
   fetchRole,
   fetchRolePhases,
 } from "@/actions/supabase/queries/sessions";
+import PromptRenderer from "@/app/participants/components/PromptRenderer";
 import { useProfile } from "@/utils/ProfileProvider";
 import NextButton from "../components/ParticipantNextButton";
 import {
+  BodyTextStyled,
   Container,
+  ContextStyled,
   Main,
   ParticipantFlowMain,
+  PhaseContextStyled,
   PhaseHeading,
   PromptCard,
-  PromptText,
-  RolePhaseDescription,
-  StyledTextarea,
+  PromptQuestionTitleStyled,
+  ScenarioOverviewFieldsStyled,
+  ScenarioOverviewStyled,
+  ScenarioOverviewTitleStyled,
+  SubheaderStyled,
 } from "./styles";
+
+export interface PromptWithOption {
+  prompt: Prompt;
+  options: PromptOption[];
+}
 
 export default function ParticipantFlowPage() {
   const { userId } = useProfile();
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get("sessionId") as UUID | null;
+  const sessionId = searchParams.get("sessionId") as UUID;
 
   const [roleId, setRoleId] = useState<string | null>(null);
   const [phases, setPhases] = useState<Phase[]>([]);
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
   const [rolePhase, setRolePhase] = useState<RolePhase | null>(null);
-  const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [promptsWithOptions, setPromptsWithOptions] = useState<
+    PromptWithOption[]
+  >([]);
   const [loading, setLoading] = useState(true);
-  const [answers, setAnswers] = useState<string[]>([]);
+  const [answers, setAnswers] = useState<(string | string[])[]>([]);
   const [completedPrompts, setCompletedPrompts] = useState<Set<string>>(
     new Set(),
   );
   // DT: We use a set to store the index of prompts that hvae been completed (defined by blurred)
-  const totalPrompts = prompts.length;
+  const totalPrompts = promptsWithOptions.length;
   const completedCount = completedPrompts.size;
   const progressPercentage =
     totalPrompts > 0 ? Math.round((completedCount / totalPrompts) * 100) : 0;
@@ -85,31 +101,52 @@ export default function ParticipantFlowPage() {
     loadData();
   }, [userId, sessionId]);
 
+  // Load Options if prompt is an mcq or checkbox
+  async function loadPromptOptions(prompt_id: string) {
+    const pulled_options = await getOptionsForPrompt(prompt_id);
+    return pulled_options ?? [];
+  }
+
   useEffect(() => {
     if (!currentPhase || !roleId) return;
 
     async function loadPhaseContent() {
       try {
+        console.log("Getting role phase id");
         const rp = await fetchRolePhases(roleId as UUID, currentPhase.phase_id);
         setRolePhase(rp);
 
         if (rp) {
-          const p = await fetchPrompts(rp.role_phase_id);
-          setPrompts(p);
+          const prompts = await fetchPrompts(rp.role_phase_id);
+
+          const buffer: PromptWithOption[] = await Promise.all(
+            prompts.map(async p => {
+              const pulled_options = await loadPromptOptions(p.prompt_id);
+
+              return {
+                prompt: p,
+                options: pulled_options,
+              };
+            }),
+          );
+
+          setPromptsWithOptions(buffer);
+          console.log("Loaded prompts ", buffer);
         } else {
-          setPrompts([]);
+          setPromptsWithOptions([]);
         }
       } catch (err) {
         console.error("Error setting prompts:", err);
-        setPrompts([]);
+        setPromptsWithOptions([]);
       }
     }
 
     loadPhaseContent();
-  }, [currentPhase, roleId]);
+  }, [currentPhase, currentPhaseIndex, roleId]);
 
   useEffect(() => {
-    if (!userId || !sessionId || !rolePhase || prompts.length === 0) return;
+    if (!userId || !sessionId || !rolePhase || promptsWithOptions.length === 0)
+      return;
 
     async function loadResponses() {
       if (!userId || !sessionId || !rolePhase) return;
@@ -137,7 +174,10 @@ export default function ParticipantFlowPage() {
 
           if (!responses) return;
 
-          const ordered = sortResponsesByPromptOrder(prompts, responses);
+          const ordered = sortResponsesByPromptOrder(
+            promptsWithOptions,
+            responses,
+          );
           const answerStrings = ordered.map(r => r?.prompt_answer ?? "");
           setAnswers(answerStrings);
         }
@@ -147,15 +187,17 @@ export default function ParticipantFlowPage() {
     }
 
     loadResponses();
-  }, [userId, sessionId, rolePhase, prompts, currentPhaseIndex]);
+  }, [userId, sessionId, rolePhase, promptsWithOptions, currentPhaseIndex]);
 
   function sortResponsesByPromptOrder(
-    prompts: Prompt[],
+    promptsWithOptions: PromptWithOption[],
     responses: PromptAnswer[],
   ) {
     const responseMap = new Map(responses.map(r => [r.prompt_id, r]));
 
-    return prompts.map(prompt => responseMap.get(prompt.prompt_id) ?? null);
+    return promptsWithOptions.map(
+      ({ prompt }) => responseMap.get(prompt.prompt_id) ?? null,
+    );
   }
 
   useEffect(() => {
@@ -176,7 +218,18 @@ export default function ParticipantFlowPage() {
           filter: `session_id=eq.${sessionId}`,
         },
         payload => {
-          console.log("Realtime payload received:", payload);
+          console.log(
+            "OLD Realtime payload received:",
+            payload,
+            payload.old.is_finished,
+            payload.old.phase_index,
+          );
+          console.log(
+            "Realtime payload received:",
+            payload,
+            payload.new.is_finished,
+            payload.new.phase_index,
+          );
 
           const newPhaseIndex = payload.new.phase_index;
           console.log("New phase_index from DB:", newPhaseIndex);
@@ -198,54 +251,53 @@ export default function ParticipantFlowPage() {
   }, [userId, sessionId, phases]);
 
   useEffect(() => {
-    setAnswers(Array(prompts.length).fill(""));
+    setAnswers(Array(promptsWithOptions.length).fill(""));
     setCompletedPrompts(new Set());
-  }, [prompts]);
+  }, [promptsWithOptions]);
 
-  function handleInputAnswer(index: number, value: string) {
-    const updated = [...answers];
-    updated[index] = value;
-    setAnswers(updated);
+  function handleInputAnswer(index: number, value: string | string[]) {
+    setAnswers(prev => {
+      const copy = [...prev];
+      copy[index] = value;
+      return copy;
+    });
+  }
+
+  async function handleSave(promptIndex: number, value: string | string[]) {
+    const { prompt_id, prompt_type } = promptsWithOptions[promptIndex].prompt;
+    if (!value || !userId || !rolePhase) return;
+
+    if (prompt_type === "checkbox" || prompt_type === "multiple_choice") {
+      const deleteResult = await deletePromptAnswers(
+        userId,
+        prompt_id,
+        sessionId,
+      );
+      console.log("deleted rows for", prompt_id, deleteResult);
+    }
+
+    const values = Array.isArray(value) ? value : [value];
+    for (const v of values) {
+      const result = await createPromptAnswer(
+        userId,
+        prompt_id,
+        sessionId,
+        rolePhase.phase_id,
+        v,
+        prompt_type,
+      );
+      console.log("inserted", v, result);
+    }
+
+    console.log("saving answer ", prompt_id, values);
+
+    setCompletedPrompts(prev => new Set(prev).add(prompt_id));
   }
 
   async function submitAnswers() {
-    if (!userId || !sessionId) return;
-    const updatedCompletedPrompts = new Set(completedPrompts);
-
+    // sequential, submit all answers, safety flush
     for (let i = 0; i < answers.length; i++) {
-      const answer = answers[i];
-      const promptId = prompts[i].prompt_id;
-
-      if (!answer.trim()) continue;
-      updatedCompletedPrompts.add(promptId);
-
-      await createPromptAnswer(
-        userId,
-        sessionId!,
-        currentPhase.phase_id,
-        promptId,
-        answer,
-      );
-    }
-    setCompletedPrompts(updatedCompletedPrompts);
-  }
-
-  async function saveAnswers() {
-    if (!userId || !sessionId) return;
-    for (let i = 0; i < answers.length; i++) {
-      const answer = answers[i];
-
-      if (!answer.trim()) continue;
-      const promptId = prompts[i].prompt_id;
-
-      if (!userId) continue;
-      await createPromptAnswer(
-        userId,
-        promptId,
-        answer,
-        sessionId,
-        currentPhase.phase_id,
-      );
+      await handleSave(i, answers[i]);
     }
   }
 
@@ -254,58 +306,92 @@ export default function ParticipantFlowPage() {
     return <div>Loading phases...</div>;
   }
 
-  console.log("user id:", userId);
-  console.log("session id:", sessionId);
-  console.log("currentPhaseIndex:", currentPhaseIndex);
-
   return (
     <Main>
       <Container>
-        <ParticipantFlowMain>
+        <PhaseContextStyled>
+          {currentPhaseIndex + 1} out of {phases.length}
           <PhaseHeading>Phase {currentPhaseIndex + 1}</PhaseHeading>
+          <ContextStyled>
+            <SubheaderStyled>Context</SubheaderStyled>
+            <BodyTextStyled>
+              <div>
+                Your office has been working around the clock tackling a new
+                wave of COVID-19 spurred by a lack of compliance with public
+                health precautions as people moved indoors during the colder
+                months. Yesterday, the country reached all-time highs of 7,019
+                new cases and 144 deaths. Vaccines are expected to start
+                becoming available in February, but only in limited amounts
+                initially.
+              </div>
+              <div>
+                You receive a call from a rural field office that the local
+                hospital has reported seeing over 100 patients with fever,
+                headache and breathing difficulties last week. Due to limited
+                lab supplies, only 37 of the patients could be tested. The swabs
+                were sent to a private laboratory for analysis, and none of the
+                tests were positive for COVID-19. Based on the symptoms and
+                progression of the disease, doctors at the hospital believe the
+                patients do have COVID-19, and they are concerned about the
+                handling and testing protocols used for the samples. Upon
+                checking CRVS, you find that the lab has not yet submitted the
+                results for those tests.
+              </div>
+              <div>
+                You ask your colleague at the field office to visit the hospital
+                and the laboratory to see if he can identify any issues with the
+                test kits, sampling process, handling, or analysis protocols. He
+                expresses concern about visiting the COVID ward at the hospital
+                due to shortages of PPE.
+              </div>
+              <div>
+                A breakout of COVID-19 at PTCL headquarters in Islamabad has
+                impacted Internet reliability, causing intermittent outages,
+                particularly in the capital.
+              </div>
+            </BodyTextStyled>
+            <button>Hide</button>
+          </ContextStyled>
+          <ScenarioOverviewStyled>
+            <ScenarioOverviewTitleStyled>
+              Scenario Overview
+            </ScenarioOverviewTitleStyled>
 
-          {rolePhase && (
-            <RolePhaseDescription>
-              Role description: {rolePhase.description}
-            </RolePhaseDescription>
-          )}
+            <ScenarioOverviewFieldsStyled>
+              <SubheaderStyled>Summary</SubheaderStyled>
+              {}
+            </ScenarioOverviewFieldsStyled>
+
+            <ScenarioOverviewFieldsStyled>
+              <SubheaderStyled>Setting</SubheaderStyled>
+              {}
+            </ScenarioOverviewFieldsStyled>
+
+            <ScenarioOverviewFieldsStyled>
+              <SubheaderStyled>Current Activity</SubheaderStyled>
+              {}
+            </ScenarioOverviewFieldsStyled>
+          </ScenarioOverviewStyled>
+        </PhaseContextStyled>
+
+        <ParticipantFlowMain>
+          <PromptQuestionTitleStyled>Questions</PromptQuestionTitleStyled>
+
           <div>
             Progress: {completedCount} / {totalPrompts} completed (
             {progressPercentage}%)
           </div>
+
           <PromptCard>
-            {prompts.map((prompt, index) => (
-              <div key={prompt.prompt_id}>
-                <PromptText>{prompt.prompt_text}</PromptText>
-
-                <StyledTextarea
-                  value={answers[index]}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                    handleInputAnswer(index, e.target.value)
-                  }
-                  onBlur={async () => {
-                    const value = answers[index]?.trim();
-                    if (!value || !userId || !sessionId) return;
-                    const promptId = prompts[index].prompt_id;
-
-                    await createPromptAnswer(
-                      userId,
-                      promptId,
-                      value,
-                      sessionId,
-                      currentPhase.phase_id,
-                    );
-
-                    setCompletedPrompts(prev => {
-                      const updated = new Set(prev);
-                      updated.add(promptId);
-                      return updated;
-                    });
-                  }}
-                  minRows={3}
-                  placeholder="Type your answer..."
-                />
-              </div>
+            {promptsWithOptions.map((pWithOpts, index) => (
+              <PromptRenderer
+                index={index}
+                key={pWithOpts.prompt.prompt_id}
+                promptWithOption={pWithOpts}
+                answer={answers[index]}
+                onAnswer={value => handleInputAnswer(index, value)}
+                onBlur={value => handleSave(index, value)}
+              />
             ))}
           </PromptCard>
 

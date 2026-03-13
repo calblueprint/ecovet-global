@@ -333,39 +333,92 @@ export async function fetchRole(
   return data.role_id;
 }
 
+export async function deletePromptAnswers(
+  userId: string,
+  promptId: string,
+  sessionId: UUID,
+) {
+  const supabase = await getSupabaseServerClient();
+  const { error } = await supabase
+    .from("prompt_response")
+    .delete()
+    .match({ user_id: userId, prompt_id: promptId, session_id: sessionId });
+
+  if (error) {
+    console.error(
+      "Error deleting prompt answers:",
+      JSON.stringify(error, null, 2),
+    );
+  }
+}
+
 export async function createPromptAnswer(
   userId: string,
   promptId: string,
   sessionId: UUID,
   phaseId: UUID,
   answer: string,
+  promptType: string | null,
 ) {
   const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
+
+  const isOptionPrompt =
+    promptType === "checkbox" || promptType === "multiple_choice";
+
+  const baseRow = {
+    session_id: sessionId,
+    phase_id: phaseId,
+    user_id: userId,
+    prompt_id: promptId,
+  };
+
+  // OPTION PROMPTS (checkbox / MCQ)
+  if (isOptionPrompt) {
+    const { data, error } = await supabase
+      .from("prompt_response")
+      .insert({
+        ...baseRow,
+        prompt_response_id: crypto.randomUUID(),
+        prompt_option_id: answer,
+        prompt_answer: null,
+      })
+      .select("prompt_response_id");
+
+    if (error) console.error("Error inserting option response:", error);
+    return data;
+  }
+
+  // TEXT PROMPTS (single response)
+  const { data: updated, error: updateError } = await supabase
     .from("prompt_response")
-    .upsert(
-      [
-        {
-          prompt_response_id: crypto.randomUUID(),
-          session_id: sessionId,
-          phase_id: phaseId,
-          user_id: userId,
-          prompt_id: promptId,
-          prompt_answer: answer,
-        },
-      ],
-      { onConflict: "user_id,prompt_id,session_id" },
-    )
+    .update({
+      prompt_answer: answer,
+      prompt_option_id: null,
+    })
+    .match({
+      user_id: userId,
+      prompt_id: promptId,
+      session_id: sessionId,
+    })
     .select("prompt_response_id");
 
-  if (error) {
-    console.error(
-      "Error creating prompt answer:",
-      JSON.stringify(error, null, 2),
-    );
-  } else {
-    console.log("Insert success:", data);
-  }
+  if (updateError) console.error("Update error:", updateError);
+
+  if (updated && updated.length > 0) return updated;
+
+  // Insert if no existing row
+  const { data, error } = await supabase
+    .from("prompt_response")
+    .insert({
+      ...baseRow,
+      prompt_response_id: crypto.randomUUID(),
+      prompt_answer: answer,
+      prompt_option_id: null,
+    })
+    .select("prompt_response_id");
+
+  if (error) console.error("Insert error:", error);
+
   return data;
 }
 

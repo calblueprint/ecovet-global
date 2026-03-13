@@ -1,7 +1,7 @@
 import { PromptType, UUID } from "@/types/schema";
 import supabase from "../client";
 
-export async function getOptionsForPrompt(prompt_id: UUID) {
+export async function getOptionsForPrompt(prompt_id: string) {
   const { data, error } = await supabase
     .from("prompt_option")
     .select("*")
