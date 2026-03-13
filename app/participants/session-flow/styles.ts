@@ -41,6 +41,7 @@ export const PromptCard = styled.div`
   align-items: flex-start;
   gap: 32px;
   flex: 1 0 0;
+  width: 100%;
 `;
 
 export const Main = styled.main`

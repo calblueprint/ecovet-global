@@ -28,6 +28,7 @@ const McqOptionParticipantStyled = styled.div<{ $selected: boolean }>`
 
   .MuiFormControlLabel-root {
     margin-left: 0;
+    width: 100%;
   }
 
   .MuiRadio-root.Mui-checked {
@@ -46,6 +47,7 @@ const OptionTextStyled = styled.span<{ $selected: boolean }>`
   color: ${({ $selected }) => ($selected ? COLORS.black100 : COLORS.black70)};
   line-height: 150%; /* 18px */
   padding: 8px 0;
+  width: 100%;
 `;
 
 type Props = {

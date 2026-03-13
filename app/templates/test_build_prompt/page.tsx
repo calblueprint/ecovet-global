@@ -60,7 +60,7 @@ export default function TestPage() {
         const { question, prompt_type, options } = prompt.data;
 
         // Insert prompt => get prompt_id (UUID)
-        const prompt_id: UUID = await addNewPrompt(question, prompt_type);
+        const prompt_id = await addNewPrompt(question, prompt_type);
 
         // Insert each option
         for (const opt of options) {

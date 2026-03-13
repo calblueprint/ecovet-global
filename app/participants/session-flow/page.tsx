@@ -1,13 +1,23 @@
 "use client";
 
-import type { Phase, Prompt, PromptOption, UUID } from "@/types/schema";
+import type {
+  Phase,
+  Prompt,
+  PromptAnswer,
+  PromptOption,
+  RolePhase,
+  UUID,
+} from "@/types/schema";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import supabase from "@/actions/supabase/client";
 import { getOptionsForPrompt } from "@/actions/supabase/queries/prompt";
 import {
   createPromptAnswer,
+  deletePromptAnswers,
+  fetchMostRecentPhase,
   fetchPhases,
+  fetchPromptResponses,
   fetchPrompts,
   fetchRole,
   fetchRolePhases,
@@ -39,17 +49,25 @@ export interface PromptWithOption {
 export default function ParticipantFlowPage() {
   const { userId } = useProfile();
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get("sessionId") as UUID | null;
+  const sessionId = searchParams.get("sessionId") as UUID;
 
   const [roleId, setRoleId] = useState<string | null>(null);
   const [phases, setPhases] = useState<Phase[]>([]);
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
+  const [rolePhase, setRolePhase] = useState<RolePhase | null>(null);
   const [promptsWithOptions, setPromptsWithOptions] = useState<
     PromptWithOption[]
   >([]);
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState<(string | string[])[]>([]);
-
+  const [completedPrompts, setCompletedPrompts] = useState<Set<string>>(
+    new Set(),
+  );
+  // DT: We use a set to store the index of prompts that hvae been completed (defined by blurred)
+  const totalPrompts = promptsWithOptions.length;
+  const completedCount = completedPrompts.size;
+  const progressPercentage =
+    totalPrompts > 0 ? Math.round((completedCount / totalPrompts) * 100) : 0;
   const isLastPhase = currentPhaseIndex === phases.length - 1;
 
   const currentPhase = phases[currentPhaseIndex];
@@ -66,6 +84,13 @@ export default function ParticipantFlowPage() {
 
         const fetchedRoleId = await fetchRole(userId, sessionId);
         setRoleId(fetchedRoleId as string);
+
+        // Set currentPhaseIndex to most recent phase
+        const mostRecentPhaseIndex = await fetchMostRecentPhase(
+          userId,
+          sessionId,
+        );
+        setCurrentPhaseIndex(mostRecentPhaseIndex);
       } catch (err) {
         console.error("Error loading session data:", err);
       } finally {
@@ -89,9 +114,9 @@ export default function ParticipantFlowPage() {
       try {
         console.log("Getting role phase id");
         const rp = await fetchRolePhases(roleId as UUID, currentPhase.phase_id);
+        setRolePhase(rp);
 
         if (rp) {
-          console.log("Getting prompts");
           const prompts = await fetchPrompts(rp.role_phase_id);
 
           const buffer: PromptWithOption[] = await Promise.all(
@@ -106,6 +131,7 @@ export default function ParticipantFlowPage() {
           );
 
           setPromptsWithOptions(buffer);
+          console.log("Loaded prompts ", buffer);
         } else {
           setPromptsWithOptions([]);
         }
@@ -117,6 +143,62 @@ export default function ParticipantFlowPage() {
 
     loadPhaseContent();
   }, [currentPhase, currentPhaseIndex, roleId]);
+
+  useEffect(() => {
+    if (!userId || !sessionId || !rolePhase || promptsWithOptions.length === 0)
+      return;
+
+    async function loadResponses() {
+      if (!userId || !sessionId || !rolePhase) return;
+
+      try {
+        const mostRecentPhaseIndex = await fetchMostRecentPhase(
+          userId,
+          sessionId,
+        );
+        console.log(
+          "currentPhaseIndex ",
+          currentPhaseIndex,
+          "mostRecentPhaseIndex ",
+          mostRecentPhaseIndex,
+        );
+
+        if (currentPhaseIndex < mostRecentPhaseIndex) {
+          const responses = await fetchPromptResponses(
+            userId,
+            sessionId,
+            rolePhase.phase_id,
+          );
+
+          console.log("responses ", responses);
+
+          if (!responses) return;
+
+          const ordered = sortResponsesByPromptOrder(
+            promptsWithOptions,
+            responses,
+          );
+          const answerStrings = ordered.map(r => r?.prompt_answer ?? "");
+          setAnswers(answerStrings);
+        }
+      } catch (err) {
+        console.error("Response load failed:", err);
+      }
+    }
+
+    loadResponses();
+  }, [userId, sessionId, rolePhase, promptsWithOptions, currentPhaseIndex]);
+
+  function sortResponsesByPromptOrder(
+    promptsWithOptions: PromptWithOption[],
+    responses: PromptAnswer[],
+  ) {
+    const responseMap = new Map(responses.map(r => [r.prompt_id, r]));
+
+    return promptsWithOptions.map(
+      ({ prompt }) => responseMap.get(prompt.prompt_id) ?? null,
+    );
+  }
 
   useEffect(() => {
     if (!userId || !sessionId) return;
@@ -154,7 +236,7 @@ export default function ParticipantFlowPage() {
 
           if (newPhaseIndex == null) return;
 
-          const arrayIndex = newPhaseIndex - 1;
+          const arrayIndex = newPhaseIndex;
           console.log("Mapped to array index:", arrayIndex);
 
           setCurrentPhaseIndex(arrayIndex);
@@ -170,6 +252,7 @@ export default function ParticipantFlowPage() {
 
   useEffect(() => {
     setAnswers(Array(promptsWithOptions.length).fill(""));
+    setCompletedPrompts(new Set());
   }, [promptsWithOptions]);
 
   function handleInputAnswer(index: number, value: string | string[]) {
@@ -180,33 +263,41 @@ export default function ParticipantFlowPage() {
     });
   }
 
-  async function submitTextAnswer(promptId: string, answer: string) {
-    console.log("trying to submit string");
-    if (!userId || !answer.trim()) return;
-    await createPromptAnswer(userId, promptId, answer, false);
-  }
+  async function handleSave(promptIndex: number, value: string | string[]) {
+    const { prompt_id, prompt_type } = promptsWithOptions[promptIndex].prompt;
+    if (!value || !userId || !rolePhase) return;
 
-  async function submitOptionAnswer(
-    promptId: string,
-    answer: string | string[],
-  ) {
-    console.log("trying to submit option");
-    if (!userId) return;
-    const optionIds = Array.isArray(answer) ? answer : [answer];
-    for (const optionId of optionIds) {
-      await createPromptAnswer(userId, promptId, optionId, true);
+    if (prompt_type === "checkbox" || prompt_type === "multiple_choice") {
+      const deleteResult = await deletePromptAnswers(
+        userId,
+        prompt_id,
+        sessionId,
+      );
+      console.log("deleted rows for", prompt_id, deleteResult);
     }
+
+    const values = Array.isArray(value) ? value : [value];
+    for (const v of values) {
+      const result = await createPromptAnswer(
+        userId,
+        prompt_id,
+        sessionId,
+        rolePhase.phase_id,
+        v,
+        prompt_type,
+      );
+      console.log("inserted", v, result);
+    }
+
+    console.log("saving answer ", prompt_id, values);
+
+    setCompletedPrompts(prev => new Set(prev).add(prompt_id));
   }
 
   async function submitAnswers() {
+    // sequential, submit all answers, safety flush
     for (let i = 0; i < answers.length; i++) {
-      const answer = answers[i];
-      const { prompt_id, prompt_type } = promptsWithOptions[i].prompt;
-      if (!userId || !answer) continue;
-
-      if (prompt_type === "multiple_choice" || prompt_type === "checkbox")
-        await submitOptionAnswer(prompt_id, answer);
-      else await submitTextAnswer(prompt_id, answer as string);
+      await handleSave(i, answers[i]);
     }
   }
 
@@ -286,11 +377,10 @@ export default function ParticipantFlowPage() {
         <ParticipantFlowMain>
           <PromptQuestionTitleStyled>Questions</PromptQuestionTitleStyled>
 
-          {/* {rolePhase && (
-            <RolePhaseDescription>
-              Role description: {rolePhase.description}
-            </RolePhaseDescription>
-          )} */}
+          <div>
+            Progress: {completedCount} / {totalPrompts} completed (
+            {progressPercentage}%)
+          </div>
 
           <PromptCard>
             {promptsWithOptions.map((pWithOpts, index) => (
@@ -300,6 +390,7 @@ export default function ParticipantFlowPage() {
                 promptWithOption={pWithOpts}
                 answer={answers[index]}
                 onAnswer={value => handleInputAnswer(index, value)}
+                onBlur={value => handleSave(index, value)}
               />
             ))}
           </PromptCard>
@@ -311,6 +402,7 @@ export default function ParticipantFlowPage() {
               session_id={sessionId as UUID}
               isLastPhase={isLastPhase}
               currentPhaseIndex={currentPhaseIndex}
+              phase_id={currentPhase.phase_id as UUID}
               onClick={submitAnswers}
             />
           )}

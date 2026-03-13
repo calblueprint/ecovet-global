@@ -16,6 +16,7 @@ type PromptRendererProps = {
   promptWithOption: PromptWithOption;
   answer: string | string[];
   onAnswer: (value: string | string[]) => void;
+  onBlur: (value: string | string[]) => void;
 };
 
 export default function PromptRenderer({
@@ -23,8 +24,17 @@ export default function PromptRenderer({
   promptWithOption,
   answer,
   onAnswer,
+  onBlur,
 }: PromptRendererProps) {
   const { prompt, options } = promptWithOption;
+
+  function handleChange(value: string | string[]) {
+    onAnswer(value);
+    // fire immediately for selection types
+    if (prompt.prompt_type !== "text") {
+      onBlur(value);
+    }
+  }
 
   const arrowString: string = "->";
 
@@ -43,6 +53,7 @@ export default function PromptRenderer({
           <TextPromptParticipant
             value={(answer as string) || ""}
             onChange={onAnswer}
+            onBlur={() => onBlur(answer)}
           />
         )}
 
@@ -50,7 +61,7 @@ export default function PromptRenderer({
           <MultipleChoicePromptParticipant
             options={options}
             value={(answer as string) || ""}
-            onChange={onAnswer}
+            onChange={handleChange}
           />
         )}
 
@@ -58,7 +69,7 @@ export default function PromptRenderer({
           <CheckboxPromptParticipant
             options={options}
             value={(answer as string[]) || []}
-            onChange={onAnswer}
+            onChange={handleChange}
           />
         )}
       </PromptQuestionContentStyled>
