@@ -146,6 +146,10 @@ export default function SessionFlowPage() {
   }, [userId, sessionIdStr, rolePhase, prompts, phaseIdx]);
 
   useEffect(() => {
+    console.log("Phase index changed:", phaseIdx);
+  }, [phaseIdx]);
+
+  useEffect(() => {
     if (!userId || !sessionIdStr) return;
 
     const channel = supabase
@@ -160,6 +164,11 @@ export default function SessionFlowPage() {
         },
         payload => {
           const newPhaseIndex = payload.new.phase_index;
+          if (
+            payload.new.user_id != userId ||
+            payload.new.session_id != sessionIdStr
+          )
+            return;
           if (newPhaseIndex != null) setPhaseIdx(newPhaseIndex);
         },
       )
@@ -190,16 +199,18 @@ export default function SessionFlowPage() {
   }
 
   async function handleBlur(index: number) {
-    const value = answers[index]?.trim();
-    if (!value || !userId || !sessionIdStr || !currentPhase) return;
+    const answer = answers[index]?.trim();
+    if (!answer || !userId || !sessionIdStr || !currentPhase) return;
     const promptId = prompts[index].prompt_id;
+
     await createPromptAnswer(
       userId,
       promptId,
-      value,
       sessionIdStr,
       currentPhase.phase_id,
+      answer,
     );
+
     setCompletedPrompts(prev => new Set(prev).add(promptId));
   }
 

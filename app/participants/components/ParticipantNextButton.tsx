@@ -44,7 +44,8 @@ export default function NextButton({
 
     if (is_async) {
       if (isLastPhase) {
-        router.push("/participants/past-exercises");
+        await setIsFinished(user_id, role_id, session_id);
+        router.push("/sessions/session-finish");
       } else {
         await advancePhaseForSingleUser(user_id, role_id, session_id);
       }

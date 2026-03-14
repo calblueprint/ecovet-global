@@ -431,9 +431,8 @@ export async function createPromptAnswer(
       "Error creating prompt answer:",
       JSON.stringify(error, null, 2),
     );
-  } else {
-    console.log("Insert success:", data);
   }
+
   return data;
 }
 
