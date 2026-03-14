@@ -200,12 +200,29 @@ export const Label = styled.label`
 export const StyledSelect = styled.select`
   border: 1px solid ${COLORS.oat_medium};
   border-radius: 4px;
-  padding: 0.5rem;
+  padding: 0.5rem 1rem;
   font-family: ${Sans.style.fontFamily};
   font-size: 14px;
   background-color: ${COLORS.white};
-  height: 40px;
+  height: 48px;
   outline: none;
+  color: ${COLORS.black};
+
+  /* This ensures the arrow shows up across all browsers */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23d1d1d1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.2em;
+
+  cursor: pointer;
+
+  &:focus {
+    border-color: ${COLORS.darkElectricBlue};
+  }
 `;
 
 export const ToggleGroup = styled.div`
@@ -279,19 +296,29 @@ export const IconButton = styled.button`
   background-color: ${COLORS.darkElectricBlue};
   color: ${COLORS.white};
   border: none;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  margin: 1.5rem auto;
-  font-size: 18px;
+  margin: 2rem auto;
+  font-size: 20px;
+  transition: transform 0.1s ease;
+
+  &:active {
+    transform: scale(0.9);
+  }
+
+  &:hover {
+    filter: brightness(1.1);
+  }
 `;
 
 export const PrimaryActionArea = styled.div`
   display: flex;
   justify-content: flex-end;
   margin-top: 1rem;
+  padding-bottom: 4rem;
 `;
