@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useId, useMemo } from "react";
-import Select, { MultiValue, SingleValue } from "react-select";
+import Select, { MultiValue, SingleValue, StylesConfig } from "react-select";
 import { DropdownOption } from "@/types/dropdown";
 import { selectStyles } from "./styles";
 
@@ -13,6 +13,7 @@ interface CommonProps {
   error?: string;
   disabled?: boolean;
   required?: boolean;
+  customStyles?: StylesConfig<DropdownOption, boolean>;
 }
 
 interface MultiSelectProps extends CommonProps {
@@ -26,7 +27,6 @@ interface SingleSelectProps extends CommonProps {
 }
 
 type InputDropdownProps = SingleSelectProps | MultiSelectProps;
-
 // main dropdown component
 export default function InputDropdown({
   options,
@@ -35,6 +35,7 @@ export default function InputDropdown({
   required,
   onChange,
   multi,
+  customStyles,
 }: InputDropdownProps) {
   const optionsArray = useMemo(
     () =>
@@ -73,7 +74,9 @@ export default function InputDropdown({
       placeholder={placeholder}
       isMulti={multi}
       onChange={handleChange}
-      styles={selectStyles}
+      styles={
+        customStyles || (selectStyles as StylesConfig<DropdownOption, boolean>)
+      }
     />
   );
 }

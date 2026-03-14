@@ -1,6 +1,8 @@
+import { StylesConfig } from "react-select";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
+import { DropdownOption } from "@/types/dropdown";
 
 export const LayoutWrapper = styled.div`
   display: flex;
@@ -322,3 +324,43 @@ export const PrimaryActionArea = styled.div`
   margin-top: 1rem;
   padding-bottom: 4rem;
 `;
+
+export const ExerciseSelectStyles: StylesConfig<DropdownOption, boolean> = {
+  control: base => ({
+    ...base,
+    height: "48px",
+    minHeight: "48px",
+    borderRadius: "4px",
+    border: `1px solid ${COLORS.oat_medium}`,
+    boxShadow: "none",
+    fontFamily: Sans.style.fontFamily,
+    fontSize: "14px",
+    backgroundColor: COLORS.white,
+    "&:hover": {
+      borderColor: COLORS.black40,
+    },
+  }),
+  valueContainer: base => ({
+    ...base,
+    padding: "0 12px",
+    height: "48px",
+    display: "flex",
+    alignItems: "center",
+  }),
+  indicatorsContainer: base => ({
+    ...base,
+    height: "48px",
+  }),
+  placeholder: base => ({
+    ...base,
+    color: COLORS.black40,
+  }),
+  indicatorSeparator: () => ({
+    display: "none",
+  }),
+  dropdownIndicator: base => ({
+    ...base,
+    color: COLORS.black40,
+    padding: "8px",
+  }),
+};

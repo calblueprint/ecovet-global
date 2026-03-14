@@ -11,6 +11,7 @@ import {
   ConfigRow,
   ContentWrapper,
   DropdownContainer,
+  ExerciseSelectStyles,
   Heading3,
   IconButton,
   LayoutWrapper,
@@ -117,6 +118,7 @@ export default function Page() {
                 label="Select Exercise"
                 options={exerciseOptions}
                 placeholder="Select Exercise"
+                customStyles={ExerciseSelectStyles}
                 onChange={val => console.log("Exercise selected:", val)}
               />
             </DropdownContainer>
@@ -149,6 +151,7 @@ export default function Page() {
                     label="Participant"
                     options={userOptions}
                     placeholder="Select a member"
+                    customStyles={ExerciseSelectStyles}
                     onChange={val => updateParticipant(i, "user_id", val)}
                   />
                 </div>
@@ -158,6 +161,7 @@ export default function Page() {
                     label="Role"
                     options={roleOptions}
                     placeholder="Select Role"
+                    customStyles={ExerciseSelectStyles}
                     onChange={val => updateParticipant(i, "role", val)}
                   />
                 </div>
