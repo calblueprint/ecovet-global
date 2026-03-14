@@ -251,15 +251,6 @@ export default function TemplateListPage() {
             }
             onTagRenamed={() => setTagVersion(v => v + 1)}
           />
-          <TagCreator
-            user_group_id={user_group_id}
-            selectedTagId={selectedTagId}
-            onTagClick={(id: UUID) =>
-              setSelectedTagId(prev => (prev === id ? null : id))
-            }
-            onTagRenamed={() => setTagVersion(v => v + 1)}
-            onDeleteTag={deleteTagComponent}
-          />
         </SideNavContainer>
 
         <ContentWrapper>

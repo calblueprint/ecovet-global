@@ -11,7 +11,7 @@ export const AssociatedTags = styled.div`
 export const TemplateTag = styled.span`
   display: inline-flex;
   border-radius: 4px;
-  background: var(--Oat-Medium, #eee);
+  background: ${COLORS["tagYellow"]};
   justify-content: center;
   align-items: center;
   gap: 8px;
