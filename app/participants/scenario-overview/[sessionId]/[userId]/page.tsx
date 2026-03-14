@@ -206,16 +206,19 @@ export default function SessionFlowPage() {
   async function submitAnswers() {
     if (!userId || !sessionIdStr || !currentPhase) return;
     const updated = new Set(completedPrompts);
+
     for (let i = 0; i < answers.length; i++) {
       const answer = answers[i];
       const promptId = prompts[i].prompt_id;
+
       if (!answer.trim()) continue;
       updated.add(promptId);
+
       await createPromptAnswer(
         userId,
+        promptId,
         sessionIdStr,
         currentPhase.phase_id,
-        promptId,
         answer,
       );
     }

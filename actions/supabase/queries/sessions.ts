@@ -76,7 +76,6 @@ export async function assignParticipantToSession(
   roleId: UUID | null,
 ) {
   const supabase = await getSupabaseServerClient();
-  console.log(userId, sessionId, roleId);
   const { error } = await supabase.from("participant_session").upsert(
     {
       user_id: userId,
@@ -401,6 +400,14 @@ export async function createPromptAnswer(
   phaseId: UUID,
   answer: string,
 ) {
+  console.log("Creating prompt answer with:", {
+    userId,
+    promptId,
+    sessionId,
+    phaseId,
+    answer,
+  });
+
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("prompt_response")

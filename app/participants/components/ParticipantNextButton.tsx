@@ -18,7 +18,7 @@ interface NextButtonProps {
   promptsCompleted: boolean;
   isLastPhase: boolean;
   currentPhaseIndex: number;
-  onClick: () => void;
+  onClick: () => Promise<void>;
 }
 
 export default function NextButton({
@@ -40,7 +40,7 @@ export default function NextButton({
 
   async function handleClick() {
     console.log("Next button clicked", is_async, isLastPhase);
-    onClick();
+    await onClick();
 
     if (is_async) {
       if (isLastPhase) {

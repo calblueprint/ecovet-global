@@ -175,9 +175,11 @@ export default function FacilitatorSessionView() {
           </>
         )}
 
-        <Button onClick={advancePhase} disabled={isAdvancing}>
-          {isAdvancing ? "Advancing..." : "Force Advance"}
-        </Button>
+        {!isAsync && (
+          <Button onClick={advancePhase} disabled={isAdvancing}>
+            {isAdvancing ? "Advancing..." : "Force Advance"}
+          </Button>
+        )}
 
         {allDone && (
           <h3 style={{ marginTop: "1rem" }}>All participants are finished</h3>
