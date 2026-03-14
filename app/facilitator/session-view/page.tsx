@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import supabase from "@/actions/supabase/client";
 import {
   finishSession,
+  isSessionAsync,
   SessionParticipant,
   sessionParticipants,
 } from "@/actions/supabase/queries/sessions";
@@ -22,6 +23,7 @@ export default function FacilitatorSessionView() {
   const [currentPhase, setCurrentPhase] = useState(1);
   const [allDone, setAllDone] = useState(false);
   const [isAdvancing, setIsAdvancing] = useState(false);
+  const [isAsync, setIsAsync] = useState(false);
 
   async function advancePhase() {
     if (!sessionId || isAdvancing) return;
@@ -69,7 +71,17 @@ export default function FacilitatorSessionView() {
       }
     }
 
+    async function checkIfAsync() {
+      try {
+        const isCurrentSessionAsync = await isSessionAsync(sessionId as UUID);
+        setIsAsync(isCurrentSessionAsync);
+      } catch (err) {
+        console.error("Failed to check if session is async:", err);
+      }
+    }
+
     loadParticipants();
+    checkIfAsync();
   }, [sessionId]);
 
   useEffect(() => {
@@ -87,6 +99,7 @@ export default function FacilitatorSessionView() {
         },
         async payload => {
           const updated = payload.new as ParticipantSession;
+          console.log("Received participant session update:", updated);
 
           setParticipants(prev =>
             prev.map(p =>
@@ -124,27 +137,43 @@ export default function FacilitatorSessionView() {
         <h1 style={{ textAlign: "center" }}>Phase {currentPhase}</h1>
         <h3>Session ID: {sessionId}</h3>
 
-        <div>
-          <h3>Unfinished Participants</h3>
-          {participants
-            .filter(p => p.user_id !== profile?.id && !p.is_finished)
-            .map(p => (
+        {isAsync ? (
+          <div>
+            <h3>Participants</h3>
+            {participants.map(p => (
               <div key={p.user_id}>
-                {p.profile?.first_name} {p.profile?.last_name}
+                {p.profile?.first_name} {p.profile?.last_name}{" "}
+                {isAsync && `(Phase ${p.phase_index})`}
               </div>
             ))}
-        </div>
+          </div>
+        ) : (
+          <>
+            <div>
+              <h3>Unfinished Participants</h3>
+              {participants
+                .filter(p => p.user_id !== profile?.id && !p.is_finished)
+                .map(p => (
+                  <div key={p.user_id}>
+                    {p.profile?.first_name} {p.profile?.last_name}{" "}
+                    {isAsync && `(Phase ${p.phase_index})`}
+                  </div>
+                ))}
+            </div>
 
-        <div>
-          <h3>Finished Participants</h3>
-          {participants
-            .filter(p => p.user_id !== profile?.id && p.is_finished)
-            .map(p => (
-              <div key={p.user_id}>
-                {p.profile?.first_name} {p.profile?.last_name}
-              </div>
-            ))}
-        </div>
+            <div>
+              <h3>Finished Participants</h3>
+              {participants
+                .filter(p => p.user_id !== profile?.id && p.is_finished)
+                .map(p => (
+                  <div key={p.user_id}>
+                    {p.profile?.first_name} {p.profile?.last_name}{" "}
+                    {isAsync && `(Phase ${p.phase_index})`}
+                  </div>
+                ))}
+            </div>
+          </>
+        )}
 
         <Button onClick={advancePhase} disabled={isAdvancing}>
           {isAdvancing ? "Advancing..." : "Force Advance"}

@@ -10,6 +10,7 @@ import {
   fetchRoles,
 } from "@/actions/supabase/queries/sessions";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
+import { Flex } from "@/styles/containers";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
   BackLink,
@@ -49,6 +50,7 @@ export default function RoleSelectionPage() {
   ]);
 
   const [starting, setStarting] = useState(false);
+  const [isAsync, setIsAsync] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
 
@@ -115,6 +117,7 @@ export default function RoleSelectionPage() {
       const sessionId = (await createSession(
         templateId,
         profile.user_group_id,
+        isAsync,
       )) as UUID;
 
       //assign the facilitator to session
@@ -185,6 +188,13 @@ export default function RoleSelectionPage() {
         })}
 
         <SmallButton onClick={addParticipant}>+ Add Participant</SmallButton>
+
+        <label>is async</label>
+        <input
+          type="checkbox"
+          id="async"
+          onChange={e => setIsAsync(e.target.checked)}
+        />
 
         <Button onClick={handleStartGame} disabled={starting}>
           {starting ? "Starting Game…" : "Start Game"}

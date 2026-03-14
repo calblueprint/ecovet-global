@@ -95,7 +95,11 @@ export async function assignParticipantToSession(
   }
 }
 
-export async function createSession(templateId: string, userGroupId: string) {
+export async function createSession(
+  templateId: string,
+  userGroupId: string,
+  isAsync: boolean = false,
+) {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("session")
@@ -103,6 +107,7 @@ export async function createSession(templateId: string, userGroupId: string) {
       {
         template_id: templateId,
         user_group_id: userGroupId,
+        is_async: isAsync,
       },
     ])
     .select("session_id")
@@ -182,6 +187,46 @@ export async function sessionParticipantsBulk(
   return data ?? [];
 }
 
+export async function advancePhaseForSingleUser(
+  userId: UUID,
+  roleId: UUID,
+  sessionId: UUID,
+): Promise<void> {
+  const supabase = await getSupabaseServerClient();
+
+  const { data: currentData, error: fetchError } = await supabase
+    .from("participant_session")
+    .select("phase_index")
+    .eq("user_id", userId)
+    .eq("role_id", roleId)
+    .eq("session_id", sessionId)
+    .single();
+
+  if (fetchError) {
+    throw new Error(
+      `Failed to fetch current phase index for user in advancePhaseForUser: ${fetchError.message}`,
+    );
+  }
+
+  const { data, error } = await supabase
+    .from("participant_session")
+    .update({ phase_index: currentData.phase_index + 1 })
+    .eq("user_id", userId)
+    .eq("role_id", roleId)
+    .eq("session_id", sessionId)
+    .select();
+
+  if (error) {
+    throw new Error(
+      `Failed to set advance phase for single user: ${error.message}`,
+    );
+  }
+
+  if (!data || data.length === 0) {
+    throw new Error("No participant_session row matched the update");
+  }
+}
+
 export async function setIsFinished(
   userId: UUID,
   roleId: UUID,
@@ -205,6 +250,21 @@ export async function setIsFinished(
   if (!data || data.length === 0) {
     throw new Error("No participant_session row matched the update");
   }
+}
+
+export async function isSessionAsync(sessionId: string) {
+  const supabase = await getSupabaseServerClient();
+  const { data: session, error: sessionError } = await supabase
+    .from("session")
+    .select("is_async")
+    .eq("session_id", sessionId)
+    .single();
+
+  if (sessionError || !session) {
+    throw new Error("Failed to fetch session");
+  }
+
+  return session.is_async;
 }
 
 export async function fetchPhases(sessionId: string) {

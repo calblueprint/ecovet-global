@@ -3,13 +3,17 @@
 import type { UUID } from "@/types/schema";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { setIsFinished } from "@/actions/supabase/queries/sessions";
+import {
+  advancePhaseForSingleUser,
+  setIsFinished,
+} from "@/actions/supabase/queries/sessions";
 import { Button } from "../styles";
 
 interface NextButtonProps {
   user_id: UUID;
   role_id: UUID;
   session_id: UUID;
+  is_async: boolean;
   phase_id: UUID;
   isLastPhase: boolean;
   currentPhaseIndex: number;
@@ -20,6 +24,7 @@ export default function NextButton({
   user_id,
   role_id,
   session_id,
+  is_async,
   isLastPhase,
   currentPhaseIndex,
   onClick,
@@ -32,19 +37,23 @@ export default function NextButton({
   }, [currentPhaseIndex]);
 
   async function handleClick() {
-    setClicked(true);
+    if (is_async) {
+      await advancePhaseForSingleUser(user_id, role_id, session_id);
+    } else {
+      setClicked(true);
 
-    try {
-      if (onClick) {
-        await onClick();
+      try {
+        if (onClick) {
+          await onClick();
+        }
+        await setIsFinished(user_id, role_id, session_id);
+        if (isLastPhase) {
+          router.push("/sessions/session-finish");
+        }
+      } catch (err) {
+        console.error(err);
+        setClicked(false);
       }
-      await setIsFinished(user_id, role_id, session_id);
-      if (isLastPhase) {
-        router.push("/sessions/session-finish");
-      }
-    } catch (err) {
-      console.error(err);
-      setClicked(false);
     }
   }
 

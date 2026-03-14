@@ -7,7 +7,7 @@ import type {
   RolePhase,
   UUID,
 } from "@/types/schema";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import supabase from "@/actions/supabase/client";
 import {
@@ -18,6 +18,7 @@ import {
   fetchPrompts,
   fetchRole,
   fetchRolePhases,
+  isSessionAsync,
 } from "@/actions/supabase/queries/sessions";
 import { useProfile } from "@/utils/ProfileProvider";
 import NextButton from "../components/ParticipantNextButton";
@@ -47,6 +48,8 @@ export default function ParticipantFlowPage() {
   const [completedPrompts, setCompletedPrompts] = useState<Set<string>>(
     new Set(),
   );
+  const [isAsync, setIsAsync] = useState(false);
+
   // DT: We use a set to store the index of prompts that hvae been completed (defined by blurred)
   const totalPrompts = prompts.length;
   const completedCount = completedPrompts.size;
@@ -62,19 +65,23 @@ export default function ParticipantFlowPage() {
 
       setLoading(true);
       try {
-        const phaseData = await fetchPhases(sessionId);
+        const [
+          phaseData,
+          fetchedRoleId,
+          mostRecentPhaseIndex,
+          isCurrentSessionAsync,
+        ] = await Promise.all([
+          fetchPhases(sessionId),
+          fetchRole(userId, sessionId),
+          fetchMostRecentPhase(userId, sessionId),
+          isSessionAsync(sessionId),
+        ]);
+
         setPhases(phaseData);
-        console.log("Loaded phases:", phaseData);
-
-        const fetchedRoleId = await fetchRole(userId, sessionId);
         setRoleId(fetchedRoleId as string);
-
-        // Set currentPhaseIndex to most recent phase
-        const mostRecentPhaseIndex = await fetchMostRecentPhase(
-          userId,
-          sessionId,
-        );
         setCurrentPhaseIndex(mostRecentPhaseIndex);
+        setIsAsync(isCurrentSessionAsync);
+        console.log("Loaded phases:", phaseData);
       } catch (err) {
         console.error("Error loading session data:", err);
       } finally {
@@ -314,6 +321,7 @@ export default function ParticipantFlowPage() {
               user_id={userId as UUID}
               role_id={roleId as UUID}
               session_id={sessionId as UUID}
+              is_async={isAsync}
               isLastPhase={isLastPhase}
               currentPhaseIndex={currentPhaseIndex}
               phase_id={currentPhase.phase_id as UUID}
