@@ -37,18 +37,6 @@ export default function PromptsRightPanel({
   const progressPercentage =
     totalPrompts > 0 ? Math.round((completedCount / totalPrompts) * 100) : 0;
 
-  if (isOverview) {
-    return (
-      <ContentDiv>
-        <PhaseHeading>Get Ready</PhaseHeading>
-        <PromptText>
-          Read the scenario overview on the left, then click Continue to begin
-          Phase 1.
-        </PromptText>
-      </ContentDiv>
-    );
-  }
-
   return (
     <ContentDiv>
       <PhaseHeading>Phase {phaseInd + 1}</PhaseHeading>
