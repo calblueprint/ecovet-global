@@ -37,6 +37,8 @@ export default function NextButton({
   }, [currentPhaseIndex]);
 
   async function handleClick() {
+    console.log("Next button clicked", is_async, isLastPhase);
+
     if (is_async) {
       await advancePhaseForSingleUser(user_id, role_id, session_id);
     } else {

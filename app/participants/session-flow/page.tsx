@@ -257,7 +257,12 @@ export default function ParticipantFlowPage() {
   }
 
   if (loading || !currentPhase) {
-    console.log("Loading or currentPhase not yet available");
+    console.log(
+      "Loading or currentPhase not yet available",
+      loading,
+      currentPhase,
+      phases,
+    );
     return <div>Loading phases...</div>;
   }
 

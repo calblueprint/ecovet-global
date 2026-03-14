@@ -38,15 +38,19 @@ export default function ScenarioOverview() {
   const loadData = useCallback(async () => {
     if (!sessionId) return;
     console.log(sessionId);
+
     const templateId = await fetchTemplateId(sessionId as UUID);
     const template = await fetchTemplate(
       templateId.template_id as unknown as UUID,
     );
     setTemplateInfo(template);
     console.log(templateId);
+
     setPhases(await fetchPhases(sessionId as UUID));
+
     const fetchedProfile = await fetchProfileByUserId(userId as UUID);
     if (!fetchedProfile) return;
+
     setRoleId(fetchedProfile.role_id ?? "");
   }, [sessionId, userId]);
 

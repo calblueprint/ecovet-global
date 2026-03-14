@@ -103,7 +103,8 @@ export default function ParticipantWaitingPage() {
 
           {sessionExists && profile?.id && (
             <Link
-              href={`/participants/scenario-overview/${sessionId}/${profile?.id}`}
+              // href={`/participants/scenario-overview/${sessionId}/${profile?.id}`}
+              href={`/participants/session-flow?sessionId=${sessionId}`}
             >
               <Button>Start Session</Button>
             </Link>

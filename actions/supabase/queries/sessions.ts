@@ -192,6 +192,7 @@ export async function advancePhaseForSingleUser(
   roleId: UUID,
   sessionId: UUID,
 ): Promise<void> {
+  console.log("Advancing phase for user:", { userId, roleId, sessionId });
   const supabase = await getSupabaseServerClient();
 
   const { data: currentData, error: fetchError } = await supabase
