@@ -83,7 +83,7 @@ export async function assignParticipantToSession(
       session_id: sessionId,
       role_id: roleId,
       is_finished: false,
-      phase_index: 1,
+      phase_index: 0,
     },
     {
       onConflict: "user_id,session_id",
@@ -317,7 +317,7 @@ export async function fetchMostRecentPhase(
     throw new Error("No phase id found");
   }
 
-  return data.phase_index - 1;
+  return data.phase_index;
 }
 
 export async function fetchRolePhases(

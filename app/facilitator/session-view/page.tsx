@@ -20,7 +20,7 @@ export default function FacilitatorSessionView() {
   const router = useRouter();
 
   const [participants, setParticipants] = useState<SessionParticipant[]>([]);
-  const [currentPhase, setCurrentPhase] = useState(1);
+  const [currentPhase, setCurrentPhase] = useState(0);
   const [allDone, setAllDone] = useState(false);
   const [isAdvancing, setIsAdvancing] = useState(false);
   const [isAsync, setIsAsync] = useState(false);
@@ -64,7 +64,7 @@ export default function FacilitatorSessionView() {
         console.log("Participants:", psData);
 
         if (psData && psData.length > 0) {
-          setCurrentPhase(psData[0].phase_index ?? 1);
+          setCurrentPhase(psData[0].phase_index ?? 0);
         }
       } catch (err) {
         console.error("Failed to load participants:", err);
@@ -106,14 +106,14 @@ export default function FacilitatorSessionView() {
               p.user_id === updated.user_id
                 ? {
                     ...p,
-                    phase_index: updated.phase_index ?? 1,
+                    phase_index: updated.phase_index ?? 0,
                     is_finished: updated.is_finished,
                   }
                 : p,
             ),
           );
 
-          setCurrentPhase(updated.phase_index ?? 1);
+          setCurrentPhase(updated.phase_index ?? 0);
         },
       )
       .subscribe();
@@ -143,7 +143,7 @@ export default function FacilitatorSessionView() {
             {participants.map(p => (
               <div key={p.user_id}>
                 {p.profile?.first_name} {p.profile?.last_name}{" "}
-                {isAsync && `(Phase ${p.phase_index})`}
+                {isAsync && `(Phase ${(p.phase_index ?? 0) + 1})`}
               </div>
             ))}
           </div>

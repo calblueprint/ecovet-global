@@ -43,7 +43,11 @@ export default function NextButton({
     onClick();
 
     if (is_async) {
-      await advancePhaseForSingleUser(user_id, role_id, session_id);
+      if (isLastPhase) {
+        router.push("/participants/past-exercises");
+      } else {
+        await advancePhaseForSingleUser(user_id, role_id, session_id);
+      }
     } else {
       setClicked(true);
 

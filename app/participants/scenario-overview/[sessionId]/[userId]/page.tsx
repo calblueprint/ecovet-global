@@ -244,7 +244,7 @@ export default function SessionFlowPage() {
         prompts={isOverview ? [] : prompts}
         answers={answers}
         completedPrompts={completedPrompts}
-        phaseName={phases[phaseIdx].phase_name ?? "Unnamed Phase"}
+        phaseName={phases[phaseIdx]?.phase_name ?? "Unnamed Phase"}
         isOverview={isOverview}
         onInputAnswer={handleInputAnswer}
         onBlur={handleBlur}
