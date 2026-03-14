@@ -2,6 +2,7 @@
 
 import { useCallback, useId, useMemo } from "react";
 import Select, { MultiValue, SingleValue } from "react-select";
+import CreatableSelect from "react-select/creatable";
 import { DropdownOption } from "@/types/dropdown";
 import { selectStyles } from "./styles";
 
@@ -13,6 +14,8 @@ interface CommonProps {
   error?: string;
   disabled?: boolean;
   required?: boolean;
+  creatable?: boolean;
+  onCreateOption?: (inputValue: string) => void;
 }
 
 interface MultiSelectProps extends CommonProps {
@@ -35,7 +38,11 @@ export default function InputDropdown({
   required,
   onChange,
   multi,
+  creatable,
+  onCreateOption,
 }: InputDropdownProps) {
+  const SelectComponent = creatable ? CreatableSelect : Select;
+
   const optionsArray = useMemo(
     () =>
       options instanceof Set
@@ -61,7 +68,7 @@ export default function InputDropdown({
   );
 
   return (
-    <Select
+    <SelectComponent
       isClearable
       closeMenuOnSelect={false}
       tabSelectsValue={false}
@@ -73,6 +80,7 @@ export default function InputDropdown({
       placeholder={placeholder}
       isMulti={multi}
       onChange={handleChange}
+      onCreateOption={onCreateOption} // Passed to CreatableSelect
       styles={selectStyles}
     />
   );

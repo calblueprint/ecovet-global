@@ -1,12 +1,13 @@
 "use client";
 
-import type { Tag, Template, UUID } from "@/types/schema";
+import type { Template, UUID } from "@/types/schema";
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import {
   assignTagToTemplate,
+  createTag,
   deleteTag,
   getAllTags,
   removeTagFromTemplate,
@@ -16,7 +17,7 @@ import img from "@/assets/images/NewTagPlus.png";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import { TagComponent } from "@/components/Tag/Tag";
-import { TagCreator } from "@/components/Tag/TagCreator";
+import { Tag, TagCreator } from "@/components/Tag/TagCreator";
 import COLORS from "@/styles/colors";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
@@ -181,11 +182,43 @@ export default function TemplateListPage() {
     setOpenTagDropdownFor(template_id);
   }
 
-  async function handleSelectTag(template_id: UUID, tag_id: UUID) {
+  async function handleCreateAndAssign(template_id: UUID, name: string) {
+    const newTagId = await createTag({
+      name,
+      user_group_id,
+      color: "yellow",
+      number: 0,
+    });
+
+    if (newTagId) {
+      const newlyCreatedTag: Tag = {
+        tag_id: newTagId as UUID,
+        name: name,
+        color: "yellow",
+        number: 0,
+        user_group_id: user_group_id,
+      };
+
+      await handleSelectTag(
+        template_id,
+        newlyCreatedTag.tag_id,
+        newlyCreatedTag,
+      );
+
+      setTagVersion(v => v + 1);
+    }
+  }
+
+  async function handleSelectTag(
+    template_id: UUID,
+    tag_id: UUID,
+    passedTag?: Tag,
+  ) {
     const success = await assignTagToTemplate(template_id, tag_id);
     if (!success) return;
 
-    const tag = availableTags.find(t => t.tag_id === tag_id);
+    const tag = passedTag || availableTags.find(t => t.tag_id === tag_id);
+
     if (!tag) return;
 
     setTemplates(prev =>
@@ -210,6 +243,13 @@ export default function TemplateListPage() {
           <TemplateSideBar
             filterMode={filterMode}
             setFilterMode={setFilterMode}
+            onDeleteConfirmed={deleteTagComponent}
+            user_group_id={user_group_id}
+            selectedTagId={selectedTagId}
+            onTagClick={(id: UUID) =>
+              setSelectedTagId(prev => (prev === id ? null : id))
+            }
+            onTagRenamed={() => setTagVersion(v => v + 1)}
           />
           <TagCreator
             user_group_id={user_group_id}
@@ -294,6 +334,10 @@ export default function TemplateListPage() {
                     {openTagDropdownFor === t.template_id && (
                       <InputDropdown
                         label="Select tag"
+                        creatable={true}
+                        onCreateOption={val =>
+                          handleCreateAndAssign(t.template_id, val)
+                        }
                         options={
                           new Map(
                             availableTags.map(tag => [tag.tag_id, tag.name]),
