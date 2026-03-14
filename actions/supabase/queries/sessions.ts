@@ -317,7 +317,7 @@ export async function fetchMostRecentPhase(
     throw new Error("No phase id found");
   }
 
-  return data.phase_index;
+  return data.phase_index - 1;
 }
 
 export async function fetchRolePhases(

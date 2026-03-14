@@ -15,6 +15,7 @@ interface NextButtonProps {
   session_id: UUID;
   is_async: boolean;
   phase_id: UUID;
+  promptsCompleted: boolean;
   isLastPhase: boolean;
   currentPhaseIndex: number;
   onClick: () => void;
@@ -25,6 +26,7 @@ export default function NextButton({
   role_id,
   session_id,
   is_async,
+  promptsCompleted,
   isLastPhase,
   currentPhaseIndex,
   onClick,
@@ -38,6 +40,7 @@ export default function NextButton({
 
   async function handleClick() {
     console.log("Next button clicked", is_async, isLastPhase);
+    onClick();
 
     if (is_async) {
       await advancePhaseForSingleUser(user_id, role_id, session_id);
@@ -45,9 +48,6 @@ export default function NextButton({
       setClicked(true);
 
       try {
-        if (onClick) {
-          await onClick();
-        }
         await setIsFinished(user_id, role_id, session_id);
         if (isLastPhase) {
           router.push("/sessions/session-finish");
@@ -61,7 +61,7 @@ export default function NextButton({
 
   return (
     <div>
-      <Button onClick={handleClick} disabled={clicked}>
+      <Button onClick={handleClick} disabled={!promptsCompleted || clicked}>
         {isLastPhase ? "Finish Game" : "Next"}
       </Button>
 
