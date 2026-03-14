@@ -34,7 +34,14 @@ import {
   SortButton,
 } from "../styles";
 import TemplateSideBar from "./components/TemplateSidebar";
-import { AddNewTagPlus, AssociatedTags, NewTag, TemplateTag } from "./styles";
+import {
+  AddNewTagPlus,
+  AssociatedTags,
+  ClearAllButton,
+  NewTag,
+  TagEditContainer,
+  TemplateTag,
+} from "./styles";
 
 type TemplateWithTags = Template & {
   associated_tags: Tag[];
@@ -211,6 +218,24 @@ export default function TemplateListPage() {
     }
   }
 
+  async function handleClearAllTags(template_id: UUID) {
+    const currentTemplate = templates.find(t => t.template_id === template_id);
+    if (!currentTemplate) return;
+
+    // remove from database
+    const deletePromises = currentTemplate.associated_tags.map(tag =>
+      removeTagFromTemplate(template_id, tag.tag_id),
+    );
+    await Promise.all(deletePromises);
+
+    // update local state
+    setTemplates(prev =>
+      prev.map(t =>
+        t.template_id === template_id ? { ...t, associated_tags: [] } : t,
+      ),
+    );
+  }
+
   async function handleMultiTagChange(
     template_id: UUID,
     nextTagIds: Set<UUID>,
@@ -356,29 +381,43 @@ export default function TemplateListPage() {
                     ))}
 
                     {openTagDropdownFor === t.template_id && (
-                      <InputDropdown
-                        label="Select tag"
-                        multi={true}
-                        creatable={true}
-                        onCreateOption={val =>
-                          handleCreateAndAssign(t.template_id, val)
-                        }
-                        options={
-                          new Map(
-                            availableTags.map(tag => [tag.tag_id, tag.name]),
-                          )
-                        }
-                        value={
-                          new Set(t.associated_tags.map(tag => tag.tag_id))
-                        }
-                        onBlur={() => setOpenTagDropdownFor(null)}
-                        onChange={selectedIds => {
-                          handleMultiTagChange(
-                            t.template_id,
-                            selectedIds as Set<UUID>,
-                          );
-                        }}
-                      />
+                      <TagEditContainer>
+                        <InputDropdown
+                          label="Select tag"
+                          multi={true}
+                          creatable={true}
+                          onCreateOption={val =>
+                            handleCreateAndAssign(t.template_id, val)
+                          }
+                          options={
+                            new Map(
+                              availableTags.map(tag => [tag.tag_id, tag.name]),
+                            )
+                          }
+                          value={
+                            new Set(t.associated_tags.map(tag => tag.tag_id))
+                          }
+                          onBlur={() => setOpenTagDropdownFor(null)}
+                          onChange={selectedIds => {
+                            handleMultiTagChange(
+                              t.template_id,
+                              selectedIds as Set<UUID>,
+                            );
+                          }}
+                        />
+
+                        {t.associated_tags.length > 0 && (
+                          <ClearAllButton
+                            onMouseDown={e => e.preventDefault()}
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleClearAllTags(t.template_id);
+                            }}
+                          >
+                            Clear all
+                          </ClearAllButton>
+                        )}
+                      </TagEditContainer>
                     )}
                     <NewTag onClick={() => addNewTag(t.template_id)}>
                       <AddNewTagPlus>
