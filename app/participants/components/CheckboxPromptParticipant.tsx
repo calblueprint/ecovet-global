@@ -1,53 +1,10 @@
 import { Checkbox, FormControlLabel } from "@mui/material";
-import styled from "styled-components";
-import COLORS from "@/styles/colors";
-import { Sans } from "@/styles/fonts";
 import { PromptOption } from "@/types/schema";
-
-const CheckboxParticipantStyled = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-
-  .MuiFormGroup-root {
-    gap: 8px;
-  }
-`;
-
-const CheckboxOptionParticipantStyled = styled.div<{ $selected: boolean }>`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  width: 100%;
-  border-radius: 8px;
-  background-color: ${({ $selected }) =>
-    $selected ? COLORS.lightEletricBlue : COLORS.oat_light};
-  border: 1px solid
-    ${({ $selected }) => ($selected ? COLORS.darkElectricBlue : "transparent")};
-
-  .MuiFormControlLabel-root {
-    margin-left: 0;
-    width: 100%;
-  }
-
-  .MuiCheckbox-root {
-    padding-left: 8px;
-  }
-
-  .MuiCheckbox-root.Mui-checked {
-    color: ${COLORS.darkElectricBlue};
-  }
-`;
-
-const OptionTextStyled = styled.span<{ $selected: boolean }>`
-  font-family: ${Sans.style.fontFamily};
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 150%;
-  padding: 8px 0;
-  color: ${({ $selected }) => ($selected ? COLORS.black100 : COLORS.black70)};
-`;
+import {
+  CheckboxOptionParticipantStyled,
+  CheckboxOptionTextStyled,
+  CheckboxParticipantStyled,
+} from "./styles";
 
 type Props = {
   options: PromptOption[];
@@ -86,9 +43,9 @@ export default function CheckboxPromptParticipant({
                 />
               }
               label={
-                <OptionTextStyled $selected={selected}>
+                <CheckboxOptionTextStyled $selected={selected}>
                   {o.option_text}
-                </OptionTextStyled>
+                </CheckboxOptionTextStyled>
               }
             />
           </CheckboxOptionParticipantStyled>
