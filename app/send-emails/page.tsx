@@ -9,8 +9,7 @@ import { useProfile } from "@/utils/ProfileProvider";
 export default function SendEmailButton() {
   const { profile } = useProfile();
   const [message, setMessage] = useState<string>("");
-  // const [email, setEmail] = useState<string>("");
-  const email = "monique.mc@berkeley.edu";
+  const [email, setEmail] = useState<string>("");
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
 
   const sendEmail = async () => {
@@ -28,7 +27,7 @@ export default function SendEmailButton() {
       setUserProfile(await fetchProfileByUserId(user_id));
       if (!userProfile) return;
       if (!userProfile.email) return;
-      //setEmail(userProfile.email);
+      setEmail(userProfile.email);
     }
 
     fetchEmail(profile.id);
