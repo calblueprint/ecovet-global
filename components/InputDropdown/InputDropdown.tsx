@@ -16,6 +16,8 @@ interface CommonProps {
   required?: boolean;
   creatable?: boolean;
   onCreateOption?: (inputValue: string) => void;
+  value?: Set<string>;
+  onBlur?: () => void;
 }
 
 interface MultiSelectProps extends CommonProps {
@@ -40,6 +42,8 @@ export default function InputDropdown({
   multi,
   creatable,
   onCreateOption,
+  value,
+  onBlur,
 }: InputDropdownProps) {
   const SelectComponent = creatable ? CreatableSelect : Select;
 
@@ -54,14 +58,21 @@ export default function InputDropdown({
     [options],
   );
 
+  const internalValue = useMemo(() => {
+    if (!value) return multi ? [] : null;
+    return optionsArray.filter(opt => value.has(opt.value));
+  }, [value, optionsArray, multi]);
+
   const handleChange = useCallback(
     (newValue: MultiValue<DropdownOption> | SingleValue<DropdownOption>) => {
-      if (multi && newValue instanceof Array) {
-        onChange?.(new Set(newValue.map(v => v.value)));
-      } else if (!multi && !(newValue instanceof Array)) {
-        onChange?.(newValue ? newValue.value : null);
+      if (multi) {
+        // ensure newValue is an array
+        const values = (newValue as MultiValue<DropdownOption>) || [];
+        onChange?.(new Set(values.map(v => v.value)));
       } else {
-        throw new Error("An unexpected error occurred!");
+        //ensure newValue is a single object
+        const val = newValue as SingleValue<DropdownOption>;
+        onChange?.(val ? val.value : null);
       }
     },
     [multi, onChange],
@@ -72,16 +83,20 @@ export default function InputDropdown({
       isClearable
       closeMenuOnSelect={false}
       tabSelectsValue={false}
-      hideSelectedOptions={false}
+      hideSelectedOptions={true}
       required={required}
       isDisabled={disabled}
       instanceId={useId()}
       options={optionsArray}
       placeholder={placeholder}
       isMulti={multi}
+      onBlur={onBlur} // dropdown goes away when click off
+      autoFocus={true}
+      value={internalValue}
       onChange={handleChange}
-      onCreateOption={onCreateOption} // Passed to CreatableSelect
+      onCreateOption={onCreateOption}
       styles={selectStyles}
+      controlShouldRenderValue={true} // Ensures selected tags show up in the box
     />
   );
 }

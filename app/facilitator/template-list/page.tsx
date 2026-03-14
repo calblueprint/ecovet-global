@@ -174,11 +174,8 @@ export default function TemplateListPage() {
     }
 
     const allTags = await getAllTags(user_group_id);
-    const template = templates.find(t => t.template_id === template_id);
-    if (!template) return;
 
-    const assigned = new Set(template.associated_tags.map(t => t.tag_id));
-    setAvailableTags(allTags.filter(t => !assigned.has(t.tag_id)));
+    setAvailableTags(allTags);
     setOpenTagDropdownFor(template_id);
   }
 
@@ -199,14 +196,50 @@ export default function TemplateListPage() {
         user_group_id: user_group_id,
       };
 
-      await handleSelectTag(
-        template_id,
-        newlyCreatedTag.tag_id,
-        newlyCreatedTag,
-      );
+      setAvailableTags(prev => [...prev, newlyCreatedTag]);
 
+      const currentTags =
+        templates.find(t => t.template_id === template_id)?.associated_tags ||
+        [];
+      const nextIds = new Set([
+        ...currentTags.map(t => t.tag_id),
+        newlyCreatedTag.tag_id,
+      ]);
+
+      await handleMultiTagChange(template_id, nextIds);
       setTagVersion(v => v + 1);
     }
+  }
+
+  async function handleMultiTagChange(
+    template_id: UUID,
+    nextTagIds: Set<UUID>,
+  ) {
+    const currentTemplate = templates.find(t => t.template_id === template_id);
+    if (!currentTemplate) return;
+
+    const currentTagIds = new Set(
+      currentTemplate.associated_tags.map(tag => tag.tag_id),
+    );
+
+    for (const id of nextTagIds) {
+      if (!currentTagIds.has(id)) await assignTagToTemplate(template_id, id);
+    }
+    for (const id of currentTagIds) {
+      if (!nextTagIds.has(id)) await removeTagFromTemplate(template_id, id);
+    }
+
+    const updatedAssociatedTags = availableTags.filter((tag: Tag) =>
+      nextTagIds.has(tag.tag_id),
+    );
+
+    setTemplates(prev =>
+      prev.map(t =>
+        t.template_id === template_id
+          ? { ...t, associated_tags: updatedAssociatedTags }
+          : t,
+      ),
+    );
   }
 
   async function handleSelectTag(
@@ -325,6 +358,7 @@ export default function TemplateListPage() {
                     {openTagDropdownFor === t.template_id && (
                       <InputDropdown
                         label="Select tag"
+                        multi={true}
                         creatable={true}
                         onCreateOption={val =>
                           handleCreateAndAssign(t.template_id, val)
@@ -334,9 +368,16 @@ export default function TemplateListPage() {
                             availableTags.map(tag => [tag.tag_id, tag.name]),
                           )
                         }
-                        onChange={value =>
-                          value && handleSelectTag(t.template_id, value as UUID)
+                        value={
+                          new Set(t.associated_tags.map(tag => tag.tag_id))
                         }
+                        onBlur={() => setOpenTagDropdownFor(null)}
+                        onChange={selectedIds => {
+                          handleMultiTagChange(
+                            t.template_id,
+                            selectedIds as Set<UUID>,
+                          );
+                        }}
                       />
                     )}
                     <NewTag onClick={() => addNewTag(t.template_id)}>
