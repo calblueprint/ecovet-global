@@ -1,13 +1,19 @@
 "use client";
 
 import { useCallback, useId, useMemo } from "react";
-import Select, { MultiValue, SingleValue } from "react-select";
+import Select, {
+  components,
+  MenuListProps,
+  MultiValue,
+  SingleValue,
+} from "react-select";
 import CreatableSelect from "react-select/creatable";
 import { DropdownOption } from "@/types/dropdown";
-import { selectStyles } from "./styles";
+import { selectStyles, tagSelectStyles } from "./styles";
 
 // for map: key is actual data stored, value is displayed
 interface CommonProps {
+  isTagStyle?: boolean;
   options: Set<string> | Map<string, string>;
   label: string;
   placeholder?: string;
@@ -32,9 +38,28 @@ interface SingleSelectProps extends CommonProps {
 
 type InputDropdownProps = SingleSelectProps | MultiSelectProps;
 
+const CustomMenuList = (props: MenuListProps<DropdownOption>) => {
+  return (
+    <components.MenuList {...props}>
+      <div
+        style={{
+          padding: "8px 12px",
+          fontSize: "11px",
+          color: "#959492",
+          fontWeight: 500,
+        }}
+      >
+        Add a tag
+      </div>
+      {props.children}
+    </components.MenuList>
+  );
+};
+
 // main dropdown component
 export default function InputDropdown({
   options,
+  isTagStyle = false,
   placeholder = "",
   disabled,
   required,
@@ -46,6 +71,8 @@ export default function InputDropdown({
   onBlur,
 }: InputDropdownProps) {
   const SelectComponent = creatable ? CreatableSelect : Select;
+
+  const styles = isTagStyle ? tagSelectStyles : selectStyles;
 
   const optionsArray = useMemo(
     () =>
@@ -81,10 +108,13 @@ export default function InputDropdown({
   return (
     <SelectComponent
       isClearable
+      menuIsOpen={isTagStyle ? true : undefined}
+      components={isTagStyle ? { MenuList: CustomMenuList } : {}}
       closeMenuOnSelect={false}
       tabSelectsValue={false}
       hideSelectedOptions={true}
       required={required}
+      controlShouldRenderValue={!isTagStyle}
       isDisabled={disabled}
       instanceId={useId()}
       options={optionsArray}
@@ -95,8 +125,7 @@ export default function InputDropdown({
       value={internalValue}
       onChange={handleChange}
       onCreateOption={onCreateOption}
-      styles={selectStyles}
-      controlShouldRenderValue={true} // Ensures selected tags show up in the box
+      styles={styles}
     />
   );
 }

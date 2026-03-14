@@ -267,6 +267,7 @@ export default function TemplateListPage() {
     );
   }
 
+  // NO LONGER USING, REPLACED WITH handleMultiTagChange()
   async function handleSelectTag(
     template_id: UUID,
     tag_id: UUID,
@@ -385,6 +386,7 @@ export default function TemplateListPage() {
                         <InputDropdown
                           label="Select tag"
                           multi={true}
+                          isTagStyle={true}
                           creatable={true}
                           onCreateOption={val =>
                             handleCreateAndAssign(t.template_id, val)
