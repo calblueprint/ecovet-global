@@ -63,7 +63,7 @@ export default function InputDropdown({
   return (
     <Select
       isClearable
-      closeMenuOnSelect={false}
+      closeMenuOnSelect={multi ? false : true}
       tabSelectsValue={false}
       hideSelectedOptions={false}
       required={required}

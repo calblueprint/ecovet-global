@@ -1,7 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import type { Profile, UUID } from "@/types/schema";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { fetchUserGroupMembers } from "@/actions/supabase/queries/user-groups";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
+import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import InviteComponent from "@/components/InviteComponent/InviteComponent";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
@@ -14,8 +17,6 @@ import {
   ParticipantTable,
   PrimaryActionArea,
   SideNavNewTemplateButton, // Reusing existing styled button for "Start Exercise"
-  StaticDataBox,
-  StyledSelect,
   TableHeader,
   TableRow,
   ToggleButton,
@@ -25,39 +26,77 @@ import {
 export default function Page() {
   const { profile } = useProfile();
   const [isSync, setIsSync] = useState(true);
+  const [availableUsers, setAvailableUsers] = useState<Profile[]>([]);
 
-  // mock data NEED TO REPLACE WITH SUPABASE LATER
   const [participants, setParticipants] = useState([
-    { name: "Dude 1", email: "aow@a.com", role: "Project Lead" },
-    { name: "Dude 2", email: "bow@b.com", role: "Designer" },
-    { name: "Dude 3", email: "cow@c.com", role: "Developer" },
+    { id: "", name: "", email: "", role: "" },
   ]);
+
+  // 1. Prepare options for InputDropdown (Map<value, label>)
+  const userOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    availableUsers.forEach(u => {
+      const fullName = `${u.first_name} ${u.last_name}`;
+      // Key: user ID (better for DB), Value: Display string
+      map.set(u.id, `${fullName}, ${u.email}`);
+    });
+    return map;
+  }, [availableUsers]);
+
+  const roleOptions = useMemo(() => {
+    return new Set(["Project Lead", "Designer", "Developer", "External"]);
+  }, []);
+
+  const exerciseOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    map.set("scenario_1", "Scenario A: Crisis Management");
+    map.set("scenario_2", "Scenario B: Tech Debt");
+    return map;
+  }, []);
+
+  const loadGroupMembers = useCallback(async () => {
+    if (profile?.user_group_id) {
+      const members = await fetchUserGroupMembers(
+        profile.user_group_id as UUID,
+      );
+      setAvailableUsers(members ?? []);
+    }
+  }, [profile?.user_group_id]);
+
+  useEffect(() => {
+    loadGroupMembers();
+  }, [loadGroupMembers]);
 
   const addParticipantRow = () => {
     setParticipants([
       ...participants,
-      { name: "", email: "", role: "Select Role" },
+      { id: "", name: "", email: "", role: "" },
     ]);
   };
 
-  // 3. Logic to update a specific row's data
-  const updateParticipant = (index: number, field: string, value: string) => {
+  const updateParticipant = (
+    index: number,
+    field: string,
+    value: string | null,
+  ) => {
     const updated = [...participants];
-    if (field === "combined") {
-      const [name, email] = value.split(", ");
-      updated[index] = {
-        ...updated[index],
-        name: name || value,
-        email: email || "",
-      };
+
+    if (field === "user_id") {
+      const selectedUser = availableUsers.find(u => u.id === value);
+      if (selectedUser) {
+        updated[index] = {
+          ...updated[index],
+          id: selectedUser.id,
+          name: `${selectedUser.first_name} ${selectedUser.last_name}`,
+          email: selectedUser.email ?? "",
+        };
+      } else {
+        updated[index] = { ...updated[index], id: "", name: "", email: "" };
+      }
     } else {
-      updated[index] = { ...updated[index], [field]: value };
+      updated[index] = { ...updated[index], [field]: value ?? "" };
     }
     setParticipants(updated);
-  };
-
-  const loadData = () => {
-    console.log("Invites changed! Refreshing data...");
   };
 
   if (!profile?.user_group_id) {
@@ -73,11 +112,13 @@ export default function Page() {
 
           <ConfigRow>
             <DropdownContainer>
-              <StyledSelect>
-                <option value="">Select Exercise</option>
-                <option value="scenario_1">Scenario A: test</option>
-                <option value="scenario_2">Scenario B: testy</option>
-              </StyledSelect>
+              {/* Exercise Dropdown */}
+              <InputDropdown
+                label="Select Exercise"
+                options={exerciseOptions}
+                placeholder="Select Exercise"
+                onChange={val => console.log("Exercise selected:", val)}
+              />
             </DropdownContainer>
 
             <ToggleGroup>
@@ -92,7 +133,7 @@ export default function Page() {
 
           <InviteComponent
             user_group_id={profile.user_group_id}
-            onInvitesChange={() => loadData()}
+            onInvitesChange={() => loadGroupMembers()}
           />
 
           <ParticipantTable>
@@ -103,39 +144,23 @@ export default function Page() {
 
             {participants.map((p, i) => (
               <TableRow key={i}>
-                <StyledSelect
-                  value={p.email ? `${p.name}, ${p.email}` : p.name}
-                  onChange={e =>
-                    updateParticipant(i, "combined", e.target.value)
-                  }
-                >
-                  <option value="" disabled>
-                    Select a member
-                  </option>
-                  <option value="Esha Bansiya, esha.bansiya@berkeley.edu">
-                    Esha Bansiya, esha.bansiya@berkeley.edu
-                  </option>
-                  <option value="Kevin Yamashita, kyama@berkeley.edu">
-                    Kevin Yamashita, kyama@berkeley.edu
-                  </option>
-                  <option value="Aditya Pawar, apawar@berkeley.edu">
-                    Aditya Pawar, apawar@berkeley.edu
-                  </option>
-                  <option value="Joshua Chou">Joshua Chou</option>
-                </StyledSelect>
+                <div style={{ flex: 1 }}>
+                  <InputDropdown
+                    label="Participant"
+                    options={userOptions}
+                    placeholder="Select a member"
+                    onChange={val => updateParticipant(i, "user_id", val)}
+                  />
+                </div>
 
-                <StyledSelect
-                  value={p.role}
-                  onChange={e => updateParticipant(i, "role", e.target.value)}
-                >
-                  <option value="Select Role" disabled>
-                    Select Role
-                  </option>
-                  <option value="Project Lead">Project Lead</option>
-                  <option value="Designer">Designer</option>
-                  <option value="Developer">Developer</option>
-                  <option value="External">External</option>
-                </StyledSelect>
+                <div style={{ flex: 1 }}>
+                  <InputDropdown
+                    label="Role"
+                    options={roleOptions}
+                    placeholder="Select Role"
+                    onChange={val => updateParticipant(i, "role", val)}
+                  />
+                </div>
               </TableRow>
             ))}
           </ParticipantTable>
