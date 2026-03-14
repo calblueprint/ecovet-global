@@ -35,20 +35,31 @@ export default function TemplateSideBar({
   const router = useRouter();
 
   const [isWarningOpen, setIsWarningOpen] = useState(false);
+  const [resolveDelete, setResolveDelete] = useState<
+    ((val: boolean) => void) | null
+  >(null);
   const [tagToDelete, setTagToDelete] = useState<UUID | null>(null);
 
   const handleRequestDelete = async (id: UUID): Promise<boolean> => {
     setTagToDelete(id);
     setIsWarningOpen(true);
-    return true;
+    return new Promise(resolve => {
+      setResolveDelete(() => (val: boolean) => resolve(val));
+    });
   };
 
   const handleModalClose = (shouldDel: boolean) => {
     if (shouldDel && tagToDelete && onDeleteConfirmed) {
       onDeleteConfirmed(tagToDelete);
     }
+
+    if (resolveDelete) {
+      resolveDelete(shouldDel);
+    }
+
     setIsWarningOpen(false);
     setTagToDelete(null);
+    setResolveDelete(null);
   };
 
   return (
