@@ -246,7 +246,7 @@ export async function fetchMostRecentPhase(
     .eq("session_id", sessionId)
     .eq("user_id", userId)
     .maybeSingle();
-
+  console.log(data);
   if (error) {
     console.error("fetchMostRecentPhase error:", error);
     throw new Error("Failed to fetch user's most recent phase", error);
@@ -256,7 +256,7 @@ export async function fetchMostRecentPhase(
     throw new Error("No phase id found");
   }
 
-  return data.phase_index;
+  return data.phase_index - 1;
 }
 
 export async function fetchRolePhases(
