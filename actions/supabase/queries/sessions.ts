@@ -76,14 +76,13 @@ export async function assignParticipantToSession(
   roleId: UUID | null,
 ) {
   const supabase = await getSupabaseServerClient();
-  console.log(userId, sessionId, roleId);
   const { error } = await supabase.from("participant_session").upsert(
     {
       user_id: userId,
       session_id: sessionId,
       role_id: roleId,
       is_finished: false,
-      phase_index: 1,
+      phase_index: 0,
     },
     {
       onConflict: "user_id,session_id",
@@ -95,7 +94,11 @@ export async function assignParticipantToSession(
   }
 }
 
-export async function createSession(templateId: string, userGroupId: string) {
+export async function createSession(
+  templateId: string,
+  userGroupId: string,
+  isAsync: boolean = false,
+) {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("session")
@@ -103,6 +106,7 @@ export async function createSession(templateId: string, userGroupId: string) {
       {
         template_id: templateId,
         user_group_id: userGroupId,
+        is_async: isAsync,
       },
     ])
     .select("session_id")
@@ -182,6 +186,47 @@ export async function sessionParticipantsBulk(
   return data ?? [];
 }
 
+export async function advancePhaseForSingleUser(
+  userId: UUID,
+  roleId: UUID,
+  sessionId: UUID,
+): Promise<void> {
+  console.log("Advancing phase for user:", { userId, roleId, sessionId });
+  const supabase = await getSupabaseServerClient();
+
+  const { data: currentData, error: fetchError } = await supabase
+    .from("participant_session")
+    .select("phase_index")
+    .eq("user_id", userId)
+    .eq("role_id", roleId)
+    .eq("session_id", sessionId)
+    .single();
+
+  if (fetchError) {
+    throw new Error(
+      `Failed to fetch current phase index for user in advancePhaseForUser: ${fetchError.message}`,
+    );
+  }
+
+  const { data, error } = await supabase
+    .from("participant_session")
+    .update({ phase_index: currentData.phase_index + 1 })
+    .eq("user_id", userId)
+    .eq("role_id", roleId)
+    .eq("session_id", sessionId)
+    .select();
+
+  if (error) {
+    throw new Error(
+      `Failed to set advance phase for single user: ${error.message}`,
+    );
+  }
+
+  if (!data || data.length === 0) {
+    throw new Error("No participant_session row matched the update");
+  }
+}
+
 export async function setIsFinished(
   userId: UUID,
   roleId: UUID,
@@ -205,6 +250,21 @@ export async function setIsFinished(
   if (!data || data.length === 0) {
     throw new Error("No participant_session row matched the update");
   }
+}
+
+export async function isSessionAsync(sessionId: string) {
+  const supabase = await getSupabaseServerClient();
+  const { data: session, error: sessionError } = await supabase
+    .from("session")
+    .select("is_async")
+    .eq("session_id", sessionId)
+    .single();
+
+  if (sessionError || !session) {
+    throw new Error("Failed to fetch session");
+  }
+
+  return session.is_async;
 }
 
 export async function fetchPhases(sessionId: string) {
@@ -340,6 +400,14 @@ export async function createPromptAnswer(
   phaseId: UUID,
   answer: string,
 ) {
+  console.log("Creating prompt answer with:", {
+    userId,
+    promptId,
+    sessionId,
+    phaseId,
+    answer,
+  });
+
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("prompt_response")
@@ -363,9 +431,8 @@ export async function createPromptAnswer(
       "Error creating prompt answer:",
       JSON.stringify(error, null, 2),
     );
-  } else {
-    console.log("Insert success:", data);
   }
+
   return data;
 }
 
