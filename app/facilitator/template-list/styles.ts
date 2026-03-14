@@ -11,7 +11,7 @@ export const AssociatedTags = styled.div`
 export const TemplateTag = styled.span`
   display: inline-flex;
   border-radius: 4px;
-  background: var(--Oat-Medium, #eee);
+  background: ${COLORS["tagYellow"]};
   justify-content: center;
   align-items: center;
   gap: 8px;
@@ -51,4 +51,31 @@ export const AddNewTagPlus = styled.div`
     background-color: ${COLORS["oat_medium"]};
   }
   color: ${COLORS.white};
+`;
+
+export const TagEditContainer = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 12rem;
+`;
+
+export const ClearAllButton = styled.button`
+  position: absolute;
+  right: 50px; // just need to offset it to right by a bit for now
+  background: none;
+  border: none;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 11px;
+  font-weight: 500;
+  color: ${COLORS.black40};
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+
+  &:hover {
+    color: ${COLORS.black};
+    background-color: ${COLORS.oat_light};
+  }
 `;

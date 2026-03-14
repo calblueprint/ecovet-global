@@ -1,12 +1,13 @@
 "use client";
 
-import type { Tag, Template, UUID } from "@/types/schema";
+import type { Template, UUID } from "@/types/schema";
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import {
   assignTagToTemplate,
+  createTag,
   deleteTag,
   getAllTags,
   removeTagFromTemplate,
@@ -16,7 +17,7 @@ import img from "@/assets/images/NewTagPlus.png";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import { TagComponent } from "@/components/Tag/Tag";
-import { TagCreator } from "@/components/Tag/TagCreator";
+import { Tag, TagCreator } from "@/components/Tag/TagCreator";
 import COLORS from "@/styles/colors";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
@@ -33,7 +34,14 @@ import {
   SortButton,
 } from "../styles";
 import TemplateSideBar from "./components/TemplateSidebar";
-import { AddNewTagPlus, AssociatedTags, NewTag, TemplateTag } from "./styles";
+import {
+  AddNewTagPlus,
+  AssociatedTags,
+  ClearAllButton,
+  NewTag,
+  TagEditContainer,
+  TemplateTag,
+} from "./styles";
 
 type TemplateWithTags = Template & {
   associated_tags: Tag[];
@@ -173,19 +181,103 @@ export default function TemplateListPage() {
     }
 
     const allTags = await getAllTags(user_group_id);
-    const template = templates.find(t => t.template_id === template_id);
-    if (!template) return;
 
-    const assigned = new Set(template.associated_tags.map(t => t.tag_id));
-    setAvailableTags(allTags.filter(t => !assigned.has(t.tag_id)));
+    setAvailableTags(allTags);
     setOpenTagDropdownFor(template_id);
   }
 
-  async function handleSelectTag(template_id: UUID, tag_id: UUID) {
+  async function handleCreateAndAssign(template_id: UUID, name: string) {
+    const newTagId = await createTag({
+      name,
+      user_group_id,
+      color: "yellow",
+      number: 0,
+    });
+
+    if (newTagId) {
+      const newlyCreatedTag: Tag = {
+        tag_id: newTagId as UUID,
+        name: name,
+        color: "yellow",
+        number: 0,
+        user_group_id: user_group_id,
+      };
+
+      setAvailableTags(prev => [...prev, newlyCreatedTag]);
+
+      const currentTags =
+        templates.find(t => t.template_id === template_id)?.associated_tags ||
+        [];
+      const nextIds = new Set([
+        ...currentTags.map(t => t.tag_id),
+        newlyCreatedTag.tag_id,
+      ]);
+
+      await handleMultiTagChange(template_id, nextIds);
+      setTagVersion(v => v + 1);
+    }
+  }
+
+  async function handleClearAllTags(template_id: UUID) {
+    const currentTemplate = templates.find(t => t.template_id === template_id);
+    if (!currentTemplate) return;
+
+    // remove from database
+    const deletePromises = currentTemplate.associated_tags.map(tag =>
+      removeTagFromTemplate(template_id, tag.tag_id),
+    );
+    await Promise.all(deletePromises);
+
+    // update local state
+    setTemplates(prev =>
+      prev.map(t =>
+        t.template_id === template_id ? { ...t, associated_tags: [] } : t,
+      ),
+    );
+  }
+
+  async function handleMultiTagChange(
+    template_id: UUID,
+    nextTagIds: Set<UUID>,
+  ) {
+    const currentTemplate = templates.find(t => t.template_id === template_id);
+    if (!currentTemplate) return;
+
+    const currentTagIds = new Set(
+      currentTemplate.associated_tags.map(tag => tag.tag_id),
+    );
+
+    for (const id of nextTagIds) {
+      if (!currentTagIds.has(id)) await assignTagToTemplate(template_id, id);
+    }
+    for (const id of currentTagIds) {
+      if (!nextTagIds.has(id)) await removeTagFromTemplate(template_id, id);
+    }
+
+    const updatedAssociatedTags = availableTags.filter((tag: Tag) =>
+      nextTagIds.has(tag.tag_id),
+    );
+
+    setTemplates(prev =>
+      prev.map(t =>
+        t.template_id === template_id
+          ? { ...t, associated_tags: updatedAssociatedTags }
+          : t,
+      ),
+    );
+  }
+
+  // NO LONGER USING, REPLACED WITH handleMultiTagChange()
+  async function handleSelectTag(
+    template_id: UUID,
+    tag_id: UUID,
+    passedTag?: Tag,
+  ) {
     const success = await assignTagToTemplate(template_id, tag_id);
     if (!success) return;
 
-    const tag = availableTags.find(t => t.tag_id === tag_id);
+    const tag = passedTag || availableTags.find(t => t.tag_id === tag_id);
+
     if (!tag) return;
 
     setTemplates(prev =>
@@ -210,15 +302,13 @@ export default function TemplateListPage() {
           <TemplateSideBar
             filterMode={filterMode}
             setFilterMode={setFilterMode}
-          />
-          <TagCreator
+            onDeleteConfirmed={deleteTagComponent}
             user_group_id={user_group_id}
             selectedTagId={selectedTagId}
             onTagClick={(id: UUID) =>
               setSelectedTagId(prev => (prev === id ? null : id))
             }
             onTagRenamed={() => setTagVersion(v => v + 1)}
-            onDeleteTag={deleteTagComponent}
           />
         </SideNavContainer>
 
@@ -292,17 +382,44 @@ export default function TemplateListPage() {
                     ))}
 
                     {openTagDropdownFor === t.template_id && (
-                      <InputDropdown
-                        label="Select tag"
-                        options={
-                          new Map(
-                            availableTags.map(tag => [tag.tag_id, tag.name]),
-                          )
-                        }
-                        onChange={value =>
-                          value && handleSelectTag(t.template_id, value as UUID)
-                        }
-                      />
+                      <TagEditContainer>
+                        <InputDropdown
+                          label="Select tag"
+                          multi={true}
+                          isTagStyle={true}
+                          creatable={true}
+                          onCreateOption={val =>
+                            handleCreateAndAssign(t.template_id, val)
+                          }
+                          options={
+                            new Map(
+                              availableTags.map(tag => [tag.tag_id, tag.name]),
+                            )
+                          }
+                          value={
+                            new Set(t.associated_tags.map(tag => tag.tag_id))
+                          }
+                          onBlur={() => setOpenTagDropdownFor(null)}
+                          onChange={selectedIds => {
+                            handleMultiTagChange(
+                              t.template_id,
+                              selectedIds as Set<UUID>,
+                            );
+                          }}
+                        />
+
+                        {t.associated_tags.length > 0 && (
+                          <ClearAllButton
+                            onMouseDown={e => e.preventDefault()}
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleClearAllTags(t.template_id);
+                            }}
+                          >
+                            Clear all
+                          </ClearAllButton>
+                        )}
+                      </TagEditContainer>
                     )}
                     <NewTag onClick={() => addNewTag(t.template_id)}>
                       <AddNewTagPlus>
