@@ -1,7 +1,15 @@
 "use client";
 
+import type { DropdownOption } from "@/types/dropdown";
 import type { Profile, UUID } from "@/types/schema";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import type { SelectInstance } from "react-select";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { fetchUserGroupMembers } from "@/actions/supabase/queries/user-groups";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
@@ -28,6 +36,8 @@ export default function Page() {
   const { profile } = useProfile();
   const [isSync, setIsSync] = useState(true);
   const [availableUsers, setAvailableUsers] = useState<Profile[]>([]);
+  const roleRef = useRef<SelectInstance<DropdownOption> | null>(null);
+  const participantRefs = useRef<(SelectInstance<DropdownOption> | null)[]>([]);
 
   const [participants, setParticipants] = useState([
     { id: "", name: "", email: "", role: "" },
@@ -69,10 +79,13 @@ export default function Page() {
   }, [loadGroupMembers]);
 
   const addParticipantRow = () => {
-    setParticipants([
-      ...participants,
-      { id: "", name: "", email: "", role: "" },
-    ]);
+    setParticipants(prev => {
+      const next = [...prev, { id: "", name: "", email: "", role: "" }];
+      setTimeout(() => {
+        participantRefs.current[next.length - 1]?.focus();
+      }, 50);
+      return next;
+    });
   };
 
   const updateParticipant = (
@@ -104,6 +117,17 @@ export default function Page() {
     return <div>Loading session...</div>;
   }
 
+  const handleEnterToNext =
+    (nextRef: React.RefObject<SelectInstance<DropdownOption> | null>) =>
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        const isMenuOpen = nextRef.current?.focus();
+        setTimeout(() => {
+          nextRef.current?.focus();
+        }, 50);
+      }
+    };
+
   return (
     <>
       <TopNavBar />
@@ -124,10 +148,10 @@ export default function Page() {
             </DropdownContainer>
 
             <ToggleGroup>
-              <ToggleButton active={isSync} onClick={() => setIsSync(true)}>
+              <ToggleButton $active={isSync} onClick={() => setIsSync(true)}>
                 Synchronous
               </ToggleButton>
-              <ToggleButton active={!isSync} onClick={() => setIsSync(false)}>
+              <ToggleButton $active={!isSync} onClick={() => setIsSync(false)}>
                 Asynchronous
               </ToggleButton>
             </ToggleGroup>
@@ -152,7 +176,11 @@ export default function Page() {
                     options={userOptions}
                     placeholder="Select a member"
                     customStyles={ExerciseSelectStyles}
+                    selectRef={(el: SelectInstance<DropdownOption> | null) => {
+                      participantRefs.current[i] = el;
+                    }}
                     onChange={val => updateParticipant(i, "user_id", val)}
+                    onKeyDown={handleEnterToNext(roleRef)}
                   />
                 </div>
 
@@ -162,7 +190,13 @@ export default function Page() {
                     options={roleOptions}
                     placeholder="Select Role"
                     customStyles={ExerciseSelectStyles}
+                    selectRef={roleRef}
                     onChange={val => updateParticipant(i, "role", val)}
+                    onKeyDown={e => {
+                      if (e.key === "Enter") {
+                        setTimeout(() => addParticipantRow(), 50);
+                      }
+                    }}
                   />
                 </div>
               </TableRow>

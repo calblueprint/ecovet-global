@@ -237,7 +237,7 @@ export const ToggleGroup = styled.div`
   align-items: center;
 `;
 
-export const ToggleButton = styled.button<{ active?: boolean }>`
+export const ToggleButton = styled.button<{ $active?: boolean }>`
   border: none;
   height: 100%;
   padding: 0 1.5rem;
@@ -252,8 +252,8 @@ export const ToggleButton = styled.button<{ active?: boolean }>`
 
   /* The logic swap: Gray if active, White if inactive */
   background-color: ${props =>
-    props.active ? COLORS.oat_light : COLORS.white};
-  color: ${props => (props.active ? COLORS.black : COLORS.black40)};
+    props.$active ? COLORS.oat_light : COLORS.white};
+  color: ${props => (props.$active ? COLORS.black : COLORS.black40)};
 
   &:hover {
     color: ${COLORS.black};

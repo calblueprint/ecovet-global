@@ -1,5 +1,6 @@
 "use client";
 
+import type { SelectInstance } from "react-select";
 import { useCallback, useId, useMemo } from "react";
 import Select, { MultiValue, SingleValue, StylesConfig } from "react-select";
 import { DropdownOption } from "@/types/dropdown";
@@ -14,6 +15,8 @@ interface CommonProps {
   disabled?: boolean;
   required?: boolean;
   customStyles?: StylesConfig<DropdownOption, boolean>;
+  onKeyDown?: (e: React.KeyboardEvent) => void;
+  selectRef?: React.Ref<SelectInstance<DropdownOption>>;
 }
 
 interface MultiSelectProps extends CommonProps {
@@ -36,6 +39,8 @@ export default function InputDropdown({
   onChange,
   multi,
   customStyles,
+  onKeyDown,
+  selectRef,
 }: InputDropdownProps) {
   const optionsArray = useMemo(
     () =>
@@ -63,6 +68,9 @@ export default function InputDropdown({
 
   return (
     <Select
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ref={selectRef as React.Ref<any>}
+      onKeyDown={onKeyDown}
       isClearable
       closeMenuOnSelect={multi ? false : true}
       tabSelectsValue={false}
