@@ -50,7 +50,7 @@ export async function checkIfUserExists(email: string): Promise<boolean> {
     return false;
   }
 
-  return data !== null;
+  return data !== null && data.length > 0;
 }
 
 /* returns True if there is an unaccepted invite given an email*/

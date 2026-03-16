@@ -1,18 +1,9 @@
 "use client";
 
-import type { UUID } from "@/types/schema";
+import type { Profile } from "@/types/schema";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { fetchProfileByUserId } from "@/actions/supabase/queries/profile";
 import supabase from "../actions/supabase/client";
-
-type Profile = {
-  id: string;
-  user_type: string | null;
-  user_group_id: UUID | null;
-  first_name: string | null;
-  last_name: string | null;
-  country: string | null;
-  org_role: string | null;
-};
 
 type Context = {
   userId: string | null;
@@ -28,37 +19,31 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    (async () => {
-      setLoading(true);
-      const { data, error } = await supabase.auth.getUser();
-      if (error) console.error("Auth error:", error);
+    let initialLoad = true;
+
+    supabase.auth.getUser().then(async ({ data }) => {
       const uid = data?.user?.id ?? null;
       setUserId(uid);
-
-      if (uid) {
-        const { data: row } = await supabase
-          .from("profile")
-          .select("*")
-          .eq("id", uid)
-          .single();
-
-        setProfile(
-          row ?? {
-            id: uid,
-            first_name: null,
-            user_type: null,
-            user_group_id: null,
-            last_name: null,
-            country: null,
-            org_role: null,
-          },
-        );
-      } else {
-        setProfile(null);
-      }
-
+      if (uid) setProfile(await fetchProfileByUserId(uid));
       setLoading(false);
-    })();
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (initialLoad) {
+        initialLoad = false;
+        return;
+      }
+      setLoading(true);
+      const uid = session?.user?.id ?? null;
+      setUserId(uid);
+      if (uid) setProfile(await fetchProfileByUserId(uid));
+      else setProfile(null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   return (

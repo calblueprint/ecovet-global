@@ -3,6 +3,27 @@
 import type { UUID } from "@/types/schema";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
+export async function getProfileById(uid: string) {
+  const supabase = await getSupabaseServerClient();
+  const { data } = await supabase
+    .from("profile")
+    .select("*")
+    .eq("id", uid)
+    .single();
+
+  return (
+    data ?? {
+      id: uid,
+      first_name: null,
+      user_type: null,
+      user_group_id: null,
+      last_name: null,
+      country: null,
+      org_role: null,
+    }
+  );
+}
+
 async function getInviteByEmail(email: string) {
   const lowerCaseEmail = email.toLowerCase();
 
