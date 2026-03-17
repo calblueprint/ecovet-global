@@ -126,7 +126,7 @@ export default function SessionFlowPage() {
           const responses = await fetchPromptResponses(
             userId!,
             sessionIdStr!,
-            rolePhase!.phase_id,
+            rolePhase!.role_phase_id,
           );
           if (!responses) return;
           const ordered = sortResponsesByPromptOrder(prompts, responses);
@@ -186,7 +186,8 @@ export default function SessionFlowPage() {
 
   async function handleBlur(index: number) {
     const value = answers[index]?.trim();
-    if (!value || !userId || !sessionIdStr || !currentPhase) return;
+    const rp = await fetchRolePhases(roleId as UUID, currentPhase!.phase_id);
+    if (!value || !userId || !sessionIdStr || !currentPhase || !rp) return;
     const promptId = prompts[index].prompt_id;
 
     await createPromptAnswer(
@@ -194,13 +195,16 @@ export default function SessionFlowPage() {
       promptId,
       sessionIdStr,
       currentPhase.phase_id,
+      rp?.role_phase_id,
       value,
     );
     setCompletedPrompts(prev => new Set(prev).add(promptId));
   }
 
   async function submitAnswers() {
-    if (!userId || !sessionIdStr || !currentPhase) return;
+    const rp = await fetchRolePhases(roleId as UUID, currentPhase!.phase_id);
+
+    if (!userId || !sessionIdStr || !currentPhase || !rp) return;
     const updated = new Set(completedPrompts);
     for (let i = 0; i < answers.length; i++) {
       const answer = answers[i];
@@ -213,6 +217,7 @@ export default function SessionFlowPage() {
         promptId,
         sessionIdStr,
         currentPhase.phase_id,
+        rp?.role_phase_id,
         answer,
       );
     }

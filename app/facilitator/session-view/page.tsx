@@ -128,13 +128,13 @@ export default function FacilitatorSessionView() {
   useEffect(() => {
     if (!sessionId) return;
     if (participants.length === 0) return;
-    if (Object.keys(promptCounts).length > 0) return;
+    //if (Object.keys(promptCounts).length > 0) return;
     async function loadCounts() {
       const counts: Record<string, { done: number; total: number }> = {};
 
       try {
         const phaseId = await getPhaseId(sessionId as UUID);
-
+        console.log(phaseId);
         if (!phaseId) return;
 
         for (const p of participants) {
@@ -176,7 +176,7 @@ export default function FacilitatorSessionView() {
     }
 
     loadCounts();
-  }, [sessionId, currentPhase]);
+  }, [sessionId, currentPhase, participants]);
   return (
     <Main>
       <Container>

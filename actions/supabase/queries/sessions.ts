@@ -338,6 +338,7 @@ export async function createPromptAnswer(
   promptId: string,
   sessionId: UUID,
   phaseId: UUID,
+  rolePhaseId: UUID,
   answer: string,
 ) {
   const supabase = await getSupabaseServerClient();
@@ -351,10 +352,11 @@ export async function createPromptAnswer(
           phase_id: phaseId,
           user_id: userId,
           prompt_id: promptId,
+          role_phase_id: rolePhaseId,
           prompt_answer: answer,
         },
       ],
-      { onConflict: "user_id,prompt_id,session_id" },
+      { onConflict: "user_id,prompt_id,session_id,role_phase_id" },
     )
     .select("prompt_response_id");
 
@@ -372,7 +374,7 @@ export async function createPromptAnswer(
 export async function fetchPromptResponses(
   userId: string,
   sessionId: string,
-  phaseId: UUID,
+  rolePhaseId: UUID,
 ): Promise<PromptAnswer[] | null> {
   const supabase = await getSupabaseServerClient();
   // Fetch all response to for user for session for the phase
@@ -381,7 +383,7 @@ export async function fetchPromptResponses(
     .select("*")
     .eq("user_id", userId)
     .eq("session_id", sessionId)
-    .eq("phase_id", phaseId);
+    .eq("role_phase_id", rolePhaseId);
   if (error) {
     console.error("Error fetching prompts:", error);
   }
