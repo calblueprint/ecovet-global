@@ -5,7 +5,11 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import supabase from "@/actions/supabase/client";
 import {
+  fetchCountPrompts,
+  fetchCountResponses,
   finishSession,
+  getPhaseId,
+  getRolePhaseId,
   SessionParticipant,
   sessionParticipants,
 } from "@/actions/supabase/queries/sessions";
@@ -22,6 +26,9 @@ export default function FacilitatorSessionView() {
   const [currentPhase, setCurrentPhase] = useState(1);
   const [allDone, setAllDone] = useState(false);
   const [isAdvancing, setIsAdvancing] = useState(false);
+  const [promptCounts, setPromptCounts] = useState<
+    Record<string, { done: number; total: number }>
+  >({});
 
   async function advancePhase() {
     if (!sessionId || isAdvancing) return;
@@ -118,6 +125,57 @@ export default function FacilitatorSessionView() {
     setAllDone(nonFacilitators.every(p => p.is_finished));
   }, [participants, profile?.id]);
 
+  useEffect(() => {
+    if (!sessionId || participants.length === 0) return;
+
+    async function loadCounts() {
+      const counts: Record<string, { done: number; total: number }> = {};
+
+      try {
+        const phaseId = await getPhaseId(sessionId as UUID);
+
+        if (!phaseId) return;
+
+        for (const p of participants) {
+          if (!p.role_id) continue;
+
+          try {
+            const rolePhaseId = await getRolePhaseId(
+              sessionId as UUID,
+              p.role_id,
+            );
+
+            if (!rolePhaseId) continue;
+
+            const totalPrompts = await fetchCountPrompts(rolePhaseId);
+
+            const doneResponses = await fetchCountResponses(
+              p.user_id,
+              sessionId as UUID,
+              phaseId as UUID,
+            );
+
+            counts[p.user_id] = {
+              total: totalPrompts ?? 0,
+              done: doneResponses ?? 0,
+            };
+
+            console.log(p.profile?.first_name, totalPrompts, doneResponses);
+            console.log("Total Responses", totalPrompts);
+            console.log("Done Responses", doneResponses);
+          } catch (err) {
+            console.error(`Failed to load counts for user ${p.user_id}`, err);
+          }
+        }
+
+        setPromptCounts(counts);
+      } catch (err) {
+        console.error("loadCounts error", err);
+      }
+    }
+
+    loadCounts();
+  }, [participants, sessionId]);
   return (
     <Main>
       <Container>
@@ -128,11 +186,18 @@ export default function FacilitatorSessionView() {
           <h3>Unfinished Participants</h3>
           {participants
             .filter(p => p.user_id !== profile?.id && !p.is_finished)
-            .map(p => (
-              <div key={p.user_id}>
-                {p.profile?.first_name} {p.profile?.last_name}
-              </div>
-            ))}
+            .map(p => {
+              const counts = promptCounts[p.user_id];
+
+              return (
+                <div key={p.user_id}>
+                  {p.profile?.first_name} {p.profile?.last_name}{" "}
+                  {counts
+                    ? `(${counts.done}/${counts.total} responses)`
+                    : "(Loading counts...)"}
+                </div>
+              );
+            })}
         </div>
 
         <div>

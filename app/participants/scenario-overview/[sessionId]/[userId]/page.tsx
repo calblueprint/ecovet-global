@@ -188,12 +188,13 @@ export default function SessionFlowPage() {
     const value = answers[index]?.trim();
     if (!value || !userId || !sessionIdStr || !currentPhase) return;
     const promptId = prompts[index].prompt_id;
+
     await createPromptAnswer(
       userId,
       promptId,
-      value,
       sessionIdStr,
       currentPhase.phase_id,
+      value,
     );
     setCompletedPrompts(prev => new Set(prev).add(promptId));
   }
@@ -206,11 +207,12 @@ export default function SessionFlowPage() {
       const promptId = prompts[i].prompt_id;
       if (!answer.trim()) continue;
       updated.add(promptId);
+
       await createPromptAnswer(
         userId,
+        promptId,
         sessionIdStr,
         currentPhase.phase_id,
-        promptId,
         answer,
       );
     }

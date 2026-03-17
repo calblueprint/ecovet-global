@@ -256,7 +256,7 @@ export async function fetchMostRecentPhase(
     throw new Error("No phase id found");
   }
 
-  return data.phase_index;
+  return data.phase_index - 1;
 }
 
 export async function fetchRolePhases(
@@ -402,4 +402,94 @@ export async function fetchSessionsbyUserGroup(
   }
 
   return data ?? [];
+}
+
+export async function getPhaseId(sessionId: UUID): Promise<UUID | null> {
+  const supabase = await getSupabaseServerClient();
+
+  const { data: sessionData, error: sessionError } = await supabase
+    .from("session")
+    .select("template_id")
+    .eq("session_id", sessionId)
+    .single();
+
+  if (sessionError) {
+    console.error("Session error:", sessionError);
+    throw sessionError;
+  }
+
+  const templateId = sessionData.template_id;
+
+  const { data: phaseData, error: phaseError } = await supabase
+    .from("phase")
+    .select("phase_id")
+    .eq("template_id", templateId)
+    .limit(1)
+    .single();
+
+  if (phaseError) {
+    console.error("Phase error:", phaseError);
+    throw phaseError;
+  }
+
+  return phaseData.phase_id ?? null;
+}
+
+export async function getRolePhaseId(
+  // DT: We have getRolePhaseId so that we know how many unique prompts there are for each unique role in each particular phase.
+  sessionId: UUID,
+  roleId: UUID,
+): Promise<UUID | null> {
+  const supabase = await getSupabaseServerClient();
+
+  const phaseId = await getPhaseId(sessionId);
+
+  if (!phaseId) return null;
+
+  const { data, error } = await supabase
+    .from("role_phase")
+    .select("role_phase_id")
+    .eq("role_id", roleId)
+    .eq("phase_id", phaseId)
+    .single();
+
+  if (error) {
+    console.error("Error getting role_phase_id:", error);
+    throw error;
+  }
+
+  return data?.role_phase_id ?? null;
+}
+
+export async function fetchCountPrompts(rolePhaseId: UUID): Promise<number> {
+  // From the rolePhaseId, we count the number of unique rows in the prompt table that match that rolePhaseId.
+  // This tells us how many prompts there are for that role in that phase.
+  const supabase = await getSupabaseServerClient();
+  const { count, error } = await supabase
+    .from("prompt")
+    .select("*", { count: "exact", head: true })
+    .eq("role_phase_id", rolePhaseId);
+  if (error) {
+    console.error("Error fetching prompt count:", error);
+  }
+  return count ?? 0;
+}
+
+export async function fetchCountResponses(
+  userId: UUID,
+  sessionId: UUID,
+  phaseId: UUID,
+): Promise<number> {
+  const supabase = await getSupabaseServerClient();
+
+  const { count, error } = await supabase
+    .from("prompt_response")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("session_id", sessionId)
+    .eq("phase_id", phaseId);
+  if (error) {
+    console.error("Error fetching answered prompt count:", error);
+  }
+  return count ?? 0;
 }
