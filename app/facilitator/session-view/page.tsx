@@ -126,8 +126,9 @@ export default function FacilitatorSessionView() {
   }, [participants, profile?.id]);
 
   useEffect(() => {
-    if (!sessionId || participants.length === 0) return;
-
+    if (!sessionId) return;
+    if (participants.length === 0) return;
+    if (Object.keys(promptCounts).length > 0) return;
     async function loadCounts() {
       const counts: Record<string, { done: number; total: number }> = {};
 
@@ -155,7 +156,7 @@ export default function FacilitatorSessionView() {
               phaseId as UUID,
             );
 
-            counts[p.user_id] = {
+            counts[String(p.user_id)] = {
               total: totalPrompts ?? 0,
               done: doneResponses ?? 0,
             };
@@ -175,7 +176,7 @@ export default function FacilitatorSessionView() {
     }
 
     loadCounts();
-  }, [participants, sessionId]);
+  }, [sessionId, currentPhase]);
   return (
     <Main>
       <Container>
@@ -187,7 +188,7 @@ export default function FacilitatorSessionView() {
           {participants
             .filter(p => p.user_id !== profile?.id && !p.is_finished)
             .map(p => {
-              const counts = promptCounts[p.user_id];
+              const counts = promptCounts[String(p.user_id)];
 
               return (
                 <div key={p.user_id}>
