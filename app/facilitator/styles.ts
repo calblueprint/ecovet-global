@@ -1,6 +1,8 @@
+import { StylesConfig } from "react-select";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
+import { DropdownOption } from "@/types/dropdown";
 
 export const LayoutWrapper = styled.div`
   display: flex;
@@ -173,3 +175,192 @@ export const SideNavNewTemplateButton = styled.button`
   color: ${COLORS.white};
   cursor: pointer;
 `;
+
+export const ConfigRow = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+  gap: 2rem;
+`;
+
+export const DropdownContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  max-width: 400px;
+`;
+
+export const Label = styled.label`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 12px;
+  font-weight: 500;
+  color: ${COLORS.black70};
+  margin-bottom: 0.5rem;
+`;
+
+export const StyledSelect = styled.select`
+  border: 1px solid ${COLORS.oat_medium};
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 14px;
+  background-color: ${COLORS.white};
+  height: 48px;
+  outline: none;
+  color: ${COLORS.black};
+
+  /* This ensures the arrow shows up across all browsers */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23d1d1d1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.2em;
+
+  cursor: pointer;
+
+  &:focus {
+    border-color: ${COLORS.darkElectricBlue};
+  }
+`;
+
+export const ToggleGroup = styled.div`
+  display: flex;
+  background-color: ${COLORS.white};
+  border: 1px solid ${COLORS.oat_medium};
+  padding: 4px;
+  border-radius: 8px;
+  height: 40px;
+  align-items: center;
+`;
+
+export const ToggleButton = styled.button<{ $active?: boolean }>`
+  border: none;
+  height: 100%;
+  padding: 0 1.5rem;
+  border-radius: 4px;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+
+  /* The logic swap: Gray if active, White if inactive */
+  background-color: ${props =>
+    props.$active ? COLORS.oat_light : COLORS.white};
+  color: ${props => (props.$active ? COLORS.black : COLORS.black40)};
+
+  &:hover {
+    color: ${COLORS.black};
+  }
+`;
+
+export const ParticipantTable = styled.div`
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+export const TableHeader = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  padding: 0 0.5rem;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 12px;
+  font-weight: 600;
+  color: ${COLORS.black40};
+`;
+
+export const TableRow = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+`;
+
+export const StaticDataBox = styled.div`
+  border: 1px solid ${COLORS.oat_medium};
+  border-radius: 4px;
+  padding: 0.75rem;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 13px;
+  color: ${COLORS.black70};
+  background-color: ${COLORS.white};
+`;
+
+export const IconButton = styled.button`
+  background-color: ${COLORS.darkElectricBlue};
+  color: ${COLORS.white};
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin: 2rem auto;
+  font-size: 20px;
+  transition: transform 0.1s ease;
+
+  &:active {
+    transform: scale(0.9);
+  }
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+`;
+
+export const PrimaryActionArea = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-bottom: 4rem;
+`;
+
+export const ExerciseSelectStyles: StylesConfig<DropdownOption, boolean> = {
+  control: base => ({
+    ...base,
+    height: "48px",
+    minHeight: "48px",
+    borderRadius: "4px",
+    border: `1px solid ${COLORS.oat_medium}`,
+    boxShadow: "none",
+    fontFamily: Sans.style.fontFamily,
+    fontSize: "14px",
+    backgroundColor: COLORS.white,
+    "&:hover": {
+      borderColor: COLORS.black40,
+    },
+  }),
+  valueContainer: base => ({
+    ...base,
+    padding: "0 12px",
+    height: "48px",
+    display: "flex",
+    alignItems: "center",
+  }),
+  indicatorsContainer: base => ({
+    ...base,
+    height: "48px",
+  }),
+  placeholder: base => ({
+    ...base,
+    color: COLORS.black40,
+  }),
+  indicatorSeparator: () => ({
+    display: "none",
+  }),
+  dropdownIndicator: base => ({
+    ...base,
+    color: COLORS.black40,
+    padding: "8px",
+  }),
+};
