@@ -36,6 +36,8 @@ export type PromptAnswer = Tables<"prompt_response">;
 export type Tag = Tables<"tag">;
 export type TemplateTag = Tables<"template_tag">;
 export type Invite = Tables<"invite">;
+export type ChatRoom = Tables<"chat_room">;
+export type ChatMessage = Tables<"chat_message">;
 export type PromptOption = Tables<"prompt_option">;
 
 /* ============================
