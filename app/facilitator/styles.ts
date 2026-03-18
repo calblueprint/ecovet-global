@@ -74,7 +74,7 @@ export const Heading3 = styled.h3`
 
 export const GeneralList = styled.ul`
   display: grid;
-  grid-template-columns: 1fr 1fr auto; /* left | middle | right */
+  grid-template-columns: 1.5fr 1fr 2fr;
   column-gap: 1rem;
 
   border-radius: 0.5rem 0.5rem 0 0;
@@ -86,12 +86,12 @@ export const GeneralList = styled.ul`
   font-weight: 500;
   color: ${COLORS.black70};
   min-height: 4rem;
-  align-items: center;
+  align-items: start;
 `;
 
 export const GeneralTitle = styled.h1`
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1.5fr 1.1fr 1.9fr;
   align-items: center;
   border-bottom: 1px solid ${COLORS.oat_medium};
   border-radius: 0.5rem 0.5rem 0 0;
