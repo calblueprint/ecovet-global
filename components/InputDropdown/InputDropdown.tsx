@@ -21,6 +21,7 @@ interface CommonProps {
   disabled?: boolean;
   required?: boolean;
   creatable?: boolean;
+  multiple?: boolean;
   onCreateOption?: (inputValue: string) => void;
   value?: Set<string>;
   onBlur?: () => void;
@@ -65,13 +66,13 @@ export default function InputDropdown({
   required,
   onChange,
   multi,
+  multiple,
   creatable,
   onCreateOption,
   value,
   onBlur,
 }: InputDropdownProps) {
   const SelectComponent = creatable ? CreatableSelect : Select;
-
   const styles = isTagStyle ? tagSelectStyles : selectStyles;
 
   const optionsArray = useMemo(
@@ -85,19 +86,18 @@ export default function InputDropdown({
     [options],
   );
 
-  const internalValue = useMemo(() => {
-    if (!value) return multi ? [] : null;
-    return optionsArray.filter(opt => value.has(opt.value));
-  }, [value, optionsArray, multi]);
+  // For tag style: exclude already-selected from the dropdown list
+  const filteredOptions = useMemo(() => {
+    if (!isTagStyle || !value) return optionsArray;
+    return optionsArray.filter(opt => !value.has(opt.value));
+  }, [optionsArray, isTagStyle, value]);
 
   const handleChange = useCallback(
     (newValue: MultiValue<DropdownOption> | SingleValue<DropdownOption>) => {
       if (multi) {
-        // ensure newValue is an array
         const values = (newValue as MultiValue<DropdownOption>) || [];
         onChange?.(new Set(values.map(v => v.value)));
       } else {
-        //ensure newValue is a single object
         const val = newValue as SingleValue<DropdownOption>;
         onChange?.(val ? val.value : null);
       }
@@ -107,25 +107,27 @@ export default function InputDropdown({
 
   return (
     <SelectComponent
-      isClearable
       menuIsOpen={isTagStyle ? true : undefined}
-      components={isTagStyle ? { MenuList: CustomMenuList } : {}}
+      components={
+        isTagStyle ? { MenuList: CustomMenuList, Control: () => null } : {}
+      }
       closeMenuOnSelect={false}
       tabSelectsValue={false}
       hideSelectedOptions={true}
       required={required}
-      controlShouldRenderValue={!isTagStyle}
+      controlShouldRenderValue={false}
       isDisabled={disabled}
       instanceId={useId()}
-      options={optionsArray}
+      options={filteredOptions}
       placeholder={placeholder}
       isMulti={multi}
-      onBlur={onBlur} // dropdown goes away when click off
+      onBlur={onBlur}
       autoFocus={true}
-      value={internalValue}
+      value={[]}
       onChange={handleChange}
       onCreateOption={onCreateOption}
       styles={styles}
+      isClearable={false}
     />
   );
 }

@@ -26,13 +26,7 @@ type TagCreatorProps = {
 
 type ColorKey = keyof typeof COLORS;
 
-const TAG_COLOR_ORDER: ColorKey[] = [
-  "tagRed",
-  "tagOrange",
-  "tagYellow",
-  "tagGreen",
-  "tagBlue",
-];
+const TAG_COLOR_ORDER: ColorKey[] = ["tagYellow"];
 
 export function TagCreator({
   user_group_id,

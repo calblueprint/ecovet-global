@@ -2,7 +2,6 @@
 
 import type { Template, UUID } from "@/types/schema";
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import {
@@ -13,11 +12,9 @@ import {
   removeTagFromTemplate,
 } from "@/actions/supabase/queries/tag";
 import { fetchTemplatesWithTags } from "@/actions/supabase/queries/templates";
-import img from "@/assets/images/NewTagPlus.png";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
-import InputDropdown from "@/components/InputDropdown/InputDropdown";
-import { TagComponent } from "@/components/Tag/Tag";
-import { Tag, TagCreator } from "@/components/Tag/TagCreator";
+import { Tag } from "@/components/Tag/TagCreator";
+import { TagAutocomplete } from "@/components/TagAutoComplete/TagAutoComplete";
 import COLORS from "@/styles/colors";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
@@ -34,14 +31,7 @@ import {
   SortButton,
 } from "../styles";
 import TemplateSideBar from "./components/TemplateSidebar";
-import {
-  AddNewTagPlus,
-  AssociatedTags,
-  ClearAllButton,
-  NewTag,
-  TagEditContainer,
-  TemplateTag,
-} from "./styles";
+import { AssociatedTags } from "./styles";
 
 type TemplateWithTags = Template & {
   associated_tags: Tag[];
@@ -75,8 +65,12 @@ export default function TemplateListPage() {
     if (!user_group_id) return;
 
     const load = async () => {
-      const allTemplates = (await fetchTemplatesWithTags()) || [];
-      setTemplates(allTemplates);
+      const [allTemplates, allTags] = await Promise.all([
+        fetchTemplatesWithTags(),
+        getAllTags(user_group_id),
+      ]);
+      setTemplates(allTemplates || []);
+      setAvailableTags(allTags);
     };
 
     load();
@@ -340,7 +334,6 @@ export default function TemplateListPage() {
                     )}
                   </SortButton>
                 </span>
-                <span>Tags</span>
                 <span>
                   Created{" "}
                   <SortButton onClick={() => toggleSort("date")}>
@@ -355,6 +348,7 @@ export default function TemplateListPage() {
                     )}
                   </SortButton>
                 </span>
+                <span>Tags</span>
               </GeneralTitle>
 
               {filteredTemplates.map(t => (
@@ -366,69 +360,6 @@ export default function TemplateListPage() {
                     {t.template_name}
                   </div>
 
-                  <AssociatedTags>
-                    {t.associated_tags.map(tag => (
-                      <TemplateTag key={tag.tag_id}>
-                        <TagComponent
-                          name={tag.name}
-                          color={tag.color as ColorKey}
-                          tag_id={tag.tag_id}
-                          sidebar={false}
-                          onDelete={(id: UUID) =>
-                            deleteTagComponent(id, t.template_id)
-                          }
-                        />
-                      </TemplateTag>
-                    ))}
-
-                    {openTagDropdownFor === t.template_id && (
-                      <TagEditContainer>
-                        <InputDropdown
-                          label="Select tag"
-                          multi={true}
-                          isTagStyle={true}
-                          creatable={true}
-                          onCreateOption={val =>
-                            handleCreateAndAssign(t.template_id, val)
-                          }
-                          options={
-                            new Map(
-                              availableTags.map(tag => [tag.tag_id, tag.name]),
-                            )
-                          }
-                          value={
-                            new Set(t.associated_tags.map(tag => tag.tag_id))
-                          }
-                          onBlur={() => setOpenTagDropdownFor(null)}
-                          onChange={selectedIds => {
-                            handleMultiTagChange(
-                              t.template_id,
-                              selectedIds as Set<UUID>,
-                            );
-                          }}
-                        />
-
-                        {t.associated_tags.length > 0 && (
-                          <ClearAllButton
-                            onMouseDown={e => e.preventDefault()}
-                            onClick={e => {
-                              e.stopPropagation();
-                              handleClearAllTags(t.template_id);
-                            }}
-                          >
-                            Clear all
-                          </ClearAllButton>
-                        )}
-                      </TagEditContainer>
-                    )}
-                    <NewTag onClick={() => addNewTag(t.template_id)}>
-                      <AddNewTagPlus>
-                        <Image src={img} alt="Add tag" />
-                      </AddNewTagPlus>
-                      New Tag
-                    </NewTag>
-                  </AssociatedTags>
-
                   <div>
                     {new Date(t.timestamp).toLocaleDateString("en-GB", {
                       day: "2-digit",
@@ -436,6 +367,37 @@ export default function TemplateListPage() {
                       year: "numeric",
                     })}
                   </div>
+
+                  <AssociatedTags>
+                    <TagAutocomplete
+                      availableTags={availableTags}
+                      selectedTagIds={
+                        new Set(t.associated_tags.map(tag => tag.tag_id))
+                      }
+                      onSelect={tagId =>
+                        handleMultiTagChange(
+                          t.template_id,
+                          new Set([
+                            ...t.associated_tags.map(tag => tag.tag_id),
+                            tagId,
+                          ]),
+                        )
+                      }
+                      onRemove={tagId =>
+                        handleMultiTagChange(
+                          t.template_id,
+                          new Set(
+                            t.associated_tags
+                              .map(tag => tag.tag_id)
+                              .filter(id => id !== tagId),
+                          ),
+                        )
+                      }
+                      onCreate={name =>
+                        handleCreateAndAssign(t.template_id, name)
+                      }
+                    />
+                  </AssociatedTags>
                 </GeneralList>
               ))}
             </MainDiv>

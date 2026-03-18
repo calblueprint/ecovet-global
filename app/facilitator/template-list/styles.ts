@@ -4,8 +4,10 @@ import { Sans } from "@/styles/fonts";
 
 export const AssociatedTags = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+  align-items: flex-start;
+  width: 100%;
+  min-width: 0;
+  overflow: visible;
 `;
 
 export const TemplateTag = styled.span`
