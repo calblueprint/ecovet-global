@@ -1,30 +1,18 @@
 "use client";
 
 import { useCallback, useId, useMemo } from "react";
-import Select, {
-  components,
-  MenuListProps,
-  MultiValue,
-  SingleValue,
-} from "react-select";
-import CreatableSelect from "react-select/creatable";
+import Select, { MultiValue, SingleValue } from "react-select";
 import { DropdownOption } from "@/types/dropdown";
-import { selectStyles, tagSelectStyles } from "./styles";
+import { selectStyles } from "./styles";
 
 // for map: key is actual data stored, value is displayed
 interface CommonProps {
-  isTagStyle?: boolean;
   options: Set<string> | Map<string, string>;
   label: string;
   placeholder?: string;
   error?: string;
   disabled?: boolean;
   required?: boolean;
-  creatable?: boolean;
-  multiple?: boolean;
-  onCreateOption?: (inputValue: string) => void;
-  value?: Set<string>;
-  onBlur?: () => void;
 }
 
 interface MultiSelectProps extends CommonProps {
@@ -39,42 +27,15 @@ interface SingleSelectProps extends CommonProps {
 
 type InputDropdownProps = SingleSelectProps | MultiSelectProps;
 
-const CustomMenuList = (props: MenuListProps<DropdownOption>) => {
-  return (
-    <components.MenuList {...props}>
-      <div
-        style={{
-          padding: "8px 12px",
-          fontSize: "11px",
-          color: "#959492",
-          fontWeight: 500,
-        }}
-      >
-        Add a tag
-      </div>
-      {props.children}
-    </components.MenuList>
-  );
-};
-
 // main dropdown component
 export default function InputDropdown({
   options,
-  isTagStyle = false,
   placeholder = "",
   disabled,
   required,
   onChange,
   multi,
-  multiple,
-  creatable,
-  onCreateOption,
-  value,
-  onBlur,
 }: InputDropdownProps) {
-  const SelectComponent = creatable ? CreatableSelect : Select;
-  const styles = isTagStyle ? tagSelectStyles : selectStyles;
-
   const optionsArray = useMemo(
     () =>
       options instanceof Set
@@ -86,48 +47,33 @@ export default function InputDropdown({
     [options],
   );
 
-  // For tag style: exclude already-selected from the dropdown list
-  const filteredOptions = useMemo(() => {
-    if (!isTagStyle || !value) return optionsArray;
-    return optionsArray.filter(opt => !value.has(opt.value));
-  }, [optionsArray, isTagStyle, value]);
-
   const handleChange = useCallback(
     (newValue: MultiValue<DropdownOption> | SingleValue<DropdownOption>) => {
-      if (multi) {
-        const values = (newValue as MultiValue<DropdownOption>) || [];
-        onChange?.(new Set(values.map(v => v.value)));
+      if (multi && newValue instanceof Array) {
+        onChange?.(new Set(newValue.map(v => v.value)));
+      } else if (!multi && !(newValue instanceof Array)) {
+        onChange?.(newValue ? newValue.value : null);
       } else {
-        const val = newValue as SingleValue<DropdownOption>;
-        onChange?.(val ? val.value : null);
+        throw new Error("An unexpected error occurred!");
       }
     },
     [multi, onChange],
   );
 
   return (
-    <SelectComponent
-      menuIsOpen={isTagStyle ? true : undefined}
-      components={
-        isTagStyle ? { MenuList: CustomMenuList, Control: () => null } : {}
-      }
+    <Select
+      isClearable
       closeMenuOnSelect={false}
       tabSelectsValue={false}
-      hideSelectedOptions={true}
+      hideSelectedOptions={false}
       required={required}
-      controlShouldRenderValue={false}
       isDisabled={disabled}
       instanceId={useId()}
-      options={filteredOptions}
+      options={optionsArray}
       placeholder={placeholder}
       isMulti={multi}
-      onBlur={onBlur}
-      autoFocus={true}
-      value={[]}
       onChange={handleChange}
-      onCreateOption={onCreateOption}
-      styles={styles}
-      isClearable={false}
+      styles={selectStyles}
     />
   );
 }
