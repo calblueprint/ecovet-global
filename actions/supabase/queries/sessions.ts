@@ -348,12 +348,13 @@ export async function createPromptAnswer(
       [
         {
           prompt_response_id: crypto.randomUUID(),
-          session_id: sessionId,
-          phase_id: phaseId,
           user_id: userId,
           prompt_id: promptId,
-          role_phase_id: rolePhaseId,
           prompt_answer: answer,
+          prompt_option_id: null,
+          session_id: sessionId,
+          phase_id: phaseId,
+          role_phase_id: rolePhaseId,
         },
       ],
       { onConflict: "user_id,prompt_id,session_id,role_phase_id" },
@@ -439,14 +440,11 @@ export async function getPhaseId(sessionId: UUID): Promise<UUID | null> {
 
 export async function getRolePhaseId(
   // DT: We have getRolePhaseId so that we know how many unique prompts there are for each unique role in each particular phase.
-  sessionId: UUID,
+  // DT: 03/18: Updated this to use roleId and phaseId instead of sessionId and roleId because one sessionId can have multiple phases.
   roleId: UUID,
+  phaseId: UUID,
 ): Promise<UUID | null> {
   const supabase = await getSupabaseServerClient();
-
-  const phaseId = await getPhaseId(sessionId);
-
-  if (!phaseId) return null;
 
   const { data, error } = await supabase
     .from("role_phase")
@@ -463,35 +461,47 @@ export async function getRolePhaseId(
   return data?.role_phase_id ?? null;
 }
 
-export async function fetchCountPrompts(rolePhaseId: UUID): Promise<number> {
-  // From the rolePhaseId, we count the number of unique rows in the prompt table that match that rolePhaseId.
-  // This tells us how many prompts there are for that role in that phase.
+export async function getPromptIdDylan(
+  rolePhaseId: UUID,
+): Promise<UUID[] | null> {
+  // DT: Effectively, this gives us the number of Prompt questions because the promptId is unique for each Prompt.
+  //DT: This works because each PromptId is unique for each combination of Role + Phase.
   const supabase = await getSupabaseServerClient();
-  const { count, error } = await supabase
+
+  const { data, error } = await supabase
     .from("prompt")
-    .select("*", { count: "exact", head: true })
+    .select("prompt_id")
     .eq("role_phase_id", rolePhaseId);
+
   if (error) {
-    console.error("Error fetching prompt count:", error);
+    console.error("Error getting prompt_id:", error);
+    throw error;
   }
-  return count ?? 0;
+
+  return data?.map(d => d.prompt_id) ?? null;
 }
 
-export async function fetchCountResponses(
-  userId: UUID,
+export async function getRespondedPromptsDylan2(
+  promptIds: UUID[],
   sessionId: UUID,
   phaseId: UUID,
 ): Promise<number> {
+  // DT: This gives us the number of Prompt questions that have been answered by the user for a particular Role + Phase in a particular Session.
+  // DT: We have to use userId and sessionId because the same RolePhaseId can be present in multiple sessions and we want to know how many prompts
+  // the user has answered for that RolePhaseId in that particular session.
   const supabase = await getSupabaseServerClient();
 
   const { count, error } = await supabase
     .from("prompt_response")
     .select("*", { count: "exact", head: true })
-    .eq("user_id", userId)
+    .in("prompt_id", promptIds)
     .eq("session_id", sessionId)
     .eq("phase_id", phaseId);
+
   if (error) {
-    console.error("Error fetching answered prompt count:", error);
+    console.error("Error counting responded prompts:", error);
+    throw error;
   }
+
   return count ?? 0;
 }

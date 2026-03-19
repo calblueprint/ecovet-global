@@ -1,14 +1,15 @@
 "use client";
 
-import type { ParticipantSession, UUID } from "@/types/schema";
+import type { ParticipantSession, Phase, UUID } from "@/types/schema";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { current } from "immer";
 import supabase from "@/actions/supabase/client";
 import {
-  fetchCountPrompts,
-  fetchCountResponses,
+  fetchPhases,
   finishSession,
-  getPhaseId,
+  getPromptIdDylan,
+  getRespondedPromptsDylan2,
   getRolePhaseId,
   SessionParticipant,
   sessionParticipants,
@@ -21,9 +22,10 @@ export default function FacilitatorSessionView() {
   const sessionId = searchParams.get("sessionId") as UUID | null;
   const { profile } = useProfile();
   const router = useRouter();
-
-  const [participants, setParticipants] = useState<SessionParticipant[]>([]);
+  const [phases, setPhases] = useState<Phase[]>([]);
   const [currentPhase, setCurrentPhase] = useState(1);
+  const currentPhaseObject = phases[currentPhase - 1];
+  const [participants, setParticipants] = useState<SessionParticipant[]>([]);
   const [allDone, setAllDone] = useState(false);
   const [isAdvancing, setIsAdvancing] = useState(false);
   const [promptCounts, setPromptCounts] = useState<
@@ -127,43 +129,79 @@ export default function FacilitatorSessionView() {
 
   useEffect(() => {
     if (!sessionId) return;
+
+    async function loadPhases() {
+      try {
+        const phasesData = await fetchPhases(sessionId as UUID);
+        setPhases(phasesData);
+        console.log("Phases loaded", phasesData);
+      } catch (err) {
+        console.error("Failed to load phases", err);
+      }
+    }
+
+    loadPhases();
+  }, [sessionId]);
+
+  useEffect(() => {
+    if (!sessionId) return;
     if (participants.length === 0) return;
-    //if (Object.keys(promptCounts).length > 0) return;
+    if (phases.length === 0) return;
+    if (!currentPhaseObject) return;
+
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
     async function loadCounts() {
       const counts: Record<string, { done: number; total: number }> = {};
 
       try {
-        const phaseId = await getPhaseId(sessionId as UUID);
-        console.log(phaseId);
-        if (!phaseId) return;
+        const phaseId2 = currentPhaseObject?.phase_id;
+        console.log("SessionId", sessionId);
+        console.log("CurrentPhase", currentPhase - 1);
+        if (!phaseId2) return;
 
         for (const p of participants) {
           if (!p.role_id) continue;
 
           try {
+            const phaseId2 = currentPhaseObject?.phase_id;
+            // console.log("SessionId", sessionId);
+            // console.log("CurrentPhase", currentPhase - 1);
+            // console.log("CurrentPhase typeof", typeof currentPhase);
+            // console.log("CurrentPhaseObject", currentPhaseObject);
+            // console.log("PhaseId from getPhaseId", phaseId);
+            // console.log("PhaseId from currentPhaseInd", phaseId2);
+            // console.log("phaseId2", phaseId2);
+
+            // 1. get rolePhaseId from roleId + phaseId
             const rolePhaseId = await getRolePhaseId(
-              sessionId as UUID,
               p.role_id,
+              phaseId2 as UUID,
             );
+            console.log("RoleId", p.role_id);
+            console.log("RolePhaseId", rolePhaseId);
 
             if (!rolePhaseId) continue;
 
-            const totalPrompts = await fetchCountPrompts(rolePhaseId);
+            // 2. get total prompts
+            const promptIds = await getPromptIdDylan(rolePhaseId);
+            console.log("PromptIds", promptIds);
+            const totalPrompts = promptIds?.length ?? 0;
 
-            const doneResponses = await fetchCountResponses(
-              p.user_id,
+            // 3. get responded count
+            const doneResponses = await getRespondedPromptsDylan2(
+              promptIds as UUID[],
               sessionId as UUID,
-              phaseId as UUID,
+              phaseId2 as UUID,
             );
-
+            console.log("PromptIds for getRespondedPromptsDylan2", promptIds);
+            console.log("SessionId for getRespondedPromptsDylan2", sessionId);
+            console.log("PhaseId2 for getRespondedPromptsDylan2", phaseId2);
+            console.log("DoneResponses", doneResponses);
             counts[String(p.user_id)] = {
-              total: totalPrompts ?? 0,
-              done: doneResponses ?? 0,
+              total: totalPrompts,
+              done: doneResponses,
             };
-
-            console.log(p.profile?.first_name, totalPrompts, doneResponses);
-            console.log("Total Responses", totalPrompts);
-            console.log("Done Responses", doneResponses);
           } catch (err) {
             console.error(`Failed to load counts for user ${p.user_id}`, err);
           }
@@ -176,7 +214,31 @@ export default function FacilitatorSessionView() {
     }
 
     loadCounts();
-  }, [sessionId, currentPhase, participants]);
+
+    // realtime subscription for prompt_response
+    channel = supabase
+      .channel(`prompt-response-${sessionId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "prompt_response",
+          filter: `session_id=eq.${sessionId}`,
+        },
+        () => {
+          loadCounts();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [sessionId, participants, currentPhase, phases]);
+
   return (
     <Main>
       <Container>

@@ -98,6 +98,13 @@ export default function SessionFlowPage() {
         );
         setRolePhase(rp);
         const p = rp ? await fetchPrompts(rp.role_phase_id) : [];
+        console.log("sessionId", sessionId);
+        console.log("currentPhase", currentPhase);
+        console.log("phases", phases);
+        console.log("phaseInd", phaseInd);
+        console.log("roleID", roleId);
+        console.log("currentPhaseId", currentPhase.phase_id);
+        console.log("rolePhaseId", rp?.role_phase_id, p);
         setPrompts(p);
       } catch (err) {
         console.error("Error loading phase content:", err);
@@ -215,10 +222,10 @@ export default function SessionFlowPage() {
       await createPromptAnswer(
         userId,
         promptId,
+        answer,
         sessionIdStr,
         currentPhase.phase_id,
         rp?.role_phase_id,
-        answer,
       );
     }
     setCompletedPrompts(updated);
