@@ -24,24 +24,20 @@ export default function Login() {
   const handleSignUp = async () => {
     if (await checkIfUserExists(email)) {
       throw new Error("You already have an account, please sign in.");
+      return;
     }
 
-    const { data, error } = await sessionHandler.signUp(email, password);
+    const res = await fetch("/api/create-admin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const { data, error } = await res.json();
+    console.log("API response:", { data, error });
     if (error) {
-      throw new Error(
-        "An error occurred during admin creation: " + error.message,
-      );
-    }
-
-    console.log("Admin created:", data);
-
-    const { error: signInError } = await sessionHandler.signInWithEmail(
-      email,
-      password,
-    );
-
-    if (signInError) {
-      throw new Error(signInError.message);
+      throw new Error(JSON.stringify(error));
+      return;
     }
 
     router.push("/test-page");
