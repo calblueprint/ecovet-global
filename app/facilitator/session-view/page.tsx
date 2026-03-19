@@ -153,14 +153,16 @@ export default function FacilitatorSessionView() {
         {!isForceAdvance ? (
           <div>
             <h3>Participants</h3>
-            {participants.map(p => (
-              <div key={p.user_id}>
-                {p.profile?.first_name} {p.profile?.last_name}{" "}
-                {p.is_finished // only set to true on final phase for async sessions
-                  ? "(Finished)"
-                  : `Phase ${(p.phase_index ?? 0) + 1}`}
-              </div>
-            ))}
+            {participants
+              .filter(p => p.user_id !== profile?.id)
+              .map(p => (
+                <div key={p.user_id}>
+                  {p.profile?.first_name} {p.profile?.last_name}{" "}
+                  {p.is_finished // only set to true on final phase for async sessions
+                    ? "(Finished)"
+                    : `Phase ${(p.phase_index ?? 0) + 1}`}
+                </div>
+              ))}
           </div>
         ) : (
           <>
