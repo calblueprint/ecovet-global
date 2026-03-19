@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import supabase from "@/actions/supabase/client";
 import {
+  fetchPhases,
   finishSession,
   isSessionForceAdvance,
   SessionParticipant,
@@ -21,37 +22,11 @@ export default function FacilitatorSessionView() {
 
   const [participants, setParticipants] = useState<SessionParticipant[]>([]);
   const [currentPhase, setCurrentPhase] = useState(0);
+  const [totalPhases, setTotalPhases] = useState(0);
   const [allDone, setAllDone] = useState(false);
   const [isAdvancing, setIsAdvancing] = useState(false);
   const [isForceAdvance, setIsForceAdvance] = useState(false);
-
-  async function advancePhase() {
-    if (!sessionId || isAdvancing) return;
-
-    setIsAdvancing(true);
-
-    const { data, error } = await supabase.rpc("advance_phase", {
-      p_session_id: sessionId,
-      p_current_phase_num: currentPhase,
-    });
-
-    if (error) {
-      console.error("Failed to advance phase:", error);
-      setIsAdvancing(false);
-      return;
-    }
-
-    if (!data) {
-      try {
-        await finishSession(sessionId);
-        router.push("/sessions/session-finish/");
-      } catch (err) {
-        console.error("Failed to finish session:", err);
-      }
-    }
-
-    setIsAdvancing(false);
-  }
+  const isLastPhase = currentPhase >= totalPhases - 1;
 
   useEffect(() => {
     if (!sessionId) return;
@@ -75,6 +50,15 @@ export default function FacilitatorSessionView() {
       try {
         const isForce = await isSessionForceAdvance(sessionId as UUID);
         setIsForceAdvance(isForce);
+      } catch (err) {
+        console.error("Failed to check if session is async:", err);
+      }
+    }
+
+    async function getTotalPhases() {
+      try {
+        const phases = await fetchPhases(sessionId as UUID);
+        setTotalPhases(phases.length);
       } catch (err) {
         console.error("Failed to check if session is async:", err);
       }
@@ -131,6 +115,34 @@ export default function FacilitatorSessionView() {
     setAllDone(nonFacilitators.every(p => p.is_finished));
   }, [participants, profile?.id]);
 
+  async function advancePhase() {
+    if (!sessionId || isAdvancing) return;
+
+    setIsAdvancing(true);
+
+    if (!isLastPhase) {
+      const { data, error } = await supabase.rpc("advance_phase", {
+        p_session_id: sessionId,
+        p_current_phase_num: currentPhase,
+      });
+
+      if (error) {
+        console.error("Failed to advance phase:", error);
+        setIsAdvancing(false);
+        return;
+      }
+    } else {
+      try {
+        await finishSession(sessionId);
+        router.push("/sessions/session-finish/");
+      } catch (err) {
+        console.error("Failed to finish session:", err);
+      }
+    }
+
+    setIsAdvancing(false);
+  }
+
   return (
     <Main>
       <Container>
@@ -179,7 +191,13 @@ export default function FacilitatorSessionView() {
 
         {!isForceAdvance && (
           <Button onClick={advancePhase} disabled={isAdvancing}>
-            {isAdvancing ? "Advancing..." : "Force Advance"}
+            {isLastPhase
+              ? isAdvancing
+                ? "Finishing..."
+                : "Finish Session"
+              : isAdvancing
+                ? "Advancing..."
+                : "Force Advance"}
           </Button>
         )}
 
