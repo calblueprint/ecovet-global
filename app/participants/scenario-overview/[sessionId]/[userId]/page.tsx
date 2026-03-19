@@ -71,8 +71,8 @@ export default function SessionFlowPage() {
       const fetchedRoleId = await fetchRole(userId, sessionIdStr);
       setRoleId(fetchedRoleId as string);
 
-      const isCurrentSessionAsync = await isSessionForceAdvance(sessionIdStr);
-      setIsForceAdvance(isCurrentSessionAsync);
+      const isForce = await isSessionForceAdvance(sessionIdStr);
+      setIsForceAdvance(isForce);
 
       let mostRecentPhaseIndex: number;
       try {

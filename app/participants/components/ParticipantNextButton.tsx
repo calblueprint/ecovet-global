@@ -42,25 +42,23 @@ export default function NextButton({
     console.log("Next button clicked", is_force_advance, isLastPhase);
     await onClick();
 
+    if (isLastPhase) {
+      await setIsFinished(user_id, role_id, session_id);
+      router.push("/sessions/session-finish");
+      return;
+    }
+
     if (is_force_advance) {
-      if (isLastPhase) {
-        await setIsFinished(user_id, role_id, session_id);
-        router.push("/sessions/session-finish");
-      } else {
-        await advancePhaseForSingleUser(user_id, role_id, session_id);
-      }
-    } else {
       setClicked(true);
 
       try {
         await setIsFinished(user_id, role_id, session_id);
-        if (isLastPhase) {
-          router.push("/sessions/session-finish");
-        }
       } catch (err) {
         console.error(err);
         setClicked(false);
       }
+    } else {
+      await advancePhaseForSingleUser(user_id, role_id, session_id);
     }
   }
 

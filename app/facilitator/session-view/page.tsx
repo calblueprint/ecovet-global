@@ -66,6 +66,7 @@ export default function FacilitatorSessionView() {
 
     loadParticipants();
     checkIfForceAdvance();
+    getTotalPhases();
   }, [sessionId]);
 
   useEffect(() => {
@@ -149,7 +150,7 @@ export default function FacilitatorSessionView() {
         <h1 style={{ textAlign: "center" }}>Phase {currentPhase}</h1>
         <h3>Session ID: {sessionId}</h3>
 
-        {isForceAdvance ? (
+        {!isForceAdvance ? (
           <div>
             <h3>Participants</h3>
             {participants.map(p => (
@@ -170,7 +171,6 @@ export default function FacilitatorSessionView() {
                 .map(p => (
                   <div key={p.user_id}>
                     {p.profile?.first_name} {p.profile?.last_name}{" "}
-                    {isForceAdvance && `(Phase ${p.phase_index})`}
                   </div>
                 ))}
             </div>
@@ -189,7 +189,7 @@ export default function FacilitatorSessionView() {
           </>
         )}
 
-        {!isForceAdvance && (
+        {isForceAdvance && (
           <Button onClick={advancePhase} disabled={isAdvancing}>
             {isLastPhase
               ? isAdvancing
