@@ -125,6 +125,7 @@ export type Database = {
         Row: {
           created_at: string;
           is_finished: boolean;
+          phase_id: string | null;
           phase_index: number;
           role_id: string;
           session_id: string;
@@ -133,6 +134,7 @@ export type Database = {
         Insert: {
           created_at?: string | null;
           is_finished?: boolean | null;
+          phase_id?: string | null;
           phase_index?: number | null;
           role_id?: string | null;
           session_id: string;
@@ -141,12 +143,20 @@ export type Database = {
         Update: {
           created_at?: string | null;
           is_finished?: boolean | null;
+          phase_id?: string | null;
           phase_index?: number | null;
           role_id?: string | null;
           session_id?: string;
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "participant_session_phase_id_fkey";
+            columns: ["phase_id"];
+            isOneToOne: false;
+            referencedRelation: "phase";
+            referencedColumns: ["phase_id"];
+          },
           {
             foreignKeyName: "participant_session_role_id_fkey";
             columns: ["role_id"];
@@ -358,28 +368,31 @@ export type Database = {
         Row: {
           phase_id: string;
           prompt_answer: string | null;
-          prompt_id: string | null;
+          prompt_id: string;
           prompt_option_id: string | null;
           prompt_response_id: string;
-          session_id: string | null;
+          role_phase_id: string | null;
+          session_id: string;
           user_id: string;
         };
         Insert: {
           phase_id?: string;
           prompt_answer?: string | null;
-          prompt_id?: string | null;
+          prompt_id: string;
           prompt_option_id?: string | null;
           prompt_response_id: string;
-          session_id?: string | null;
+          role_phase_id?: string | null;
+          session_id: string;
           user_id?: string;
         };
         Update: {
           phase_id?: string;
           prompt_answer?: string | null;
-          prompt_id?: string | null;
+          prompt_id?: string;
           prompt_option_id?: string | null;
           prompt_response_id?: string;
-          session_id?: string | null;
+          role_phase_id?: string | null;
+          session_id?: string;
           user_id?: string;
         };
         Relationships: [
@@ -403,6 +416,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "prompt_option";
             referencedColumns: ["option_id"];
+          },
+          {
+            foreignKeyName: "prompt_response_role_phase_id_fkey";
+            columns: ["role_phase_id"];
+            isOneToOne: false;
+            referencedRelation: "role_phase";
+            referencedColumns: ["role_phase_id"];
           },
           {
             foreignKeyName: "prompt_response_session_id_fkey";
@@ -481,6 +501,7 @@ export type Database = {
       session: {
         Row: {
           after_action_report_id: string | null;
+          force_advance: boolean;
           is_async: boolean;
           is_finished: boolean | null;
           phase_id: string | null;
@@ -491,6 +512,7 @@ export type Database = {
         };
         Insert: {
           after_action_report_id?: string | null;
+          force_advance?: boolean;
           is_async?: boolean;
           is_finished?: boolean | null;
           phase_id?: string | null;
@@ -501,6 +523,7 @@ export type Database = {
         };
         Update: {
           after_action_report_id?: string | null;
+          force_advance?: boolean;
           is_async?: boolean;
           is_finished?: boolean | null;
           phase_id?: string | null;
