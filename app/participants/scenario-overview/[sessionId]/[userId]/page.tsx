@@ -20,7 +20,7 @@ import {
   fetchRole,
   fetchRolePhases,
   fetchTemplateId,
-  isSessionAsync,
+  isSessionForceAdvance,
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
 import { useProfile } from "@/utils/ProfileProvider";
@@ -48,7 +48,7 @@ export default function SessionFlowPage() {
   const [completedPrompts, setCompletedPrompts] = useState<Set<string>>(
     new Set(),
   );
-  const [isAsync, setIsAsync] = useState(false);
+  const [isForceAdvance, setIsForceAdvance] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const currentPhase = phases[phaseIdx] ?? null;
@@ -71,8 +71,8 @@ export default function SessionFlowPage() {
       const fetchedRoleId = await fetchRole(userId, sessionIdStr);
       setRoleId(fetchedRoleId as string);
 
-      const isCurrentSessionAsync = await isSessionAsync(sessionIdStr);
-      setIsAsync(isCurrentSessionAsync);
+      const isCurrentSessionAsync = await isSessionForceAdvance(sessionIdStr);
+      setIsForceAdvance(isCurrentSessionAsync);
 
       let mostRecentPhaseIndex: number;
       try {
@@ -272,7 +272,7 @@ export default function SessionFlowPage() {
               user_id={userId as UUID}
               role_id={roleId as UUID}
               session_id={sessionIdStr}
-              is_async={isAsync}
+              is_force_advance={isForceAdvance}
               promptsCompleted={completedPrompts.size == prompts.length}
               isLastPhase={isLastPhase}
               currentPhaseIndex={phaseIdx}

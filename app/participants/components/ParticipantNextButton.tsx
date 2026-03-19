@@ -13,7 +13,7 @@ interface NextButtonProps {
   user_id: UUID;
   role_id: UUID;
   session_id: UUID;
-  is_async: boolean;
+  is_force_advance: boolean;
   phase_id: UUID;
   promptsCompleted: boolean;
   isLastPhase: boolean;
@@ -25,7 +25,7 @@ export default function NextButton({
   user_id,
   role_id,
   session_id,
-  is_async,
+  is_force_advance,
   promptsCompleted,
   isLastPhase,
   currentPhaseIndex,
@@ -39,10 +39,10 @@ export default function NextButton({
   }, [currentPhaseIndex]);
 
   async function handleClick() {
-    console.log("Next button clicked", is_async, isLastPhase);
+    console.log("Next button clicked", is_force_advance, isLastPhase);
     await onClick();
 
-    if (is_async) {
+    if (is_force_advance) {
       if (isLastPhase) {
         await setIsFinished(user_id, role_id, session_id);
         router.push("/sessions/session-finish");

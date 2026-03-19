@@ -97,7 +97,7 @@ export async function assignParticipantToSession(
 export async function createSession(
   templateId: string,
   userGroupId: string,
-  isAsync: boolean = false,
+  forceAdvance: boolean = false,
 ) {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
@@ -106,7 +106,7 @@ export async function createSession(
       {
         template_id: templateId,
         user_group_id: userGroupId,
-        is_async: isAsync,
+        force_advance: forceAdvance,
       },
     ])
     .select("session_id")
@@ -252,11 +252,11 @@ export async function setIsFinished(
   }
 }
 
-export async function isSessionAsync(sessionId: string) {
+export async function isSessionForceAdvance(sessionId: string) {
   const supabase = await getSupabaseServerClient();
   const { data: session, error: sessionError } = await supabase
     .from("session")
-    .select("is_async")
+    .select("force_advance")
     .eq("session_id", sessionId)
     .single();
 
@@ -264,7 +264,7 @@ export async function isSessionAsync(sessionId: string) {
     throw new Error("Failed to fetch session");
   }
 
-  return session.is_async;
+  return session.force_advance;
 }
 
 export async function fetchPhases(sessionId: string) {

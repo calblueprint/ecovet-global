@@ -50,7 +50,7 @@ export default function RoleSelectionPage() {
   ]);
 
   const [starting, setStarting] = useState(false);
-  const [isAsync, setIsAsync] = useState(false);
+  const [isForceAdvance, setIsForceAdvance] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
 
@@ -117,7 +117,7 @@ export default function RoleSelectionPage() {
       const sessionId = (await createSession(
         templateId,
         profile.user_group_id,
-        isAsync,
+        isForceAdvance,
       )) as UUID;
 
       //assign the facilitator to session
@@ -189,11 +189,11 @@ export default function RoleSelectionPage() {
 
         <SmallButton onClick={addParticipant}>+ Add Participant</SmallButton>
 
-        <label>is async</label>
+        <label>is force advance</label>
         <input
           type="checkbox"
-          id="async"
-          onChange={e => setIsAsync(e.target.checked)}
+          id="force-advance"
+          onChange={e => setIsForceAdvance(e.target.checked)}
         />
 
         <Button onClick={handleStartGame} disabled={starting}>
