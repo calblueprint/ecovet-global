@@ -263,7 +263,7 @@ export async function fetchTemplate(
     console.error("Error fetching template by template_id:", error);
     return null;
   }
-  console.log("this", data);
+
   return data;
 }
 

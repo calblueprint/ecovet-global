@@ -15,7 +15,7 @@ const COLORS = {
 
   tagRed: "#EF4444",
   tagOrange: "#FB923C",
-  tagYellow: "#FACC15",
+  tagYellow: "#FFED94;",
   tagGreen: "#22C55E",
   tagBlue: "#3B82F6",
 };

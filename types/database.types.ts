@@ -14,6 +14,81 @@ export type Database = {
   };
   public: {
     Tables: {
+      chat_message: {
+        Row: {
+          created_at: string;
+          id: string;
+          message: string;
+          room_id: string | null;
+          sender: string | null;
+          sender_name: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          message: string;
+          room_id?: string | null;
+          sender?: string | null;
+          sender_name?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          message?: string;
+          room_id?: string | null;
+          sender?: string | null;
+          sender_name?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "chat_message_room_id_fkey";
+            columns: ["room_id"];
+            isOneToOne: false;
+            referencedRelation: "chat_room";
+            referencedColumns: ["room_id"];
+          },
+          {
+            foreignKeyName: "chat_message_sender_fkey";
+            columns: ["sender"];
+            isOneToOne: false;
+            referencedRelation: "profile";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      chat_room: {
+        Row: {
+          room_id: string;
+          session_id: string | null;
+          user_id: string | null;
+        };
+        Insert: {
+          room_id?: string;
+          session_id?: string | null;
+          user_id?: string | null;
+        };
+        Update: {
+          room_id?: string;
+          session_id?: string | null;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "chat_rooms_session_id_fkey";
+            columns: ["session_id"];
+            isOneToOne: false;
+            referencedRelation: "session";
+            referencedColumns: ["session_id"];
+          },
+          {
+            foreignKeyName: "chat_rooms_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profile";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       invite: {
         Row: {
           email: string | null;
@@ -50,6 +125,7 @@ export type Database = {
         Row: {
           created_at: string;
           is_finished: boolean;
+          phase_id: string | null;
           phase_index: number;
           role_id: string;
           session_id: string;
@@ -58,6 +134,7 @@ export type Database = {
         Insert: {
           created_at?: string | null;
           is_finished?: boolean | null;
+          phase_id?: string | null;
           phase_index?: number | null;
           role_id?: string | null;
           session_id: string;
@@ -66,12 +143,20 @@ export type Database = {
         Update: {
           created_at?: string | null;
           is_finished?: boolean | null;
+          phase_id?: string | null;
           phase_index?: number | null;
           role_id?: string | null;
           session_id?: string;
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "participant_session_phase_id_fkey";
+            columns: ["phase_id"];
+            isOneToOne: false;
+            referencedRelation: "phase";
+            referencedColumns: ["phase_id"];
+          },
           {
             foreignKeyName: "participant_session_role_id_fkey";
             columns: ["role_id"];
@@ -281,30 +366,43 @@ export type Database = {
       };
       prompt_response: {
         Row: {
+          phase_id: string;
           prompt_answer: string | null;
-          prompt_id: string | null;
+          prompt_id: string;
           prompt_option_id: string | null;
           prompt_response_id: string;
-          session_id: string | null;
+          role_phase_id: string | null;
+          session_id: string;
           user_id: string;
         };
         Insert: {
+          phase_id?: string;
           prompt_answer?: string | null;
-          prompt_id?: string | null;
+          prompt_id: string;
           prompt_option_id?: string | null;
           prompt_response_id: string;
-          session_id?: string | null;
+          role_phase_id?: string | null;
+          session_id: string;
           user_id?: string;
         };
         Update: {
+          phase_id?: string;
           prompt_answer?: string | null;
-          prompt_id?: string | null;
+          prompt_id?: string;
           prompt_option_id?: string | null;
           prompt_response_id?: string;
-          session_id?: string | null;
+          role_phase_id?: string | null;
+          session_id?: string;
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "prompt_response_phase_id_fkey";
+            columns: ["phase_id"];
+            isOneToOne: false;
+            referencedRelation: "phase";
+            referencedColumns: ["phase_id"];
+          },
           {
             foreignKeyName: "prompt_response_prompt_id_fkey";
             columns: ["prompt_id"];
@@ -318,6 +416,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "prompt_option";
             referencedColumns: ["option_id"];
+          },
+          {
+            foreignKeyName: "prompt_response_role_phase_id_fkey";
+            columns: ["role_phase_id"];
+            isOneToOne: false;
+            referencedRelation: "role_phase";
+            referencedColumns: ["role_phase_id"];
           },
           {
             foreignKeyName: "prompt_response_session_id_fkey";
@@ -396,6 +501,7 @@ export type Database = {
       session: {
         Row: {
           after_action_report_id: string | null;
+          force_advance: boolean;
           is_async: boolean;
           is_finished: boolean | null;
           phase_id: string | null;
@@ -406,6 +512,7 @@ export type Database = {
         };
         Insert: {
           after_action_report_id?: string | null;
+          force_advance?: boolean;
           is_async?: boolean;
           is_finished?: boolean | null;
           phase_id?: string | null;
@@ -416,6 +523,7 @@ export type Database = {
         };
         Update: {
           after_action_report_id?: string | null;
+          force_advance?: boolean;
           is_async?: boolean;
           is_finished?: boolean | null;
           phase_id?: string | null;

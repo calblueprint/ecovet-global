@@ -256,6 +256,7 @@ export default function TemplateBuilder({
                   promptById: localStore.promptById,
                   promptIndex: localStore.promptIndex,
                   phasesById: localStore.phasesById,
+                  optionsByPromptId: localStore.optionsByPromptId,
                 }}
                 rolePhaseId={activeIds.rolePhaseId || rolePhases[0]}
                 phase={
