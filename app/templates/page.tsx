@@ -11,7 +11,8 @@ import TemplateBuilderSideBar from "./components/TemplateBuilderSidebar";
 import { TemplateMainBox } from "./styles";
 
 const createInitialStore = (): LocalStore => {
-  const templateID = crypto.randomUUID() as UUID;
+  const templateID =
+    crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
 
   return {
     templateID: templateID,
@@ -35,7 +36,6 @@ const createInitialStore = (): LocalStore => {
     rolePhaseIndex: {},
     promptById: {},
     promptIndex: {},
-    optionsByPromptId: {}, // NEW
   };
 };
 

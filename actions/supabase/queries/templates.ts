@@ -209,7 +209,6 @@ export async function createPrompts(
   user_id: UUID | null,
   role_phase_id: UUID,
   prompt_text: string | null,
-  prompt_type: "text" | "multiple_choice" | "checkbox" | null,
 ): Promise<UUID> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
@@ -219,7 +218,6 @@ export async function createPrompts(
       user_id: user_id,
       role_phase_id: role_phase_id,
       prompt_text: prompt_text,
-      prompt_type: prompt_type,
     })
     .select("prompt_id")
     .single();

@@ -13,9 +13,6 @@ export type UserType = "Admin" | "Facilitator" | "Participant";
 // ENUM for status
 export type StatusType = "Pending" | "Accepted" | "Cancelled";
 
-// ENUM for prompt_type
-export type PromptType = "text" | "multiple_choice" | "checkbox";
-
 export type UUID = string;
 
 /* ============================
@@ -36,7 +33,6 @@ export type PromptAnswer = Tables<"prompt_response">;
 export type Tag = Tables<"tag">;
 export type TemplateTag = Tables<"template_tag">;
 export type Invite = Tables<"invite">;
-export type PromptOption = Tables<"prompt_option">;
 
 /* ============================
    Insert / Update Helpers
@@ -54,25 +50,11 @@ export type EditablePhase = Omit<Tables<"phase">, "session_id">;
    (NOT direct DB rows)
 ============================ */
 
-export interface PromptAnswer {
-  prompt_response_id: UUID; // prompt_answer_id
-  session_id: UUID;
-  user_id: UUID;
-  prompt_id: UUID;
-  prompt_option_id: UUID;
-  prompt_answer: string;
-}
-
 export type ParticipantSessionWithProfile = ParticipantSession & {
   profile: {
     first_name: string;
     last_name: string;
   };
-};
-
-export type StagedOption = {
-  option_number: number;
-  option_text: string;
 };
 
 export type LocalStore = {
@@ -85,7 +67,6 @@ export type LocalStore = {
   rolePhaseIndex: Record<UUID, Record<UUID, UUID>>;
   promptById: Record<UUID, Prompt>;
   promptIndex: Record<UUID, UUID[]>;
-  optionsByPromptId: Record<UUID, StagedOption[]>; // NEW
 };
 
 export type RoleFormInput = {
@@ -95,7 +76,6 @@ export type RoleFormInput = {
   promptById: Record<UUID, Prompt>;
   promptIndex: Record<UUID, UUID[]>;
   phasesById: Record<UUID, EditablePhase>;
-  optionsByPromptId: Record<UUID, StagedOption[]>;
 };
 
 export type Participant = {
