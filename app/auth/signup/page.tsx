@@ -57,10 +57,6 @@ export default function Login() {
 
   const handleSignUp = async () => {
     try {
-      if (await checkIfUserExists(email)) {
-        throw new Error("You already have an account, please sign in.");
-      }
-
       const inviteStatus = await checkInvites(email);
       switch (inviteStatus) {
         case "no_invite":
@@ -82,22 +78,23 @@ export default function Login() {
         throw new Error("Passwords do not match");
       }
 
-      const { data, error } = await supabase.auth.updateUser({
-        password: password,
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
       });
 
       if (error) {
-        throw new Error(
-          "An error occurred during sign up: " +
-            error.message +
-            "with email" +
-            data,
-        );
+        if (error.message.includes("already registered")) {
+          throw new Error("You already have an account, please sign in.");
+        }
+        throw new Error("An error occurred during sign up: " + error.message);
       }
+
       const userId = data.user?.id;
       if (!userId) {
         throw new Error("Signup succeeded but user ID was missing.");
       }
+
       await markInviteAccepted(email);
       await addInviteInfoToProfile(userId, email);
       router.push("/onboarding");

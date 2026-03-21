@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { checkIfUserExists } from "@/actions/supabase/queries/auth";
 import { useSession } from "@/utils/AuthProvider";
 import {
   Button,
@@ -19,55 +18,62 @@ export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const sessionHandler = useSession();
 
   const handleSignUp = async () => {
-    if (await checkIfUserExists(email)) {
-      throw new Error("You already have an account, please sign in.");
-      return;
+    setErrorMessage(null);
+    try {
+      const res = await fetch("/api/create-admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const { data, error } = await res.json();
+      console.log("API response:", { data, error });
+
+      if (error) {
+        if (error?.message?.includes("already been registered")) {
+          setErrorMessage("You already have an account, please sign in.");
+        } else {
+          setErrorMessage(error?.message ?? "Sign up failed.");
+        }
+        return;
+      }
+
+      router.push("/test-page");
+    } catch {
+      setErrorMessage("An unexpected error occurred during sign up.");
     }
-
-    const res = await fetch("/api/create-admin", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const { data, error } = await res.json();
-    console.log("API response:", { data, error });
-    if (error) {
-      throw new Error(JSON.stringify(error));
-      return;
-    }
-
-    router.push("/test-page");
   };
 
   const signInWithEmail = async () => {
-    const { data, error } = await sessionHandler.signInWithEmail(
-      email,
-      password,
-    );
-    if (error) {
-      throw new Error(
-        "An error occurred during sign in: " +
-          error.message +
-          "with email" +
-          email,
+    setErrorMessage(null);
+    try {
+      const { data, error } = await sessionHandler.signInWithEmail(
+        email,
+        password,
       );
+      if (error) {
+        setErrorMessage("An error occurred during sign in: " + error.message);
+        return;
+      }
+      if (!data.user) {
+        setErrorMessage("User not found after sign in.");
+        return;
+      }
+      router.push("/test-page");
+    } catch {
+      setErrorMessage("An unexpected error occurred during sign in.");
     }
-
-    if (!data.user) {
-      throw new Error("User not found after sign in");
-    }
-    router.push("/test-page");
   };
 
   const signOut = async () => {
     try {
       await sessionHandler.signOut();
-    } catch (error) {
-      throw new Error("An error occurred during sign out: " + error);
+    } catch {
+      setErrorMessage("An error occurred during sign out.");
     }
   };
 
@@ -96,17 +102,15 @@ export default function Login() {
           placeholder="password"
         />
       </InputFields>
+      {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
       <Button type="button" onClick={handleSignUp}>
-        {" "}
-        Sign up{" "}
+        Sign up
       </Button>
       <Button type="button" onClick={signInWithEmail}>
-        {" "}
-        Sign in{" "}
+        Sign in
       </Button>
       <Button type="button" onClick={signOut}>
-        {" "}
-        Sign out{" "}
+        Sign out
       </Button>
       <div>
         Click <Link href="/auth/reset-password"> here </Link> if you forgot your

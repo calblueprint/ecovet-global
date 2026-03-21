@@ -29,6 +29,7 @@ export async function POST(req: Request) {
   });
 
   if (profileError) {
+    await supabase.auth.admin.deleteUser(data.user.id);
     return Response.json({ error: profileError }, { status: 400 });
   }
 

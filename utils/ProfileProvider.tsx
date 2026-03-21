@@ -19,8 +19,6 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let initialLoad = true;
-
     supabase.auth.getUser().then(async ({ data }) => {
       const uid = data?.user?.id ?? null;
       setUserId(uid);
@@ -31,10 +29,8 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (initialLoad) {
-        initialLoad = false;
-        return;
-      }
+      if (event === "INITIAL_SESSION") return;
+
       setLoading(true);
       const uid = session?.user?.id ?? null;
       setUserId(uid);
