@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "13.0.5";
   };
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json;
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
   public: {
     Tables: {
       chat_message: {
@@ -123,11 +148,11 @@ export type Database = {
       };
       participant_session: {
         Row: {
-          created_at: string;
-          is_finished: boolean;
+          created_at: string | null;
+          is_finished: boolean | null;
           phase_id: string | null;
-          phase_index: number;
-          role_id: string;
+          phase_index: number | null;
+          role_id: string | null;
           session_id: string;
           user_id: string;
         };
@@ -186,9 +211,9 @@ export type Database = {
           phase_description: string | null;
           phase_id: string;
           phase_name: string | null;
-          phase_number: number;
-          session_id: string;
-          template_id: string;
+          phase_number: number | null;
+          session_id: string | null;
+          template_id: string | null;
         };
         Insert: {
           is_finished?: boolean | null;
@@ -366,7 +391,7 @@ export type Database = {
       };
       prompt_response: {
         Row: {
-          phase_id: string;
+          phase_id: string | null;
           prompt_answer: string | null;
           prompt_id: string;
           prompt_option_id: string | null;
@@ -376,7 +401,7 @@ export type Database = {
           user_id: string;
         };
         Insert: {
-          phase_id?: string;
+          phase_id?: string | null;
           prompt_answer?: string | null;
           prompt_id: string;
           prompt_option_id?: string | null;
@@ -386,7 +411,7 @@ export type Database = {
           user_id?: string;
         };
         Update: {
-          phase_id?: string;
+          phase_id?: string | null;
           prompt_answer?: string | null;
           prompt_id?: string;
           prompt_option_id?: string | null;
@@ -507,8 +532,8 @@ export type Database = {
           phase_id: string | null;
           session_id: string;
           session_name: string | null;
-          template_id: string;
-          user_group_id: string;
+          template_id: string | null;
+          user_group_id: string | null;
         };
         Insert: {
           after_action_report_id?: string | null;
@@ -559,7 +584,7 @@ export type Database = {
       tag: {
         Row: {
           color: string | null;
-          name: string;
+          name: string | null;
           number: number | null;
           tag_id: string;
           user_group_id: string;
@@ -597,7 +622,7 @@ export type Database = {
           summary: string | null;
           template_id: string;
           template_name: string | null;
-          timestamp: string;
+          timestamp: string | null;
           user_group_id: string | null;
         };
         Insert: {
@@ -820,6 +845,9 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       prompt_type: ["text", "multiple_choice", "checkbox"],
