@@ -170,7 +170,6 @@ export default function FacilitatorSessionView() {
             const phaseIndex = isForceAdvance
               ? currentPhase
               : (p.phase_index ?? 0);
-            console.log("HIIIIII");
             const result = await loadCountsForParticipant(p, phaseIndex);
             if (result) {
               counts[p.user_id] = result;
@@ -206,7 +205,7 @@ export default function FacilitatorSessionView() {
     return () => {
       if (channel) supabase.removeChannel(channel);
     };
-  }, [sessionId, participants, currentPhase, phases]);
+  }, [sessionId, participants, currentPhase, phases, isForceAdvance]);
 
   async function advancePhase() {
     if (!sessionId || isAdvancing) return;
