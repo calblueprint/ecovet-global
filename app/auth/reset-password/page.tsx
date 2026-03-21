@@ -1,10 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  checkIfUserExists,
-  sendPasswordResetEmail,
-} from "@/actions/supabase/queries/auth";
+import { sendPasswordResetEmail } from "@/actions/supabase/queries/auth";
 import {
   Button,
   Container,
@@ -31,12 +28,6 @@ export default function ResetPassword() {
     try {
       if (!isEmailValid(email)) {
         throw new Error("Please enter a valid email address");
-      }
-
-      if (!(await checkIfUserExists(email))) {
-        throw new Error(
-          "No account exists with that email. Please sign up first.",
-        );
       }
 
       const { error } = await sendPasswordResetEmail(email);
