@@ -1,7 +1,7 @@
 "use client";
 
 import type { DropdownOption } from "@/types/dropdown";
-import type { Profile, UUID } from "@/types/schema";
+import type { Profile, Template, UUID } from "@/types/schema";
 import type { SelectInstance } from "react-select";
 import React, {
   useCallback,
@@ -10,6 +10,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { fetchTemplatesExercise } from "@/actions/supabase/queries/templates";
 import { fetchUserGroupMembers } from "@/actions/supabase/queries/user-groups";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
@@ -38,6 +39,8 @@ export default function Page() {
   const [availableUsers, setAvailableUsers] = useState<Profile[]>([]);
   const roleRef = useRef<SelectInstance<DropdownOption> | null>(null);
   const participantRefs = useRef<(SelectInstance<DropdownOption> | null)[]>([]);
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
 
   const [participants, setParticipants] = useState([
     { id: "", name: "", email: "", role: "" },
@@ -60,10 +63,18 @@ export default function Page() {
 
   const exerciseOptions = useMemo(() => {
     const map = new Map<string, string>();
-    map.set("scenario_1", "Scenario A: Crisis Management");
-    map.set("scenario_2", "Scenario B: Tech Debt");
+    templates.forEach(t => {
+      map.set(t.template_id, t.template_name || "Untitled Exercise");
+    });
     return map;
-  }, []);
+  }, [templates]);
+
+  const loadTemplates = useCallback(async () => {
+    if (profile?.user_group_id) {
+      const data = await fetchTemplatesExercise(profile.user_group_id as UUID);
+      setTemplates(data || []);
+    }
+  }, [profile?.user_group_id]);
 
   const loadGroupMembers = useCallback(async () => {
     if (profile?.user_group_id) {
@@ -74,9 +85,18 @@ export default function Page() {
     }
   }, [profile?.user_group_id]);
 
+  const handleExerciseChange = (templateId: string | null) => {
+    if (templateId !== selectedTemplateId) {
+      setSelectedTemplateId(templateId ?? "");
+      setParticipants([{ id: "", name: "", email: "", role: "" }]);
+      console.log("Template changed, resetting participants...");
+    }
+  };
+
   useEffect(() => {
     loadGroupMembers();
-  }, [loadGroupMembers]);
+    loadTemplates();
+  }, [loadGroupMembers, loadTemplates]);
 
   const addParticipantRow = () => {
     setParticipants(prev => {
@@ -121,7 +141,6 @@ export default function Page() {
     (nextRef: React.RefObject<SelectInstance<DropdownOption> | null>) =>
     (e: React.KeyboardEvent) => {
       if (e.key === "Enter") {
-        const isMenuOpen = nextRef.current?.focus();
         setTimeout(() => {
           nextRef.current?.focus();
         }, 50);
@@ -137,13 +156,12 @@ export default function Page() {
 
           <ConfigRow>
             <DropdownContainer>
-              {/* Exercise Dropdown */}
               <InputDropdown
                 label="Select Exercise"
                 options={exerciseOptions}
                 placeholder="Select Exercise"
                 customStyles={ExerciseSelectStyles}
-                onChange={val => console.log("Exercise selected:", val)}
+                onChange={handleExerciseChange}
               />
             </DropdownContainer>
 
