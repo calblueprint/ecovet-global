@@ -10,6 +10,12 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { useRouter } from "next/navigation";
+import {
+  assignParticipantToSession,
+  createSession,
+  fetchRoles,
+} from "@/actions/supabase/queries/sessions";
 import { fetchTemplatesExercise } from "@/actions/supabase/queries/templates";
 import { fetchUserGroupMembers } from "@/actions/supabase/queries/user-groups";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
@@ -26,12 +32,17 @@ import {
   LayoutWrapper,
   ParticipantTable,
   PrimaryActionArea,
-  SideNavNewTemplateButton, // Reusing existing styled button for "Start Exercise"
+  SideNavNewTemplateButton,
   TableHeader,
   TableRow,
   ToggleButton,
   ToggleGroup,
 } from "../../styles";
+
+interface Role {
+  id: string;
+  name: string;
+}
 
 export default function Page() {
   const { profile } = useProfile();
@@ -41,33 +52,40 @@ export default function Page() {
   const participantRefs = useRef<(SelectInstance<DropdownOption> | null)[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
+  const router = useRouter();
+  const [isStarting, setIsStarting] = useState(false);
+  const [roles, setRoles] = useState<Role[]>([]);
 
   const [participants, setParticipants] = useState([
     { id: "", name: "", email: "", role: "" },
   ]);
 
-  // 1. Prepare options for InputDropdown (Map<value, label>)
-  const userOptions = useMemo(() => {
-    const map = new Map<string, string>();
-    availableUsers.forEach(u => {
-      const fullName = `${u.first_name} ${u.last_name}`;
-      // Key: user ID (better for DB), Value: Display string
-      map.set(u.id, `${fullName}, ${u.email}`);
-    });
-    return map;
-  }, [availableUsers]);
+  const userOptions = useMemo(
+    () =>
+      new Map(
+        availableUsers.map(u => [
+          u.id,
+          `${u.first_name} ${u.last_name}, ${u.email}`,
+        ]),
+      ),
+    [availableUsers],
+  );
 
-  const roleOptions = useMemo(() => {
-    return new Set(["Project Lead", "Designer", "Developer", "External"]);
-  }, []);
+  const roleOptions = useMemo(
+    () => new Map(roles.map(r => [r.id, r.name])),
+    [roles],
+  );
 
-  const exerciseOptions = useMemo(() => {
-    const map = new Map<string, string>();
-    templates.forEach(t => {
-      map.set(t.template_id, t.template_name || "Untitled Exercise");
-    });
-    return map;
-  }, [templates]);
+  const exerciseOptions = useMemo(
+    () =>
+      new Map(
+        templates.map(t => [
+          t.template_id,
+          t.template_name || "Untitled Exercise",
+        ]),
+      ),
+    [templates],
+  );
 
   const loadTemplates = useCallback(async () => {
     if (profile?.user_group_id) {
@@ -85,11 +103,56 @@ export default function Page() {
     }
   }, [profile?.user_group_id]);
 
-  const handleExerciseChange = (templateId: string | null) => {
+  const handleExerciseChange = async (templateId: string | null) => {
     if (templateId !== selectedTemplateId) {
-      setSelectedTemplateId(templateId ?? "");
+      const id = templateId ?? "";
+      setSelectedTemplateId(id);
       setParticipants([{ id: "", name: "", email: "", role: "" }]);
-      console.log("Template changed, resetting participants...");
+
+      if (id) {
+        const rolesData = await fetchRoles(id);
+        // Cast to Role[] instead of any[]
+        setRoles((rolesData as Role[]) || []);
+      } else {
+        setRoles([]);
+      }
+    }
+  };
+
+  const handleStartExercise = async () => {
+    if (!profile?.id || !profile.user_group_id || !selectedTemplateId) {
+      alert("Please select an exercise first.");
+      return;
+    }
+
+    setIsStarting(true);
+
+    try {
+      const validAssignments = participants.filter(p => p.id && p.role);
+
+      if (validAssignments.length === 0) {
+        throw new Error("Please assign at least one participant with a role.");
+      }
+
+      const sessionId = (await createSession(
+        selectedTemplateId as UUID,
+        profile.user_group_id as UUID,
+      )) as UUID;
+
+      await assignParticipantToSession(profile.id as UUID, sessionId, null);
+
+      await Promise.all(
+        validAssignments.map(p =>
+          assignParticipantToSession(p.id as UUID, sessionId, p.role as UUID),
+        ),
+      );
+
+      router.push(`/facilitator/session-view?sessionId=${sessionId}`);
+    } catch (err) {
+      console.error(err);
+      alert(err instanceof Error ? err.message : "Failed to start session");
+    } finally {
+      setIsStarting(false);
     }
   };
 
@@ -187,7 +250,7 @@ export default function Page() {
             </TableHeader>
 
             {participants.map((p, i) => (
-              <TableRow key={i}>
+              <TableRow key={`${selectedTemplateId}-${i}`}>
                 <div style={{ flex: 1 }}>
                   <InputDropdown
                     label="Participant"
@@ -224,7 +287,12 @@ export default function Page() {
           <IconButton onClick={addParticipantRow}>+</IconButton>
 
           <PrimaryActionArea>
-            <SideNavNewTemplateButton>Start Exercise</SideNavNewTemplateButton>
+            <SideNavNewTemplateButton
+              onClick={handleStartExercise}
+              disabled={isStarting || !selectedTemplateId}
+            >
+              {isStarting ? "Starting Session..." : "Start Exercise"}
+            </SideNavNewTemplateButton>
           </PrimaryActionArea>
         </ContentWrapper>
       </LayoutWrapper>
