@@ -18,7 +18,6 @@ export const Main = styled.main`
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  background-color: ${COLORS.white};
   background: ${COLORS.white};
 `;
 
@@ -68,6 +67,15 @@ export const SearchInput = styled.input`
 export const Heading3 = styled.h3`
   font-family: ${Sans.style.fontFamily};
   font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  font-style: normal;
+  line-height: normal;
+`;
+
+export const Heading4 = styled.h4`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
   font-style: normal;
@@ -206,7 +214,7 @@ export const StyledSelect = styled.select`
   font-family: ${Sans.style.fontFamily};
   font-size: 14px;
   background-color: ${COLORS.white};
-  height: 48px;
+  height: 40px;
   outline: none;
   color: ${COLORS.black};
 
@@ -244,7 +252,7 @@ export const ToggleButton = styled.button<{ $active?: boolean }>`
   border-radius: 4px;
   font-family: ${Sans.style.fontFamily};
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 1200; /* changed from 600 to 1200 to better match Figma (for ToggleGroup on 231 of start/page.tsx) */
   cursor: pointer;
   transition:
     background-color 0.2s ease,
@@ -273,8 +281,8 @@ export const TableHeader = styled.div`
   gap: 2rem;
   padding: 0 0.5rem;
   font-family: ${Sans.style.fontFamily};
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 0.875rem;
+  font-weight: 500;
   color: ${COLORS.black40};
 `;
 
@@ -328,8 +336,8 @@ export const PrimaryActionArea = styled.div`
 export const ExerciseSelectStyles: StylesConfig<DropdownOption, boolean> = {
   control: base => ({
     ...base,
-    height: "48px",
-    minHeight: "48px",
+    height: "40px",
+    minHeight: "40px",
     borderRadius: "4px",
     border: `1px solid ${COLORS.oat_medium}`,
     boxShadow: "none",
@@ -343,13 +351,13 @@ export const ExerciseSelectStyles: StylesConfig<DropdownOption, boolean> = {
   valueContainer: base => ({
     ...base,
     padding: "0 12px",
-    height: "48px",
+    height: "40px",
     display: "flex",
     alignItems: "center",
   }),
   indicatorsContainer: base => ({
     ...base,
-    height: "48px",
+    height: "40px",
   }),
   placeholder: base => ({
     ...base,

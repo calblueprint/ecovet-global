@@ -27,7 +27,7 @@ import {
   ContentWrapper,
   DropdownContainer,
   ExerciseSelectStyles,
-  Heading3,
+  Heading4,
   IconButton,
   LayoutWrapper,
   ParticipantTable,
@@ -215,7 +215,7 @@ export default function Page() {
       <TopNavBar />
       <LayoutWrapper>
         <ContentWrapper>
-          <Heading3>Start Exercise</Heading3>
+          <Heading4>Start Exercise</Heading4>
 
           <ConfigRow>
             <DropdownContainer>
