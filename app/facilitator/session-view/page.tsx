@@ -6,10 +6,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import supabase from "@/actions/supabase/client";
 import {
   fetchPhases,
+  fetchPromptsWithResponses,
   fetchRolePhases,
   finishSession,
-  getPromptIdByRolePhase,
-  getRespondedPromptsByRolePhase,
   isSessionForceAdvance,
   SessionParticipant,
   sessionParticipants,
@@ -18,6 +17,19 @@ import { useProfile } from "@/utils/ProfileProvider";
 import { Button, Container, Main } from "./styles";
 
 type PromptCounts = Record<UUID, { done: number; total: number }>;
+type PromptData = {
+  question: string;
+  answer: string | null;
+};
+
+type ParticipantPromptData = Record<
+  UUID,
+  {
+    done: number;
+    total: number;
+    prompts: PromptData[];
+  }
+>;
 
 export default function FacilitatorSessionView() {
   const searchParams = useSearchParams();
@@ -33,7 +45,7 @@ export default function FacilitatorSessionView() {
   const [isForceAdvance, setIsForceAdvance] = useState(false);
   const isLastPhase = currentPhase >= phases.length - 1;
   const currentPhaseObject = phases[currentPhase];
-  const [promptCounts, setPromptCounts] = useState<PromptCounts>({});
+  const [promptData, setPromptData] = useState<ParticipantPromptData>({});
 
   useEffect(() => {
     if (!sessionId) return;
@@ -125,34 +137,32 @@ export default function FacilitatorSessionView() {
 
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
-    async function loadCountsForParticipant(
+    async function loadDataForParticipant(
       p: SessionParticipant,
       phaseIndex: number,
-    ): Promise<{ done: number; total: number } | null> {
+    ) {
       if (!p.role_id) return null;
 
-      const participantPhaseObject = phases[phaseIndex];
-      const phaseId = participantPhaseObject?.phase_id;
+      const phaseId = phases[phaseIndex]?.phase_id;
       if (!phaseId) return null;
 
-      const rolePhaseData = await fetchRolePhases(p.role_id, phaseId as UUID);
-      const rolePhaseId = rolePhaseData?.role_phase_id;
-      if (!rolePhaseId) return null;
+      const rolePhase = await fetchRolePhases(p.role_id, phaseId);
+      if (!rolePhase) return null;
 
-      const promptIds = await getPromptIdByRolePhase(rolePhaseId);
-      const totalPrompts = promptIds?.length ?? 0;
-      console.log("rolePhaseId", rolePhaseId);
-      console.log("promptIds", promptIds);
-      console.log("sessionId", sessionId);
-
-      const doneResponses = await getRespondedPromptsByRolePhase(
-        promptIds as UUID[],
+      const prompts = await fetchPromptsWithResponses(
+        rolePhase.role_phase_id,
+        p.user_id,
         sessionId as UUID,
-        rolePhaseId as UUID,
       );
-      console.log(doneResponses);
 
-      return { total: totalPrompts, done: doneResponses };
+      const total = prompts.length;
+      const done = prompts.filter(p => p.answer).length;
+
+      return {
+        total,
+        done,
+        prompts,
+      };
     }
 
     async function loadCounts() {
@@ -162,7 +172,7 @@ export default function FacilitatorSessionView() {
         "loadCounts currentPhaseObject:",
         currentPhaseObject?.phase_id,
       );
-      const counts: Record<string, { done: number; total: number }> = {};
+      const data: ParticipantPromptData = {};
 
       await Promise.all(
         participants.map(async p => {
@@ -170,17 +180,19 @@ export default function FacilitatorSessionView() {
             const phaseIndex = isForceAdvance
               ? currentPhase
               : (p.phase_index ?? 0);
-            const result = await loadCountsForParticipant(p, phaseIndex);
+
+            const result = await loadDataForParticipant(p, phaseIndex);
+
             if (result) {
-              counts[p.user_id] = result;
+              data[p.user_id] = result;
             }
           } catch (err) {
-            console.error(`Failed to load counts for user ${p.user_id}`, err);
+            console.error(`Failed for user ${p.user_id}`, err);
           }
         }),
       );
 
-      setPromptCounts(counts);
+      setPromptData(data);
     }
 
     loadCounts();
@@ -244,16 +256,36 @@ export default function FacilitatorSessionView() {
             {participants
               .filter(p => p.user_id !== profile?.id)
               .map(p => {
-                const counts = promptCounts[p.user_id];
+                const data = promptData[p.user_id];
+
                 return (
                   <div key={p.user_id}>
-                    {p.profile?.first_name} {p.profile?.last_name}{" "}
-                    {p.is_finished
-                      ? "(Finished)"
-                      : `Phase ${(p.phase_index ?? 0) + 1}`}{" "}
-                    {counts
-                      ? `(${counts.done}/${counts.total} responses)`
-                      : "(Loading counts...)"}
+                    <strong>
+                      {p.profile?.first_name} {p.profile?.last_name}
+                    </strong>
+
+                    {data ? (
+                      <>
+                        <div>
+                          ({data.done}/{data.total} responses)
+                        </div>
+
+                        <ul>
+                          {data.prompts.map((prompt, i) => (
+                            <li key={i}>
+                              <div>
+                                <b>Q:</b> {prompt.question}
+                              </div>
+                              <div>
+                                <b>A:</b> {prompt.answer ?? <i> No response</i>}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    ) : (
+                      <div>(Loading...)</div>
+                    )}
                   </div>
                 );
               })}
@@ -266,12 +298,12 @@ export default function FacilitatorSessionView() {
               {participants
                 .filter(p => p.user_id !== profile?.id && !p.is_finished)
                 .map(p => {
-                  const counts = promptCounts[p.user_id];
+                  const data = promptData[p.user_id];
                   return (
                     <div key={p.user_id}>
                       {p.profile?.first_name} {p.profile?.last_name}{" "}
-                      {counts
-                        ? `(${counts.done}/${counts.total} responses)`
+                      {data
+                        ? `(${data.done}/${data.total} responses)`
                         : "(Loading counts...)"}
                     </div>
                   );

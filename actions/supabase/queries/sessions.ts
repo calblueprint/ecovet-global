@@ -504,14 +504,14 @@ export async function getPhaseId(sessionId: UUID): Promise<UUID | null> {
 
 export async function getPromptIdByRolePhase(
   rolePhaseId: UUID,
-): Promise<UUID[] | null> {
+): Promise<string[] | null> {
   // DT: Effectively, this gives us the number of Prompt questions because the promptId is unique for each Prompt.
   //DT: This works because each PromptId is unique for each combination of Role + Phase.
   const supabase = await getSupabaseServerClient();
 
   const { data, error } = await supabase
     .from("prompt")
-    .select("prompt_id")
+    .select("*")
     .eq("role_phase_id", rolePhaseId);
 
   if (error) {
@@ -526,15 +526,15 @@ export async function getRespondedPromptsByRolePhase(
   promptIds: UUID[],
   sessionId: UUID,
   rolePhaseId: UUID,
-): Promise<number> {
+): Promise<string[] | null> {
   // DT: This gives us the number of Prompt questions that have been answered by the user for a particular Role + Phase in a particular Session.
   // DT: We have to use userId and sessionId because the same RolePhaseId can be present in multiple sessions and we want to know how many prompts
   // the user has answered for that RolePhaseId in that particular session.
   const supabase = await getSupabaseServerClient();
 
-  const { count, error } = await supabase
+  const { data, error } = await supabase
     .from("prompt_response")
-    .select("*", { count: "exact", head: true })
+    .select("*")
     .in("prompt_id", promptIds)
     .eq("session_id", sessionId)
     .eq("role_phase_id", rolePhaseId);
@@ -544,5 +544,49 @@ export async function getRespondedPromptsByRolePhase(
     throw error;
   }
 
-  return count ?? 0;
+  return data?.map(d => d.prompt_id) ?? null;
+}
+
+export async function fetchPromptsWithResponses(
+  rolePhaseId: UUID,
+  userId: UUID,
+  sessionId: UUID,
+) {
+  const supabase = await getSupabaseServerClient();
+
+  // 1. Get all prompts (questions)
+  const { data: prompts, error: promptsError } = await supabase
+    .from("prompt")
+    .select("prompt_id, prompt_text")
+    .eq("role_phase_id", rolePhaseId);
+
+  if (promptsError) {
+    console.error("Error fetching prompts:", promptsError);
+    throw promptsError;
+  }
+
+  // 2. Get responses for each particular user/session/rolePhase
+  const { data: responses, error: responsesError } = await supabase
+    .from("prompt_response")
+    .select("prompt_id, prompt_answer")
+    .eq("user_id", userId)
+    .eq("session_id", sessionId)
+    .eq("role_phase_id", rolePhaseId);
+
+  if (responsesError) {
+    console.error("Error fetching responses:", responsesError);
+    throw responsesError;
+  }
+
+  // 3. Map responses by prompt_id for fast lookup
+  const responseMap = new Map(
+    responses?.map(r => [r.prompt_id, r.prompt_answer]),
+  );
+
+  // 4. Merge
+  return prompts.map(p => ({
+    promptId: p.prompt_id,
+    question: p.prompt_text ?? "Missing Question",
+    answer: responseMap.get(p.prompt_id) ?? null,
+  }));
 }
