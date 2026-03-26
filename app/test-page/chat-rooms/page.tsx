@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { UUID } from "node:crypto";
-import { createChatRoom, getChatRooms } from "@/actions/supabase/queries/chat";
+import {
+  createChatRoom,
+  getUserChatRooms,
+} from "@/actions/supabase/queries/chat";
 import { H2 } from "@/styles/text";
 import { useProfile } from "@/utils/ProfileProvider";
 
@@ -14,8 +17,10 @@ export default function ChatPage() {
   const [chatRooms, setChatRooms] = useState<string[]>([]);
 
   async function loadRooms() {
+    if (!userId) return;
+
     try {
-      const rooms = await getChatRooms();
+      const rooms = await getUserChatRooms(userId);
       setChatRooms(rooms);
     } catch {
       console.log("Error loading chat rooms.");

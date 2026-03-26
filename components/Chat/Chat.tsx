@@ -3,8 +3,15 @@ import { H2 } from "@/styles/text";
 import { UUID } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import { useRealtimeChat as useChat } from "@/utils/UseChat";
+import ChatUsers from "./ChatUsers";
 
-export default function Chat({ roomId }: { roomId: UUID }) {
+export default function Chat({
+  roomId,
+  sessionId,
+}: {
+  roomId: UUID;
+  sessionId: UUID;
+}) {
   const { userId, profile } = useProfile();
 
   const [userInput, setUserInput] = useState("");
@@ -32,6 +39,8 @@ export default function Chat({ roomId }: { roomId: UUID }) {
         onChange={e => setUserInput(e.target.value)}
       />
       <button onClick={() => sendMessage(userInput)}>Send Message</button>
+
+      <ChatUsers roomId={roomId} sessionId={sessionId} />
     </div>
   );
 }

@@ -6,5 +6,9 @@ import Chat from "@/components/Chat/Chat";
 export default function ChatPage() {
   const { roomId } = useParams<{ roomId: string }>();
 
-  return <Chat roomId={roomId} />;
+  return (
+    <div>
+      <Chat roomId={roomId} />
+    </div>
+  );
 }

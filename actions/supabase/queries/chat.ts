@@ -4,13 +4,33 @@ import { UUID } from "crypto";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { ChatMessage } from "@/types/schema";
 
-export async function getChatRooms(limit: number = 10) {
+export async function getChatParticipants(roomId: string) {
   const supabase = await getSupabaseServerClient();
 
   const { data, error } = await supabase
-    .from("unique_chat_rooms")
-    .select("*")
-    .limit(limit);
+    .from("chat_room")
+    .select("user_id")
+    .eq("room_id", roomId);
+
+  if (error) {
+    console.error("Error getting chat rooms users: ", error.message);
+    throw new Error("Failed to get chat rooms users.");
+  }
+
+  const userIds = data
+    .filter(({ user_id }) => user_id)
+    .map(({ user_id }) => user_id);
+
+  return userIds as string[];
+}
+
+export async function getUserChatRooms(userId: string) {
+  const supabase = await getSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("chat_room")
+    .select("room_id")
+    .eq("user_id", userId);
 
   if (error) {
     console.error("Error getting chat rooms: ", error.message);
@@ -73,7 +93,7 @@ export async function getMessageHistory(
 }
 
 export async function addUserToChatRoom(
-  roomId: UUID,
+  roomId: string,
   userId: string,
   sessionId: string,
 ) {
@@ -133,7 +153,7 @@ export async function createChatRoom(
 }
 
 async function addChatRoomEntry(
-  roomId: UUID,
+  roomId: string,
   userId: string,
   sessionId: string,
 ) {
