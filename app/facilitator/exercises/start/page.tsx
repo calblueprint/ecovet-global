@@ -111,7 +111,6 @@ export default function Page() {
 
       if (id) {
         const rolesData = await fetchRoles(id);
-        // Cast to Role[] instead of any[]
         setRoles((rolesData as Role[]) || []);
       } else {
         setRoles([]);
@@ -149,7 +148,6 @@ export default function Page() {
 
       router.push(`/facilitator/session-view?sessionId=${sessionId}`);
     } catch (err) {
-      console.error(err);
       alert(err instanceof Error ? err.message : "Failed to start session");
     } finally {
       setIsStarting(false);
@@ -251,7 +249,7 @@ export default function Page() {
 
             {participants.map((p, i) => (
               <TableRow key={`${selectedTemplateId}-${i}`}>
-                <div style={{ flex: 1 }}>
+                <div>
                   <InputDropdown
                     label="Participant"
                     options={userOptions}
@@ -265,7 +263,7 @@ export default function Page() {
                   />
                 </div>
 
-                <div style={{ flex: 1 }}>
+                <div>
                   <InputDropdown
                     label="Role"
                     options={roleOptions}
