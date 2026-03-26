@@ -1,4 +1,5 @@
-import { useState, useTransition } from "react";
+import { useState } from "react";
+import { H2 } from "@/styles/text";
 import { UUID } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import { useRealtimeChat as useChat } from "@/utils/UseChat";
@@ -15,7 +16,7 @@ export default function Chat({ roomId }: { roomId: UUID }) {
 
   return (
     <div>
-      <h1>Chat Room: {roomId}</h1>
+      <H2>Chat Room: {roomId}</H2>
       {loading && <p>Loading chat...</p>}
       <div>
         {chatMessages.map(chatMessage => (
