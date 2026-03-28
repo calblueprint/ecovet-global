@@ -354,7 +354,11 @@ export default function TemplateListPage() {
               {filteredTemplates.map(t => (
                 <GeneralList key={t.template_id}>
                   <div
-                    onClick={() => router.replace(`/sessions/${t.template_id}`)}
+                    onClick={() =>
+                      router.replace(
+                        `/facilitator/exercises/start?templateId=${t.template_id}`,
+                      )
+                    }
                     style={{ cursor: "pointer" }}
                   >
                     {t.template_name}

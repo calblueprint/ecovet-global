@@ -4,7 +4,8 @@ import type { DropdownOption } from "@/types/dropdown";
 import type { Profile, Template, UUID } from "@/types/schema";
 import type { SelectInstance } from "react-select";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Checkbox } from "@mui/material";
 import {
   assignParticipantToSession,
   createSession,
@@ -17,6 +18,9 @@ import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import InviteComponent from "@/components/InviteComponent/InviteComponent";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
+  CheckboxInput,
+  CheckboxLabel,
+  CheckboxRow,
   ConfigRow,
   DeleteButton,
   DropdownContainer,
@@ -47,9 +51,12 @@ export default function Page() {
   const participantRefs = useRef<(SelectInstance<DropdownOption> | null)[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
+  const [isForceAdvance, setIsForceAdvance] = useState(false);
   const router = useRouter();
   const [isStarting, setIsStarting] = useState(false);
   const [roles, setRoles] = useState<Role[]>([]);
+  const searchParams = useSearchParams();
+  const preselectedTemplateId = searchParams.get("templateId");
 
   const rowCounter = useRef(0);
   const [participants, setParticipants] = useState([
@@ -73,8 +80,14 @@ export default function Page() {
     if (profile?.user_group_id) {
       const data = await fetchTemplatesExercise(profile.user_group_id as UUID);
       setTemplates(data || []);
+
+      if (preselectedTemplateId) {
+        setSelectedTemplateId(preselectedTemplateId);
+        const rolesData = await fetchRoles(preselectedTemplateId);
+        setRoles((rolesData as Role[]) || []);
+      }
     }
-  }, [profile?.user_group_id]);
+  }, [profile?.user_group_id, preselectedTemplateId]);
 
   const loadGroupMembers = useCallback(async () => {
     if (profile?.user_group_id) {
@@ -120,6 +133,7 @@ export default function Page() {
       const sessionId = (await createSession(
         selectedTemplateId as UUID,
         profile.user_group_id as UUID,
+        isForceAdvance,
       )) as UUID;
 
       await assignParticipantToSession(profile.id as UUID, sessionId, null);
@@ -208,13 +222,16 @@ export default function Page() {
 
           <ConfigRow>
             <DropdownContainer>
-              <InputDropdown
-                label="Select Exercise"
-                options={exerciseOptions}
-                placeholder="Select Exercise"
-                customStyles={ExerciseSelectStyles}
-                onChange={handleExerciseChange}
-              />
+              {templates.length > 0 && (
+                <InputDropdown
+                  label="Select Exercise"
+                  options={exerciseOptions}
+                  placeholder="Select Exercise"
+                  customStyles={ExerciseSelectStyles}
+                  onChange={handleExerciseChange}
+                  defaultValue={preselectedTemplateId ?? undefined}
+                />
+              )}
             </DropdownContainer>
 
             <ToggleGroup>
@@ -225,6 +242,16 @@ export default function Page() {
                 Asynchronous
               </ToggleButton>
             </ToggleGroup>
+            <CheckboxRow>
+              <CheckboxInput
+                type="checkbox"
+                id="force-advance"
+                onChange={e => setIsForceAdvance(e.target.checked)}
+              />
+              <CheckboxLabel htmlFor="force-advance">
+                Force Advance?
+              </CheckboxLabel>
+            </CheckboxRow>
           </ConfigRow>
 
           <InviteComponent

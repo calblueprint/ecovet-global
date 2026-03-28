@@ -17,6 +17,7 @@ interface CommonProps {
   customStyles?: StylesConfig<DropdownOption, boolean>;
   onKeyDown?: (e: React.KeyboardEvent) => void;
   selectRef?: React.Ref<SelectInstance<DropdownOption>>;
+  defaultValue?: string;
 }
 
 interface MultiSelectProps extends CommonProps {
@@ -41,6 +42,7 @@ export default function InputDropdown({
   customStyles,
   onKeyDown,
   selectRef,
+  defaultValue,
 }: InputDropdownProps) {
   const optionsArray = useMemo(
     () =>
@@ -52,6 +54,10 @@ export default function InputDropdown({
           })),
     [options],
   );
+
+  const defaultOption = defaultValue
+    ? optionsArray.find(o => o.value === defaultValue)
+    : undefined;
 
   const handleChange = useCallback(
     (newValue: MultiValue<DropdownOption> | SingleValue<DropdownOption>) => {
@@ -82,6 +88,7 @@ export default function InputDropdown({
       placeholder={placeholder}
       isMulti={multi}
       onChange={handleChange}
+      defaultValue={defaultOption}
       styles={
         customStyles || (selectStyles as StylesConfig<DropdownOption, boolean>)
       }

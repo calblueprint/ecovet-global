@@ -270,3 +270,23 @@ export const DeleteButton = styled.button`
     color: #e53e3e;
   }
 `;
+
+export const CheckboxRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0.8rem;
+`;
+
+export const CheckboxLabel = styled.label`
+  font-size: 14px;
+  font-family: ${Sans.style.fontFamily};
+  color: ${COLORS.black40};
+`;
+
+export const CheckboxInput = styled.input`
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: ${COLORS.black70};
+`;
