@@ -51,8 +51,9 @@ export default function Page() {
   const [isStarting, setIsStarting] = useState(false);
   const [roles, setRoles] = useState<Role[]>([]);
 
+  const rowCounter = useRef(0);
   const [participants, setParticipants] = useState([
-    { id: "", name: "", email: "", role: "" },
+    { key: rowCounter.current++, id: "", name: "", email: "", role: "" },
   ]);
 
   const userOptions = new Map(
@@ -88,7 +89,9 @@ export default function Page() {
     if (templateId !== selectedTemplateId) {
       const id = templateId ?? "";
       setSelectedTemplateId(id);
-      setParticipants([{ id: "", name: "", email: "", role: "" }]);
+      setParticipants([
+        { key: rowCounter.current++, id: "", name: "", email: "", role: "" },
+      ]);
 
       if (id) {
         const rolesData = await fetchRoles(id);
@@ -142,7 +145,10 @@ export default function Page() {
 
   const addParticipantRow = () => {
     setParticipants(prev => {
-      const next = [...prev, { id: "", name: "", email: "", role: "" }];
+      const next = [
+        ...prev,
+        { key: rowCounter.current++, id: "", name: "", email: "", role: "" },
+      ];
       setTimeout(() => {
         participantRefs.current[next.length - 1]?.focus();
       }, 50);
@@ -233,7 +239,7 @@ export default function Page() {
             </TableHeader>
 
             {participants.map((p, i) => (
-              <TableRow key={`${selectedTemplateId}-${i}`}>
+              <TableRow key={p.key}>
                 <div>
                   <InputDropdown
                     label="Participant"
