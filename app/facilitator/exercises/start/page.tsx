@@ -3,13 +3,7 @@
 import type { DropdownOption } from "@/types/dropdown";
 import type { Profile, Template, UUID } from "@/types/schema";
 import type { SelectInstance } from "react-select";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   assignParticipantToSession,
@@ -24,7 +18,7 @@ import InviteComponent from "@/components/InviteComponent/InviteComponent";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
   ConfigRow,
-  ContentWrapper,
+  DeleteButton,
   DropdownContainer,
   ExerciseSelectStyles,
   Heading4,
@@ -33,11 +27,12 @@ import {
   ParticipantTable,
   PrimaryActionArea,
   SideNavNewTemplateButton,
+  StartContentWrapper,
   TableHeader,
   TableRow,
   ToggleButton,
   ToggleGroup,
-} from "../../styles";
+} from "./styles";
 
 interface Role {
   id: string;
@@ -60,31 +55,17 @@ export default function Page() {
     { id: "", name: "", email: "", role: "" },
   ]);
 
-  const userOptions = useMemo(
-    () =>
-      new Map(
-        availableUsers.map(u => [
-          u.id,
-          `${u.first_name} ${u.last_name}, ${u.email}`,
-        ]),
-      ),
-    [availableUsers],
+  const userOptions = new Map(
+    availableUsers.map(u => [
+      u.id,
+      `${u.first_name} ${u.last_name}, ${u.email}`,
+    ]),
   );
 
-  const roleOptions = useMemo(
-    () => new Map(roles.map(r => [r.id, r.name])),
-    [roles],
-  );
+  const roleOptions = new Map(roles.map(r => [r.id, r.name]));
 
-  const exerciseOptions = useMemo(
-    () =>
-      new Map(
-        templates.map(t => [
-          t.template_id,
-          t.template_name || "Untitled Exercise",
-        ]),
-      ),
-    [templates],
+  const exerciseOptions = new Map(
+    templates.map(t => [t.template_id, t.template_name || "Untitled Exercise"]),
   );
 
   const loadTemplates = useCallback(async () => {
@@ -198,6 +179,10 @@ export default function Page() {
     return <div>Loading session...</div>;
   }
 
+  const removeParticipantRow = (index: number) => {
+    setParticipants(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleEnterToNext =
     (nextRef: React.RefObject<SelectInstance<DropdownOption> | null>) =>
     (e: React.KeyboardEvent) => {
@@ -212,7 +197,7 @@ export default function Page() {
     <>
       <TopNavBar />
       <LayoutWrapper>
-        <ContentWrapper>
+        <StartContentWrapper>
           <Heading4>Start Exercise</Heading4>
 
           <ConfigRow>
@@ -278,6 +263,9 @@ export default function Page() {
                     }}
                   />
                 </div>
+                <DeleteButton onClick={() => removeParticipantRow(i)}>
+                  ✕
+                </DeleteButton>
               </TableRow>
             ))}
           </ParticipantTable>
@@ -292,7 +280,7 @@ export default function Page() {
               {isStarting ? "Starting Session..." : "Start Exercise"}
             </SideNavNewTemplateButton>
           </PrimaryActionArea>
-        </ContentWrapper>
+        </StartContentWrapper>
       </LayoutWrapper>
     </>
   );
