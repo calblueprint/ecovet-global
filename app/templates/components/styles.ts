@@ -264,7 +264,7 @@ export const FormStack = styled(Flex).attrs({
 export const RoleHeader = styled(Flex)`
   justify-content: space-between;
   align-items: center;
-})`;
+`;
 
 export const RoleHeaderContainer = styled(Flex).attrs({
   $direction: "column",
@@ -344,24 +344,15 @@ export const QuestionCard = styled.fieldset`
   margin-bottom: 10px;
 `;
 
-export const QuestionRowStyled = styled.div`
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  width: 100%;
-`;
-
 /* Big comfortable text area (used for description/prompts) */
 export const BigInput = styled.input.attrs({
   type: "text",
 })`
-  flex: 1;
   display: flex;
   padding: 10px 12px;
   align-items: center;
-  width: 100%;
-  justify-content: space-between;
   gap: 10px;
+  flex: 1 0 0;
   align-self: stretch;
   font-size: 0.75rem;
 
@@ -377,8 +368,6 @@ export const BigInput = styled.input.attrs({
 
 export const RolePhaseDescriptionInput = styled.input.attrs({ type: "text" })`
   border: none;
-  font-style: italic;
-  width: 100%;
   font-style: italic;
   width: 100%;
 `;
