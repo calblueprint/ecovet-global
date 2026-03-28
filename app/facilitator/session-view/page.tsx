@@ -8,6 +8,7 @@ import {
   fetchPhases,
   fetchPromptsWithResponses,
   fetchRolePhases,
+  fetchRolePhasesBatch,
   finishSession,
   isSessionForceAdvance,
   SessionParticipant,
@@ -168,10 +169,14 @@ export default function FacilitatorSessionView() {
     async function loadCounts() {
       console.log("loadCounts sessionId:", sessionId);
       console.log("loadCounts participants:", participants.length);
-      console.log(
-        "loadCounts currentPhaseObject:",
-        currentPhaseObject?.phase_id,
-      );
+      const phaseId = currentPhaseObject?.phase_id;
+      console.log("loadCounts currentPhaseObject:", phaseId);
+      const roleIds = participants
+        .map(p => p.role_id)
+        .filter(Boolean) as UUID[];
+
+      const rolePhaseMap = await fetchRolePhasesBatch(roleIds, phaseId);
+
       const data: ParticipantPromptData = {};
 
       await Promise.all(
@@ -181,11 +186,22 @@ export default function FacilitatorSessionView() {
               ? currentPhase
               : (p.phase_index ?? 0);
 
-            const result = await loadDataForParticipant(p, phaseIndex);
+            if (!p.role_id) return;
 
-            if (result) {
-              data[p.user_id] = result;
-            }
+            const rolePhase = rolePhaseMap.get(p.role_id);
+            if (!rolePhase) return;
+
+            const prompts = await fetchPromptsWithResponses(
+              rolePhase.role_phase_id,
+              p.user_id,
+              sessionId as UUID,
+            );
+
+            data[p.user_id] = {
+              total: prompts.length,
+              done: prompts.filter(prompt => prompt.answer).length,
+              prompts,
+            };
           } catch (err) {
             console.error(`Failed for user ${p.user_id}`, err);
           }

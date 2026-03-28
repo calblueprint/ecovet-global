@@ -303,3 +303,17 @@ export async function fetchTemplatesWithTags() {
     associated_tags: t.template_tag.map((tt: { tag: Tag }) => tt.tag),
   }));
 }
+
+export const fetchTemplatesExercise = async (userGroup: string) => {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("template")
+    .select("*")
+    .or(`user_group_id.eq.${userGroup},accessible_to_all.eq.true`);
+
+  if (error) {
+    console.error("Error fetching templates:", error);
+    return [];
+  }
+  return data;
+};

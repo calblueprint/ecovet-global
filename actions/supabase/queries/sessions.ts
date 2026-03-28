@@ -522,6 +522,8 @@ export async function getPromptIdByRolePhase(
   return data?.map(d => d.prompt_id) ?? null;
 }
 
+// DEPRECATED - query moved into fetchPromptsWithResponses
+// kept for future use
 export async function getRespondedPromptsByRolePhase(
   promptIds: UUID[],
   sessionId: UUID,
@@ -547,6 +549,8 @@ export async function getRespondedPromptsByRolePhase(
   return data?.map(d => d.prompt_id) ?? null;
 }
 
+// DEPRECATED - query moved into fetchPromptsWithResponses
+// kept for future use
 export async function fetchPromptsWithResponses(
   rolePhaseId: UUID,
   userId: UUID,
@@ -589,4 +593,23 @@ export async function fetchPromptsWithResponses(
     question: p.prompt_text ?? "Missing Question",
     answer: responseMap.get(p.prompt_id) ?? null,
   }));
+}
+
+export async function fetchRolePhasesBatch(
+  roleIds: UUID[],
+  phaseId: UUID,
+): Promise<Map<UUID, RolePhase>> {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("role_phase")
+    .select("*")
+    .eq("phase_id", phaseId)
+    .in("role_id", roleIds);
+
+  if (error) {
+    console.error("Error fetching role phases:", error);
+    throw error;
+  }
+
+  return new Map(data?.map(rp => [rp.role_id, rp]) ?? []);
 }
