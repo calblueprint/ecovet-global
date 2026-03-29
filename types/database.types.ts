@@ -116,11 +116,11 @@ export type Database = {
       };
       participant_session: {
         Row: {
-          created_at: string | null;
+          created_at: string;
           is_finished: boolean | null;
           phase_id: string | null;
-          phase_index: number | null;
-          role_id: string | null;
+          phase_index: number;
+          role_id: string;
           session_id: string;
           user_id: string;
         };
@@ -178,8 +178,8 @@ export type Database = {
           phase_description: string | null;
           phase_id: string;
           phase_name: string | null;
-          phase_number: number | null;
-          template_id: string | null;
+          phase_number: number;
+          template_id: string;
         };
         Insert: {
           phase_description?: string | null;
@@ -433,8 +433,8 @@ export type Database = {
           is_finished: boolean | null;
           session_id: string;
           session_name: string | null;
-          template_id: string | null;
-          user_group_id: string | null;
+          template_id: string;
+          user_group_id: string;
         };
         Insert: {
           after_action_report_id?: string | null;
@@ -476,7 +476,7 @@ export type Database = {
       tag: {
         Row: {
           color: string | null;
-          name: string | null;
+          name: string;
           number: number | null;
           tag_id: string;
           user_group_id: string;
@@ -514,7 +514,7 @@ export type Database = {
           summary: string | null;
           template_id: string;
           template_name: string | null;
-          timestamp: string | null;
+          timestamp: string;
           user_group_id: string | null;
         };
         Insert: {
