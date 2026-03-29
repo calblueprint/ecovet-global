@@ -21,14 +21,6 @@ export const Main = styled.main`
   background: ${COLORS.white};
 `;
 
-export const ContentWrapper = styled.div`
-  flex: 1;
-  padding: 2rem;
-
-  overflow-y: auto;
-  min-height: 0;
-`;
-
 export const StartContentWrapper = styled.div`
   flex: 1;
   padding: 2rem;
@@ -37,28 +29,6 @@ export const StartContentWrapper = styled.div`
 
   overflow-y: auto;
   min-height: 0;
-`;
-
-export const PageDiv = styled.main`
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  height: 100%;
-`;
-
-export const MainDiv = styled.main`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding: 2rem;
-  padding-top: 1rem;
-  background-color: ${COLORS.white};
-  background: ${COLORS.white};
-`;
-
-export const SearchBarStyled = styled.div`
-  width: 100%;
-  margin-bottom: 1rem;
 `;
 
 export const SearchInput = styled.input`
@@ -73,15 +43,6 @@ export const SearchInput = styled.input`
   background-color: ${COLORS.oat_light};
 `;
 
-export const Heading3 = styled.h3`
-  font-family: ${Sans.style.fontFamily};
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  font-style: normal;
-  line-height: normal;
-`;
-
 export const Heading4 = styled.h4`
   font-family: ${Sans.style.fontFamily};
   font-size: 1.5rem;
@@ -93,7 +54,7 @@ export const Heading4 = styled.h4`
 
 export const GeneralList = styled.ul`
   display: grid;
-  grid-template-columns: 1.5fr 1fr 2fr;
+  grid-template-columns: 1fr 1fr auto; /* left | middle | right */
   column-gap: 1rem;
 
   border-radius: 0.5rem 0.5rem 0 0;
@@ -105,21 +66,7 @@ export const GeneralList = styled.ul`
   font-weight: 500;
   color: ${COLORS.black70};
   min-height: 4rem;
-  align-items: start;
-`;
-
-export const GeneralTitle = styled.h1`
-  display: grid;
-  grid-template-columns: 1.5fr 1.1fr 1.9fr;
   align-items: center;
-  border-bottom: 1px solid ${COLORS.oat_medium};
-  border-radius: 0.5rem 0.5rem 0 0;
-  padding: 1.25rem 2rem 1.25rem 2rem;
-  background: ${COLORS.white};
-  font-family: ${Sans.style.fontFamily};
-  color: ${COLORS.black40};
-  font-size: 12px;
-  font-weight: 500;
 `;
 
 export const SortButton = styled.button`
@@ -136,45 +83,6 @@ export const SortButton = styled.button`
 
   &:hover {
     color: #555;
-  }
-`;
-
-export const SideNavContainer = styled.div`
-  display: flex;
-  padding: 0.75rem 1rem;
-  padding-right: 0;
-  width: 12rem;
-  min-width: 180px;
-  align-items: flex-start;
-  flex-direction: column;
-  background-color: ${COLORS.oat_light};
-`;
-
-export const SideNavTemplatesContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin: 1.25rem 0;
-  width: 100%;
-`;
-
-export const SideNavButton = styled.button<{ selected: boolean }>`
-  width: 100%;
-  padding: 0.75rem 1.5rem;
-  text-align: left;
-  gap: 0.5em;
-  background-color: ${({ selected }) =>
-    selected ? COLORS.oat_dark : COLORS.oat_light};
-
-  color: ${({ selected }) => (selected ? COLORS.black : COLORS.black70)};
-  border-radius: 0.25rem;
-  border: none;
-  font-family: ${Sans.style.fontFamily};
-  font-size: 12px;
-  font-weight: 500;
-  &:hover {
-    background-color: ${COLORS.oat_medium};
-    cursor: pointer;
   }
 `;
 
@@ -206,42 +114,6 @@ export const DropdownContainer = styled.div`
   flex-direction: column;
   flex: 1;
   max-width: 400px;
-`;
-
-export const Label = styled.label`
-  font-family: ${Sans.style.fontFamily};
-  font-size: 12px;
-  font-weight: 500;
-  color: ${COLORS.black70};
-  margin-bottom: 0.5rem;
-`;
-
-export const StyledSelect = styled.select`
-  border: 1px solid ${COLORS.oat_medium};
-  border-radius: 4px;
-  padding: 0.5rem 1rem;
-  font-family: ${Sans.style.fontFamily};
-  font-size: 14px;
-  background-color: ${COLORS.white};
-  height: 40px;
-  outline: none;
-  color: ${COLORS.black};
-
-  /* This ensures the arrow shows up across all browsers */
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23d1d1d1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-  background-size: 1.2em;
-
-  cursor: pointer;
-
-  &:focus {
-    border-color: ${COLORS.darkElectricBlue};
-  }
 `;
 
 export const ToggleGroup = styled.div`
@@ -297,18 +169,9 @@ export const TableHeader = styled.div`
 
 export const TableRow = styled.div`
   display: grid;
+  position: relative;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
-`;
-
-export const StaticDataBox = styled.div`
-  border: 1px solid ${COLORS.oat_medium};
-  border-radius: 4px;
-  padding: 0.75rem;
-  font-family: ${Sans.style.fontFamily};
-  font-size: 13px;
-  color: ${COLORS.black70};
-  background-color: ${COLORS.white};
 `;
 
 export const IconButton = styled.button`
@@ -383,6 +246,10 @@ export const ExerciseSelectStyles: StylesConfig<DropdownOption, boolean> = {
 };
 
 export const DeleteButton = styled.button`
+  position: absolute;
+  right: -2rem;
+  top: 25%;
+  botton: 25%;
   opacity: 0;
   background: none;
   border: none;
@@ -394,7 +261,6 @@ export const DeleteButton = styled.button`
   transition:
     opacity 0.15s,
     color 0.15s;
-  align-self: center;
 
   ${TableRow}:hover & {
     opacity: 1;
@@ -403,4 +269,24 @@ export const DeleteButton = styled.button`
   &:hover {
     color: #e53e3e;
   }
+`;
+
+export const CheckboxRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0.8rem;
+`;
+
+export const CheckboxLabel = styled.label`
+  font-size: 14px;
+  font-family: ${Sans.style.fontFamily};
+  color: ${COLORS.black40};
+`;
+
+export const CheckboxInput = styled.input`
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: ${COLORS.black70};
 `;

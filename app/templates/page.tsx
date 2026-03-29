@@ -35,7 +35,7 @@ const createInitialStore = (): LocalStore => {
     rolePhaseIndex: {},
     promptById: {},
     promptIndex: {},
-    optionsByPromptId: {}, // NEW
+    optionsByPromptId: {},
   };
 };
 

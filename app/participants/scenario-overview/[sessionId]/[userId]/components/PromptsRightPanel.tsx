@@ -15,7 +15,7 @@ interface PromptsRightPanelProps {
   prompts: Prompt[];
   answers: string[];
   completedPrompts: Set<string>;
-  phaseInd: number;
+  phaseName: string;
   isOverview: boolean;
   onInputAnswer: (index: number, value: string) => void;
   onBlur: (index: number) => void;
@@ -26,7 +26,7 @@ export default function PromptsRightPanel({
   prompts,
   answers,
   completedPrompts,
-  phaseInd,
+  phaseName,
   isOverview,
   onInputAnswer,
   onBlur,
@@ -39,7 +39,7 @@ export default function PromptsRightPanel({
 
   return (
     <ContentDiv>
-      <PhaseHeading>Phase {phaseInd + 1}</PhaseHeading>
+      <PhaseHeading>{phaseName}</PhaseHeading>
 
       <div>
         Progress: {completedCount} / {totalPrompts} completed (

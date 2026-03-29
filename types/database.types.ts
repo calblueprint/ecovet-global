@@ -117,7 +117,7 @@ export type Database = {
       participant_session: {
         Row: {
           created_at: string;
-          is_finished: boolean | null;
+          is_finished: boolean;
           phase_id: string | null;
           phase_index: number;
           role_id: string;

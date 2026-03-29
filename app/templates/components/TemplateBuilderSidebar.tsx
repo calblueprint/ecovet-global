@@ -36,9 +36,13 @@ export default function TemplateBuilderSideBar({
   const TEMPLATE_INDEX = 1;
   const template = localStore?.rolesById[TEMPLATE_INDEX] as Template;
 
+  function createUUID(): UUID {
+    return crypto.randomUUID() as `${string}-${string}-${string}-${string}-${string}`;
+  }
+
   function addPhase(): void {
     if (!localStore) return;
-    const newPhaseID = crypto.randomUUID();
+    const newPhaseID = createUUID();
 
     updateLocalStore(draft => {
       const phaseNumber = draft.phaseIds.length + 1;
@@ -48,18 +52,17 @@ export default function TemplateBuilderSideBar({
         phase_name: `Phase ${phaseNumber}`,
         phase_number: phaseNumber,
         phase_description: null,
-        is_finished: null,
       };
       draft.phaseIds.push(newPhaseID);
 
       for (const role of draft.roleIds) {
         if (typeof role === "number") continue;
-        const newRolePhaseID = crypto.randomUUID();
+        const newRolePhaseID = createUUID();
         draft.rolePhasesById[newRolePhaseID] = {
           role_phase_id: newRolePhaseID,
           phase_id: newPhaseID,
           role_id: role,
-          description: null,
+          role_phase_description: null,
         };
         draft.rolePhaseIndex[role][newPhaseID] = newRolePhaseID;
         draft.promptIndex[newRolePhaseID] = [];
@@ -69,7 +72,7 @@ export default function TemplateBuilderSideBar({
 
   function addRole(): void {
     if (localStore == null) return;
-    const newRoleID = crypto.randomUUID();
+    const newRoleID = createUUID();
 
     updateLocalStore(draft => {
       draft.rolesById[newRoleID] = {
@@ -83,13 +86,13 @@ export default function TemplateBuilderSideBar({
 
       for (const phaseID of draft.phaseIds) {
         //when creating roles when phases already exist, automatically add rolePhases for role
-        const newRolePhaseID = crypto.randomUUID();
+        const newRolePhaseID = createUUID();
         draft.rolePhaseIndex[newRoleID][phaseID] = newRolePhaseID;
         draft.rolePhasesById[newRolePhaseID] = {
           role_phase_id: newRolePhaseID,
           phase_id: phaseID,
           role_id: newRoleID,
-          description: null,
+          role_phase_description: null,
         };
         draft.promptIndex[newRolePhaseID] = []; //similiar to rolePhaseIndex dict but for prompts
       }
