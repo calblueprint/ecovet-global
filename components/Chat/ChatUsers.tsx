@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   addUserToChatRoom,
   getChatParticipants,
+  removeUserFromChatRoom,
 } from "@/actions/supabase/queries/chat";
 import { fetchParticipants } from "@/actions/supabase/queries/sessions";
 import { H3 } from "@/styles/text";
@@ -23,12 +24,30 @@ export default function ChatUsers({
   const { profile } = useProfile();
 
   const [currentParticipants, setCurrentParticipants] = useState<string[]>([]);
-  const [participants, setParticipants] = useState<User[]>([]);
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const avaliableParticipants = useMemo(
+  const [participantOptions, setParticipantOptions] = useState<User[]>([]);
+  const [addSelectedUserId, setAddSelectedUserId] = useState<string | null>(
+    null,
+  );
+  const [removeSelectedUserId, setRemoveSelectedUserId] = useState<
+    string | null
+  >(null);
+
+  const currentParticipantSelections = useMemo(
     () =>
       new Map(
-        participants
+        participantOptions
+          .filter(
+            user =>
+              user.name != "null null" && currentParticipants.includes(user.id),
+          )
+          .map(p => [p.id, p.name]),
+      ),
+    [currentParticipants, participantOptions],
+  );
+  const avaliableParticipantSelections = useMemo(
+    () =>
+      new Map(
+        participantOptions
           .filter(
             user =>
               user.name != "null null" &&
@@ -36,43 +55,76 @@ export default function ChatUsers({
           )
           .map(p => [p.id, p.name]),
       ),
-    [currentParticipants, participants],
+    [currentParticipants, participantOptions],
   );
 
-  // TODO: add delete users from chat
   useEffect(() => {
     async function loadParticipants() {
       if (!profile?.user_group_id) return;
 
       // TODO: change to Promise.all
       const participantsData = await fetchParticipants(profile?.user_group_id);
-      setParticipants(participantsData as User[]);
+      setParticipantOptions(participantsData as User[]);
 
       const currentParticipantData = await getChatParticipants(roomId);
       setCurrentParticipants(currentParticipantData);
+      console.log(participantsData, currentParticipantData);
     }
 
     loadParticipants();
-  }, []);
+  }, [profile?.user_group_id]);
 
   async function onAddUser() {
-    if (!selectedUserId) return;
-    await addUserToChatRoom(roomId, selectedUserId, sessionId);
-    setSelectedUserId(null);
+    if (!addSelectedUserId) return;
+
+    try {
+      setCurrentParticipants(curr => [...curr, addSelectedUserId]);
+      await addUserToChatRoom(roomId, addSelectedUserId, sessionId);
+    } catch {
+      setCurrentParticipants(curr =>
+        curr.filter(userId => userId != addSelectedUserId),
+      );
+    }
+
+    setAddSelectedUserId(null);
+  }
+
+  async function onRemoveUser() {
+    if (!removeSelectedUserId) return;
+
+    try {
+      setCurrentParticipants(curr =>
+        curr.filter(userId => userId != removeSelectedUserId),
+      );
+      await removeUserFromChatRoom(roomId, removeSelectedUserId);
+    } catch {
+      setCurrentParticipants(curr => [...curr, removeSelectedUserId]);
+    }
+
+    setRemoveSelectedUserId(null);
   }
 
   return (
     <div>
       <H3>Manage users</H3>
-      {/* TODO: show current users in the chat */}
       <div>
         <InputDropdown
           label={`Participant user`}
-          options={avaliableParticipants}
+          options={currentParticipantSelections}
           placeholder="Select participant"
-          onChange={userId => setSelectedUserId(userId)}
+          onChange={userId => setRemoveSelectedUserId(userId)}
         />
-        <button onClick={onAddUser} disabled={!selectedUserId}>
+        <button onClick={onRemoveUser} disabled={!removeSelectedUserId}>
+          remove user from chat
+        </button>
+
+        <InputDropdown
+          label={`Participant user`}
+          options={avaliableParticipantSelections}
+          placeholder="Select participant"
+          onChange={userId => setAddSelectedUserId(userId)}
+        />
+        <button onClick={onAddUser} disabled={!addSelectedUserId}>
           add user to chat
         </button>
       </div>

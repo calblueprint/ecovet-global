@@ -37,6 +37,8 @@ export async function getUserChatRooms(userId: string) {
     throw new Error("Failed to get chat rooms.");
   }
 
+  console.log("getting user chat romos");
+  console.log(data);
   const roomIds = data
     .filter(({ room_id }) => room_id)
     .map(({ room_id }) => room_id);
@@ -90,6 +92,22 @@ export async function getMessageHistory(
   }
 
   return data as ChatMessage[];
+}
+
+export async function removeUserFromChatRoom(roomId: string, userId: string) {
+  const supabase = await getSupabaseServerClient();
+
+  const { error } = await supabase
+    .from("chat_room")
+    .delete()
+    .eq("room_id", roomId)
+    .eq("user_id", userId)
+    .limit(1);
+
+  if (error) {
+    console.log("Error removing user from chat room.", error.message);
+    throw new Error("Failed to remove user from chat room.");
+  }
 }
 
 export async function addUserToChatRoom(

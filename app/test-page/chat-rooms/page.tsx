@@ -7,21 +7,24 @@ import {
   createChatRoom,
   getUserChatRooms,
 } from "@/actions/supabase/queries/chat";
-import { H2 } from "@/styles/text";
+import { Caption, H2 } from "@/styles/text";
 import { useProfile } from "@/utils/ProfileProvider";
 
 export default function ChatPage() {
+  // same as in /chat/[roomId]
   const HARDCODED_SESSION_ID = "000a28c2-80b1-4531-a8f7-3f24949a4738";
 
   const { userId } = useProfile();
   const [chatRooms, setChatRooms] = useState<string[]>([]);
 
   async function loadRooms() {
+    console.log(userId);
     if (!userId) return;
 
     try {
       const rooms = await getUserChatRooms(userId);
       setChatRooms(rooms);
+      console.log("found rooms: ", rooms);
     } catch {
       console.log("Error loading chat rooms.");
     }
@@ -29,7 +32,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     loadRooms();
-  }, []);
+  }, [userId]);
 
   async function onCreateRoom() {
     if (!userId) return;
@@ -42,6 +45,7 @@ export default function ChatPage() {
   return (
     <div>
       <H2>Chat rooms</H2>
+      <Caption>User id: {userId}</Caption>
       <button onClick={onCreateRoom}>create new chat room</button>
 
       {chatRooms.map(roomId => (
