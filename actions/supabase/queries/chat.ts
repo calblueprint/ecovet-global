@@ -24,6 +24,28 @@ export async function getChatParticipants(roomId: string) {
   return userIds as string[];
 }
 
+export async function getChatRoomSessionId(roomId: string) {
+  const supabase = await getSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("chat_room")
+    .select("session_id")
+    .eq("room_id", roomId)
+    .limit(1);
+
+  if (error) {
+    console.error("Error getting chat room session id: ", error.message);
+    throw new Error("Failed to get chat room session id.");
+  }
+
+  if (data?.length == 0) {
+    console.error("Tried getting session for chat room that doesn't exist");
+    throw new Error("Tried getting session for chat room that doesn't exist");
+  }
+
+  return data[0].session_id;
+}
+
 export async function getUserChatRooms(userId: string) {
   const supabase = await getSupabaseServerClient();
 
@@ -37,8 +59,6 @@ export async function getUserChatRooms(userId: string) {
     throw new Error("Failed to get chat rooms.");
   }
 
-  console.log("getting user chat romos");
-  console.log(data);
   const roomIds = data
     .filter(({ room_id }) => room_id)
     .map(({ room_id }) => room_id);

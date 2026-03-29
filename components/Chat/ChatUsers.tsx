@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import {
   addUserToChatRoom,
   getChatParticipants,
+  getChatRoomSessionId,
   removeUserFromChatRoom,
 } from "@/actions/supabase/queries/chat";
-import { fetchParticipants } from "@/actions/supabase/queries/sessions";
+import { fetchChatUserOptions } from "@/actions/supabase/queries/sessions";
 import { H3 } from "@/styles/text";
 import { useProfile } from "@/utils/ProfileProvider";
 import InputDropdown from "../InputDropdown/InputDropdown";
@@ -14,15 +15,10 @@ type User = {
   name: string;
 };
 
-export default function ChatUsers({
-  roomId,
-  sessionId,
-}: {
-  roomId: string;
-  sessionId: string;
-}) {
+export default function ChatUsers({ roomId }: { roomId: string }) {
   const { profile } = useProfile();
 
+  const [sessionId, setSessionId] = useState<string>("");
   const [currentParticipants, setCurrentParticipants] = useState<string[]>([]);
   const [participantOptions, setParticipantOptions] = useState<User[]>([]);
   const [addSelectedUserId, setAddSelectedUserId] = useState<string | null>(
@@ -62,17 +58,24 @@ export default function ChatUsers({
     async function loadParticipants() {
       if (!profile?.user_group_id) return;
 
-      // TODO: change to Promise.all
-      const participantsData = await fetchParticipants(profile?.user_group_id);
-      setParticipantOptions(participantsData as User[]);
+      let sessionIdData = sessionId;
+      if (sessionIdData.length == 0) {
+        sessionIdData = (await getChatRoomSessionId(roomId)) ?? "";
+        setSessionId(sessionIdData);
+      }
 
-      const currentParticipantData = await getChatParticipants(roomId);
+      const [participantsOptionData, currentParticipantData] =
+        await Promise.all([
+          fetchChatUserOptions(profile?.user_group_id, sessionIdData),
+          getChatParticipants(roomId),
+        ]);
+
+      setParticipantOptions(participantsOptionData);
       setCurrentParticipants(currentParticipantData);
-      console.log(participantsData, currentParticipantData);
     }
 
     loadParticipants();
-  }, [profile?.user_group_id]);
+  }, [profile?.user_group_id, roomId]);
 
   async function onAddUser() {
     if (!addSelectedUserId) return;
@@ -106,12 +109,12 @@ export default function ChatUsers({
 
   return (
     <div>
-      <H3>Manage users</H3>
+      <H3>Manage users (session: {sessionId})</H3>
       <div>
         <InputDropdown
           label={`Participant user`}
           options={currentParticipantSelections}
-          placeholder="Select participant"
+          placeholder="Select participant to remove"
           onChange={userId => setRemoveSelectedUserId(userId)}
         />
         <button onClick={onRemoveUser} disabled={!removeSelectedUserId}>
@@ -121,7 +124,7 @@ export default function ChatUsers({
         <InputDropdown
           label={`Participant user`}
           options={avaliableParticipantSelections}
-          placeholder="Select participant"
+          placeholder="Select participant to add"
           onChange={userId => setAddSelectedUserId(userId)}
         />
         <button onClick={onAddUser} disabled={!addSelectedUserId}>

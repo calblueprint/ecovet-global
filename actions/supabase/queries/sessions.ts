@@ -40,6 +40,35 @@ export async function fetchParticipants(userGroupId: string) {
     : [];
 }
 
+export async function fetchChatUserOptions(
+  userGroupId: string,
+  sessionId: string,
+) {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("profile")
+    .select(
+      `
+    *,
+    participant_session!inner(session_id)
+  `,
+    )
+    .eq("user_group_id", userGroupId)
+    .eq("participant_session.session_id", sessionId);
+
+  if (error) {
+    console.error("Error fetching chat users options:", error);
+    throw new Error("Error fetching chat users options");
+  }
+
+  return data
+    ? data.map(p => ({
+        id: String(p.id),
+        name: String(p.first_name + " " + p.last_name),
+      }))
+    : [];
+}
+
 export async function fetchTemplateId(session_id: string) {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase

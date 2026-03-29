@@ -5,13 +5,7 @@ import { useProfile } from "@/utils/ProfileProvider";
 import { useRealtimeChat as useChat } from "@/utils/UseChat";
 import ChatUsers from "./ChatUsers";
 
-export default function Chat({
-  roomId,
-  sessionId,
-}: {
-  roomId: UUID;
-  sessionId: UUID;
-}) {
+export default function Chat({ roomId }: { roomId: UUID }) {
   const { userId, profile } = useProfile();
 
   const [userInput, setUserInput] = useState("");
@@ -40,7 +34,7 @@ export default function Chat({
       />
       <button onClick={() => sendMessage(userInput)}>Send Message</button>
 
-      <ChatUsers roomId={roomId} sessionId={sessionId} />
+      <ChatUsers roomId={roomId} />
     </div>
   );
 }

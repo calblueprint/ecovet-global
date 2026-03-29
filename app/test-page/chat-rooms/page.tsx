@@ -16,6 +16,7 @@ export default function ChatPage() {
 
   const { userId } = useProfile();
   const [chatRooms, setChatRooms] = useState<string[]>([]);
+  const [sessionId, setSessionId] = useState<string>(HARDCODED_SESSION_ID);
 
   async function loadRooms() {
     console.log(userId);
@@ -46,6 +47,8 @@ export default function ChatPage() {
     <div>
       <H2>Chat rooms</H2>
       <Caption>User id: {userId}</Caption>
+      <label>session id</label>
+      <input onChange={e => setSessionId(e.target.value)} value={sessionId} />
       <button onClick={onCreateRoom}>create new chat room</button>
 
       {chatRooms.map(roomId => (
