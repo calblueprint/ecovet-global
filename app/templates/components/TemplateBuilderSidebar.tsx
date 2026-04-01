@@ -52,7 +52,6 @@ export default function TemplateBuilderSideBar({
         phase_name: `Phase ${phaseNumber}`,
         phase_number: phaseNumber,
         phase_description: null,
-        is_finished: null,
       };
       draft.phaseIds.push(newPhaseID);
 
@@ -63,7 +62,7 @@ export default function TemplateBuilderSideBar({
           role_phase_id: newRolePhaseID,
           phase_id: newPhaseID,
           role_id: role,
-          description: null,
+          role_phase_description: null,
         };
         draft.rolePhaseIndex[role][newPhaseID] = newRolePhaseID;
         draft.promptIndex[newRolePhaseID] = [];
@@ -93,7 +92,7 @@ export default function TemplateBuilderSideBar({
           role_phase_id: newRolePhaseID,
           phase_id: phaseID,
           role_id: newRoleID,
-          description: null,
+          role_phase_description: null,
         };
         draft.promptIndex[newRolePhaseID] = []; //similiar to rolePhaseIndex dict but for prompts
       }
