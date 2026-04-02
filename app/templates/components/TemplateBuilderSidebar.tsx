@@ -85,7 +85,7 @@ export default function TemplateBuilderSideBar({
       draft.rolePhaseIndex[newRoleID] = {}; //initialize rolePhaseIndex dict for this role
 
       for (const phaseID of draft.phaseIds) {
-        //when creating roles when phases already exist, automatically add rolePhases for role
+        //when creating roles when phases already exist, automatically add rolePhases for rolexf
         const newRolePhaseID = createUUID();
         draft.rolePhaseIndex[newRoleID][phaseID] = newRolePhaseID;
         draft.rolePhasesById[newRolePhaseID] = {
