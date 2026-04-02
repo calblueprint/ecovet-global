@@ -204,18 +204,18 @@ export async function deleteRolePhase(role_phase_id: UUID): Promise<void> {
 
 export async function createPrompts(
   prompt_id: UUID,
-  user_id: UUID | null,
   role_phase_id: UUID,
   prompt_text: string | null,
+  prompt_type: "text" | "multiple_choice" | "checkbox" | null,
 ): Promise<UUID> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("prompt")
     .insert({
       prompt_id: prompt_id,
-      user_id: user_id,
       role_phase_id: role_phase_id,
       prompt_text: prompt_text,
+      prompt_type: prompt_type,
     })
     .select("prompt_id")
     .single();

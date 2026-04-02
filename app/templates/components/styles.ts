@@ -127,6 +127,13 @@ export const TabsDivider = styled.div`
   flex-shrink: 0;
 `;
 
+export const QuestionRowStyled = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+`;
+
 /* Right cluster: phase count + up/down */
 export const TabsRight = styled(Flex).attrs({ $align: "center", $gap: "8px" })`
   width: auto;
