@@ -38,7 +38,7 @@ export default function RoleForm({
         <RoleDescriptionTemplate>
           <RolePhaseDescriptionInput
             placeholder="Enter phase description here..."
-            value={rolePhase.description ?? ""}
+            value={rolePhase.role_phase_description ?? ""}
             onChange={e => onChange(rolePhaseId, "description", e.target.value)}
           ></RolePhaseDescriptionInput>
         </RoleDescriptionTemplate>

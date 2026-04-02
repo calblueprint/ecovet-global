@@ -110,7 +110,6 @@ export default function TemplateBuilder({
       const newPromptID = createUUID();
       draft.promptById[newPromptID] = {
         prompt_id: newPromptID,
-        user_id: null,
         role_phase_id: rolePhaseID,
         prompt_text: "",
         prompt_type: "text",
@@ -149,7 +148,7 @@ export default function TemplateBuilder({
         });
       } else if (field == "description") {
         update(draft => {
-          draft.rolePhasesById[id as UUID].description = next;
+          draft.rolePhasesById[id as UUID].role_phase_description = next;
         });
       } else if (field == "prompt_text") {
         update(draft => {
@@ -194,7 +193,6 @@ export default function TemplateBuilder({
         phaseID,
         saveStore.phasesById[phaseID].template_id,
         saveStore.phasesById[phaseID].phase_name,
-        saveStore.phasesById[phaseID].is_finished,
         saveStore.phasesById[phaseID].phase_description,
         saveStore.phasesById[phaseID].phase_number,
       );
@@ -212,7 +210,7 @@ export default function TemplateBuilder({
           rolePhaseID,
           phaseID,
           roleID,
-          saveStore.rolePhasesById[rolePhaseID].description,
+          saveStore.rolePhasesById[rolePhaseID].role_phase_description,
         );
       }
     }

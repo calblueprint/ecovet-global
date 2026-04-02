@@ -377,17 +377,6 @@ export async function fetchPrompts(rolePhaseId: UUID): Promise<Prompt[]> {
   return data ?? [];
 }
 
-export async function assignSession(userId: string, sessionId: string) {
-  const supabase = await getSupabaseServerClient();
-  const { error } = await supabase
-    .from("profile")
-    .update({ session_id: sessionId })
-    .eq("id", userId);
-  if (error) {
-    throw error;
-  }
-}
-
 export async function finishSession(sessionId: string) {
   const supabase = await getSupabaseServerClient();
   if (!sessionId) throw new Error("Missing sessionId");

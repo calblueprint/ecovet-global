@@ -69,7 +69,6 @@ export async function createPhases(
   phase_id: UUID,
   template_id: UUID | null,
   phase_name: string | null,
-  is_finished: boolean | null,
   phase_description: string | null = null,
   phase_number: number,
 ): Promise<UUID> {
@@ -81,7 +80,6 @@ export async function createPhases(
       template_id: template_id,
       phase_name: phase_name,
       phase_description: phase_description,
-      is_finished: is_finished,
       phase_number,
     })
     .select("phase_id")
