@@ -3,15 +3,9 @@ import Image from "next/image";
 import DownArrow from "@/assets/images/DownArrow.svg";
 import RightArrow from "@/assets/images/RightArrow.svg";
 import { LocalStore, Role, UUID } from "@/types/schema";
-import { ActiveIds } from "../page";
-import {
-  PhaseCaption,
-  RoleEntryContainer,
-  RoleEntryHeader,
-  RoleFlex,
-  Selectable,
-  TabbedList,
-} from "./styles";
+import { ActiveIds } from "../../page";
+import { PhaseCaption, Selectable, TabbedList } from "../styles";
+import { RoleEntryContainer, RoleEntryHeader, RoleFlex } from "./styles";
 
 export default function RoleEntry({
   role,
