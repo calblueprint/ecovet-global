@@ -3,7 +3,7 @@
 import type { Template, UUID } from "@/types/schema";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Pencil } from "lucide-react";
 import {
   assignTagToTemplate,
   createTag,
@@ -31,7 +31,12 @@ import {
   SortButton,
 } from "../styles";
 import TemplateSideBar from "./components/TemplateSidebar";
-import { AssociatedTags } from "./styles";
+import {
+  AssociatedTags,
+  EditIconWrapper,
+  NameColumn,
+  TemplateRow,
+} from "./styles";
 
 type TemplateWithTags = Template & {
   associated_tags: Tag[];
@@ -352,17 +357,29 @@ export default function TemplateListPage() {
               </GeneralTitle>
 
               {filteredTemplates.map(t => (
-                <GeneralList key={t.template_id}>
-                  <div
-                    onClick={() =>
-                      router.replace(
-                        `/facilitator/exercises/start?templateId=${t.template_id}`,
-                      )
-                    }
-                    style={{ cursor: "pointer" }}
-                  >
-                    {t.template_name}
-                  </div>
+                <TemplateRow key={t.template_id}>
+                  <NameColumn>
+                    <span
+                      onClick={() =>
+                        router.replace(
+                          `/facilitator/exercises/start?templateId=${t.template_id}`,
+                        )
+                      }
+                    >
+                      {t.template_name}
+                    </span>
+
+                    <EditIconWrapper
+                      onClick={e => {
+                        e.stopPropagation();
+                        router.push(
+                          `/facilitator/edit-template/${t.template_id}`,
+                        );
+                      }}
+                    >
+                      <Pencil size={16} />
+                    </EditIconWrapper>
+                  </NameColumn>
 
                   <div>
                     {new Date(t.timestamp).toLocaleDateString("en-GB", {
@@ -402,7 +419,7 @@ export default function TemplateListPage() {
                       }
                     />
                   </AssociatedTags>
-                </GeneralList>
+                </TemplateRow>
               ))}
             </MainDiv>
           </PageDiv>

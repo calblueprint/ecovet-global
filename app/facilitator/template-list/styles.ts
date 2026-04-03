@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
+import { GeneralList as SharedGeneralList } from "../styles";
 
 export const AssociatedTags = styled.div`
   display: flex;
@@ -79,5 +80,42 @@ export const ClearAllButton = styled.button`
   &:hover {
     color: ${COLORS.black};
     background-color: ${COLORS.oat_light};
+  }
+`;
+
+export const EditIconWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0; // Hidden by default
+  transition: opacity 0.2s ease-in-out;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: ${COLORS.black40};
+
+  &:hover {
+    background-color: ${COLORS.oat_light};
+    color: ${COLORS.black};
+  }
+`;
+
+export const TemplateRow = styled(SharedGeneralList)`
+  &:hover ${EditIconWrapper} {
+    opacity: 1;
+  }
+`;
+
+export const NameColumn = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 12px;
+  cursor: pointer;
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 `;
