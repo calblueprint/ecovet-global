@@ -18,10 +18,10 @@ import {
   Template,
 } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
-import { ActiveIds } from "../page";
-import RoleForm from "./RoleForm/RoleForm";
+import { ActiveIds } from "../../page";
+import QuestionBuilder from "../QuestionBuilder/QuestionBuilder";
+import TemplateOverviewForm from "../TemplateOverviewForm/TemplateOverviewForm";
 import { PanelCard, SubmitButton } from "./styles";
-import TemplateOverviewForm from "./TemplateOverviewForm";
 
 // TODO: add an active phase id
 // TODO: add an active phase id
@@ -280,7 +280,7 @@ export default function TemplateBuilder({
                 onChange={setActiveUpdate}
               />
             ) : (
-              <RoleForm
+              <QuestionBuilder
                 value={{
                   role: localStore.rolesById[activeIds.roleId] as Role,
                   rolePhases: localStore.rolePhasesById,

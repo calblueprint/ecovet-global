@@ -15,28 +15,26 @@ import {
   UUID,
 } from "@/types/schema";
 import {
+  AddNewOptionStyled,
+  AddNewOptionTextStyled,
   BigInput,
+  CheckboxPromptStyled,
+  DeleteMcqOptionButton,
   FieldCard,
   FieldLegend,
   FormStack,
   GhostButton,
+  McqOptionStyled,
+  MultipleChoicePromptStyled,
   PhaseCard,
   PhaseTemplateHeader,
+  PromptTypeDropdownStyled,
   QuestionRowStyled,
   RoleDescriptionTemplate,
   RoleHeader,
   RoleHeaderContainer,
   RolePhaseDescriptionInput,
   RoleTemplateName,
-} from "../styles";
-import {
-  AddNewOptionStyled,
-  AddNewOptionTextStyled,
-  CheckboxPromptStyled,
-  DeleteMcqOptionButton,
-  McqOptionStyled,
-  MultipleChoicePromptStyled,
-  PromptTypeDropdownStyled,
   TextFieldStyled,
 } from "./styles";
 
@@ -59,7 +57,7 @@ const PlusIcon = () => (
   </svg>
 );
 
-export default function RoleForm({
+export default function QuestionBuilder({
   value,
   rolePhaseId,
   phase,

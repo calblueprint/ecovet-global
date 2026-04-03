@@ -5,22 +5,20 @@ import { useRouter } from "next/navigation";
 import img from "@/assets/images/BlackPlus.svg";
 import { Caption } from "@/styles/text";
 import { LocalStore, Role, Template, UUID } from "@/types/schema";
-import { ActiveIds } from "../page";
-import EditablePhase from "./EditablePhase";
-import RoleEntry from "./RoleEntry";
+import { ActiveIds } from "../../page";
+import EditablePhase from "../EditablePhase/EditablePhase";
+import RoleEntry from "../RoleEntry/RoleEntry";
+import { PhaseCaption, Selectable, TabbedList } from "../styles";
 import {
   HeaderWithPlus,
-  PhaseCaption,
   PhaseList,
   RoleList,
-  Selectable,
   SidebarCaption,
   SidebarContainer,
   SideBarEntry,
   SideBarHeader,
   SideBarSection,
   SidebarTemplateName,
-  TabbedList,
 } from "./styles";
 
 export default function TemplateBuilderSideBar({
