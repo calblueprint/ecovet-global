@@ -10,6 +10,7 @@ import type {
 } from "@/types/schema";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { userAgent } from "next/server";
 import supabase from "@/actions/supabase/client";
 import {
   createPromptAnswer,
@@ -21,17 +22,19 @@ import {
   fetchRolePhases,
   fetchTemplateId,
   isSessionForceAdvance,
+  sessionParticipantsBulk,
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
 import ScenarioBackButton from "@/app/participants/components/ScenarioBackButton";
 import { useProfile } from "@/utils/ProfileProvider";
+import { useAnnouncements } from "@/utils/UseChat";
 import ScenarioNextButton from "../../../components/ScenarioNextButton";
 import PromptsRightPanel from "./components/PromptsRightPanel";
 import ScenarioLeftPanel from "./components/ScenarioLeftPanel";
 import { Main } from "./styles";
 
 export default function SessionFlowPage() {
-  const { userId: profileUserId } = useProfile();
+  const { userId: profileUserId, profile } = useProfile();
   const { sessionId, userId: paramUserId } = useParams();
 
   const userId = (profileUserId ?? paramUserId) as UUID | null;
@@ -56,6 +59,47 @@ export default function SessionFlowPage() {
   const isLastPhase = phaseIdx === phases.length - 1;
   const isFirstPhase = phaseIdx === 0;
   const isOverview = phaseIdx === -1;
+
+  const { everyoneAnnouncements, roleAnnouncements, userAnnouncements } =
+    useAnnouncements({
+      sessionId: sessionIdStr ?? "unknown session id",
+      userId: userId ?? "unknown user id",
+      username: profile?.first_name ?? "Unknown Users",
+      roleId: roleId ?? "unknown role id",
+    });
+
+  useEffect(() => {
+    if (everyoneAnnouncements.chatMessages.length == 0) return;
+
+    alert(
+      "New @everyone message: " +
+        everyoneAnnouncements.chatMessages[
+          everyoneAnnouncements.chatMessages.length - 1
+        ],
+    );
+  }, [everyoneAnnouncements.chatMessages]);
+
+  useEffect(() => {
+    if (roleAnnouncements.chatMessages.length == 0) return;
+
+    alert(
+      "New @role message: " +
+        roleAnnouncements.chatMessages[
+          roleAnnouncements.chatMessages.length - 1
+        ],
+    );
+  }, [roleAnnouncements.chatMessages]);
+
+  useEffect(() => {
+    if (userAnnouncements.chatMessages.length == 0) return;
+
+    alert(
+      "New @user message: " +
+        userAnnouncements.chatMessages[
+          userAnnouncements.chatMessages.length - 1
+        ],
+    );
+  }, [userAnnouncements.chatMessages]);
 
   const loadData = useCallback(async () => {
     if (!userId || !sessionIdStr) return;

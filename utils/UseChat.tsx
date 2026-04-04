@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
+import { v5 as uuidv5 } from "uuid";
 import {
   getMessageHistory,
   persistChatMessage,
 } from "@/actions/supabase/queries/chat";
 import { supabase } from "@/lib/supabase/client";
-import { ChatMessage } from "@/types/schema";
+import { ChatMessage, Profile } from "@/types/schema";
 
 const EVENT_MESSAGE_TYPE = "message";
 
@@ -33,7 +34,6 @@ export function useRealtimeChat({
     startFetching(async () => {
       try {
         const messageHistory = await getMessageHistory(roomId, null, 100);
-        console.log("Loaded message history:", messageHistory);
         setChatMessages(messageHistory);
       } catch (error) {
         console.error("Error loading message history:", error);
@@ -92,4 +92,38 @@ export function useRealtimeChat({
   );
 
   return { loading, chatMessages, sendMessage, isConnected };
+}
+
+export function useAnnouncements({
+  sessionId,
+  roleId,
+  userId,
+  username,
+}: {
+  sessionId: string;
+  roleId: string;
+  userId: string;
+  username: string;
+}) {
+  const atEveryoneRoomId = uuidv5(sessionId, sessionId);
+  const atRoleRoomId = uuidv5(roleId, sessionId);
+  const atUserRoomId = uuidv5(userId, sessionId);
+
+  return {
+    everyoneAnnouncements: useRealtimeChat({
+      roomId: atEveryoneRoomId,
+      userId,
+      username,
+    }),
+    roleAnnouncements: useRealtimeChat({
+      roomId: atRoleRoomId,
+      userId,
+      username,
+    }),
+    userAnnouncements: useRealtimeChat({
+      roomId: atUserRoomId,
+      userId,
+      username,
+    }),
+  };
 }
