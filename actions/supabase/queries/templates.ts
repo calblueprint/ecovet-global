@@ -169,7 +169,7 @@ export async function createRolePhases(
       role_phase_id: role_phase_id,
       phase_id: phase_id,
       role_id: role_id,
-      description: description,
+      role_phase_description: description,
     })
     .select("role_phase_id")
     .single();
