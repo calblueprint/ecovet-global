@@ -1,7 +1,7 @@
 "use client";
 
 import type { ParticipantSession, UUID } from "@/types/schema";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import supabase from "@/actions/supabase/client";
 import {
@@ -9,6 +9,7 @@ import {
   SessionParticipant,
   sessionParticipants,
 } from "@/actions/supabase/queries/sessions";
+import { sendEmailReminder } from "@/actions/supabase/send-email";
 import { useProfile } from "@/utils/ProfileProvider";
 import { Button, Container, Main } from "./styles";
 
@@ -22,6 +23,10 @@ export default function FacilitatorSessionView() {
   const [currentPhase, setCurrentPhase] = useState(1);
   const [allDone, setAllDone] = useState(false);
   const [isAdvancing, setIsAdvancing] = useState(false);
+
+  const [message, setMessage] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [name, setName] = useState<string>("");
 
   async function advancePhase() {
     if (!sessionId || isAdvancing) return;
@@ -71,6 +76,24 @@ export default function FacilitatorSessionView() {
 
     loadParticipants();
   }, [sessionId]);
+
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setEmail(event.target.value);
+  };
+
+  const isEmailValid = (email: string) => {
+    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
+    return emailRegex.test(email);
+  };
+  const sendEmail = async () => {
+    setEmail;
+    if (!isEmailValid(email)) {
+      setMessage("No valid email entered. Please enter a valid email.");
+      return;
+    }
+
+    setMessage(await sendEmailReminder(email));
+  };
 
   useEffect(() => {
     if (!sessionId) return;
@@ -144,6 +167,16 @@ export default function FacilitatorSessionView() {
                 {p.profile?.first_name} {p.profile?.last_name}
               </div>
             ))}
+        </div>
+
+        <div>
+          <input
+            value={email}
+            onChange={e => handleInputChange(e)}
+            placeholder="Enter email to send reminder to"
+          ></input>
+          <button onClick={sendEmail}>send email reminder</button>
+          <p>{message}</p>
         </div>
 
         <Button onClick={advancePhase} disabled={isAdvancing}>
