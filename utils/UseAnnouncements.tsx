@@ -1,6 +1,7 @@
 "use client";
 
 import { v5 as uuidv5 } from "uuid";
+import { persistChatMessage } from "@/actions/supabase/queries/chat";
 import { sessionParticipants } from "@/actions/supabase/queries/sessions";
 import { supabase } from "@/lib/supabase/client";
 import {
@@ -86,4 +87,5 @@ export function sendAnnouncement({
     event: EVENT_MESSAGE_TYPE,
     payload: chatMessage,
   });
+  persistChatMessage(roomId, chatMessage.message, userId, username);
 }
