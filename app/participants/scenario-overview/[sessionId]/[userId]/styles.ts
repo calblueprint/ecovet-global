@@ -142,7 +142,7 @@ export const PromptText = styled.p`
   padding-bottom: 0.5rem;
 `;
 
-export const StyledTextarea = styled(TextareaAutosize)`
+export const StyledTextArea = styled(TextareaAutosize)`
   width: 100%;
   padding: 0.75rem;
   border-radius: 0.5rem;

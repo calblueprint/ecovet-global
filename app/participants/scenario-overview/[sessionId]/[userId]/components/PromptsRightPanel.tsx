@@ -8,7 +8,7 @@ import {
   PhaseHeading,
   PromptCard,
   PromptText,
-  StyledTextarea,
+  StyledTextArea,
 } from "../styles";
 
 interface PromptsRightPanelProps {
@@ -55,7 +55,7 @@ export default function PromptsRightPanel({
           prompts.map((prompt, index) => (
             <div key={prompt.prompt_id}>
               <PromptText>{prompt.prompt_text}</PromptText>
-              <StyledTextarea
+              <StyledTextArea
                 value={answers[index] ?? ""}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                   onInputAnswer(index, e.target.value)
