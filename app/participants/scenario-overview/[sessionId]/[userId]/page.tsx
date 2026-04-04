@@ -23,8 +23,9 @@ import {
   isSessionForceAdvance,
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
+import ScenarioBackButton from "@/app/participants/components/ScenarioBackButton";
 import { useProfile } from "@/utils/ProfileProvider";
-import NextButton from "../../../components/ParticipantNextButton";
+import ScenarioNextButton from "../../../components/ScenarioNextButton";
 import PromptsRightPanel from "./components/PromptsRightPanel";
 import ScenarioLeftPanel from "./components/ScenarioLeftPanel";
 import { Main } from "./styles";
@@ -53,6 +54,7 @@ export default function SessionFlowPage() {
 
   const currentPhase = phases[phaseIdx] ?? null;
   const isLastPhase = phaseIdx === phases.length - 1;
+  const isFirstPhase = phaseIdx === 0;
   const isOverview = phaseIdx === -1;
 
   const loadData = useCallback(async () => {
@@ -250,8 +252,14 @@ export default function SessionFlowPage() {
   }
 
   async function handleContinue() {
-    if (phaseIdx + 1 >= phases.length) return;
+    if (isLastPhase) return;
     const nextInd = phaseIdx + 1;
+    setPhaseIdx(nextInd);
+  }
+
+  async function handleBack() {
+    if (isFirstPhase) return;
+    const nextInd = phaseIdx - 1;
     setPhaseIdx(nextInd);
   }
 
@@ -275,13 +283,32 @@ export default function SessionFlowPage() {
         isOverview={isOverview}
         onInputAnswer={handleInputAnswer}
         onBlur={handleBlur}
+        backButton={
+          !isOverview &&
+          roleId &&
+          userId &&
+          sessionIdStr &&
+          currentPhase && (
+            <ScenarioBackButton
+              user_id={userId as UUID}
+              role_id={roleId as UUID}
+              session_id={sessionIdStr}
+              is_force_advance={isForceAdvance}
+              promptsCompleted={completedPrompts.size == prompts.length}
+              isFirstPhase={isFirstPhase}
+              currentPhaseIndex={phaseIdx}
+              phase_id={currentPhase.phase_id as UUID}
+              onClick={handleBack}
+            />
+          )
+        }
         nextButton={
           !isOverview &&
           roleId &&
           userId &&
           sessionIdStr &&
           currentPhase && (
-            <NextButton
+            <ScenarioNextButton
               user_id={userId as UUID}
               role_id={roleId as UUID}
               session_id={sessionIdStr}

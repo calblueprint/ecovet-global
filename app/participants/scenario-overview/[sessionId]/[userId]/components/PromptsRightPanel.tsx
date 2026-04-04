@@ -20,6 +20,7 @@ interface PromptsRightPanelProps {
   onInputAnswer: (index: number, value: string) => void;
   onBlur: (index: number) => void;
   nextButton: ReactNode;
+  backButton: ReactNode;
 }
 
 export default function PromptsRightPanel({
@@ -30,6 +31,7 @@ export default function PromptsRightPanel({
   isOverview,
   onInputAnswer,
   onBlur,
+  backButton,
   nextButton,
 }: PromptsRightPanelProps) {
   const totalPrompts = prompts.length;
@@ -67,7 +69,10 @@ export default function PromptsRightPanel({
         )}
       </PromptCard>
 
-      <ContinueButtonDiv>{nextButton}</ContinueButtonDiv>
+      <ContinueButtonDiv>
+        {backButton}
+        {nextButton}
+      </ContinueButtonDiv>
     </ContentDiv>
   );
 }

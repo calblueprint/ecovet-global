@@ -86,7 +86,7 @@ export const ContentBody = styled.p`
 
 export const ContinueButtonDiv = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   padding: 1rem 0 2rem 0;
   margin-top: auto;
 `;
