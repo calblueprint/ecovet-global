@@ -10,7 +10,6 @@ import type {
 } from "@/types/schema";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { userAgent } from "next/server";
 import supabase from "@/actions/supabase/client";
 import {
   createPromptAnswer,
@@ -27,7 +26,7 @@ import {
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
 import ScenarioBackButton from "@/app/participants/components/ScenarioBackButton";
 import { useProfile } from "@/utils/ProfileProvider";
-import { useAnnouncements } from "@/utils/UseChat";
+import { useAnnouncements } from "@/utils/UseAnnouncements";
 import ScenarioNextButton from "../../../components/ScenarioNextButton";
 import PromptsRightPanel from "./components/PromptsRightPanel";
 import ScenarioLeftPanel from "./components/ScenarioLeftPanel";
@@ -71,34 +70,29 @@ export default function SessionFlowPage() {
   useEffect(() => {
     if (everyoneAnnouncements.chatMessages.length == 0) return;
 
-    alert(
-      "New @everyone message: " +
-        everyoneAnnouncements.chatMessages[
-          everyoneAnnouncements.chatMessages.length - 1
-        ],
-    );
+    const message =
+      everyoneAnnouncements.chatMessages[
+        everyoneAnnouncements.chatMessages.length - 1
+      ].message;
+    alert("New @everyone message: " + message);
   }, [everyoneAnnouncements.chatMessages]);
 
   useEffect(() => {
     if (roleAnnouncements.chatMessages.length == 0) return;
 
-    alert(
-      "New @role message: " +
-        roleAnnouncements.chatMessages[
-          roleAnnouncements.chatMessages.length - 1
-        ],
-    );
+    const message =
+      roleAnnouncements.chatMessages[roleAnnouncements.chatMessages.length - 1]
+        .message;
+    alert("New @role message: " + message);
   }, [roleAnnouncements.chatMessages]);
 
   useEffect(() => {
     if (userAnnouncements.chatMessages.length == 0) return;
 
-    alert(
-      "New @user message: " +
-        userAnnouncements.chatMessages[
-          userAnnouncements.chatMessages.length - 1
-        ],
-    );
+    const message =
+      userAnnouncements.chatMessages[userAnnouncements.chatMessages.length - 1]
+        .message;
+    alert("New @user message: " + message);
   }, [userAnnouncements.chatMessages]);
 
   const loadData = useCallback(async () => {

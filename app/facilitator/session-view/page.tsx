@@ -15,6 +15,7 @@ import {
   sessionParticipants,
 } from "@/actions/supabase/queries/sessions";
 import { useProfile } from "@/utils/ProfileProvider";
+import { AnnouncementRoom, sendAnnouncement } from "@/utils/UseAnnouncements";
 import { Button, Container, Main } from "./styles";
 
 type PromptCounts = Record<UUID, { done: number; total: number }>;
@@ -35,7 +36,7 @@ type ParticipantPromptData = Record<
 export default function FacilitatorSessionView() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId") as UUID | null;
-  const { profile } = useProfile();
+  const { userId, profile } = useProfile();
   const router = useRouter();
 
   const [participants, setParticipants] = useState<SessionParticipant[]>([]);
@@ -235,6 +236,15 @@ export default function FacilitatorSessionView() {
     };
   }, [sessionId, participants, currentPhase, phases, isForceAdvance]);
 
+  function sendSessionAnnouncement(to: AnnouncementRoom, message: string) {
+    sendAnnouncement({
+      room: to,
+      userId: userId ?? "unknown user",
+      username: profile?.first_name ?? "Unknown User",
+      message,
+    });
+  }
+
   async function advancePhase() {
     if (!sessionId || isAdvancing) return;
     setIsAdvancing(true);
@@ -355,6 +365,17 @@ export default function FacilitatorSessionView() {
         {allDone && (
           <h3 style={{ marginTop: "1rem" }}>All participants are finished</h3>
         )}
+
+        <button
+          onClick={() =>
+            sendSessionAnnouncement(
+              { to: "everyone", sessionId: sessionId ?? "Unknown Session" },
+              "shut the fuck up",
+            )
+          }
+        >
+          click to send announcement
+        </button>
       </Container>
     </Main>
   );

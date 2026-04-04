@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
-import { v5 as uuidv5 } from "uuid";
 import {
   getMessageHistory,
   persistChatMessage,
@@ -9,9 +8,9 @@ import {
 import { supabase } from "@/lib/supabase/client";
 import { ChatMessage, Profile } from "@/types/schema";
 
-const EVENT_MESSAGE_TYPE = "message";
+export const EVENT_MESSAGE_TYPE = "message";
 
-type LocalChatMessage = Omit<ChatMessage, "created_at">;
+export type LocalChatMessage = Omit<ChatMessage, "created_at">;
 
 export function useRealtimeChat({
   roomId,
@@ -92,38 +91,4 @@ export function useRealtimeChat({
   );
 
   return { loading, chatMessages, sendMessage, isConnected };
-}
-
-export function useAnnouncements({
-  sessionId,
-  roleId,
-  userId,
-  username,
-}: {
-  sessionId: string;
-  roleId: string;
-  userId: string;
-  username: string;
-}) {
-  const atEveryoneRoomId = uuidv5(sessionId, sessionId);
-  const atRoleRoomId = uuidv5(roleId, sessionId);
-  const atUserRoomId = uuidv5(userId, sessionId);
-
-  return {
-    everyoneAnnouncements: useRealtimeChat({
-      roomId: atEveryoneRoomId,
-      userId,
-      username,
-    }),
-    roleAnnouncements: useRealtimeChat({
-      roomId: atRoleRoomId,
-      userId,
-      username,
-    }),
-    userAnnouncements: useRealtimeChat({
-      roomId: atUserRoomId,
-      userId,
-      username,
-    }),
-  };
 }
