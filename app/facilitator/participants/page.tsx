@@ -95,13 +95,16 @@ export default function ParticipantsPage() {
   const handleModalClose = async (shouldDelete: boolean) => {
     setWarningModalOpen(false);
     if (shouldDelete && pendingDelete) {
+      // Only delete profile is invite accepted and there is one
       if (pendingDelete.invite_accepted && pendingDelete.id) {
         console.log("deleting profile: ", pendingDelete);
         await deleteProfile(pendingDelete.id as UUID);
-      } else {
-        console.log("deleting invite: ", pendingDelete);
-        await deleteInvite(pendingDelete.invite_id as UUID);
-      }
+      } 
+
+      // Always delete invite for both cases
+      console.log("deleting invite: ", pendingDelete);
+      await deleteInvite(pendingDelete.invite_id as UUID);
+
       await loadData();
     }
     setPendingDelete(null);
