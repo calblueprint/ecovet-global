@@ -88,7 +88,7 @@ export async function GET(
     .in("role_id", roleIds)
     .in("phase_id", phaseIds);
 
-  // Prompts for all role-phases 
+  // Prompts for all role-phases
   const rolePhaseIds = (rolePhases ?? []).map(rp => rp.role_phase_id);
 
   const { data: prompts } = await supabase
@@ -96,7 +96,7 @@ export async function GET(
     .select("prompt_id, prompt_text, role_phase_id")
     .in("role_phase_id", rolePhaseIds);
 
-  // All responses for this session 
+  // All responses for this session
   const { data: responses } = await supabase
     .from("prompt_response")
     .select("user_id, prompt_id, prompt_answer")
@@ -197,7 +197,7 @@ export async function GET(
     phases: phaseData,
   };
 
-  // Generate PDF 
+  // Generate PDF
   let pdfBytes: Uint8Array;
   try {
     pdfBytes = await generateSessionReport(reportData);
@@ -206,7 +206,7 @@ export async function GET(
     return Response.json({ error: "PDF generation failed" }, { status: 500 });
   }
 
-  // Upload to Supabase Storage 
+  // Upload to Supabase Storage
   const fileName = `sessions/${sessionId}/report-${Date.now()}.pdf`;
 
   const { error: uploadError } = await supabase.storage
