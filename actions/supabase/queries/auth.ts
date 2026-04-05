@@ -7,7 +7,7 @@ export async function sendPasswordResetEmail(email: string) {
   const supabase = await getSupabaseServerClient();
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/change-password`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/change-password`,
     });
     if (error) {
       console.error("Supabase error:", error);
