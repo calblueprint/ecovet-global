@@ -395,7 +395,7 @@ export default function FacilitatorSessionView() {
           options={new Set(["everyone", "role", "user"])}
           placeholder="Select type of announcement"
           onChange={type => {
-            setAnnouncementType(type as any);
+            setAnnouncementType(type as "everyone" | "role" | "user");
             if (type == "everyone") {
               setAnnouncementRoom({
                 to: "everyone",
