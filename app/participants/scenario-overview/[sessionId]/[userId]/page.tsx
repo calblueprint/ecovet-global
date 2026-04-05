@@ -21,16 +21,19 @@ import {
   fetchRolePhases,
   fetchTemplateId,
   isSessionForceAdvance,
+  sessionParticipantsBulk,
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
+import ScenarioBackButton from "@/app/participants/components/ScenarioBackButton";
 import { useProfile } from "@/utils/ProfileProvider";
-import NextButton from "../../../components/ParticipantNextButton";
+import { useAnnouncements } from "@/utils/UseAnnouncements";
+import ScenarioNextButton from "../../../components/ScenarioNextButton";
 import PromptsRightPanel from "./components/PromptsRightPanel";
 import ScenarioLeftPanel from "./components/ScenarioLeftPanel";
 import { Main } from "./styles";
 
 export default function SessionFlowPage() {
-  const { userId: profileUserId } = useProfile();
+  const { userId: profileUserId, profile } = useProfile();
   const { sessionId, userId: paramUserId } = useParams();
 
   const userId = (profileUserId ?? paramUserId) as UUID | null;
@@ -53,7 +56,44 @@ export default function SessionFlowPage() {
 
   const currentPhase = phases[phaseIdx] ?? null;
   const isLastPhase = phaseIdx === phases.length - 1;
+  const isFirstPhase = phaseIdx === 0;
   const isOverview = phaseIdx === -1;
+
+  const { everyoneAnnouncements, roleAnnouncements, userAnnouncements } =
+    useAnnouncements({
+      sessionId: sessionIdStr ?? "unknown session id",
+      userId: userId ?? "unknown user id",
+      username: profile?.first_name ?? "Unknown Users",
+      roleId: roleId ?? "unknown role id",
+    });
+
+  useEffect(() => {
+    if (everyoneAnnouncements.chatMessages.length == 0) return;
+
+    const message =
+      everyoneAnnouncements.chatMessages[
+        everyoneAnnouncements.chatMessages.length - 1
+      ].message;
+    alert("New @everyone message: " + message);
+  }, [everyoneAnnouncements.chatMessages]);
+
+  useEffect(() => {
+    if (roleAnnouncements.chatMessages.length == 0) return;
+
+    const message =
+      roleAnnouncements.chatMessages[roleAnnouncements.chatMessages.length - 1]
+        .message;
+    alert("New @role message: " + message);
+  }, [roleAnnouncements.chatMessages]);
+
+  useEffect(() => {
+    if (userAnnouncements.chatMessages.length == 0) return;
+
+    const message =
+      userAnnouncements.chatMessages[userAnnouncements.chatMessages.length - 1]
+        .message;
+    alert("New @user message: " + message);
+  }, [userAnnouncements.chatMessages]);
 
   const loadData = useCallback(async () => {
     if (!userId || !sessionIdStr) return;
@@ -250,8 +290,14 @@ export default function SessionFlowPage() {
   }
 
   async function handleContinue() {
-    if (phaseIdx + 1 >= phases.length) return;
+    if (isLastPhase) return;
     const nextInd = phaseIdx + 1;
+    setPhaseIdx(nextInd);
+  }
+
+  async function handleBack() {
+    if (isFirstPhase) return;
+    const nextInd = phaseIdx - 1;
     setPhaseIdx(nextInd);
   }
 
@@ -275,13 +321,32 @@ export default function SessionFlowPage() {
         isOverview={isOverview}
         onInputAnswer={handleInputAnswer}
         onBlur={handleBlur}
+        backButton={
+          !isOverview &&
+          roleId &&
+          userId &&
+          sessionIdStr &&
+          currentPhase && (
+            <ScenarioBackButton
+              user_id={userId as UUID}
+              role_id={roleId as UUID}
+              session_id={sessionIdStr}
+              is_force_advance={isForceAdvance}
+              promptsCompleted={completedPrompts.size == prompts.length}
+              isFirstPhase={isFirstPhase}
+              currentPhaseIndex={phaseIdx}
+              phase_id={currentPhase.phase_id as UUID}
+              onClick={handleBack}
+            />
+          )
+        }
         nextButton={
           !isOverview &&
           roleId &&
           userId &&
           sessionIdStr &&
           currentPhase && (
-            <NextButton
+            <ScenarioNextButton
               user_id={userId as UUID}
               role_id={roleId as UUID}
               session_id={sessionIdStr}

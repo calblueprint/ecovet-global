@@ -6,11 +6,11 @@ import {
   persistChatMessage,
 } from "@/actions/supabase/queries/chat";
 import { supabase } from "@/lib/supabase/client";
-import { ChatMessage } from "@/types/schema";
+import { ChatMessage, Profile } from "@/types/schema";
 
-const EVENT_MESSAGE_TYPE = "message";
+export const EVENT_MESSAGE_TYPE = "message";
 
-type LocalChatMessage = Omit<ChatMessage, "created_at">;
+export type LocalChatMessage = Omit<ChatMessage, "created_at">;
 
 export function useRealtimeChat({
   roomId,
@@ -33,7 +33,6 @@ export function useRealtimeChat({
     startFetching(async () => {
       try {
         const messageHistory = await getMessageHistory(roomId, null, 100);
-        console.log("Loaded message history:", messageHistory);
         setChatMessages(messageHistory);
       } catch (error) {
         console.error("Error loading message history:", error);

@@ -86,7 +86,7 @@ export const ContentBody = styled.p`
 
 export const ContinueButtonDiv = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   padding: 1rem 0 2rem 0;
   margin-top: auto;
 `;
@@ -142,7 +142,7 @@ export const PromptText = styled.p`
   padding-bottom: 0.5rem;
 `;
 
-export const StyledTextarea = styled(TextareaAutosize)`
+export const StyledTextArea = styled(TextareaAutosize)`
   width: 100%;
   padding: 0.75rem;
   border-radius: 0.5rem;

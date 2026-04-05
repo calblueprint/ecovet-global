@@ -8,7 +8,7 @@ import {
   PhaseHeading,
   PromptCard,
   PromptText,
-  StyledTextarea,
+  StyledTextArea,
 } from "../styles";
 
 interface PromptsRightPanelProps {
@@ -20,6 +20,7 @@ interface PromptsRightPanelProps {
   onInputAnswer: (index: number, value: string) => void;
   onBlur: (index: number) => void;
   nextButton: ReactNode;
+  backButton: ReactNode;
 }
 
 export default function PromptsRightPanel({
@@ -30,6 +31,7 @@ export default function PromptsRightPanel({
   isOverview,
   onInputAnswer,
   onBlur,
+  backButton,
   nextButton,
 }: PromptsRightPanelProps) {
   const totalPrompts = prompts.length;
@@ -53,7 +55,7 @@ export default function PromptsRightPanel({
           prompts.map((prompt, index) => (
             <div key={prompt.prompt_id}>
               <PromptText>{prompt.prompt_text}</PromptText>
-              <StyledTextarea
+              <StyledTextArea
                 value={answers[index] ?? ""}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                   onInputAnswer(index, e.target.value)
@@ -67,7 +69,10 @@ export default function PromptsRightPanel({
         )}
       </PromptCard>
 
-      <ContinueButtonDiv>{nextButton}</ContinueButtonDiv>
+      <ContinueButtonDiv>
+        {backButton}
+        {nextButton}
+      </ContinueButtonDiv>
     </ContentDiv>
   );
 }
