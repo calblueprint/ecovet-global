@@ -14,6 +14,7 @@ import {
   SessionParticipant,
   sessionParticipants,
 } from "@/actions/supabase/queries/sessions";
+import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import { useProfile } from "@/utils/ProfileProvider";
 import { AnnouncementRoom, sendAnnouncement } from "@/utils/UseAnnouncements";
 import { Button, Container, Main } from "./styles";
@@ -48,6 +49,23 @@ export default function FacilitatorSessionView() {
   const isLastPhase = currentPhase >= phases.length - 1;
   const currentPhaseObject = phases[currentPhase];
   const [promptData, setPromptData] = useState<ParticipantPromptData>({});
+
+  const [announcementMessage, setAnnouncementMessage] = useState<string>("");
+  const [announcementType, setAnnouncementType] = useState<
+    "everyone" | "role" | "user" | null
+  >("everyone");
+  const [announcementRoom, setAnnouncementRoom] = useState<AnnouncementRoom>({
+    to: "everyone",
+    sessionId: sessionId ?? "unknown session",
+  });
+  const roleOptions = participants.map((p): [string, string] => [
+    p.role_id ?? "unknown role",
+    p.role_id ?? "unknown role",
+  ]);
+  const userOptions = participants.map((p): [string, string] => [
+    p.user_id,
+    `${p.profile.first_name} ${p.profile.last_name}`,
+  ]);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -366,15 +384,58 @@ export default function FacilitatorSessionView() {
           <h3 style={{ marginTop: "1rem" }}>All participants are finished</h3>
         )}
 
+        <input
+          placeholder="Type announcement..."
+          value={announcementMessage}
+          onChange={e => setAnnouncementMessage(e.target.value)}
+        />
+
+        <InputDropdown
+          label={`Participant user`}
+          options={new Set(["everyone", "role", "user"])}
+          placeholder="Select type of announcement"
+          onChange={type => {
+            setAnnouncementType(type as any);
+            if (type == "everyone") {
+              setAnnouncementRoom({
+                to: "everyone",
+                sessionId: sessionId ?? "unknown session",
+              });
+            }
+          }}
+        />
+
+        {announcementType != "everyone" && (
+          <InputDropdown
+            label={`Participant user`}
+            options={
+              new Map(announcementType == "role" ? roleOptions : userOptions)
+            }
+            placeholder="Select thing to send to"
+            onChange={id => {
+              if (announcementType == "role") {
+                setAnnouncementRoom({
+                  to: "role",
+                  sessionId: sessionId ?? "unknown session",
+                  roleId: id ?? "unknown role",
+                });
+              } else if (announcementType == "user") {
+                setAnnouncementRoom({
+                  to: "user",
+                  sessionId: sessionId ?? "unknown session",
+                  userId: id ?? "unknown user",
+                });
+              }
+            }}
+          />
+        )}
+
         <button
           onClick={() =>
-            sendSessionAnnouncement(
-              { to: "everyone", sessionId: sessionId ?? "Unknown Session" },
-              "shut the fuck up",
-            )
+            sendSessionAnnouncement(announcementRoom, announcementMessage)
           }
         >
-          click to send announcement
+          click to send to {}
         </button>
       </Container>
     </Main>
