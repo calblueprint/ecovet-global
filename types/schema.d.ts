@@ -102,6 +102,7 @@ export type RoleFormInput = {
 
 export type Participant = {
   id: UUID;
+  invite_id: UUID;
   name?: string | null; // optional because database doesn't have it
   email: string | null;
   role: string | null;

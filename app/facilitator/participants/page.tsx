@@ -3,10 +3,14 @@
 import type { Invite, Participant, UUID } from "@/types/schema";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Tabs from "@mui/material/Tabs";
-import { fetchInvites } from "@/actions/supabase/queries/invites";
-import { getProfilesByEmails } from "@/actions/supabase/queries/profile";
+import { deleteInvite, fetchInvites } from "@/actions/supabase/queries/invites";
+import {
+  deleteProfile,
+  getProfilesByEmails,
+} from "@/actions/supabase/queries/profile";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import InviteComponent from "@/components/InviteComponent/InviteComponent";
+import WarningModal from "@/components/WarningModal/WarningModal";
 import { useProfile } from "@/utils/ProfileProvider";
 import ParticipantsList from "./components/ParticipantsList";
 import {
@@ -22,6 +26,8 @@ export default function ParticipantsPage() {
   const [status, setStatus] = useState<"Accepted" | "Pending">("Accepted");
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [warningModalOpen, setWarningModalOpen] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<Participant | null>(null);
   const { profile } = useProfile();
 
   const loadData = useCallback(async () => {
@@ -37,7 +43,8 @@ export default function ParticipantsPage() {
     const formattedData: Participant[] = data.map((item: Invite) => {
       const p = profileByEmail[item.email ?? ""];
       return {
-        id: item.invite_id,
+        id: p ? p.id : null,
+        invite_id: item.invite_id,
         name: p
           ? `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || null
           : null,
@@ -80,6 +87,26 @@ export default function ParticipantsPage() {
     return <div>Loading! Give it a sec...</div>;
   }
 
+  const handleDeleteRow = (participant: Participant) => {
+    setPendingDelete(participant);
+    setWarningModalOpen(true);
+  };
+
+  const handleModalClose = async (shouldDelete: boolean) => {
+    setWarningModalOpen(false);
+    if (shouldDelete && pendingDelete) {
+      if (pendingDelete.invite_accepted && pendingDelete.id) {
+        console.log("deleting profile: ", pendingDelete);
+        await deleteProfile(pendingDelete.id as UUID);
+      } else {
+        console.log("deleting invite: ", pendingDelete);
+        await deleteInvite(pendingDelete.invite_id as UUID);
+      }
+      await loadData();
+    }
+    setPendingDelete(null);
+  };
+
   return (
     <>
       <TopNavBar />
@@ -109,9 +136,14 @@ export default function ParticipantsPage() {
           </ListControlsWrapper>
 
           {/* 3. Filtered list component */}
-          <ParticipantsList participants={filteredParticipants} />
+          <ParticipantsList
+            participants={filteredParticipants}
+            onDeleteRow={handleDeleteRow}
+          />
         </ContentWrapper>
       </LayoutWrapper>
+
+      <WarningModal open={warningModalOpen} onClose={handleModalClose} />
     </>
   );
 }

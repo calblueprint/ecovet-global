@@ -26,3 +26,11 @@ export const Button = styled.button`
   opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 `;
+
+export const DeleteButton = styled.button`
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+  visibility: hidden;
+  transition: opacity 0.3s ease-in-out;
+`;

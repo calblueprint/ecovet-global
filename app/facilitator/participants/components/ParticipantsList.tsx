@@ -1,5 +1,8 @@
 import { useState } from "react";
+import Image from "next/image";
 import Box from "@mui/material/Box";
+import { DeleteButton } from "@/app/participants/styles";
+import cross from "@/assets/images/DeleteTagCross.svg";
 import { Participant } from "@/types/schema";
 import { SortButton } from "../../styles";
 import {
@@ -12,8 +15,10 @@ import {
 
 export default function ParticipantsList({
   participants,
+  onDeleteRow,
 }: {
   participants: Participant[];
+  onDeleteRow: (participant: Participant) => void;
 }) {
   const [sortAsc, setSortAsc] = useState(true);
 
@@ -49,6 +54,11 @@ export default function ParticipantsList({
                 <StyledTd>{p.email}</StyledTd>
                 <StyledTd>{p.role}</StyledTd>
                 <StyledTd>{p.last_active}</StyledTd>
+                <StyledTd>
+                  <DeleteButton onClick={() => onDeleteRow(p)}>
+                    <Image src={cross} alt="cross" />
+                  </DeleteButton>
+                </StyledTd>
               </StyledTableRow>
             ))}
           </tbody>
