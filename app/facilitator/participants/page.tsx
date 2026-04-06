@@ -99,7 +99,7 @@ export default function ParticipantsPage() {
       if (pendingDelete.invite_accepted && pendingDelete.id) {
         console.log("deleting profile: ", pendingDelete);
         await deleteProfile(pendingDelete.id as UUID);
-      } 
+      }
 
       // Always delete invite for both cases
       console.log("deleting invite: ", pendingDelete);
