@@ -56,8 +56,8 @@ export default function SignIn() {
         return;
       }
 
-      const hasProfile = await checkProfileExists(data.user.id);
-      router.push(hasProfile ? "/test-page" : "/onboarding");
+      const doesNotHaveProfile = await checkProfileExists(data.user.id);
+      router.push(doesNotHaveProfile ? "/onboarding" : "/test-page");
     } catch {
       setErrorMessage("An unexpected error occurred. Please try again.");
     } finally {
