@@ -142,7 +142,7 @@ export async function sessionParticipants(
       session_id,
       phase_index,
       is_finished,
-      profile (
+      profile!fk_participant_profile (
         first_name,
         last_name
       )
@@ -169,7 +169,7 @@ export async function sessionParticipantsBulk(
       session_id,
       phase_index,
       is_finished,
-      profile (
+      profile!fk_participant_profile (
       first_name,
       last_name
       )

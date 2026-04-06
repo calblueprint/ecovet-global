@@ -64,14 +64,17 @@ export async function GET(
       user_id,
       role_id,
       is_finished,
-      profile ( first_name, last_name ),
+      profile!fk_participant_profile ( first_name, last_name ),
       role ( role_name )
     `,
     )
     .eq("session_id", sessionId);
 
   if (participantsError || !participants?.length) {
-    return Response.json({ error: "No participants found" }, { status: 404 });
+    return Response.json(
+      { error: "No participants found", participantsError },
+      { status: 404 },
+    );
   }
 
   // Role-phases (role × phase combos)
