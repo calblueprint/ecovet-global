@@ -68,7 +68,7 @@ export default function PromptRenderer({
         {prompt.prompt_type === "checkbox" && (
           <CheckboxPromptParticipant
             options={options}
-            value={(answer as string[]) || []}
+            values={(answer as string[]) || []}
             onChange={handleChange}
           />
         )}

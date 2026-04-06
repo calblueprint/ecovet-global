@@ -277,17 +277,20 @@ export default function ParticipantFlowPage() {
     }
 
     const values = Array.isArray(value) ? value : [value];
-    for (const v of values) {
-      const result = await createPromptAnswer(
-        userId,
-        prompt_id,
-        sessionId,
-        rolePhase.phase_id,
-        v,
-        prompt_type,
-      );
-      console.log("inserted", v, result);
-    }
+
+    // Updated to parrallelise DB updates
+    await Promise.allSettled(
+      values.map(v =>
+        createPromptAnswer(
+          userId,
+          prompt_id,
+          sessionId,
+          rolePhase.phase_id,
+          v,
+          prompt_type,
+        ),
+      ),
+    );
 
     console.log("saving answer ", prompt_id, values);
 

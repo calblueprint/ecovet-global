@@ -8,27 +8,31 @@ import {
 
 type Props = {
   options: PromptOption[];
-  value: string[];
+  values: string[];
   onChange: (value: string[]) => void;
 };
 
 export default function CheckboxPromptParticipant({
   options,
-  value,
+  values,
   onChange,
 }: Props) {
   function toggle(id: string) {
-    if (value.includes(id)) {
-      onChange(value.filter(v => v !== id));
+    const set = new Set(values);
+
+    if (set.has(id)) {
+      set.delete(id);
     } else {
-      onChange([...value, id]);
+      set.add(id);
     }
+
+    onChange(Array.from(set));
   }
 
   return (
     <CheckboxParticipantStyled>
       {options.map(o => {
-        const selected = value.includes(o.option_id);
+        const selected = values.includes(o.option_id);
         return (
           <CheckboxOptionParticipantStyled
             key={o.option_id}

@@ -53,6 +53,7 @@ export const CheckboxParticipantStyled = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
+  gap: 8px;
 
   .MuiFormGroup-root {
     gap: 8px;
