@@ -81,18 +81,19 @@ export async function addInviteInfoToProfile(userId: string, email: string) {
 
 export async function sendPasswordResetEmail(email: string) {
   const supabase = await getSupabaseServerClient();
+
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/auth/change-password`,
     });
     if (error) {
       console.error("Supabase error:", error);
-      return { success: false, error };
+      return { success: false, error: error.message };
     }
-    return { success: true };
+    return { success: true, error: null };
   } catch (error) {
     console.error("Error sending password reset email:", error);
-    return { success: false, error };
+    return { success: false, error: "Failed to send reset email" };
   }
 }
 
