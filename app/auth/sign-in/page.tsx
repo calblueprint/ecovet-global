@@ -7,120 +7,121 @@ import { useRouter } from "next/navigation";
 import { checkProfileExists } from "@/actions/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
 import {
-  Button,
-  Container,
-  EmailAddressDiv,
-  ErrorMessage,
-  ForgetPasswordTag,
-  Heading2,
-  Input,
-  InputFields,
-  InputLabel,
-  InputWrapper,
-  IntroText,
-  Main,
-  PasswordDiv,
-  VisibilityToggle,
-  WelcomeTag,
-} from "../styles";
+  AdminLink,
+  BrandingText,
+  ErrorMsg,
+  FieldsetInput,
+  FloatingLabel,
+  ForgotPassword,
+  FormContainer,
+  FormFields,
+  Heading,
+  LeftPanel,
+  Legend,
+  LogoText,
+  PageWrapper,
+  RightPanel,
+  SignInButton,
+  StyledInput,
+  SubText,
+  ToggleButton,
+} from "./styles";
 
-export default function Login() {
+export default function SignIn() {
   const router = useRouter();
+  const { signInWithEmail } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const sessionHandler = useSession();
-  const isEmailValid = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const signInWithEmail = async () => {
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const handleSignIn = async () => {
+    if (loading) return;
+    setLoading(true);
+    setErrorMessage(null);
+
     try {
-      const { data, error } = await sessionHandler.signInWithEmail(
-        email,
-        password,
-      );
+      const { data, error } = await signInWithEmail(email, password);
+
       if (error) {
-        throw new Error("Incorrect email or password. Please try again.");
+        setErrorMessage("Incorrect email or password. Please try again.");
+        return;
       }
 
       if (!data.user) {
-        throw new Error("User not found after sign in");
+        setErrorMessage("Sign in failed. Please try again.");
+        return;
       }
 
-      if (await checkProfileExists(data.user.id)) {
-        router.push("/onboarding");
-      } else {
-        router.push("/test-page");
-      }
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        setErrorMessage(error.message);
-      } else {
-        setErrorMessage("An unexpected error occurred.");
-      }
+      const doesNotHaveProfile = await checkProfileExists(data.user.id);
+      router.push(doesNotHaveProfile ? "/onboarding" : "/test-page");
+    } catch {
+      setErrorMessage("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <>
-      <Main>
-        <Container>
-          <IntroText>
-            <WelcomeTag>
-              <Heading2>Welcome back!</Heading2>
-            </WelcomeTag>
-          </IntroText>
-          <InputFields>
-            <EmailAddressDiv>
-              <InputWrapper>
-                <InputLabel htmlFor="email">Email address</InputLabel>
-                <Input
-                  name="email"
-                  placeholder="Email Address"
-                  onChange={e => {
-                    setEmail(e.target.value);
-                    setErrorMessage(null);
-                  }}
-                  value={email}
-                />
-              </InputWrapper>
-            </EmailAddressDiv>
-            <PasswordDiv>
-              <InputWrapper>
-                <InputLabel htmlFor="password">Password</InputLabel>
-                <Input
-                  type={showPassword ? "text" : "password"}
+    <PageWrapper>
+      <LeftPanel>
+        <LogoText>ECOVET GLOBAL</LogoText>
+        <BrandingText>
+          I wanna write some text over here about Ecovet and StartX.
+        </BrandingText>
+      </LeftPanel>
+      <RightPanel>
+        <FormContainer>
+          <Heading>Welcome Back!</Heading>
+          <FormFields>
+            <FieldsetInput>
+              <StyledInput
+                id="email"
+                name="email"
+                type="email"
+                placeholder="Email Address"
+                onChange={e => {
+                  setEmail(e.target.value);
+                  setErrorMessage(null);
+                }}
+                value={email}
+              />
+            </FieldsetInput>
+            <div>
+              <FieldsetInput>
+                <StyledInput
+                  id="password"
                   name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
                   onChange={e => setPassword(e.target.value)}
                   value={password}
-                  placeholder="Password"
-                />{" "}
-                <VisibilityToggle
+                />
+                <ToggleButton
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <FiEye size={18} /> : <FiEyeOff size={18} />}
-                </VisibilityToggle>
-              </InputWrapper>
-            </PasswordDiv>
-            <ForgetPasswordTag>
-              <Link href="/auth/reset-password"> Forget password? </Link>
-            </ForgetPasswordTag>
-          </InputFields>
-          <Button
+                  {showPassword ? <FiEye size={16} /> : <FiEyeOff size={16} />}
+                </ToggleButton>
+              </FieldsetInput>
+              <ForgotPassword>
+                <Link href="/auth/reset-password">Forgot password?</Link>
+              </ForgotPassword>
+            </div>
+          </FormFields>
+          <SignInButton
             type="button"
-            onClick={signInWithEmail}
-            disabled={!isEmailValid(email)}
+            onClick={handleSignIn}
+            disabled={!isEmailValid || !password || loading}
           >
-            {" "}
-            Sign in{" "}
-          </Button>
-          {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
-        </Container>
-      </Main>
-    </>
+            {loading ? "Signing in..." : "Sign in"}
+          </SignInButton>
+          {errorMessage && <ErrorMsg>{errorMessage}</ErrorMsg>}
+        </FormContainer>
+      </RightPanel>
+    </PageWrapper>
   );
 }
