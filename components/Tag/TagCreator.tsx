@@ -106,11 +106,7 @@ export function TagCreator({
         New Tag
       </NewTag>
       {tags.map(tag => (
-        <SidebarTag
-          key={tag.tag_id}
-          $isSelected={selectedTagId === tag.tag_id}
-          onClick={() => onTagClick(tag.tag_id)}
-        >
+        <SidebarTag key={tag.tag_id}>
           <TagComponent
             color={tag.color as ColorKey}
             name={tag.name}

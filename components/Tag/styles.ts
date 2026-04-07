@@ -5,8 +5,6 @@ import { Sans } from "@/styles/fonts";
 export const StyledTagCreator = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 6px;
-  gap: 4px;
 `;
 
 export const NewTag = styled.button`
