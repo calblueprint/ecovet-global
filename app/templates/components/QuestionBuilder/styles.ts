@@ -21,7 +21,8 @@ export const RoleDescriptionTemplate = styled(B2)`
 export const QuestionRowStyled = styled.div`
   display: flex;
   gap: 8px;
-  align-items: center;
+  justify-content: space-between;
+
   width: 100%;
 `;
 
@@ -135,8 +136,10 @@ export const BigInput = styled(TextField).attrs({
   variant: "outlined",
 })`
   display: flex;
-  flex: 1 0 0;
   align-self: stretch;
+  flex-shrink: 0;
+
+  width: 70%;
 
   .MuiInputBase-root {
     padding: 10px 12px;
@@ -155,7 +158,7 @@ export const BigInput = styled(TextField).attrs({
     font-size: 0.75rem;
 
     &::placeholder {
-      color: ${COLORS.black20};
+      color: ${COLORS.black40};
     }
   }
 `;

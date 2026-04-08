@@ -168,7 +168,7 @@ export default function QuestionBuilder({
 
                 <BigInput
                   name="prompt_follow_ups"
-                  placeholder="Type question follow ups (Optional)..."
+                  placeholder="Type question follow ups (Use Shift+Return to add more lines)..."
                   value={prompt.prompt_follow_ups ?? ""}
                   onChange={e =>
                     onChange(promptID, "prompt_follow_ups", e.target.value)
