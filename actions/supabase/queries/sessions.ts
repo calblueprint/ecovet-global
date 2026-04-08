@@ -89,6 +89,10 @@ export async function fetchTemplateNameBySession(session_id: string) {
     .single();
   if (e1) throw e1;
 
+  if (!session.template_id) {
+    throw new Error(`No session template`);
+  }
+
   const { data: template, error: e2 } = await supabase
     .from("template")
     .select("template_name")
@@ -236,7 +240,9 @@ export async function advancePhaseForSingleUser(
       `Failed to fetch current phase index for user in advancePhaseForUser: ${fetchError.message}`,
     );
   }
-
+  if (!currentData.phase_index) {
+    throw new Error(`Phase Index is null`);
+  }
   const { data, error } = await supabase
     .from("participant_session")
     .update({ phase_index: currentData.phase_index + 1 })
@@ -307,6 +313,9 @@ export async function fetchPhases(sessionId: string) {
   if (sessionError || !session) {
     throw new Error("Failed to fetch session");
   }
+  if (!session.template_id) {
+    throw new Error(`No session template`);
+  }
 
   const { data: phases, error: phasesError } = await supabase
     .from("phase")
@@ -343,6 +352,9 @@ export async function fetchMostRecentPhase(
 
   if (!data) {
     throw new Error("No phase id found");
+  }
+  if (!data.phase_index) {
+    throw new Error(`No phase index`);
   }
 
   return data.phase_index - 1;
@@ -504,6 +516,10 @@ export async function getPhaseId(sessionId: UUID): Promise<UUID | null> {
   }
 
   const templateId = sessionData.template_id;
+
+  if (!templateId) {
+    throw new Error(`No session template`);
+  }
 
   const { data: phaseData, error: phaseError } = await supabase
     .from("phase")
