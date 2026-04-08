@@ -136,6 +136,8 @@ export default function Page() {
         isForceAdvance,
       )) as UUID;
 
+      console.log(sessionId);
+
       await assignParticipantToSession(profile.id as UUID, sessionId, null);
 
       await Promise.all(

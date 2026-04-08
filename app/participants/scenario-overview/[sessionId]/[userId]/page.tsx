@@ -109,6 +109,7 @@ export default function SessionFlowPage() {
         console.log("phaseInd", phaseIdx);
         console.log("roleID", roleId);
         console.log("currentPhaseId", currentPhase.phase_id);
+        console.log("rp", rp);
         console.log("rolePhaseId", rp?.role_phase_id, p);
         setPrompts(p);
       } catch (err) {
