@@ -24,7 +24,7 @@ import {
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
 import { useProfile } from "@/utils/ProfileProvider";
-import NextButton from "../../../components/ParticipantNextButton";
+import NextButton from "./components/ParticipantNextButton";
 import PromptsRightPanel from "./components/PromptsRightPanel";
 import ScenarioLeftPanel from "./components/ScenarioLeftPanel";
 import { Main } from "./styles";
