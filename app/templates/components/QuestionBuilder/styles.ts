@@ -22,6 +22,8 @@ export const QuestionRowStyled = styled.div`
   display: flex;
   gap: 8px;
   align-items: center;
+  justify-content: space-between;
+
   width: 100%;
 `;
 

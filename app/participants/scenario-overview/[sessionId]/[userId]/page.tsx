@@ -24,7 +24,7 @@ import {
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
 import { useProfile } from "@/utils/ProfileProvider";
-import NextButton from "../../../components/ParticipantNextButton";
+import NextButton from "./components/ParticipantNextButton";
 import PromptsRightPanel from "./components/PromptsRightPanel";
 import ScenarioLeftPanel from "./components/ScenarioLeftPanel";
 import { Main } from "./styles";
@@ -109,6 +109,7 @@ export default function SessionFlowPage() {
         console.log("phaseInd", phaseIdx);
         console.log("roleID", roleId);
         console.log("currentPhaseId", currentPhase.phase_id);
+        console.log("rp", rp);
         console.log("rolePhaseId", rp?.role_phase_id, p);
         setPrompts(p);
       } catch (err) {

@@ -169,7 +169,7 @@ export async function createRolePhases(
       role_phase_id: role_phase_id,
       phase_id: phase_id,
       role_id: role_id,
-      description: description,
+      role_phase_description: description,
     })
     .select("role_phase_id")
     .single();
@@ -206,6 +206,7 @@ export async function createPrompts(
   prompt_id: UUID,
   role_phase_id: UUID,
   prompt_text: string | null,
+  prompt_follow_ups: string | null,
   prompt_type: "text" | "multiple_choice" | "checkbox" | null,
 ): Promise<UUID> {
   const supabase = await getSupabaseServerClient();
@@ -215,6 +216,7 @@ export async function createPrompts(
       prompt_id: prompt_id,
       role_phase_id: role_phase_id,
       prompt_text: prompt_text,
+      prompt_follow_ups: prompt_follow_ups,
       prompt_type: prompt_type,
     })
     .select("prompt_id")
