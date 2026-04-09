@@ -1,5 +1,5 @@
 import { Document, Page, Text, View } from "@react-pdf/renderer";
-import { styles } from "./styles"
+import { styles } from "./styles";
 
 export type ParticipantSummary = {
   name: string;
