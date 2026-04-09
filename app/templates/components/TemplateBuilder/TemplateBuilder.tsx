@@ -253,7 +253,6 @@ export default function TemplateBuilder({
         prompt.role_phase_id ?? "",
         prompt.prompt_follow_ups,
         prompt.prompt_text,
-        prompt.prompt_follow_ups,
         prompt.prompt_type,
       );
 
