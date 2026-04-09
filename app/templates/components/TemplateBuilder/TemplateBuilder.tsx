@@ -114,7 +114,6 @@ export default function TemplateBuilder({
         prompt_id: newPromptID,
         role_phase_id: rolePhaseID,
         prompt_text: "",
-        prompt_follow_ups: "",
         prompt_type: "text",
       };
       draft.promptIndex[rolePhaseID].push(newPromptID);
@@ -164,10 +163,6 @@ export default function TemplateBuilder({
       } else if (field === "prompt_text") {
         update(draft => {
           draft.promptById[id as UUID].prompt_text = next as string;
-        });
-      } else if (field === "prompt_follow_ups") {
-        update(draft => {
-          draft.promptById[id as UUID].prompt_follow_ups = next as string;
         });
       } else if (field === "prompt_type") {
         update(draft => {
@@ -256,7 +251,6 @@ export default function TemplateBuilder({
         promptID,
         prompt.role_phase_id ?? "",
         prompt.prompt_text,
-        prompt.prompt_follow_ups,
         prompt.prompt_type,
       );
 
