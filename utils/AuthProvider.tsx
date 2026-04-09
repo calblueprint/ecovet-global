@@ -17,18 +17,13 @@ export interface AuthState {
   signOut: () => void;
 }
 
-const AuthContext = createContext({} as AuthState);
+const AuthContext = createContext<AuthState | null>(null);
 
-export function useSession() {
+export function useSession(): AuthState {
   const value = useContext(AuthContext);
-  if (process.env.NODE_ENV !== "production") {
-    if (!value) {
-      throw new Error(
-        "useSession must be wrapped in a <AuthContextProvider />",
-      );
-    }
+  if (!value) {
+    throw new Error("useSession must be wrapped in a <AuthContextProvider />");
   }
-
   return value;
 }
 

@@ -7,29 +7,30 @@ import {
   advancePhaseForSingleUser,
   setIsFinished,
 } from "@/actions/supabase/queries/sessions";
-import { Button } from "../styles";
+import { Button } from "@/app/participants/styles";
 
-interface ScenarioBackButtonProps {
+interface NextButtonProps {
   user_id: UUID;
   role_id: UUID;
   session_id: UUID;
   is_force_advance: boolean;
   phase_id: UUID;
   promptsCompleted: boolean;
-  isFirstPhase: boolean;
+  isLastPhase: boolean;
   currentPhaseIndex: number;
   onClick: () => Promise<void>;
 }
 
-export default function ScenarioBackButton({
+export default function NextButton({
   user_id,
   role_id,
   session_id,
+  is_force_advance,
   promptsCompleted,
-  isFirstPhase,
+  isLastPhase,
   currentPhaseIndex,
   onClick,
-}: ScenarioBackButtonProps) {
+}: NextButtonProps) {
   const [clicked, setClicked] = useState(false);
   const router = useRouter();
 
@@ -38,13 +39,33 @@ export default function ScenarioBackButton({
   }, [currentPhaseIndex]);
 
   async function handleClick() {
+    console.log("Next button clicked", is_force_advance, isLastPhase);
     await onClick();
+
+    if (isLastPhase) {
+      await setIsFinished(user_id, role_id, session_id);
+      router.push("/sessions/session-finish");
+      return;
+    }
+
+    if (is_force_advance) {
+      setClicked(true);
+
+      try {
+        await setIsFinished(user_id, role_id, session_id);
+      } catch (err) {
+        console.error(err);
+        setClicked(false);
+      }
+    } else {
+      await advancePhaseForSingleUser(user_id, role_id, session_id);
+    }
   }
 
   return (
     <div>
-      <Button onClick={handleClick} disabled={isFirstPhase}>
-        Back
+      <Button onClick={handleClick} disabled={!promptsCompleted || clicked}>
+        {isLastPhase ? "Finish Game" : "Next"}
       </Button>
 
       {clicked && <span> waiting for others...</span>}

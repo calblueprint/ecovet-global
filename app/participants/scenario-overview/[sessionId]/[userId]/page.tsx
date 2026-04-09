@@ -24,12 +24,12 @@ import {
   sessionParticipantsBulk,
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
-import ScenarioBackButton from "@/app/participants/components/ScenarioBackButton";
 import { useProfile } from "@/utils/ProfileProvider";
 import { useAnnouncements } from "@/utils/UseAnnouncements";
-import ScenarioNextButton from "../../../components/ScenarioNextButton";
 import PromptsRightPanel from "./components/PromptsRightPanel";
+// import ScenarioBackButton from "./components/ScenarioBackButton";
 import ScenarioLeftPanel from "./components/ScenarioLeftPanel";
+import ScenarioNextButton from "./components/ScenarioNextButton";
 import { Main } from "./styles";
 
 export default function SessionFlowPage() {
@@ -149,6 +149,7 @@ export default function SessionFlowPage() {
         console.log("phaseInd", phaseIdx);
         console.log("roleID", roleId);
         console.log("currentPhaseId", currentPhase.phase_id);
+        console.log("rp", rp);
         console.log("rolePhaseId", rp?.role_phase_id, p);
         setPrompts(p);
       } catch (err) {
@@ -322,23 +323,24 @@ export default function SessionFlowPage() {
         onInputAnswer={handleInputAnswer}
         onBlur={handleBlur}
         backButton={
-          !isOverview &&
-          roleId &&
-          userId &&
-          sessionIdStr &&
-          currentPhase && (
-            <ScenarioBackButton
-              user_id={userId as UUID}
-              role_id={roleId as UUID}
-              session_id={sessionIdStr}
-              is_force_advance={isForceAdvance}
-              promptsCompleted={completedPrompts.size == prompts.length}
-              isFirstPhase={isFirstPhase}
-              currentPhaseIndex={phaseIdx}
-              phase_id={currentPhase.phase_id as UUID}
-              onClick={handleBack}
-            />
-          )
+          <></>
+          // !isOverview &&
+          // roleId &&
+          // userId &&
+          // sessionIdStr &&
+          // currentPhase && (
+          //   <ScenarioBackButton
+          //     user_id={userId as UUID}
+          //     role_id={roleId as UUID}
+          //     session_id={sessionIdStr}
+          //     is_force_advance={isForceAdvance}
+          //     promptsCompleted={completedPrompts.size == prompts.length}
+          //     isFirstPhase={isFirstPhase}
+          //     currentPhaseIndex={phaseIdx}
+          //     phase_id={currentPhase.phase_id as UUID}
+          //     onClick={handleBack}
+          //   />
+          // )
         }
         nextButton={
           !isOverview &&
