@@ -7,23 +7,19 @@ import { useRouter } from "next/navigation";
 import { checkProfileExists } from "@/actions/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
 import {
-  AdminLink,
   BrandingText,
   ErrorMsg,
   FieldsetInput,
-  FloatingLabel,
   ForgotPassword,
   FormContainer,
   FormFields,
   Heading,
   LeftPanel,
-  Legend,
   LogoText,
   PageWrapper,
   RightPanel,
   SignInButton,
   StyledInput,
-  SubText,
   ToggleButton,
 } from "./styles";
 
@@ -109,6 +105,7 @@ export default function SignIn() {
               </FieldsetInput>
               <ForgotPassword>
                 <Link href="/auth/reset-password">Forgot password?</Link>
+                <Link href="/auth/sign-up">Sign Up</Link>
               </ForgotPassword>
             </div>
           </FormFields>
