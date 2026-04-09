@@ -109,7 +109,7 @@ export function TagCreator({
         <SidebarTag key={tag.tag_id}>
           <TagComponent
             color={tag.color as ColorKey}
-            name={tag.name}
+            name={tag.name ?? "No name"}
             tag_id={tag.tag_id}
             sidebar={true}
             onRename={handleRename}
