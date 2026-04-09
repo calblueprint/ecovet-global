@@ -165,10 +165,6 @@ export default function TemplateBuilder({
         update(draft => {
           draft.promptById[id as UUID].prompt_text = next as string;
         });
-      } else if (field === "prompt_follow_ups") {
-        update(draft => {
-          draft.promptById[id as UUID].prompt_follow_ups = next as string;
-        });
       } else if (field === "prompt_type") {
         update(draft => {
           draft.promptById[id as UUID].prompt_type = next as PromptType;

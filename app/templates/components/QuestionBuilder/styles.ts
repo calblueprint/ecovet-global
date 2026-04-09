@@ -21,6 +21,7 @@ export const RoleDescriptionTemplate = styled(B2)`
 export const QuestionRowStyled = styled.div`
   display: flex;
   gap: 8px;
+  align-items: center;
   justify-content: space-between;
 
   width: 100%;
@@ -130,36 +131,24 @@ export const QuestionCard = styled.fieldset`
   margin-bottom: 10px;
 `;
 
-export const BigInput = styled(TextField).attrs({
-  multiline: true,
-  minRows: 1,
-  variant: "outlined",
+/* Big comfortable text area (used for description/prompts) */
+export const BigInput = styled.input.attrs({
+  type: "text",
 })`
   display: flex;
+  padding: 10px 12px;
+  align-items: center;
+  gap: 10px;
+  flex: 1 0 0;
   align-self: stretch;
-  flex-shrink: 0;
+  font-size: 0.75rem;
 
-  width: 70%;
+  border-radius: 4px;
+  border: 1px solid ${COLORS.oat_medium};
+  background: ${COLORS.white};
 
-  .MuiInputBase-root {
-    padding: 10px 12px;
-    font-size: 0.75rem;
-    border-radius: 4px;
-    border: 1px solid ${COLORS.oat_medium};
-    background: ${COLORS.white};
-  }
-
-  .MuiOutlinedInput-notchedOutline {
-    border: none;
-  }
-
-  .MuiInputBase-input {
-    padding: 0;
-    font-size: 0.75rem;
-
-    &::placeholder {
-      color: ${COLORS.black40};
-    }
+  ::placeholder {
+    color: ${COLORS.black20};
   }
 `;
 // TODO: placeholder color not working
