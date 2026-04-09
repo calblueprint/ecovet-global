@@ -37,6 +37,13 @@ export const WelcomeTag = styled.div`
   color: ${COLORS.black100};
 `;
 
+export const SubText = styled.p`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: ${COLORS.black70};
+`;
+
 export const SignInTag = styled.div`
   color: ${COLORS.black70};
   font-family: ${Sans.style.fontFamily};

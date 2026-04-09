@@ -146,6 +146,8 @@ export const ForgotPassword = styled.div`
   font-family: ${Sans.style.fontFamily};
   font-size: 0.6875rem;
   font-weight: 500;
+  display: flex;
+  justify-content: space-between;
 
   margin-top: 0.5rem;
 
