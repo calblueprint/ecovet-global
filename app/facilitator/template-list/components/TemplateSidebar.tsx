@@ -3,6 +3,10 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import Accordion from "@mui/material/Accordion";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import { ArrowBigDown } from "lucide-react";
 import Plus from "@/assets/images/plus.svg";
 import { TagCreator } from "@/components/Tag/TagCreator";
 import WarningModal from "@/components/WarningModal/WarningModal";
@@ -18,7 +22,7 @@ interface TemplateSideBarProps {
   setFilterMode: (val: "all" | "your" | "browse") => void;
   onDeleteConfirmed?: (tagId: UUID) => void;
   user_group_id: UUID;
-  selectedTagId: UUID | null;
+  selectedTagIds: UUID[] | null;
   onTagClick: (id: UUID) => void;
   onTagRenamed: () => void;
 }
@@ -28,7 +32,7 @@ export default function TemplateSideBar({
   setFilterMode,
   onDeleteConfirmed,
   user_group_id,
-  selectedTagId,
+  selectedTagIds,
   onTagClick,
   onTagRenamed,
 }: TemplateSideBarProps) {
@@ -89,13 +93,24 @@ export default function TemplateSideBar({
         </SideNavButton>
       </SideNavTemplatesContainer>
 
-      <TagCreator
-        user_group_id={user_group_id} // Ensure this is passed
-        selectedTagId={selectedTagId} // Ensure this is passed
-        onTagClick={onTagClick}
-        onTagRenamed={onTagRenamed}
-        onDeleteTag={handleRequestDelete}
-      />
+      <Accordion>
+        <AccordionSummary
+          expandIcon={<ArrowBigDown />}
+          aria-controls="panel1-content"
+          id="panel1-header"
+        >
+          <p> Manage Tags </p>
+        </AccordionSummary>
+        <AccordionDetails>
+          <TagCreator
+            user_group_id={user_group_id} // Ensure this is passed
+            selectedTagIds={selectedTagIds} // Ensure this is passed
+            onTagClick={onTagClick}
+            onTagRenamed={onTagRenamed}
+            onDeleteTag={handleRequestDelete}
+          />
+        </AccordionDetails>
+      </Accordion>
 
       <WarningModal open={isWarningOpen} onClose={handleModalClose} />
     </div>

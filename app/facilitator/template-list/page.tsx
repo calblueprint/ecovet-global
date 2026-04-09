@@ -53,7 +53,7 @@ export default function TemplateListPage() {
   const [sortKey, setSortKey] = useState<"name" | "date">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  const [selectedTagId, setSelectedTagId] = useState<UUID | null>(null);
+  const [selectedTagIds, setSelectedTagIds] = useState<UUID[] | null>([]);
   const [openTagDropdownFor, setOpenTagDropdownFor] = useState<UUID | null>(
     null,
   );
@@ -89,11 +89,13 @@ export default function TemplateListPage() {
       updated = updated.filter(t => t.accessible_to_all);
     }
 
-    if (selectedTagId) {
-      updated = updated.filter(t =>
-        t.associated_tags.some(tag => tag.tag_id === selectedTagId),
-      );
-    }
+    if (selectedTagIds) {
+      if (selectedTagIds.length > 0) {
+        updated = updated.filter(t =>
+          t.associated_tags.some(tag => selectedTagIds.includes(tag.tag_id)),
+        );
+      }
+    } // update to multiselect
 
     updated = updated.filter(t =>
       t.template_name?.toLowerCase().includes(searchInput.trim().toLowerCase()),
@@ -115,7 +117,7 @@ export default function TemplateListPage() {
   }, [
     templates,
     filterMode,
-    selectedTagId,
+    selectedTagIds,
     searchInput,
     sortKey,
     sortOrder,
@@ -162,7 +164,9 @@ export default function TemplateListPage() {
         })),
       );
 
-      setSelectedTagId(prev => (prev === tag_id ? null : prev));
+      setSelectedTagIds(prev =>
+        prev ? prev.filter(tag => tag !== tag_id) : null,
+      );
     }
 
     return true;
@@ -298,9 +302,13 @@ export default function TemplateListPage() {
             setFilterMode={setFilterMode}
             onDeleteConfirmed={deleteTagComponent}
             user_group_id={user_group_id}
-            selectedTagId={selectedTagId}
+            selectedTagIds={selectedTagIds}
             onTagClick={(id: UUID) =>
-              setSelectedTagId(prev => (prev === id ? null : id))
+              setSelectedTagIds(prev => {
+                if (prev === null) return null;
+                if (prev.includes(id)) return prev.filter(tag => tag !== id);
+                return [...prev, id];
+              })
             }
             onTagRenamed={() => setTagVersion(v => v + 1)}
           />
@@ -309,6 +317,8 @@ export default function TemplateListPage() {
         <ContentWrapper>
           <PageDiv>
             <MainDiv>
+              <Heading3>Browse templates</Heading3>
+
               <SearchBarStyled>
                 <SearchInput
                   value={searchInput}
@@ -317,8 +327,34 @@ export default function TemplateListPage() {
                 />
               </SearchBarStyled>
 
-              <Heading3>Browse templates</Heading3>
-
+              <TagAutocomplete
+                availableTags={availableTags}
+                selectedTagIds={new Set(selectedTagIds)}
+                onSelect={(id: UUID) =>
+                  setSelectedTagIds(prev => {
+                    if (prev === null) return [id];
+                    if (prev.includes(id)) return prev;
+                    return [...prev, id];
+                  })
+                }
+                onRemove={tagId =>
+                  setSelectedTagIds(prev =>
+                    prev !== null ? prev.filter(id => id !== tagId) : null,
+                  )
+                }
+                onCreate={name =>
+                  setAvailableTags(prev => [
+                    ...prev,
+                    {
+                      name,
+                      color: "tagYellow",
+                      tag_id: "67",
+                      user_group_id: "6767",
+                      number: 67,
+                    },
+                  ])
+                }
+              />
               <GeneralTitle>
                 <span>
                   Name{" "}
