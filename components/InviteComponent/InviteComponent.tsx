@@ -17,6 +17,8 @@ import {
   SubmitButton,
 } from "./styles";
 
+console.log(process.env.NEXT_PUBLIC_SITE_URL);
+
 const isEmailValid = (email: string) => {
   const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
   return emailRegex.test(email);

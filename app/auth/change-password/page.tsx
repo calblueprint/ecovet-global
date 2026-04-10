@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FiCheck, FiEye, FiEyeOff, FiX } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import supabase from "@/actions/supabase/client";

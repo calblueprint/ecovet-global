@@ -1,5 +1,3 @@
-import COLORS from "@/styles/colors";
-import { Caption } from "@/styles/text";
 import { PhaseCaption, PhaseEntry } from "./styles";
 
 export default function EditablePhase({

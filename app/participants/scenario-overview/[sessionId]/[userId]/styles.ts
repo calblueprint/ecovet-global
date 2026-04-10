@@ -146,14 +146,62 @@ export const StyledTextarea = styled(TextareaAutosize)`
   width: 100%;
   padding: 0.75rem;
   border-radius: 0.5rem;
-  border: ${COLORS.black20} 0.1rem solid;
+  border: ${COLORS.black20} 0.07rem solid;
   font-size: 0.8rem;
   font-family: ${Sans.style.fontFamily};
+  color: ${COLORS.black70};
   resize: none;
+
+  &::placeholder {
+    color: ${COLORS.black20};
+  }
 
   &:focus {
     outline: none;
     border-color: #7aa0ff;
     box-shadow: 0 0 0 2px #e8efff;
   }
+`;
+
+export const PromptQuestionNumber = styled.span`
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${COLORS.black70};
+`;
+
+export const PromptQuestionText = styled.p`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: ${COLORS.black70};
+  margin: 0;
+`;
+
+export const FollowUpList = styled.ul`
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+`;
+
+export const FollowUpItem = styled.li`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: ${COLORS.black40};
+  line-height: 1.4;
+`;
+
+export const PromptWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-left: 2.5rem;
+  position: relative;
 `;
