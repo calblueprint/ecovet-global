@@ -25,7 +25,6 @@ export async function GET(
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 
-  // ── Session + template ──────────────────────────────────────────────────
   const { data: session, error: sessionError } = await supabase
     .from("session")
     .select(
