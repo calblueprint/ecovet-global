@@ -317,3 +317,32 @@ export const fetchTemplatesExercise = async (userGroup: string) => {
   }
   return data;
 };
+
+export async function fetchFullTemplate(template_id: string) {
+  const supabase = await getSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("template")
+    .select(
+      `
+      *,
+      roles:role(*),
+      phases:phase(
+        *,
+        role_phases:role_phase(
+          *,
+          prompts:prompt!prompt_role_phase_id_fkey(*) 
+        )
+      )
+    `,
+    )
+    .eq("template_id", template_id)
+    .single();
+
+  if (error) {
+    console.error("Supabase Error fetching full template:", error);
+    return null;
+  }
+
+  return data;
+}
