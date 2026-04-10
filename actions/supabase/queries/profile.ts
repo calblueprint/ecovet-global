@@ -267,6 +267,15 @@ export async function fetchRoleBySessionId(sessionId: UUID, userId: UUID) {
   };
 }
 
+export async function deleteProfile(user_id: UUID): Promise<void> {
+  const supabase = await getSupabaseServerClient();
+  const { error } = await supabase.from("profile").delete().eq("id", user_id);
+
+  if (error) {
+    console.error("Error deleting profile:", error.message);
+  }
+}
+
 export async function fetchProfilesByUserIds(user_ids: UUID[]) {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
