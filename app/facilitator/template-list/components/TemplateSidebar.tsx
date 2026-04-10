@@ -24,7 +24,7 @@ interface TemplateSideBarProps {
   setFilterMode: (val: "all" | "your" | "browse") => void;
   onDeleteConfirmed?: (tagId: UUID) => void;
   user_group_id: UUID;
-  selectedTagId: UUID | null;
+  selectedTagIds: UUID[] | null;
   onTagClick: (id: UUID) => void;
   onTagRenamed: () => void;
 }
@@ -34,7 +34,7 @@ export default function TemplateSideBar({
   setFilterMode,
   onDeleteConfirmed,
   user_group_id,
-  selectedTagId,
+  selectedTagIds,
   onTagClick,
   onTagRenamed,
 }: TemplateSideBarProps) {
@@ -105,7 +105,7 @@ export default function TemplateSideBar({
           <AccordionDetails sx={{ padding: 0 }}>
             <TagCreator
               user_group_id={user_group_id}
-              selectedTagId={selectedTagId}
+              selectedTagIds={selectedTagIds}
               onTagClick={onTagClick}
               onTagRenamed={onTagRenamed}
               onDeleteTag={handleRequestDelete}
