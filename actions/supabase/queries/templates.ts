@@ -69,7 +69,6 @@ export async function createPhases(
   phase_id: UUID,
   template_id: UUID | null,
   phase_name: string | null,
-  is_finished: boolean | null,
   phase_description: string | null = null,
   phase_number: number,
 ): Promise<UUID> {
@@ -81,7 +80,6 @@ export async function createPhases(
       template_id: template_id,
       phase_name: phase_name,
       phase_description: phase_description,
-      is_finished: is_finished,
       phase_number,
     })
     .select("phase_id")
@@ -171,7 +169,7 @@ export async function createRolePhases(
       role_phase_id: role_phase_id,
       phase_id: phase_id,
       role_id: role_id,
-      description: description,
+      role_phase_description: description,
     })
     .select("role_phase_id")
     .single();
@@ -206,9 +204,9 @@ export async function deleteRolePhase(role_phase_id: UUID): Promise<void> {
 
 export async function createPrompts(
   prompt_id: UUID,
-  user_id: UUID | null,
   role_phase_id: UUID,
   prompt_text: string | null,
+  prompt_follow_ups: string | null,
   prompt_type: "text" | "multiple_choice" | "checkbox" | null,
 ): Promise<UUID> {
   const supabase = await getSupabaseServerClient();
@@ -216,9 +214,9 @@ export async function createPrompts(
     .from("prompt")
     .insert({
       prompt_id: prompt_id,
-      user_id: user_id,
       role_phase_id: role_phase_id,
       prompt_text: prompt_text,
+      prompt_follow_ups: prompt_follow_ups,
       prompt_type: prompt_type,
     })
     .select("prompt_id")
@@ -265,7 +263,7 @@ export async function fetchTemplate(
     console.error("Error fetching template by template_id:", error);
     return null;
   }
-  console.log("this", data);
+
   return data;
 }
 
@@ -305,3 +303,17 @@ export async function fetchTemplatesWithTags() {
     associated_tags: t.template_tag.map((tt: { tag: Tag }) => tt.tag),
   }));
 }
+
+export const fetchTemplatesExercise = async (userGroup: string) => {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("template")
+    .select("*")
+    .or(`user_group_id.eq.${userGroup},accessible_to_all.eq.true`);
+
+  if (error) {
+    console.error("Error fetching templates:", error);
+    return [];
+  }
+  return data;
+};

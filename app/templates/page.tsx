@@ -5,10 +5,9 @@ import { produce } from "immer";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import { LocalStore, Template, UUID } from "@/types/schema";
 import { SideNavContainer } from "../facilitator/styles";
-import { LayoutWrapper } from "./components/styles";
-import TemplateBuilder from "./components/TemplateBuilder";
-import TemplateBuilderSideBar from "./components/TemplateBuilderSidebar";
-import { TemplateMainBox } from "./styles";
+import TemplateBuilder from "./components/TemplateBuilder/TemplateBuilder";
+import TemplateBuilderSideBar from "./components/TemplateBuilderSidebar/TemplateBuilderSidebar";
+import { LayoutWrapper, TemplateMainBox } from "./styles";
 
 const createInitialStore = (): LocalStore => {
   const templateID = crypto.randomUUID() as UUID;
@@ -35,7 +34,7 @@ const createInitialStore = (): LocalStore => {
     rolePhaseIndex: {},
     promptById: {},
     promptIndex: {},
-    optionsByPromptId: {}, // NEW
+    optionsByPromptId: {},
   };
 };
 
