@@ -24,7 +24,7 @@ export async function createTemplates( // create templates with inputs, but lowk
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("template")
-    .insert({
+    .upsert({
       template_id: templateID,
       template_name: template_name,
       accessible_to_all: accessible_to_all,
