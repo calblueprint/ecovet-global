@@ -114,6 +114,7 @@ export default function TemplateBuilder({
         prompt_id: newPromptID,
         role_phase_id: rolePhaseID,
         prompt_text: "",
+        prompt_follow_ups: "",
         prompt_type: "text",
       };
       draft.promptIndex[rolePhaseID].push(newPromptID);
@@ -250,6 +251,7 @@ export default function TemplateBuilder({
       await createPrompts(
         promptID,
         prompt.role_phase_id ?? "",
+        prompt.prompt_follow_ups,
         prompt.prompt_text,
         prompt.prompt_type,
       );

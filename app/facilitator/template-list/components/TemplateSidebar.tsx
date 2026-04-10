@@ -6,16 +6,18 @@ import { useRouter } from "next/navigation";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
-import { ArrowBigDown } from "lucide-react";
 import Plus from "@/assets/images/plus.svg";
 import { TagCreator } from "@/components/Tag/TagCreator";
 import WarningModal from "@/components/WarningModal/WarningModal";
+import { Caption } from "@/styles/text";
 import { UUID } from "@/types/schema";
 import {
   SideNavButton,
+  SideNavContainer,
   SideNavNewTemplateButton,
   SideNavTemplatesContainer,
-} from "../../styles";
+  StyledAccordion,
+} from "./styles";
 
 interface TemplateSideBarProps {
   filterMode: "all" | "your" | "browse";
@@ -67,7 +69,7 @@ export default function TemplateSideBar({
   };
 
   return (
-    <div>
+    <SideNavContainer>
       <SideNavNewTemplateButton onClick={() => router.push("/templates")}>
         <Image src={Plus} alt="+" width={10} height={10} /> New Template
       </SideNavNewTemplateButton>
@@ -91,28 +93,28 @@ export default function TemplateSideBar({
         >
           Browse Templates
         </SideNavButton>
+
+        <StyledAccordion>
+          <AccordionSummary
+            expandIcon={"+"}
+            aria-controls="panel1-content"
+            id="panel1-header"
+          >
+            <Caption>Manage Tags</Caption>
+          </AccordionSummary>
+          <AccordionDetails sx={{ padding: 0 }}>
+            <TagCreator
+              user_group_id={user_group_id}
+              selectedTagId={selectedTagId}
+              onTagClick={onTagClick}
+              onTagRenamed={onTagRenamed}
+              onDeleteTag={handleRequestDelete}
+            />
+          </AccordionDetails>
+        </StyledAccordion>
+
+        <WarningModal open={isWarningOpen} onClose={handleModalClose} />
       </SideNavTemplatesContainer>
-
-      <Accordion>
-        <AccordionSummary
-          expandIcon={<ArrowBigDown />}
-          aria-controls="panel1-content"
-          id="panel1-header"
-        >
-          <p> Manage Tags </p>
-        </AccordionSummary>
-        <AccordionDetails>
-          <TagCreator
-            user_group_id={user_group_id} // Ensure this is passed
-            selectedTagIds={selectedTagIds} // Ensure this is passed
-            onTagClick={onTagClick}
-            onTagRenamed={onTagRenamed}
-            onDeleteTag={handleRequestDelete}
-          />
-        </AccordionDetails>
-      </Accordion>
-
-      <WarningModal open={isWarningOpen} onClose={handleModalClose} />
-    </div>
+    </SideNavContainer>
   );
 }

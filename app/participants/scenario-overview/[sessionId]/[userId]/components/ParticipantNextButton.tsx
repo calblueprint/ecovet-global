@@ -7,7 +7,7 @@ import {
   advancePhaseForSingleUser,
   setIsFinished,
 } from "@/actions/supabase/queries/sessions";
-import { Button } from "../styles";
+import { Button } from "../../../../styles";
 
 interface NextButtonProps {
   user_id: UUID;

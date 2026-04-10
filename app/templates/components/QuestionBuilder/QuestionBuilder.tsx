@@ -166,6 +166,15 @@ export default function QuestionBuilder({
                   </PromptTypeDropdownStyled>
                 </QuestionRowStyled>
 
+                <BigInput
+                  name="prompt_follow_ups"
+                  placeholder="Type question follow ups (Use Shift+Return to add more lines)..."
+                  value={prompt.prompt_follow_ups ?? ""}
+                  onChange={e =>
+                    onChange(promptID, "prompt_follow_ups", e.target.value)
+                  }
+                />
+
                 {promptType === "multiple_choice" && (
                   <MultipleChoicePromptStyled>
                     <RadioGroup name={`mcq-${promptID}`}>
