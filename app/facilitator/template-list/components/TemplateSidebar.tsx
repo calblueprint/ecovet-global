@@ -105,7 +105,7 @@ export default function TemplateSideBar({
           <AccordionDetails sx={{ padding: 0 }}>
             <TagCreator
               user_group_id={user_group_id}
-              selectedTagId={selectedTagId}
+              selectedTagId={selectedTagIds}
               onTagClick={onTagClick}
               onTagRenamed={onTagRenamed}
               onDeleteTag={handleRequestDelete}
