@@ -89,9 +89,15 @@ export default function InputDropdown({
       isMulti={multi}
       onChange={handleChange}
       defaultValue={defaultOption}
-      styles={
-        customStyles || (selectStyles as StylesConfig<DropdownOption, boolean>)
-      }
+      styles={{
+        ...((customStyles || selectStyles) as StylesConfig<
+          DropdownOption,
+          boolean
+        >),
+        menuPortal: base => ({ ...base, zIndex: 9999 }),
+      }}
+      menuPortalTarget={typeof document !== "undefined" ? document.body : null}
+      menuPosition="fixed"
     />
   );
 }

@@ -7,12 +7,13 @@ import { DropdownOption } from "@/types/dropdown";
 export const LayoutWrapper = styled.div`
   display: flex;
   width: 100%;
+  height: 100%;
 `;
 
 export const Main = styled.main`
   display: flex;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   min-height: 100vh;
   padding: 2rem;
   justify-content: center;
@@ -28,7 +29,6 @@ export const StartContentWrapper = styled.div`
   margin-left: 10%;
 
   overflow-y: auto;
-  min-height: 0;
 `;
 
 export const SearchInput = styled.input`
@@ -114,6 +114,7 @@ export const DropdownContainer = styled.div`
   flex-direction: column;
   flex: 1;
   max-width: 400px;
+  min-height: 100%;
 `;
 
 export const ToggleGroup = styled.div`
@@ -154,6 +155,7 @@ export const ParticipantTable = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  overflow: visible;
 `;
 
 export const TableHeader = styled.div`
@@ -177,16 +179,18 @@ export const TableRow = styled.div`
 export const IconButton = styled.button`
   background-color: ${COLORS.darkElectricBlue};
   color: ${COLORS.white};
+  font-family: ${Sans.style.fontFamily};
+  font-weight: 500;
   border: none;
-  width: 28px;
-  height: 28px;
-  border-radius: 4px;
+  width: 10rem;
+  height: 2rem;
+  border-radius: 0.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   margin: 2rem auto;
-  font-size: 20px;
+  font-size: 12px;
   transition: transform 0.1s ease;
 
   &:active {
