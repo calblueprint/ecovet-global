@@ -13,7 +13,7 @@ import {
   fetchPromptsWithResponses,
   fetchRolePhases,
   fetchRolePhasesBatch,
-  fetchSessionName,
+  fetchTemplateNameBySession,
   finishSession,
   isSessionForceAdvance,
   SessionParticipant,
@@ -73,7 +73,7 @@ export default function FacilitatorSessionView() {
   const isLastPhase = currentPhase >= phases.length - 1;
   const currentPhaseObject = phases[currentPhase];
   const [promptData, setPromptData] = useState<ParticipantPromptData>({});
-  const [sessionName, setSessionName] = useState<string | null>(null);
+  const [templateName, setTemplateName] = useState<string | null>(null);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -108,19 +108,19 @@ export default function FacilitatorSessionView() {
       }
     }
 
-    async function loadSessionName() {
+    async function loadTemplateName() {
       try {
-        const name = await fetchSessionName(sessionId as UUID);
-        setSessionName(name);
+        const name = await fetchTemplateNameBySession(sessionId as UUID);
+        setTemplateName(name);
       } catch (err) {
-        console.error("Failed to load session name:", err);
+        console.error("Failed to load template name:", err);
       }
     }
 
     loadParticipants();
     checkIfForceAdvance();
     loadPhases();
-    loadSessionName();
+    loadTemplateName();
   }, [sessionId]);
 
   useEffect(() => {
@@ -302,7 +302,7 @@ export default function FacilitatorSessionView() {
   console.log("isForceAdvance:", isForceAdvance);
   console.log("participants:", participants);
   console.log("profile:", profile?.id);
-  console.log("Session Name:", sessionName);
+  console.log("Template Name:", templateName);
 
   const completedCount = participants
     .filter(p => p.user_id !== profile?.id)
@@ -323,7 +323,7 @@ export default function FacilitatorSessionView() {
         <ContentWrapper>
           <MainDiv>
             <HeadingBox>
-              <Heading3>{sessionName}</Heading3>
+              <Heading3>{templateName}</Heading3>
             </HeadingBox>
             {isForceAdvance && (
               <PhaseInformation>
