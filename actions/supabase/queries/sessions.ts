@@ -179,6 +179,9 @@ export async function sessionParticipants(
       session_id,
       phase_index,
       is_finished,
+      role (
+        role_name
+      ),
       profile!fk_participant_profile (
         first_name,
         last_name

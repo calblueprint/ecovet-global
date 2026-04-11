@@ -1,6 +1,11 @@
 "use client";
 
-import type { ParticipantSession, Phase, UUID } from "@/types/schema";
+import type {
+  ParticipantSession,
+  ParticipantSessionWithProfile,
+  Phase,
+  UUID,
+} from "@/types/schema";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import supabase from "@/actions/supabase/client";
@@ -40,7 +45,9 @@ export default function FacilitatorSessionView() {
   const { userId, profile } = useProfile();
   const router = useRouter();
 
-  const [participants, setParticipants] = useState<SessionParticipant[]>([]);
+  const [participants, setParticipants] = useState<
+    ParticipantSessionWithProfile[]
+  >([]);
   const [currentPhase, setCurrentPhase] = useState(0);
   const [phases, setPhases] = useState<Phase[]>([]);
   const [allDone, setAllDone] = useState(false);
@@ -60,7 +67,7 @@ export default function FacilitatorSessionView() {
   });
   const roleOptions = participants.map((p): [string, string] => [
     p.role_id ?? "unknown role",
-    p.role_id ?? "unknown role",
+    p.role?.role_name ?? "unknown role",
   ]);
   const userOptions = participants.map((p): [string, string] => [
     p.user_id,

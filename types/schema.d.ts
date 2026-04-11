@@ -70,6 +70,9 @@ export type ParticipantSessionWithProfile = ParticipantSession & {
     first_name: string;
     last_name: string;
   };
+  role?: {
+    role_name: string;
+  };
 };
 
 export type StagedOption = {
