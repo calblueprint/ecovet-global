@@ -26,10 +26,10 @@ import {
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
 import { useProfile } from "@/utils/ProfileProvider";
 import { useAnnouncements } from "@/utils/UseAnnouncements";
+import NextPhaseButton from "./components/NextPhaseButton";
+import PrevPhaseButton from "./components/PrevPhaseButton";
 import PromptsRightPanel from "./components/PromptsRightPanel";
-// import ScenarioBackButton from "./components/ScenarioBackButton";
 import ScenarioLeftPanel from "./components/ScenarioLeftPanel";
-import ScenarioNextButton from "./components/ScenarioNextButton";
 import { Main } from "./styles";
 
 export default function SessionFlowPage() {
@@ -292,14 +292,12 @@ export default function SessionFlowPage() {
 
   async function handleContinue() {
     if (isLastPhase) return;
-    const nextInd = phaseIdx + 1;
-    setPhaseIdx(nextInd);
+    setPhaseIdx(i => i + 1);
   }
 
   async function handleBack() {
-    if (isFirstPhase) return;
-    const nextInd = phaseIdx - 1;
-    setPhaseIdx(nextInd);
+    if (isOverview) return;
+    setPhaseIdx(i => i - 1);
   }
 
   if (loading) return <div>Loading session...</div>;
@@ -323,24 +321,20 @@ export default function SessionFlowPage() {
         onInputAnswer={handleInputAnswer}
         onBlur={handleBlur}
         backButton={
-          <></>
-          // !isOverview &&
-          // roleId &&
-          // userId &&
-          // sessionIdStr &&
-          // currentPhase && (
-          //   <ScenarioBackButton
-          //     user_id={userId as UUID}
-          //     role_id={roleId as UUID}
-          //     session_id={sessionIdStr}
-          //     is_force_advance={isForceAdvance}
-          //     promptsCompleted={completedPrompts.size == prompts.length}
-          //     isFirstPhase={isFirstPhase}
-          //     currentPhaseIndex={phaseIdx}
-          //     phase_id={currentPhase.phase_id as UUID}
-          //     onClick={handleBack}
-          //   />
-          // )
+          !isOverview &&
+          roleId &&
+          userId &&
+          sessionIdStr &&
+          currentPhase && (
+            <PrevPhaseButton
+              userId={userId as UUID}
+              roleId={roleId as UUID}
+              sessionId={sessionIdStr}
+              isOnOverview={isOverview}
+              isFirstPhase={isFirstPhase}
+              onClick={handleBack}
+            />
+          )
         }
         nextButton={
           !isOverview &&
@@ -348,15 +342,15 @@ export default function SessionFlowPage() {
           userId &&
           sessionIdStr &&
           currentPhase && (
-            <ScenarioNextButton
-              user_id={userId as UUID}
-              role_id={roleId as UUID}
-              session_id={sessionIdStr}
-              is_force_advance={isForceAdvance}
+            <NextPhaseButton
+              userId={userId as UUID}
+              roleId={roleId as UUID}
+              sessionId={sessionIdStr}
+              isForceAdvance={isForceAdvance}
               promptsCompleted={completedPrompts.size == prompts.length}
               isLastPhase={isLastPhase}
               currentPhaseIndex={phaseIdx}
-              phase_id={currentPhase.phase_id as UUID}
+              phaseId={currentPhase.phase_id as UUID}
               onClick={submitAnswers}
             />
           )

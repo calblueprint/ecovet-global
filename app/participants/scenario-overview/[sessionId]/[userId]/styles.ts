@@ -205,3 +205,7 @@ export const PromptWrapper = styled.div`
   padding-left: 2.5rem;
   position: relative;
 `;
+
+export const Clickable = styled.div`
+  cursor: pointer;
+`;

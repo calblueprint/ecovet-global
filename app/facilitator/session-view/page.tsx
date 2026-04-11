@@ -301,77 +301,56 @@ export default function FacilitatorSessionView() {
     <Main>
       <Container>
         <h3>Session ID: {sessionId}</h3>
-        {!isForceAdvance ? (
-          <div>
-            <h3>Participants</h3>
-            {participants.map(p => {
-              const data = promptData[p.user_id];
-
-              return (
-                <div key={p.user_id}>
-                  <strong>
-                    {p.profile?.first_name} {p.profile?.last_name}
-                  </strong>
-
-                  {data ? (
-                    <>
-                      <div>
-                        ({data.done}/{data.total} responses)
-                      </div>
-
-                      <ul>
-                        {data.prompts.map((prompt, i) => (
-                          <li key={i}>
-                            <div>
-                              <b>Q:</b> {prompt.question}
-                            </div>
-                            <div>
-                              <b>A:</b> {prompt.answer ?? <i> No response</i>}
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  ) : (
-                    <div>(Loading...)</div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <>
-            <h1 style={{ textAlign: "center" }}>Phase {currentPhase}</h1>
-            <div>
-              <h3>Unfinished Participants</h3>
-              {participants
-                .filter(p => !p.is_finished)
-                .map(p => {
-                  const data = promptData[p.user_id];
-                  return (
-                    <div key={p.user_id}>
-                      {p.profile?.first_name} {p.profile?.last_name}{" "}
-                      {data
-                        ? `(${data.done}/${data.total} responses)`
-                        : "(Loading counts...)"}
-                    </div>
-                  );
-                })}
-            </div>
-
-            <div>
-              <h3>Finished Participants</h3>
-              {participants
-                .filter(p => p.is_finished)
-                .map(p => (
-                  <div key={p.user_id}>
-                    {p.profile?.first_name} {p.profile?.last_name}{" "}
-                    {isForceAdvance && `(Phase ${p.phase_index})`}
-                  </div>
-                ))}
-            </div>
-          </>
+        {isForceAdvance && (
+          <h3>
+            Phase:{" "}
+            {currentPhase >= 0
+              ? phases[currentPhase].phase_name
+              : "Session Overview"}{" "}
+            (idx={currentPhase})
+          </h3>
         )}
+        <div>
+          <h3>Participants</h3>
+          {participants.map(p => {
+            const data = promptData[p.user_id];
+
+            return (
+              <div key={p.user_id}>
+                <strong>
+                  {p.profile?.first_name} {p.profile?.last_name} (Phase:{" "}
+                  {(p.phase_index ?? 0) >= 0
+                    ? phases[p.phase_index ?? 0].phase_name
+                    : "Session Overview"}
+                  )
+                </strong>
+
+                {data ? (
+                  <>
+                    <div>
+                      ({data.done}/{data.total} responses)
+                    </div>
+
+                    <ul>
+                      {data.prompts.map((prompt, i) => (
+                        <li key={i}>
+                          <div>
+                            <b>Q:</b> {prompt.question}
+                          </div>
+                          <div>
+                            <b>A:</b> {prompt.answer ?? <i> No response</i>}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : (
+                  <div>(Loading...)</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
 
         {isForceAdvance && (
           <Button onClick={advancePhase} disabled={isAdvancing}>

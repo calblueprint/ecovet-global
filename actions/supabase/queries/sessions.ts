@@ -227,7 +227,24 @@ export async function advancePhaseForSingleUser(
   roleId: UUID,
   sessionId: UUID,
 ): Promise<void> {
-  console.log("Advancing phase for user:", { userId, roleId, sessionId });
+  changePhaseForSingleUser(userId, roleId, sessionId, 1);
+}
+
+export async function backPhaseForSingleUser(
+  userId: UUID,
+  roleId: UUID,
+  sessionId: UUID,
+): Promise<void> {
+  changePhaseForSingleUser(userId, roleId, sessionId, -1);
+}
+
+export async function changePhaseForSingleUser(
+  userId: UUID,
+  roleId: UUID,
+  sessionId: UUID,
+  phaseChange: number,
+): Promise<void> {
+  console.log("Changing phase for user:", { userId, roleId, sessionId });
   const supabase = await getSupabaseServerClient();
 
   const { data: currentData, error: fetchError } = await supabase
@@ -240,15 +257,22 @@ export async function advancePhaseForSingleUser(
 
   if (fetchError) {
     throw new Error(
-      `Failed to fetch current phase index for user in advancePhaseForUser: ${fetchError.message}`,
+      `Failed to fetch current phase index for user in changePhaseForUser: ${fetchError.message}`,
     );
   }
   if (currentData.phase_index == null) {
     throw new Error(`Phase Index is null: ${JSON.stringify(currentData)}`);
   }
+
+  if (currentData.phase_index + phaseChange < -1) {
+    throw new Error(
+      `Cannot change phase from "${currentData.phase_index}" to "${currentData.phase_index + phaseChange}"`,
+    );
+  }
+
   const { data, error } = await supabase
     .from("participant_session")
-    .update({ phase_index: currentData.phase_index + 1 })
+    .update({ phase_index: currentData.phase_index + phaseChange })
     .eq("user_id", userId)
     .eq("role_id", roleId)
     .eq("session_id", sessionId)
@@ -256,7 +280,7 @@ export async function advancePhaseForSingleUser(
 
   if (error) {
     throw new Error(
-      `Failed to set advance phase for single user: ${error.message}`,
+      `Failed to set change phase for single user: ${error.message}`,
     );
   }
 
@@ -360,7 +384,6 @@ export async function fetchMostRecentPhase(
     throw new Error(`No phase index`);
   }
 
-  // TODO: why are we subtracing :(
   return data.phase_index - 1;
 }
 

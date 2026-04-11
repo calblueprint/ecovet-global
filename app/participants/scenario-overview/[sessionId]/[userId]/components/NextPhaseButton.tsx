@@ -10,22 +10,22 @@ import {
 import { Button } from "@/app/participants/styles";
 
 interface NextButtonProps {
-  user_id: UUID;
-  role_id: UUID;
-  session_id: UUID;
-  is_force_advance: boolean;
-  phase_id: UUID;
+  userId: UUID;
+  roleId: UUID;
+  sessionId: UUID;
+  isForceAdvance: boolean;
+  phaseId: UUID;
   promptsCompleted: boolean;
   isLastPhase: boolean;
   currentPhaseIndex: number;
   onClick: () => Promise<void>;
 }
 
-export default function NextButton({
-  user_id,
-  role_id,
-  session_id,
-  is_force_advance,
+export default function NextPhaseButton({
+  userId,
+  roleId,
+  sessionId,
+  isForceAdvance,
   promptsCompleted,
   isLastPhase,
   currentPhaseIndex,
@@ -39,26 +39,25 @@ export default function NextButton({
   }, [currentPhaseIndex]);
 
   async function handleClick() {
-    console.log("Next button clicked", is_force_advance, isLastPhase);
     await onClick();
 
     if (isLastPhase) {
-      await setIsFinished(user_id, role_id, session_id);
+      await setIsFinished(userId, roleId, sessionId);
       router.push("/sessions/session-finish");
       return;
     }
 
-    if (is_force_advance) {
+    if (isForceAdvance) {
       setClicked(true);
 
       try {
-        await setIsFinished(user_id, role_id, session_id);
+        await setIsFinished(userId, roleId, sessionId);
       } catch (err) {
         console.error(err);
         setClicked(false);
       }
     } else {
-      await advancePhaseForSingleUser(user_id, role_id, session_id);
+      await advancePhaseForSingleUser(userId, roleId, sessionId);
     }
   }
 
