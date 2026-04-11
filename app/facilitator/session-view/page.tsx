@@ -69,11 +69,12 @@ export default function FacilitatorSessionView() {
 
   useEffect(() => {
     if (!sessionId) return;
+    if (!profile) return;
 
     async function loadParticipants() {
       try {
         const psData = await sessionParticipants(sessionId as UUID);
-        setParticipants(psData);
+        setParticipants(psData.filter(p => p.user_id !== profile?.id));
         if (psData && psData.length > 0) {
           setCurrentPhase(psData[0].phase_index ?? 0);
         }
@@ -103,7 +104,7 @@ export default function FacilitatorSessionView() {
     loadParticipants();
     checkIfForceAdvance();
     loadPhases();
-  }, [sessionId]);
+  }, [sessionId, profile]);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -145,8 +146,7 @@ export default function FacilitatorSessionView() {
 
   useEffect(() => {
     if (!profile?.id || participants.length === 0) return;
-    const nonFacilitators = participants.filter(p => p.user_id !== profile.id);
-    setAllDone(nonFacilitators.every(p => p.is_finished));
+    setAllDone(participants.every(p => p.is_finished));
   }, [participants, profile?.id]);
 
   useEffect(() => {
@@ -297,42 +297,40 @@ export default function FacilitatorSessionView() {
         {!isForceAdvance ? (
           <div>
             <h3>Participants</h3>
-            {participants
-              .filter(p => p.user_id !== profile?.id)
-              .map(p => {
-                const data = promptData[p.user_id];
+            {participants.map(p => {
+              const data = promptData[p.user_id];
 
-                return (
-                  <div key={p.user_id}>
-                    <strong>
-                      {p.profile?.first_name} {p.profile?.last_name}
-                    </strong>
+              return (
+                <div key={p.user_id}>
+                  <strong>
+                    {p.profile?.first_name} {p.profile?.last_name}
+                  </strong>
 
-                    {data ? (
-                      <>
-                        <div>
-                          ({data.done}/{data.total} responses)
-                        </div>
+                  {data ? (
+                    <>
+                      <div>
+                        ({data.done}/{data.total} responses)
+                      </div>
 
-                        <ul>
-                          {data.prompts.map((prompt, i) => (
-                            <li key={i}>
-                              <div>
-                                <b>Q:</b> {prompt.question}
-                              </div>
-                              <div>
-                                <b>A:</b> {prompt.answer ?? <i> No response</i>}
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      </>
-                    ) : (
-                      <div>(Loading...)</div>
-                    )}
-                  </div>
-                );
-              })}
+                      <ul>
+                        {data.prompts.map((prompt, i) => (
+                          <li key={i}>
+                            <div>
+                              <b>Q:</b> {prompt.question}
+                            </div>
+                            <div>
+                              <b>A:</b> {prompt.answer ?? <i> No response</i>}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  ) : (
+                    <div>(Loading...)</div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         ) : (
           <>
@@ -340,7 +338,7 @@ export default function FacilitatorSessionView() {
             <div>
               <h3>Unfinished Participants</h3>
               {participants
-                .filter(p => p.user_id !== profile?.id && !p.is_finished)
+                .filter(p => !p.is_finished)
                 .map(p => {
                   const data = promptData[p.user_id];
                   return (
@@ -357,7 +355,7 @@ export default function FacilitatorSessionView() {
             <div>
               <h3>Finished Participants</h3>
               {participants
-                .filter(p => p.user_id !== profile?.id && p.is_finished)
+                .filter(p => p.is_finished)
                 .map(p => (
                   <div key={p.user_id}>
                     {p.profile?.first_name} {p.profile?.last_name}{" "}
