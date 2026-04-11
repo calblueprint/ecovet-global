@@ -305,7 +305,7 @@ export default function FacilitatorSessionView() {
           <h3>
             Phase:{" "}
             {currentPhase >= 0
-              ? phases[currentPhase].phase_name
+              ? phases[currentPhase]?.phase_name
               : "Session Overview"}{" "}
             (idx={currentPhase})
           </h3>

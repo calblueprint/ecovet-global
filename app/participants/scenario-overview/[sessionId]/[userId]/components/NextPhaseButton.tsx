@@ -18,6 +18,7 @@ interface NextButtonProps {
   promptsCompleted: boolean;
   isLastPhase: boolean;
   currentPhaseIndex: number;
+  beenToPhaseBefore: boolean;
   onClick: () => Promise<void>;
 }
 
@@ -29,6 +30,7 @@ export default function NextPhaseButton({
   promptsCompleted,
   isLastPhase,
   currentPhaseIndex,
+  beenToPhaseBefore,
   onClick,
 }: NextButtonProps) {
   const [clicked, setClicked] = useState(false);
@@ -37,6 +39,13 @@ export default function NextPhaseButton({
   useEffect(() => {
     setClicked(false);
   }, [currentPhaseIndex]);
+
+  useEffect(() => {
+    if (beenToPhaseBefore && clicked) {
+      (async () =>
+        await advancePhaseForSingleUser(userId, roleId, sessionId))();
+    }
+  }, [beenToPhaseBefore]);
 
   async function handleClick() {
     await onClick();
@@ -47,7 +56,7 @@ export default function NextPhaseButton({
       return;
     }
 
-    if (isForceAdvance) {
+    if (isForceAdvance && !beenToPhaseBefore) {
       setClicked(true);
 
       try {

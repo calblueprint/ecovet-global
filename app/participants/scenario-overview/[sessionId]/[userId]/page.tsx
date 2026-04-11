@@ -43,6 +43,8 @@ export default function SessionFlowPage() {
   const [phases, setPhases] = useState<Phase[]>([]);
 
   const [phaseIdx, setPhaseIdx] = useState(-1);
+  // used when the user uses the back button, so we know how far they went
+  const [beenToPhaseBefore, setBeenToPhaseBefore] = useState(false);
 
   const [roleId, setRoleId] = useState<string | null>(null);
   const [rolePhase, setRolePhase] = useState<RolePhase | null>(null);
@@ -155,6 +157,7 @@ export default function SessionFlowPage() {
 
   useEffect(() => {
     if (!userId || !sessionIdStr || !rolePhase || prompts.length === 0) return;
+    setBeenToPhaseBefore(false);
 
     async function loadResponses() {
       try {
@@ -166,14 +169,15 @@ export default function SessionFlowPage() {
         if (!responses) return;
 
         const ordered = sortResponsesByPromptOrder(prompts, responses);
-        setAnswers(ordered.map(r => r?.prompt_answer ?? ""));
-        setCompletedPrompts(
-          new Set(
-            ordered
-              .filter(r => r?.prompt_answer)
-              .map(r => r?.prompt_id as string),
-          ),
+        const completed = new Set(
+          ordered
+            .filter(r => r?.prompt_answer)
+            .map(r => r?.prompt_id as string),
         );
+
+        setAnswers(ordered.map(r => r?.prompt_answer ?? ""));
+        setCompletedPrompts(completed);
+        setBeenToPhaseBefore(responses.length == completed.size);
       } catch (err) {
         console.error("Response load failed:", err);
       }
@@ -181,10 +185,6 @@ export default function SessionFlowPage() {
 
     loadResponses();
   }, [userId, sessionIdStr, rolePhase, prompts, phaseIdx]);
-
-  useEffect(() => {
-    console.log("Phase index changed:", phaseIdx);
-  }, [phaseIdx]);
 
   useEffect(() => {
     if (!userId || !sessionIdStr) return;
@@ -339,6 +339,7 @@ export default function SessionFlowPage() {
               promptsCompleted={completedPrompts.size == prompts.length}
               isLastPhase={isLastPhase}
               currentPhaseIndex={phaseIdx}
+              beenToPhaseBefore={beenToPhaseBefore}
               phaseId={currentPhase.phase_id as UUID}
               onClick={submitAnswers}
             />
