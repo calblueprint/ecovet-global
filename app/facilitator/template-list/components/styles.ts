@@ -3,7 +3,11 @@ import { Accordion } from "@mui/material";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
-import { DropdownOption } from "@/types/dropdown";
+import { Caption } from "@/styles/text";
+
+export const TagsCaption = styled(Caption)`
+  color: ${COLORS.black70};
+`;
 
 export const StyledAccordion = styled(Accordion)`
   width: 100%;

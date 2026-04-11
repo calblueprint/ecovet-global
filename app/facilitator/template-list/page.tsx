@@ -303,13 +303,6 @@ export default function TemplateListPage() {
             onDeleteConfirmed={deleteTagComponent}
             user_group_id={user_group_id}
             selectedTagIds={selectedTagIds}
-            onTagClick={(id: UUID) =>
-              setSelectedTagIds(prev => {
-                if (prev === null) return null;
-                if (prev.includes(id)) return prev.filter(tag => tag !== id);
-                return [...prev, id];
-              })
-            }
             onTagRenamed={() => setTagVersion(v => v + 1)}
           />
         </SideNavContainer>

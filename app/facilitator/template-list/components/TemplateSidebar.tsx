@@ -17,6 +17,7 @@ import {
   SideNavNewTemplateButton,
   SideNavTemplatesContainer,
   StyledAccordion,
+  TagsCaption,
 } from "./styles";
 
 interface TemplateSideBarProps {
@@ -25,7 +26,6 @@ interface TemplateSideBarProps {
   onDeleteConfirmed?: (tagId: UUID) => void;
   user_group_id: UUID;
   selectedTagIds: UUID[] | null;
-  onTagClick: (id: UUID) => void;
   onTagRenamed: () => void;
 }
 
@@ -35,7 +35,6 @@ export default function TemplateSideBar({
   onDeleteConfirmed,
   user_group_id,
   selectedTagIds,
-  onTagClick,
   onTagRenamed,
 }: TemplateSideBarProps) {
   const router = useRouter();
@@ -100,13 +99,12 @@ export default function TemplateSideBar({
             aria-controls="panel1-content"
             id="panel1-header"
           >
-            <Caption>Manage Tags</Caption>
+            <TagsCaption>Manage Tags</TagsCaption>
           </AccordionSummary>
           <AccordionDetails sx={{ padding: 0 }}>
             <TagCreator
               user_group_id={user_group_id}
               selectedTagIds={selectedTagIds}
-              onTagClick={onTagClick}
               onTagRenamed={onTagRenamed}
               onDeleteTag={handleRequestDelete}
             />

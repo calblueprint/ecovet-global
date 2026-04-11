@@ -42,9 +42,6 @@ export const SidebarTag = styled.div<{ $isSelected?: boolean }>`
   cursor: pointer;
   background: ${({ $isSelected }) =>
     $isSelected ? COLORS["oat_medium"] : COLORS["oat_light"]};
-  &:hover {
-    background: ${COLORS["oat_medium"]}80;
-  }
 `;
 
 export const StyledTag = styled.div`
