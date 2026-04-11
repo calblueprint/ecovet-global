@@ -15,30 +15,175 @@ export const Main = styled.main`
   background: ${COLORS.white};
 `;
 
+export const MainDiv = styled.main`
+  display: flex;
+  width: 1096px;
+  padding: 2rem 3rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 32px;
+  max-width: 1100px;
+`;
+
+export const HeadingBox = styled.main`
+  display: flex;
+  padding: 1rem 1.25rem;
+  height: 50px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  align-self: stretch;
+`;
+
+export const PhaseInformation = styled.div`
+  display: flex;
+  padding: 16px 20px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 16px;
+  align-self: stretch;
+  border-radius: 8px;
+  border: 1px solid var(--Oat-Medium, #eee);
+  background: var(--Oat-Light, #f9f9f9);
+`;
+
+export const PhaseTitle = styled.h2`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+  color: ${COLORS.black};
+  line-height: normal;
+`;
+
+export const PhaseStats = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 32px;
+  display: inline-flex;
+  width: 100%;
+  justify-content: space-between;
+  align-self: stretch;
+`;
+
+export const PhaseStatsLeft = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 32px;
+`;
+
+export const StatItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: align-start;
+  gap: 4px;
+  display: inline;
+`;
+
+export const ParticipantTable = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-self: stretch;
+`;
+
+export const TableHeader = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 2fr 4fr;
+  height: 41px;
+  padding: 0.75rem 1.5rem;
+  align-items: center;
+  align-self: stretch;
+  border-radius: 8px 8px 0 0;
+  border-bottom: 2px solid var(--Oat-Medium, #eee);
+  font-size: 14px;
+  gap: 16px;
+`;
+
+export const TableRow = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 2fr 4fr;
+  height: 50px;
+  padding: 0.75rem 1.5rem;
+  align-items: center;
+  align-self: stretch;
+  border-bottom: 1px solid var(--Oat-Medium, #eee);
+  gap: 16px;
+
+  &:hover {
+    background-color: ${COLORS.oat_light};
+  }
+`;
+
+export const TableCell = styled.span`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  color: ${COLORS.black70};
+  line-height: normal;
+  display: flex;
+  align-items: center;
+`;
+
+export const TableCellBold = styled(TableCell)`
+  font-weight: 600;
+  color: ${COLORS.black};
+`;
+
+export const Heading3 = styled.h3`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  font-style: normal;
+  line-height: normal;
+`;
+
 export const Container = styled.div`
   display: flex;
   flex-direction: column; /* stack children vertically */
   gap: 1rem; /* now works! */
   background-color: ${COLORS.white};
   border-radius: 12px;
-  padding: 2rem 2.5rem;
-  width: 40%;
+  width: 100%;
   border: none;
 `;
 
-export const Button = styled.button<{ disabled?: boolean }>`
+export const LayoutWrapper = styled.div`
+  display: flex;
   width: 100%;
-  height: 45px;
+  flex-direction: column;
+`;
+
+export const ContentWrapper = styled.div`
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  min-height: 0;
   display: flex;
   justify-content: center;
+`;
+
+export const Button = styled.button<{ disabled?: boolean }>`
+  display: flex;
+  padding: 0.5rem 2rem;
+  justify-content: center;
   align-items: center;
-  background-color: ${COLORS.darkElectricBlue};
-  font-family: ${Sans.style.fontFamily};
-  font-size: 14px;
-  font-weight: 700;
-  color: white;
-  border: none;
+  gap: 0.5rem;
   border-radius: 4px;
+  background: var(--Dark-Electric-Blue, #476c77);
+  border: var(--Dark-Electric-Blue, #476c77);
+  font-family: ${Sans.style.fontFamily};
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+  color: ${COLORS.white};
+  line-height: normal;
+  letter-spacing: 0.2px;
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
   opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
   transition: background-color 0.2s;
@@ -46,4 +191,23 @@ export const Button = styled.button<{ disabled?: boolean }>`
   &:not(:last-child) {
     margin-bottom: 0.5rem;
   }
+`;
+
+export const SilverText = styled.span`
+  color: var(--Black-40, #959492);
+  font-family: ${Sans.style.fontFamily};
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+`;
+
+export const NormalText = styled.span`
+  color: var(--Black-70, #4b4a49);
+  /* Body 1 */
+  font-family: ${Sans.style.fontFamily};
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
 `;
