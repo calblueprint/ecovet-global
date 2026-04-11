@@ -320,7 +320,7 @@ export default function FacilitatorSessionView() {
                 <strong>
                   {p.profile?.first_name} {p.profile?.last_name} (Phase:{" "}
                   {(p.phase_index ?? 0) >= 0
-                    ? phases[p.phase_index ?? 0].phase_name
+                    ? phases[p.phase_index ?? 0]?.phase_name
                     : "Session Overview"}
                   )
                 </strong>
