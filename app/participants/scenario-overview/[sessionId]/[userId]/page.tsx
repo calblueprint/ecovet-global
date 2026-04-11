@@ -143,14 +143,6 @@ export default function SessionFlowPage() {
         );
         setRolePhase(rp);
         const p = rp ? await fetchPrompts(rp.role_phase_id) : [];
-        console.log("sessionId", sessionId);
-        console.log("currentPhase", currentPhase);
-        console.log("phases", phases);
-        console.log("phaseInd", phaseIdx);
-        console.log("roleID", roleId);
-        console.log("currentPhaseId", currentPhase.phase_id);
-        console.log("rp", rp);
-        console.log("rolePhaseId", rp?.role_phase_id, p);
         setPrompts(p);
       } catch (err) {
         console.error("Error loading phase content:", err);
@@ -166,25 +158,22 @@ export default function SessionFlowPage() {
 
     async function loadResponses() {
       try {
-        let mostRecentPhaseIndex: number;
-        try {
-          mostRecentPhaseIndex = await fetchMostRecentPhase(
-            userId!,
-            sessionIdStr!,
-          );
-        } catch {
-          return;
-        }
-        if (phaseIdx < mostRecentPhaseIndex) {
-          const responses = await fetchPromptResponses(
-            userId!,
-            sessionIdStr!,
-            rolePhase!.role_phase_id,
-          );
-          if (!responses) return;
-          const ordered = sortResponsesByPromptOrder(prompts, responses);
-          setAnswers(ordered.map(r => r?.prompt_answer ?? ""));
-        }
+        const responses = await fetchPromptResponses(
+          userId!,
+          sessionIdStr!,
+          rolePhase!.role_phase_id,
+        );
+        if (!responses) return;
+
+        const ordered = sortResponsesByPromptOrder(prompts, responses);
+        setAnswers(ordered.map(r => r?.prompt_answer ?? ""));
+        setCompletedPrompts(
+          new Set(
+            ordered
+              .filter(r => r?.prompt_answer)
+              .map(r => r?.prompt_id as string),
+          ),
+        );
       } catch (err) {
         console.error("Response load failed:", err);
       }
