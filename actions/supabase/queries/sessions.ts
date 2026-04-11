@@ -243,8 +243,8 @@ export async function advancePhaseForSingleUser(
       `Failed to fetch current phase index for user in advancePhaseForUser: ${fetchError.message}`,
     );
   }
-  if (!currentData.phase_index) {
-    throw new Error(`Phase Index is null`);
+  if (currentData.phase_index == null) {
+    throw new Error(`Phase Index is null: ${JSON.stringify(currentData)}`);
   }
   const { data, error } = await supabase
     .from("participant_session")
@@ -356,10 +356,11 @@ export async function fetchMostRecentPhase(
   if (!data) {
     throw new Error("No phase id found");
   }
-  if (!data.phase_index) {
+  if (data.phase_index == null) {
     throw new Error(`No phase index`);
   }
 
+  // TODO: why are we subtracing :(
   return data.phase_index - 1;
 }
 
