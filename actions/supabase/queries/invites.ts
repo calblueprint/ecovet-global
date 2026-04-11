@@ -195,6 +195,17 @@ export async function changeToFacilitator(user_id: UUID): Promise<void> {
   }
 }
 
+export async function deleteInvite(invite_id: UUID): Promise<void> {
+  const { error } = await supabase
+    .from("invite")
+    .delete()
+    .eq("invite_id", invite_id);
+
+  if (error) {
+    console.error("Error deleting invite:", error.message);
+  }
+}
+
 export async function fetchInvites(user_group_id: UUID) {
   try {
     const { data, error } = await supabase
