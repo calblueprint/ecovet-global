@@ -159,7 +159,10 @@ export type SessionParticipant = {
   profile: {
     first_name: string;
     last_name: string;
-  };
+  } | null;
+  role: {
+    role_name: string;
+  } | null;
 };
 
 export async function sessionParticipants(
@@ -175,10 +178,12 @@ export async function sessionParticipants(
       session_id,
       phase_index,
       is_finished,
-      profile (
+      profile!fk_participant_profile (
         first_name,
         last_name
-      )
+      ),
+        role(
+        role_name)
     `,
     )
     .eq("session_id", session_id)
@@ -630,4 +635,38 @@ export async function fetchRolePhasesBatch(
   }
 
   return new Map(data?.map(rp => [rp.role_id, rp]) ?? []);
+}
+
+export async function fetchRoleName(roleId: UUID): Promise<string | null> {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("role")
+    .select("role_name")
+    .eq("role_id", roleId)
+    .single();
+
+  if (error) {
+    console.error("Error fetching role name:", error);
+    throw error;
+  }
+
+  return data?.role_name ?? null;
+}
+
+export async function fetchSessionName(
+  session_id: UUID,
+): Promise<string | null> {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("session")
+    .select("session_name")
+    .eq("session_id", session_id)
+    .single();
+
+  if (error) {
+    console.error("Error fetching session name:", error);
+    throw error;
+  }
+
+  return data?.session_name ?? null;
 }

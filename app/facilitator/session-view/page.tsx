@@ -2,20 +2,46 @@
 
 import type { ParticipantSession, Phase, UUID } from "@/types/schema";
 import { useEffect, useState } from "react";
+import * as React from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import Box from "@mui/material/Box";
+import LinearProgress from "@mui/material/LinearProgress";
 import supabase from "@/actions/supabase/client";
 import {
   fetchPhases,
   fetchPromptsWithResponses,
   fetchRolePhases,
   fetchRolePhasesBatch,
+  fetchSessionName,
   finishSession,
   isSessionForceAdvance,
   SessionParticipant,
   sessionParticipants,
 } from "@/actions/supabase/queries/sessions";
+import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
-import { Button, Container, Main } from "./styles";
+import {
+  Button,
+  Container,
+  ContentWrapper,
+  Heading3,
+  HeadingBox,
+  LayoutWrapper,
+  MainDiv,
+  NormalText,
+  ParticipantTable,
+  PhaseInformation,
+  PhaseStats,
+  PhaseStatsLeft,
+  PhaseTitle,
+  SilverText,
+  StatItem,
+  TableCell,
+  TableCellBold,
+  TableHeader,
+  TableRow,
+} from "./styles";
 
 type PromptCounts = Record<UUID, { done: number; total: number }>;
 type PromptData = {
@@ -47,6 +73,7 @@ export default function FacilitatorSessionView() {
   const isLastPhase = currentPhase >= phases.length - 1;
   const currentPhaseObject = phases[currentPhase];
   const [promptData, setPromptData] = useState<ParticipantPromptData>({});
+  const [sessionName, setSessionName] = useState<string | null>(null);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -81,9 +108,19 @@ export default function FacilitatorSessionView() {
       }
     }
 
+    async function loadSessionName() {
+      try {
+        const name = await fetchSessionName(sessionId as UUID);
+        setSessionName(name);
+      } catch (err) {
+        console.error("Failed to load session name:", err);
+      }
+    }
+
     loadParticipants();
     checkIfForceAdvance();
     loadPhases();
+    loadSessionName();
   }, [sessionId]);
 
   useEffect(() => {
@@ -262,100 +299,156 @@ export default function FacilitatorSessionView() {
     setIsAdvancing(false);
   }
 
+  console.log("isForceAdvance:", isForceAdvance);
+  console.log("participants:", participants);
+  console.log("profile:", profile?.id);
+  console.log("Session Name:", sessionName);
+
+  const completedCount = participants
+    .filter(p => p.user_id !== profile?.id)
+    .filter(p => {
+      const data = promptData[p.user_id];
+      return data && data.total > 0 && data.done === data.total;
+    }).length;
+
+  const totalParticipants = participants.filter(
+    p => p.user_id !== profile?.id,
+  ).length;
+
   return (
-    <Main>
-      <Container>
-        <h3>Session ID: {sessionId}</h3>
-        {!isForceAdvance ? (
-          <div>
-            <h3>Participants</h3>
-            {participants
-              .filter(p => p.user_id !== profile?.id)
-              .map(p => {
-                const data = promptData[p.user_id];
+    <>
+      <TopNavBar />
 
-                return (
-                  <div key={p.user_id}>
-                    <strong>
-                      {p.profile?.first_name} {p.profile?.last_name}
-                    </strong>
+      <LayoutWrapper>
+        <ContentWrapper>
+          <MainDiv>
+            <HeadingBox>
+              <Heading3>{sessionName}</Heading3>
+            </HeadingBox>
+            {isForceAdvance && (
+              <PhaseInformation>
+                <PhaseTitle>Phase Information</PhaseTitle>
+                <PhaseStats>
+                  <PhaseStatsLeft>
+                    <StatItem>
+                      {" "}
+                      <SilverText> Current Phase:</SilverText>{" "}
+                      <NormalText>
+                        {" "}
+                        {phases[currentPhase]?.phase_name}{" "}
+                      </NormalText>
+                    </StatItem>
+                    <StatItem>
+                      {" "}
+                      <SilverText>
+                        Participants Complete{" "}
+                        <NormalText>
+                          {" "}
+                          {completedCount} / {totalParticipants}
+                        </NormalText>
+                      </SilverText>{" "}
+                    </StatItem>
+                  </PhaseStatsLeft>
 
-                    {data ? (
-                      <>
-                        <div>
-                          ({data.done}/{data.total} responses)
-                        </div>
+                  <StatItem
+                    style={{
+                      display: "flex",
+                      alignItems: "align-right",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    <Button onClick={advancePhase} disabled={isAdvancing}>
+                      {isLastPhase
+                        ? isAdvancing
+                          ? "Finishing..."
+                          : "Finish Session"
+                        : isAdvancing
+                          ? "Advancing..."
+                          : "Force to Next Phase"}
+                    </Button>
+                  </StatItem>
+                </PhaseStats>
+              </PhaseInformation>
+            )}
+            <Container>
+              <div>
+                <ParticipantTable>
+                  <TableHeader>
+                    <span>Name</span>
+                    <span>Role</span>
+                    <span>Progress</span>
+                  </TableHeader>
 
-                        <ul>
-                          {data.prompts.map((prompt, i) => (
-                            <li key={i}>
-                              <div>
-                                <b>Q:</b> {prompt.question}
-                              </div>
-                              <div>
-                                <b>A:</b> {prompt.answer ?? <i> No response</i>}
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      </>
-                    ) : (
-                      <div>(Loading...)</div>
-                    )}
-                  </div>
-                );
-              })}
-          </div>
-        ) : (
-          <>
-            <h1 style={{ textAlign: "center" }}>Phase {currentPhase}</h1>
-            <div>
-              <h3>Unfinished Participants</h3>
-              {participants
-                .filter(p => p.user_id !== profile?.id && !p.is_finished)
-                .map(p => {
-                  const data = promptData[p.user_id];
-                  return (
-                    <div key={p.user_id}>
-                      {p.profile?.first_name} {p.profile?.last_name}{" "}
-                      {data
-                        ? `(${data.done}/${data.total} responses)`
-                        : "(Loading counts...)"}
-                    </div>
-                  );
-                })}
-            </div>
+                  {participants
+                    .filter(p => p.user_id !== profile?.id)
+                    .map(p => {
+                      console.log("SessionID:", sessionId);
+                      console.log("participant object:", p);
+                      console.log("first_name:", p.profile?.first_name);
+                      console.log("last_name:", p.profile?.last_name);
+                      console.log("user_id:", p.user_id);
+                      const data = promptData[p.user_id];
+                      const percent =
+                        data && data.total > 0
+                          ? Math.round((data.done / data.total) * 100)
+                          : 0;
+                      return (
+                        <TableRow
+                          key={p.user_id}
+                          onClick={() =>
+                            router.push(
+                              `/facilitator/session-view/${p.user_id}?sessionId=${sessionId}`,
+                            )
+                          }
+                          style={{ cursor: "pointer" }}
+                        >
+                          <TableCellBold>
+                            {p.profile?.first_name} {p.profile?.last_name}
+                          </TableCellBold>
+                          <TableCell>{p.role?.role_name}</TableCell>
+                          <TableCell>
+                            {data ? (
+                              <Box
+                                sx={{
+                                  width: "100%",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "0.5rem",
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    whiteSpace: "nowrap",
+                                    fontSize: "14px",
+                                  }}
+                                >
+                                  {percent}% Complete
+                                </span>
+                                <LinearProgress
+                                  variant="determinate"
+                                  value={percent}
+                                  sx={{ flex: 1 }}
+                                />
+                              </Box>
+                            ) : (
+                              <span>(Loading...)</span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                </ParticipantTable>
+              </div>
 
-            <div>
-              <h3>Finished Participants</h3>
-              {participants
-                .filter(p => p.user_id !== profile?.id && p.is_finished)
-                .map(p => (
-                  <div key={p.user_id}>
-                    {p.profile?.first_name} {p.profile?.last_name}{" "}
-                    {isForceAdvance && `(Phase ${p.phase_index})`}
-                  </div>
-                ))}
-            </div>
-          </>
-        )}
-
-        {isForceAdvance && (
-          <Button onClick={advancePhase} disabled={isAdvancing}>
-            {isLastPhase
-              ? isAdvancing
-                ? "Finishing..."
-                : "Finish Session"
-              : isAdvancing
-                ? "Advancing..."
-                : "Force Advance"}
-          </Button>
-        )}
-
-        {allDone && (
-          <h3 style={{ marginTop: "1rem" }}>All participants are finished</h3>
-        )}
-      </Container>
-    </Main>
+              {allDone && (
+                <h3 style={{ marginTop: "1rem" }}>
+                  All participants are finished
+                </h3>
+              )}
+            </Container>
+          </MainDiv>
+        </ContentWrapper>
+      </LayoutWrapper>
+    </>
   );
 }

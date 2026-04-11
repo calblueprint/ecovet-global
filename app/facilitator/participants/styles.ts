@@ -12,10 +12,10 @@ export const LayoutWrapper = styled.div`
 `;
 
 export const ContentWrapper = styled.div`
-  width: 100%;
-  max-width: 1000px;
+  flex: 1;
   padding: 2rem;
   overflow-y: auto;
+  min-height: 0;
 `;
 
 export const StyledTable = styled.table`
