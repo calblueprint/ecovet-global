@@ -1,9 +1,56 @@
+import { GroupBase, StylesConfig } from "react-select";
 import { TextField } from "@mui/material";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Flex } from "@/styles/containers";
 import { Sans } from "@/styles/fonts";
 import { B2, Caption, H3 } from "@/styles/text";
+import { DropdownOption } from "@/types/dropdown";
+
+export const selectStyles: StylesConfig<
+  DropdownOption,
+  boolean,
+  GroupBase<DropdownOption>
+> = {
+  control: base => ({
+    ...base,
+    border: `1px solid ${COLORS.black}`,
+  }),
+  menu: base => ({
+    ...base,
+    border: `1px solid ${COLORS.black}`,
+  }),
+};
+
+export const compactSelectStyles: StylesConfig<
+  DropdownOption,
+  boolean,
+  GroupBase<DropdownOption>
+> = {
+  control: base => ({
+    ...base,
+    border: `1px solid ${COLORS.oat_dark}`,
+    boxShadow: "none",
+    "&:hover": {
+      border: `1px solid ${COLORS.oat_dark}`,
+    },
+    fontSize: "0.625rem",
+    minHeight: "32px",
+  }),
+  menu: base => ({
+    ...base,
+    border: `1px solid ${COLORS.black20}`,
+    fontSize: "0.75rem",
+  }),
+  option: base => ({
+    ...base,
+    fontSize: "0.75rem",
+  }),
+  singleValue: base => ({
+    ...base,
+    fontSize: "0.75rem",
+  }),
+};
 
 export const PhaseTemplateHeader = styled(H3)`
   color: ${COLORS.black100};
@@ -120,6 +167,11 @@ export const FieldLegend = styled(B2)`
   color: ${COLORS.black70};
   font-weight: 700;
   line-height: 150%;
+`;
+
+export const LegendFlex = styled(Flex)`
+  display: flex;
+  justify-content: space-between;
 `;
 
 export const QuestionCard = styled.fieldset`
@@ -239,4 +291,22 @@ export const AddNewOptionTextStyled = styled.div`
   font-weight: 500;
   line-height: normal;
   color: ${COLORS.darkElectricBlue};
+`;
+
+export const DeleteButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  font-size: 12px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition:
+    opacity 0.15s,
+    color 0.15s;
+  align-self: center;
+
+  &:hover {
+    color: #e53e3e;
+  }
 `;

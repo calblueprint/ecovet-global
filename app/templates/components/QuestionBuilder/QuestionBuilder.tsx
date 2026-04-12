@@ -7,6 +7,7 @@ import {
   RadioGroup,
   Select,
 } from "@mui/material";
+import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import {
   EditablePhase,
   PromptType,
@@ -19,11 +20,14 @@ import {
   AddNewOptionTextStyled,
   BigInput,
   CheckboxPromptStyled,
+  compactSelectStyles,
+  DeleteButton,
   DeleteMcqOptionButton,
   FieldCard,
   FieldLegend,
   FormStack,
   GhostButton,
+  LegendFlex,
   McqOptionStyled,
   MultipleChoicePromptStyled,
   PhaseCard,
@@ -76,6 +80,10 @@ export default function QuestionBuilder({
 
   function handleTypeChange(promptID: UUID, newType: PromptType) {
     onChange(promptID, "prompt_type", newType);
+  }
+
+  function deletePrompt(promptID: UUID) {
+    onChange(promptID, "remove_prompt", rolePhase.role_phase_id);
   }
 
   function addOption(promptID: UUID) {
@@ -132,8 +140,12 @@ export default function QuestionBuilder({
 
             return (
               <FieldCard key={promptID}>
-                <FieldLegend>Question {j + 1}</FieldLegend>
-
+                <LegendFlex>
+                  <FieldLegend>Question {j + 1}</FieldLegend>
+                  <DeleteButton onClick={() => deletePrompt(promptID)}>
+                    Delete
+                  </DeleteButton>
+                </LegendFlex>
                 <QuestionRowStyled>
                   <BigInput
                     name="prompt"
@@ -145,24 +157,24 @@ export default function QuestionBuilder({
                   />
 
                   <PromptTypeDropdownStyled>
-                    <FormControl size="small">
-                      <Select
-                        value={promptType}
-                        onChange={e =>
-                          handleTypeChange(
-                            promptID,
-                            e.target.value as PromptType,
-                          )
-                        }
-                        size="small"
-                      >
-                        <MenuItem value="text">Text</MenuItem>
-                        <MenuItem value="multiple_choice">
-                          Multiple Choice
-                        </MenuItem>
-                        <MenuItem value="checkbox">Checkbox</MenuItem>
-                      </Select>
-                    </FormControl>
+                    <InputDropdown
+                      label=""
+                      options={
+                        new Map([
+                          ["text", "Text"],
+                          ["multiple_choice", "Multiple Choice"],
+                          ["checkbox", "Checkbox"],
+                        ])
+                      }
+                      value={promptType}
+                      defaultValue="text"
+                      isClearable={false}
+                      customStyles={compactSelectStyles}
+                      onChange={value => {
+                        if (value)
+                          handleTypeChange(promptID, value as PromptType);
+                      }}
+                    />
                   </PromptTypeDropdownStyled>
                 </QuestionRowStyled>
 
