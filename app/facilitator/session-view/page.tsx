@@ -3,7 +3,6 @@
 import type { ParticipantSession, Phase, UUID } from "@/types/schema";
 import { useEffect, useState } from "react";
 import * as React from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
