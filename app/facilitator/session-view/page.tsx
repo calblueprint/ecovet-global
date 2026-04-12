@@ -40,7 +40,9 @@ import {
   TableCell,
   TableCellBold,
   TableHeader,
+  TableHeaderNFA,
   TableRow,
+  TableRowNFA,
 } from "./styles";
 
 type PromptCounts = Record<UUID, { done: number; total: number }>;
@@ -325,59 +327,135 @@ export default function FacilitatorSessionView() {
             <HeadingBox>
               <Heading3>{templateName}</Heading3>
             </HeadingBox>
-            {isForceAdvance && (
-              <PhaseInformation>
-                <PhaseTitle>Phase Information</PhaseTitle>
-                <PhaseStats>
-                  <PhaseStatsLeft>
-                    <StatItem>
-                      {" "}
-                      <SilverText> Current Phase:</SilverText>{" "}
-                      <NormalText>
+            {isForceAdvance ? (
+              <Container>
+                <PhaseInformation>
+                  <PhaseTitle>Phase Information</PhaseTitle>
+                  <PhaseStats>
+                    <PhaseStatsLeft>
+                      <StatItem>
                         {" "}
-                        {phases[currentPhase]?.phase_name}{" "}
-                      </NormalText>
-                    </StatItem>
-                    <StatItem>
-                      {" "}
-                      <SilverText>
-                        Participants Complete{" "}
+                        <SilverText> Current Phase:</SilverText>{" "}
                         <NormalText>
                           {" "}
-                          {completedCount} / {totalParticipants}
+                          {phases[currentPhase]?.phase_name}{" "}
                         </NormalText>
-                      </SilverText>{" "}
-                    </StatItem>
-                  </PhaseStatsLeft>
+                      </StatItem>
+                      <StatItem>
+                        {" "}
+                        <SilverText>
+                          Participants Complete{" "}
+                          <NormalText>
+                            {" "}
+                            {completedCount} / {totalParticipants}
+                          </NormalText>
+                        </SilverText>{" "}
+                      </StatItem>
+                    </PhaseStatsLeft>
 
-                  <StatItem
-                    style={{
-                      display: "flex",
-                      alignItems: "align-right",
-                      gap: "0.5rem",
-                    }}
-                  >
-                    <Button onClick={advancePhase} disabled={isAdvancing}>
-                      {isLastPhase
-                        ? isAdvancing
-                          ? "Finishing..."
-                          : "Finish Session"
-                        : isAdvancing
-                          ? "Advancing..."
-                          : "Force to Next Phase"}
-                    </Button>
-                  </StatItem>
-                </PhaseStats>
-              </PhaseInformation>
-            )}
-            <Container>
-              <div>
+                    <StatItem
+                      style={{
+                        display: "flex",
+                        alignItems: "align-right",
+                        gap: "0.5rem",
+                      }}
+                    >
+                      <Button onClick={advancePhase} disabled={isAdvancing}>
+                        {isLastPhase
+                          ? isAdvancing
+                            ? "Finishing..."
+                            : "Finish Session"
+                          : isAdvancing
+                            ? "Advancing..."
+                            : "Force to Next Phase"}
+                      </Button>
+                    </StatItem>
+                  </PhaseStats>
+                </PhaseInformation>
+                <div>
+                  <ParticipantTable>
+                    <TableHeader>
+                      <span>Name</span>
+                      <span>Role</span>
+                      <span>Progress</span>
+                    </TableHeader>
+
+                    {participants
+                      .filter(p => p.user_id !== profile?.id)
+                      .map(p => {
+                        console.log("SessionID:", sessionId);
+                        console.log("participant object:", p);
+                        console.log("first_name:", p.profile?.first_name);
+                        console.log("last_name:", p.profile?.last_name);
+                        console.log("user_id:", p.user_id);
+                        const data = promptData[p.user_id];
+                        const percent =
+                          data && data.total > 0
+                            ? Math.round((data.done / data.total) * 100)
+                            : 0;
+                        return (
+                          <TableRow
+                            key={p.user_id}
+                            onClick={() =>
+                              router.push(
+                                `/facilitator/session-view/${p.user_id}?sessionId=${sessionId}`,
+                              )
+                            }
+                            style={{ cursor: "pointer" }}
+                          >
+                            <TableCellBold>
+                              {p.profile?.first_name} {p.profile?.last_name}
+                            </TableCellBold>
+                            <TableCell>{p.role?.role_name}</TableCell>
+                            <TableCell>
+                              {data ? (
+                                <Box
+                                  sx={{
+                                    width: "100%",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "0.5rem",
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      whiteSpace: "nowrap",
+                                      fontSize: "14px",
+                                    }}
+                                  >
+                                    {percent}% Complete
+                                  </span>
+                                  <LinearProgress
+                                    variant="determinate"
+                                    value={percent}
+                                    sx={{ flex: 1 }}
+                                  />
+                                </Box>
+                              ) : (
+                                <span>(Loading...)</span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                  </ParticipantTable>
+                </div>
+
+                {allDone && (
+                  <h3 style={{ marginTop: "1rem" }}>
+                    All participants are finished
+                  </h3>
+                )}
+              </Container>
+            ) : (
+              <Container>
                 <ParticipantTable>
-                  <TableHeader>
+                  <TableHeaderNFA>
                     <span>Name</span>
                     <span>Role</span>
+                    <span>Phase</span>
                     <span>Progress</span>
-                  </TableHeader>
+                  </TableHeaderNFA>
 
                   {participants
                     .filter(p => p.user_id !== profile?.id)
@@ -393,7 +471,7 @@ export default function FacilitatorSessionView() {
                           ? Math.round((data.done / data.total) * 100)
                           : 0;
                       return (
-                        <TableRow
+                        <TableRowNFA
                           key={p.user_id}
                           onClick={() =>
                             router.push(
@@ -406,6 +484,9 @@ export default function FacilitatorSessionView() {
                             {p.profile?.first_name} {p.profile?.last_name}
                           </TableCellBold>
                           <TableCell>{p.role?.role_name}</TableCell>
+                          <TableCell>
+                            {phases[currentPhase]?.phase_name}
+                          </TableCell>
                           <TableCell>
                             {data ? (
                               <Box
@@ -434,18 +515,12 @@ export default function FacilitatorSessionView() {
                               <span>(Loading...)</span>
                             )}
                           </TableCell>
-                        </TableRow>
+                        </TableRowNFA>
                       );
                     })}
                 </ParticipantTable>
-              </div>
-
-              {allDone && (
-                <h3 style={{ marginTop: "1rem" }}>
-                  All participants are finished
-                </h3>
-              )}
-            </Container>
+              </Container>
+            )}
           </MainDiv>
         </ContentWrapper>
       </LayoutWrapper>

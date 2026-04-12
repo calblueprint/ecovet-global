@@ -83,6 +83,34 @@ export const StatItem = styled.div`
   display: inline;
 `;
 
+export const TableHeaderNFA = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 2fr 2fr 4fr;
+  height: 41px;
+  padding: 0.75rem 1.5rem;
+  align-items: center;
+  align-self: stretch;
+  border-radius: 8px 8px 0 0;
+  border-bottom: 2px solid var(--Oat-Medium, #eee);
+  font-size: 14px;
+  gap: 16px;
+`;
+
+export const TableRowNFA = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 2fr 2fr 4fr;
+  height: 50px;
+  padding: 0.75rem 1.5rem;
+  align-items: center;
+  align-self: stretch;
+  border-bottom: 1px solid var(--Oat-Medium, #eee);
+  gap: 16px;
+
+  &:hover {
+    background-color: ${COLORS.oat_light};
+  }
+`;
+
 export const ParticipantTable = styled.div`
   display: flex;
   flex-direction: column;
