@@ -188,9 +188,7 @@ export async function sessionParticipants(
       profile!fk_participant_profile (
         first_name,
         last_name
-      ),
-        role(
-        role_name)
+      )
     `,
     )
     .eq("session_id", session_id)
