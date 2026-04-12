@@ -3,7 +3,11 @@ import { Accordion } from "@mui/material";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
-import { DropdownOption } from "@/types/dropdown";
+import { Caption } from "@/styles/text";
+
+export const TagsCaption = styled(Caption)`
+  color: ${COLORS.black70};
+`;
 
 export const StyledAccordion = styled(Accordion)`
   width: 100%;
@@ -47,8 +51,6 @@ export const SideNavContainer = styled.div`
   display: flex;
   padding: 0.75rem 1rem;
   padding-right: 0;
-  width: 12rem;
-  min-width: 180px;
   align-items: flex-start;
   flex-direction: column;
   background-color: ${COLORS.oat_light};
@@ -60,7 +62,6 @@ export const SideNavTemplatesContainer = styled.div`
   flex-direction: column;
   gap: 0.5rem;
   margin: 1.25rem 0;
-  width: 100%;
 `;
 
 export const SideNavButton = styled.button<{ selected: boolean }>`

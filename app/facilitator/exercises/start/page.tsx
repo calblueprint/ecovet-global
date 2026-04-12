@@ -305,7 +305,9 @@ export default function Page() {
             ))}
           </ParticipantTable>
 
-          <IconButton onClick={addParticipantRow}>+</IconButton>
+          <IconButton onClick={addParticipantRow}>
+            + Add a Participant
+          </IconButton>
 
           <PrimaryActionArea>
             <SideNavNewTemplateButton
