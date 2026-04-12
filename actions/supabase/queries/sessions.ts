@@ -141,7 +141,7 @@ export async function fetchSessionGlobalPhaseIndex(sessionId: string) {
       `Session with sessionId ${sessionId} not found while trying to fetchSessionGlobalPhaseIndex`,
     );
 
-  return data.phase_index;
+  return data.phase_index ?? 0;
 }
 
 // only for force advance sessions, so we make sure people don't advance further than they should
