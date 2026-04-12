@@ -12,10 +12,10 @@ export const LayoutWrapper = styled.div`
 `;
 
 export const ContentWrapper = styled.div`
-  width: 100%;
-  max-width: 1000px;
+  flex: 1;
   padding: 2rem;
   overflow-y: auto;
+  min-height: 0;
 `;
 
 export const StyledTable = styled.table`
@@ -40,6 +40,10 @@ export const StyledTh = styled.th`
 export const StyledTableRow = styled.tr`
   border-bottom: 1px solid ${COLORS.oat_light};
   font-size: 0.75rem;
+  &:hover button {
+    visibility: visible;
+    opacity: 1;
+  }
 `;
 
 export const StyledTd = styled.td`

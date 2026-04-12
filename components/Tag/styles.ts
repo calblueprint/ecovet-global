@@ -5,8 +5,6 @@ import { Sans } from "@/styles/fonts";
 export const StyledTagCreator = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 6px;
-  gap: 4px;
 `;
 
 export const NewTag = styled.button`
@@ -44,9 +42,6 @@ export const SidebarTag = styled.div<{ $isSelected?: boolean }>`
   cursor: pointer;
   background: ${({ $isSelected }) =>
     $isSelected ? COLORS["oat_medium"] : COLORS["oat_light"]};
-  &:hover {
-    background: ${COLORS["oat_medium"]}80;
-  }
 `;
 
 export const StyledTag = styled.div`
