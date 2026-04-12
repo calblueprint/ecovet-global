@@ -387,6 +387,7 @@ export default function FacilitatorSessionView() {
                       console.log("first_name:", p.profile?.first_name);
                       console.log("last_name:", p.profile?.last_name);
                       console.log("user_id:", p.user_id);
+                      console.log("role_id:", p.role_id);
                       const data = promptData[p.user_id];
                       const percent =
                         data && data.total > 0
