@@ -19,6 +19,7 @@ import {
   finishSession,
   isSessionForceAdvance,
   sessionParticipants,
+  setSessionGlobalPhaseIndex,
 } from "@/actions/supabase/queries/sessions";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
@@ -282,6 +283,10 @@ export default function FacilitatorSessionView() {
     setIsAdvancing(true);
 
     if (!isLastPhase) {
+      if (isForceAdvance) {
+        await setSessionGlobalPhaseIndex(sessionId, currentPhase + 1);
+      }
+
       const { error } = await supabase.rpc("advance_phase", {
         p_session_id: sessionId,
         p_current_phase_num: currentPhase,
@@ -303,11 +308,6 @@ export default function FacilitatorSessionView() {
 
     setIsAdvancing(false);
   }
-
-  console.log("isForceAdvance:", isForceAdvance);
-  console.log("participants:", participants);
-  console.log("profile:", profile?.id);
-  console.log("Template Name:", templateName);
 
   const completedCount = participants
     .filter(p => p.user_id !== profile?.id)

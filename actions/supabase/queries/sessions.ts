@@ -127,6 +127,37 @@ export async function assignParticipantToSession(
   }
 }
 
+export async function fetchSessionGlobalPhaseIndex(sessionId: string) {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("session")
+    .select("phase_index")
+    .eq("session_id", sessionId)
+    .single();
+
+  if (error) throw error;
+  if (data == null)
+    throw new Error(
+      `Session with sessionId ${sessionId} not found while trying to fetchSessionGlobalPhaseIndex`,
+    );
+
+  return data.phase_index;
+}
+
+// only for force advance sessions, so we make sure people don't advance further than they should
+export async function setSessionGlobalPhaseIndex(
+  sessionId: string,
+  newPhaseIndex: number,
+) {
+  const supabase = await getSupabaseServerClient();
+  const { error } = await supabase
+    .from("session")
+    .update({ phase_index: newPhaseIndex })
+    .eq("session_id", sessionId);
+
+  if (error) throw error;
+}
+
 export async function createSession(
   templateId: string,
   userGroupId: string,
@@ -140,6 +171,7 @@ export async function createSession(
         template_id: templateId,
         user_group_id: userGroupId,
         force_advance: forceAdvance,
+        phase_index: forceAdvance ? 0 : null,
       },
     ])
     .select("session_id")

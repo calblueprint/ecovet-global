@@ -19,8 +19,10 @@ import {
   fetchPrompts,
   fetchRole,
   fetchRolePhases,
+  fetchSessionGlobalPhaseIndex,
   fetchTemplateId,
   isSessionForceAdvance,
+  sessionParticipants,
   sessionParticipantsBulk,
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
@@ -43,8 +45,9 @@ export default function SessionFlowPage() {
   const [phases, setPhases] = useState<Phase[]>([]);
 
   const [phaseIdx, setPhaseIdx] = useState(-1);
-  // used when the user uses the back button, so we know how far they went
-  const [beenToPhaseBefore, setBeenToPhaseBefore] = useState(false);
+
+  // only used for force advance sessions
+  const [maxPhaseIndex, setMaxPhaseIndex] = useState(0);
 
   const [roleId, setRoleId] = useState<string | null>(null);
   const [rolePhase, setRolePhase] = useState<RolePhase | null>(null);
@@ -157,7 +160,6 @@ export default function SessionFlowPage() {
 
   useEffect(() => {
     if (!userId || !sessionIdStr || !rolePhase || prompts.length === 0) return;
-    setBeenToPhaseBefore(false);
 
     async function loadResponses() {
       try {
@@ -177,7 +179,6 @@ export default function SessionFlowPage() {
 
         setAnswers(ordered.map(r => r?.prompt_answer ?? ""));
         setCompletedPrompts(completed);
-        setBeenToPhaseBefore(responses.length == completed.size);
       } catch (err) {
         console.error("Response load failed:", err);
       }
@@ -189,7 +190,31 @@ export default function SessionFlowPage() {
   useEffect(() => {
     if (!userId || !sessionIdStr) return;
 
-    const channel = supabase
+    async function loadPhaseIndex() {
+      if (!sessionIdStr) return;
+      const phaseIdx = await fetchSessionGlobalPhaseIndex(sessionIdStr);
+      setMaxPhaseIndex(phaseIdx);
+    }
+    loadPhaseIndex();
+
+    const sessionChannel = supabase
+      .channel(`session_updates_${sessionIdStr}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "session",
+          filter: `session_id=eq.${sessionIdStr}`,
+        },
+        payload => {
+          const newPhaseIndex = payload.new.phase_index;
+          if (newPhaseIndex != null) setMaxPhaseIndex(newPhaseIndex);
+        },
+      )
+      .subscribe();
+
+    const participantSessionChannel = supabase
       .channel(`participant_session_updates_${userId}_${sessionIdStr}`)
       .on(
         "postgres_changes",
@@ -212,7 +237,8 @@ export default function SessionFlowPage() {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(sessionChannel);
+      supabase.removeChannel(participantSessionChannel);
     };
   }, [userId, sessionIdStr]);
 
@@ -336,10 +362,10 @@ export default function SessionFlowPage() {
               roleId={roleId as UUID}
               sessionId={sessionIdStr}
               isForceAdvance={isForceAdvance}
+              forceAdvanceMaxPhaseIndex={maxPhaseIndex}
               promptsCompleted={completedPrompts.size == prompts.length}
               isLastPhase={isLastPhase}
               currentPhaseIndex={phaseIdx}
-              beenToPhaseBefore={beenToPhaseBefore}
               phaseId={currentPhase.phase_id as UUID}
               onClick={submitAnswers}
             />
