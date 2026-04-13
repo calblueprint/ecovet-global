@@ -33,7 +33,7 @@ interface PromptsRightPanelProps {
   phaseName: string;
   isOverview: boolean;
   onInputAnswer: (index: number, value: string) => void;
-  onBlur: (index: number) => void;
+  onBlur: (index: number, value: string) => void;
   nextButton: ReactNode;
 }
 
@@ -88,7 +88,7 @@ export default function PromptsRightPanel({
             value={selectedId}
             onChange={e => {
               onInputAnswer(index, e.target.value);
-              onBlur(index);
+              onBlur(index, e.target.value);
             }}
             name={`mcq-${prompt.prompt_id}`}
           >
@@ -119,8 +119,9 @@ export default function PromptsRightPanel({
         const set = new Set(selectedIds);
         if (set.has(id)) set.delete(id);
         else set.add(id);
-        onInputAnswer(index, JSON.stringify(Array.from(set)));
-        onBlur(index);
+        const next = JSON.stringify(Array.from(set));
+        onInputAnswer(index, next);
+        onBlur(index, next);
       };
       return (
         <CheckboxParticipantStyled>
@@ -158,7 +159,7 @@ export default function PromptsRightPanel({
         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
           onInputAnswer(index, e.target.value)
         }
-        onBlur={() => onBlur(index)}
+        onBlur={() => onBlur(index, answer)}
         minRows={3}
         placeholder="Type your answer here..."
       />
