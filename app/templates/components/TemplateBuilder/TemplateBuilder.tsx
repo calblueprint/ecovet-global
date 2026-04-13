@@ -165,6 +165,10 @@ export default function TemplateBuilder({
         update(draft => {
           draft.promptById[id as UUID].prompt_text = next as string;
         });
+      } else if (field === "prompt_follow_ups") {
+        update(draft => {
+          draft.promptById[id as UUID].prompt_follow_ups = next as string;
+        });
       } else if (field === "prompt_type") {
         update(draft => {
           draft.promptById[id as UUID].prompt_type = next as PromptType;
@@ -251,8 +255,8 @@ export default function TemplateBuilder({
       await createPrompts(
         promptID,
         prompt.role_phase_id ?? "",
-        prompt.prompt_follow_ups,
         prompt.prompt_text,
+        prompt.prompt_follow_ups,
         prompt.prompt_type,
       );
 
