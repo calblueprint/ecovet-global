@@ -35,6 +35,7 @@ import {
   AssociatedTags,
   EditIconWrapper,
   NameColumn,
+  RowActions,
   TemplateRow,
 } from "./styles";
 
@@ -368,17 +369,6 @@ export default function TemplateListPage() {
                     >
                       {t.template_name}
                     </span>
-
-                    <EditIconWrapper
-                      onClick={e => {
-                        e.stopPropagation();
-                        router.push(
-                          `/facilitator/edit-template/${t.template_id}`,
-                        );
-                      }}
-                    >
-                      <Pencil size={16} />
-                    </EditIconWrapper>
                   </NameColumn>
 
                   <div>
@@ -419,6 +409,19 @@ export default function TemplateListPage() {
                       }
                     />
                   </AssociatedTags>
+
+                  <RowActions className="row-actions">
+                    <EditIconWrapper
+                      onClick={e => {
+                        e.stopPropagation();
+                        router.push(
+                          `/facilitator/edit-template/${t.template_id}`,
+                        );
+                      }}
+                    >
+                      <Pencil size={16} />
+                    </EditIconWrapper>
+                  </RowActions>
                 </TemplateRow>
               ))}
             </MainDiv>

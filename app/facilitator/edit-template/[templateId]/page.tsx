@@ -8,9 +8,7 @@ import TemplateBuilder from "@/app/templates/components/TemplateBuilder/Template
 import TemplateBuilderSideBar from "@/app/templates/components/TemplateBuilderSidebar/TemplateBuilderSidebar";
 import { ActiveIds } from "@/app/templates/page";
 import { LayoutWrapper, TemplateMainBox } from "@/app/templates/styles";
-// UI Components & Styles
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
-// Types
 import {
   EditablePhase,
   LocalStore,
@@ -21,8 +19,8 @@ import {
   UUID,
 } from "@/types/schema";
 import { SideNavContainer } from "../../styles";
+import { LoadingMessages } from "../styles";
 
-// Step 2 Interface: Matches the Supabase Query
 interface FullTemplateResponse extends Template {
   roles: Role[];
   phases: (EditablePhase & {
@@ -32,7 +30,6 @@ interface FullTemplateResponse extends Template {
   })[];
 }
 
-// Step 3 Component: The Page UI
 export default function EditTemplatePage() {
   const params = useParams();
   const templateId = params.templateId as UUID;
@@ -68,10 +65,9 @@ export default function EditTemplatePage() {
     setLocalStore(prev => (prev ? produce(prev, updater) : prev));
   };
 
-  if (loading)
-    return <div style={{ padding: "20px" }}>Loading template...</div>;
+  if (loading) return <LoadingMessages>Loading template...</LoadingMessages>;
   if (!localStore)
-    return <div style={{ padding: "20px" }}>Template not found.</div>;
+    return <LoadingMessages>Template not found.</LoadingMessages>;
 
   return (
     <>
@@ -99,7 +95,6 @@ export default function EditTemplatePage() {
   );
 }
 
-// Step 2 Helper: The Transformer
 function transformToLocalStore(data: FullTemplateResponse): LocalStore {
   const rolesById: Record<number | UUID, Role | Template> = { 1: data };
   const roleIds: (number | UUID)[] = [1];

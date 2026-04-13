@@ -283,7 +283,6 @@ export async function fetchTemplate(
 
 export async function fetchAllTemplates() {
   try {
-    // Pull data
     const supabase = await getSupabaseServerClient();
     const { data, error } = await supabase.from("template").select("*");
 

@@ -87,10 +87,8 @@ export const EditIconWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0; // Hidden by default
-  transition: opacity 0.2s ease-in-out;
   cursor: pointer;
-  padding: 4px;
+  padding: 8px;
   border-radius: 4px;
   color: ${COLORS.black40};
 
@@ -100,16 +98,9 @@ export const EditIconWrapper = styled.div`
   }
 `;
 
-export const TemplateRow = styled(SharedGeneralList)`
-  &:hover ${EditIconWrapper} {
-    opacity: 1;
-  }
-`;
-
 export const NameColumn = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding-right: 12px;
   cursor: pointer;
 
@@ -117,5 +108,35 @@ export const NameColumn = styled.div`
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+`;
+
+export const RowActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  padding: 0 16px 0 32px;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out;
+`;
+
+export const TemplateRow = styled(SharedGeneralList)`
+  position: relative;
+  overflow: hidden;
+  transition: background-color 0.15s ease-in-out;
+
+  &:hover {
+    background-color: ${COLORS.oat_light};
+  }
+
+  &:hover ${RowActions} {
+    opacity: 1;
+    pointer-events: auto;
   }
 `;
