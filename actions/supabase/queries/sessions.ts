@@ -335,7 +335,7 @@ export async function fetchPhases(sessionId: string) {
   return phases ?? [];
 }
 
-// Can merge with fetchRole so that we dont have to call twice
+// Can merge with fetchRole so that we dont have to call twice.
 export async function fetchMostRecentPhase(
   userId: string,
   sessionId: string,
@@ -358,7 +358,8 @@ export async function fetchMostRecentPhase(
   if (!data) {
     throw new Error("No phase id found");
   }
-  if (!data.phase_index) {
+  console.log("Phase Index:", data);
+  if (data.phase_index === null || data.phase_index === undefined) {
     throw new Error(`No phase index`);
   }
 

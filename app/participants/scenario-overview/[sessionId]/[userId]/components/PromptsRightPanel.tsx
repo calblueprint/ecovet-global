@@ -1,7 +1,8 @@
 "use client";
 
-import type { Prompt } from "@/types/schema";
+import type { Prompt, PromptOption } from "@/types/schema";
 import type { ReactNode } from "react";
+import { Checkbox, FormControlLabel, Radio, RadioGroup } from "@mui/material";
 import {
   ContentDiv,
   ContinueButtonDiv,
@@ -15,10 +16,19 @@ import {
   PromptWrapper,
   StyledTextarea,
 } from "../styles";
+import {
+  CheckboxOptionParticipantStyled,
+  CheckboxOptionTextStyled,
+  CheckboxParticipantStyled,
+  McqOptionParticipantStyled,
+  McqOptionTextStyled,
+  MultipleChoiceParticipantStyled,
+} from "./styles";
 
 interface PromptsRightPanelProps {
   prompts: Prompt[];
   answers: string[];
+  optionsByPromptId: Record<string, PromptOption[]>;
   completedPrompts: Set<string>;
   phaseName: string;
   isOverview: boolean;
@@ -27,9 +37,20 @@ interface PromptsRightPanelProps {
   nextButton: ReactNode;
 }
 
+function parseCheckboxAnswer(raw: string): string[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 export default function PromptsRightPanel({
   prompts,
   answers,
+  optionsByPromptId,
   completedPrompts,
   phaseName,
   isOverview,
@@ -55,6 +76,95 @@ export default function PromptsRightPanel({
     );
   }
 
+  function renderAnswerInput(prompt: Prompt, index: number) {
+    const promptOptions = optionsByPromptId[prompt.prompt_id] ?? [];
+    const answer = answers[index];
+
+    if (prompt.prompt_type === "multiple_choice") {
+      const selectedId = typeof answer === "string" ? answer : "";
+      return (
+        <MultipleChoiceParticipantStyled>
+          <RadioGroup
+            value={selectedId}
+            onChange={e => {
+              onInputAnswer(index, e.target.value);
+              onBlur(index);
+            }}
+            name={`mcq-${prompt.prompt_id}`}
+          >
+            {promptOptions.map(o => (
+              <McqOptionParticipantStyled
+                key={o.option_id}
+                $selected={selectedId === o.option_id}
+              >
+                <FormControlLabel
+                  value={o.option_id}
+                  control={<Radio size="small" />}
+                  label={
+                    <McqOptionTextStyled $selected={selectedId === o.option_id}>
+                      {o.option_text}
+                    </McqOptionTextStyled>
+                  }
+                />
+              </McqOptionParticipantStyled>
+            ))}
+          </RadioGroup>
+        </MultipleChoiceParticipantStyled>
+      );
+    }
+
+    if (prompt.prompt_type === "checkbox") {
+      const selectedIds = parseCheckboxAnswer(answer ?? "");
+      const toggle = (id: string) => {
+        const set = new Set(selectedIds);
+        if (set.has(id)) set.delete(id);
+        else set.add(id);
+        onInputAnswer(index, JSON.stringify(Array.from(set)));
+        onBlur(index);
+      };
+      return (
+        <CheckboxParticipantStyled>
+          {promptOptions.map(o => {
+            const selected = selectedIds.includes(o.option_id);
+            return (
+              <CheckboxOptionParticipantStyled
+                key={o.option_id}
+                $selected={selected}
+              >
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      size="small"
+                      checked={selected}
+                      onChange={() => toggle(o.option_id)}
+                    />
+                  }
+                  label={
+                    <CheckboxOptionTextStyled $selected={selected}>
+                      {o.option_text}
+                    </CheckboxOptionTextStyled>
+                  }
+                />
+              </CheckboxOptionParticipantStyled>
+            );
+          })}
+        </CheckboxParticipantStyled>
+      );
+    }
+
+    return (
+      <StyledTextarea
+        value={typeof answer === "string" ? answer : ""}
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+          onInputAnswer(index, e.target.value)
+        }
+        onBlur={() => onBlur(index)}
+        minRows={3}
+        placeholder="Type your answer here..."
+      />
+    );
+  }
+
   return (
     <ContentDiv>
       <PhaseHeading>Questions</PhaseHeading>
@@ -73,15 +183,7 @@ export default function PromptsRightPanel({
               <PromptQuestionNumber>{index + 1} →</PromptQuestionNumber>
               <PromptQuestionText>{prompt.prompt_text}</PromptQuestionText>
               {renderFollowUps(prompt.prompt_follow_ups)}
-              <StyledTextarea
-                value={answers[index] ?? ""}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                  onInputAnswer(index, e.target.value)
-                }
-                onBlur={() => onBlur(index)}
-                minRows={3}
-                placeholder="Type your answer here..."
-              />
+              {renderAnswerInput(prompt, index)}
             </PromptWrapper>
           ))
         )}
