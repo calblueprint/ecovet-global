@@ -18,10 +18,10 @@ import {
   Template,
 } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
-import { ActiveIds } from "../page";
-import RoleForm from "./RoleForm";
+import { ActiveIds } from "../../page";
+import QuestionBuilder from "../QuestionBuilder/QuestionBuilder";
+import TemplateOverviewForm from "../TemplateOverviewForm/TemplateOverviewForm";
 import { PanelCard, SubmitButton } from "./styles";
-import TemplateOverviewForm from "./TemplateOverviewForm";
 
 // TODO: add an active phase id
 // TODO: add an active phase id
@@ -44,6 +44,7 @@ export default function TemplateBuilder({
 
   function removeRole(role_id: UUID | number): void {
     if (localStore == null || typeof role_id == "number") return;
+
     let nextActive: UUID | number = 1;
     const idx = localStore.roleIds.indexOf(role_id);
     if (idx !== -1) {
@@ -111,9 +112,9 @@ export default function TemplateBuilder({
       const newPromptID = crypto.randomUUID();
       draft.promptById[newPromptID] = {
         prompt_id: newPromptID,
-        user_id: null,
         role_phase_id: rolePhaseID,
         prompt_text: "",
+        prompt_follow_ups: "",
         prompt_type: "text",
       };
       draft.promptIndex[rolePhaseID].push(newPromptID);
@@ -127,6 +128,7 @@ export default function TemplateBuilder({
     update(draft => {
       const i = draft.promptIndex[rolePhaseID].indexOf(promptID);
       if (i !== -1) draft.promptIndex[rolePhaseID].splice(i, 1);
+
       delete draft.promptById[promptID];
       delete draft.optionsByPromptId[promptID];
     });
@@ -156,11 +158,16 @@ export default function TemplateBuilder({
         });
       } else if (field === "description") {
         update(draft => {
-          draft.rolePhasesById[id as UUID].description = next as string;
+          draft.rolePhasesById[id as UUID].role_phase_description =
+            next as string;
         });
       } else if (field === "prompt_text") {
         update(draft => {
           draft.promptById[id as UUID].prompt_text = next as string;
+        });
+      } else if (field === "prompt_follow_ups") {
+        update(draft => {
+          draft.promptById[id as UUID].prompt_follow_ups = next as string;
         });
       } else if (field === "prompt_type") {
         update(draft => {
@@ -179,6 +186,7 @@ export default function TemplateBuilder({
 
   async function saveTemplate(): Promise<void> {
     setSaving(true);
+
     if (localStore == null) return;
     const saveStore: LocalStore = structuredClone(localStore);
 
@@ -209,7 +217,6 @@ export default function TemplateBuilder({
         phaseID,
         saveStore.phasesById[phaseID].template_id,
         saveStore.phasesById[phaseID].phase_name,
-        saveStore.phasesById[phaseID].is_finished,
         saveStore.phasesById[phaseID].phase_description,
         saveStore.phasesById[phaseID].phase_number,
       );
@@ -225,14 +232,15 @@ export default function TemplateBuilder({
       ][]) {
         console.log(
           "saving rolePhase description:",
-          saveStore.rolePhasesById[rolePhaseID].description,
+
+          saveStore.rolePhasesById[rolePhaseID].role_phase_description,
         );
         try {
           await createRolePhases(
             rolePhaseID,
             phaseID,
             roleID,
-            saveStore.rolePhasesById[rolePhaseID].description,
+            saveStore.rolePhasesById[rolePhaseID].role_phase_description,
           );
         } catch (err) {
           console.error("createRolePhases error:", err);
@@ -246,9 +254,9 @@ export default function TemplateBuilder({
     ][]) {
       await createPrompts(
         promptID,
-        null,
         prompt.role_phase_id ?? "",
         prompt.prompt_text,
+        prompt.prompt_follow_ups,
         prompt.prompt_type,
       );
 
@@ -278,7 +286,7 @@ export default function TemplateBuilder({
                 onChange={setActiveUpdate}
               />
             ) : (
-              <RoleForm
+              <QuestionBuilder
                 value={{
                   role: localStore.rolesById[activeIds.roleId] as Role,
                   rolePhases: localStore.rolePhasesById,

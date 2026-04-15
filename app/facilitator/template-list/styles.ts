@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
+import { GeneralList as SharedGeneralList } from "../styles";
 
 export const AssociatedTags = styled.div`
   display: flex;
@@ -79,5 +80,63 @@ export const ClearAllButton = styled.button`
   &:hover {
     color: ${COLORS.black};
     background-color: ${COLORS.oat_light};
+  }
+`;
+
+export const EditIconWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  color: ${COLORS.black40};
+
+  &:hover {
+    background-color: ${COLORS.oat_light};
+    color: ${COLORS.black};
+  }
+`;
+
+export const NameColumn = styled.div`
+  display: flex;
+  align-items: center;
+  padding-right: 12px;
+  cursor: pointer;
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+`;
+
+export const RowActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  padding: 0 16px 0 32px;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out;
+`;
+
+export const TemplateRow = styled(SharedGeneralList)`
+  position: relative;
+  overflow: hidden;
+  transition: background-color 0.15s ease-in-out;
+
+  &:hover {
+    background-color: ${COLORS.oat_light};
+  }
+
+  &:hover ${RowActions} {
+    opacity: 1;
+    pointer-events: auto;
   }
 `;

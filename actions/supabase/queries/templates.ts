@@ -24,16 +24,19 @@ export async function createTemplates( // create templates with inputs, but lowk
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("template")
-    .insert({
-      template_id: templateID,
-      template_name: template_name,
-      accessible_to_all: accessible_to_all,
-      user_group_id: user_group_id,
-      objective: objective,
-      summary: summary,
-      setting: setting,
-      current_activity: current_activity,
-    })
+    .upsert(
+      {
+        template_id: templateID,
+        template_name: template_name,
+        accessible_to_all: accessible_to_all,
+        user_group_id: user_group_id,
+        objective: objective,
+        summary: summary,
+        setting: setting,
+        current_activity: current_activity,
+      },
+      { onConflict: "template_id" },
+    )
     .select("template_id")
     .single();
 
@@ -69,21 +72,22 @@ export async function createPhases(
   phase_id: UUID,
   template_id: UUID | null,
   phase_name: string | null,
-  is_finished: boolean | null,
   phase_description: string | null = null,
   phase_number: number,
 ): Promise<UUID> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("phase")
-    .insert({
-      phase_id: phase_id,
-      template_id: template_id,
-      phase_name: phase_name,
-      phase_description: phase_description,
-      is_finished: is_finished,
-      phase_number,
-    })
+    .upsert(
+      {
+        phase_id: phase_id,
+        template_id: template_id,
+        phase_name: phase_name,
+        phase_description: phase_description,
+        phase_number,
+      },
+      { onConflict: "phase_id" },
+    )
     .select("phase_id")
     .single();
 
@@ -124,12 +128,15 @@ export async function createRoles(
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("role")
-    .insert({
-      role_id: role_id,
-      role_name: role_name,
-      role_description: role_description,
-      template_id: template_id,
-    })
+    .upsert(
+      {
+        role_id: role_id,
+        role_name: role_name,
+        role_description: role_description,
+        template_id: template_id,
+      },
+      { onConflict: "role_id" },
+    )
     .select("role_id")
     .single();
 
@@ -167,12 +174,15 @@ export async function createRolePhases(
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("role_phase")
-    .insert({
-      role_phase_id: role_phase_id,
-      phase_id: phase_id,
-      role_id: role_id,
-      description: description,
-    })
+    .upsert(
+      {
+        role_phase_id: role_phase_id,
+        phase_id: phase_id,
+        role_id: role_id,
+        role_phase_description: description,
+      },
+      { onConflict: "role_phase_id" },
+    )
     .select("role_phase_id")
     .single();
 
@@ -206,21 +216,23 @@ export async function deleteRolePhase(role_phase_id: UUID): Promise<void> {
 
 export async function createPrompts(
   prompt_id: UUID,
-  user_id: UUID | null,
   role_phase_id: UUID,
   prompt_text: string | null,
+  prompt_follow_ups: string | null,
   prompt_type: "text" | "multiple_choice" | "checkbox" | null,
 ): Promise<UUID> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("prompt")
-    .insert({
-      prompt_id: prompt_id,
-      user_id: user_id,
-      role_phase_id: role_phase_id,
-      prompt_text: prompt_text,
-      prompt_type: prompt_type,
-    })
+    .upsert(
+      {
+        prompt_id: prompt_id,
+        role_phase_id: role_phase_id,
+        prompt_text: prompt_text,
+        prompt_type: prompt_type,
+      },
+      { onConflict: "prompt_id" },
+    )
     .select("prompt_id")
     .single();
 
@@ -265,13 +277,12 @@ export async function fetchTemplate(
     console.error("Error fetching template by template_id:", error);
     return null;
   }
-  console.log("this", data);
+
   return data;
 }
 
 export async function fetchAllTemplates() {
   try {
-    // Pull data
     const supabase = await getSupabaseServerClient();
     const { data, error } = await supabase.from("template").select("*");
 
@@ -304,4 +315,47 @@ export async function fetchTemplatesWithTags() {
     ...t,
     associated_tags: t.template_tag.map((tt: { tag: Tag }) => tt.tag),
   }));
+}
+
+export const fetchTemplatesExercise = async (userGroup: string) => {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("template")
+    .select("*")
+    .or(`user_group_id.eq.${userGroup},accessible_to_all.eq.true`);
+
+  if (error) {
+    console.error("Error fetching templates:", error);
+    return [];
+  }
+  return data;
+};
+
+export async function fetchFullTemplate(template_id: string) {
+  const supabase = await getSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("template")
+    .select(
+      `
+      *,
+      roles:role(*),
+      phases:phase(
+        *,
+        role_phases:role_phase(
+          *,
+          prompts:prompt!prompt_role_phase_id_fkey(*) 
+        )
+      )
+    `,
+    )
+    .eq("template_id", template_id)
+    .single();
+
+  if (error) {
+    console.error("Supabase Error fetching full template:", error);
+    return null;
+  }
+
+  return data;
 }

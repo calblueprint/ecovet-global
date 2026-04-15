@@ -47,10 +47,10 @@ export default function ScenarioLeftPanel({
           </ContentBody>
         </ContentBubble>
 
-        {rolePhase?.description && (
+        {rolePhase?.role_phase_description && (
           <ContentBubble>
             <ContentHeader>Your Role</ContentHeader>
-            <ContentBody>{rolePhase.description}</ContentBody>
+            <ContentBody>{rolePhase.role_phase_description}</ContentBody>
           </ContentBubble>
         )}
       </PhaseDescriptionWrapper>

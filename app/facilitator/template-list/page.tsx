@@ -3,7 +3,7 @@
 import type { Template, UUID } from "@/types/schema";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Pencil } from "lucide-react";
 import {
   assignTagToTemplate,
   createTag,
@@ -31,7 +31,13 @@ import {
   SortButton,
 } from "../styles";
 import TemplateSideBar from "./components/TemplateSidebar";
-import { AssociatedTags } from "./styles";
+import {
+  AssociatedTags,
+  EditIconWrapper,
+  NameColumn,
+  RowActions,
+  TemplateRow,
+} from "./styles";
 
 type TemplateWithTags = Template & {
   associated_tags: Tag[];
@@ -53,7 +59,7 @@ export default function TemplateListPage() {
   const [sortKey, setSortKey] = useState<"name" | "date">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  const [selectedTagId, setSelectedTagId] = useState<UUID | null>(null);
+  const [selectedTagIds, setSelectedTagIds] = useState<UUID[] | null>([]);
   const [openTagDropdownFor, setOpenTagDropdownFor] = useState<UUID | null>(
     null,
   );
@@ -89,11 +95,13 @@ export default function TemplateListPage() {
       updated = updated.filter(t => t.accessible_to_all);
     }
 
-    if (selectedTagId) {
-      updated = updated.filter(t =>
-        t.associated_tags.some(tag => tag.tag_id === selectedTagId),
-      );
-    }
+    if (selectedTagIds) {
+      if (selectedTagIds.length > 0) {
+        updated = updated.filter(t =>
+          t.associated_tags.some(tag => selectedTagIds.includes(tag.tag_id)),
+        );
+      }
+    } // update to multiselect
 
     updated = updated.filter(t =>
       t.template_name?.toLowerCase().includes(searchInput.trim().toLowerCase()),
@@ -115,7 +123,7 @@ export default function TemplateListPage() {
   }, [
     templates,
     filterMode,
-    selectedTagId,
+    selectedTagIds,
     searchInput,
     sortKey,
     sortOrder,
@@ -162,7 +170,9 @@ export default function TemplateListPage() {
         })),
       );
 
-      setSelectedTagId(prev => (prev === tag_id ? null : prev));
+      setSelectedTagIds(prev =>
+        prev ? prev.filter(tag => tag !== tag_id) : null,
+      );
     }
 
     return true;
@@ -191,7 +201,7 @@ export default function TemplateListPage() {
     if (newTagId) {
       const newlyCreatedTag: Tag = {
         tag_id: newTagId as UUID,
-        name: name,
+        name: name ?? "No Name",
         color: "yellow",
         number: 0,
         user_group_id: user_group_id,
@@ -298,10 +308,7 @@ export default function TemplateListPage() {
             setFilterMode={setFilterMode}
             onDeleteConfirmed={deleteTagComponent}
             user_group_id={user_group_id}
-            selectedTagId={selectedTagId}
-            onTagClick={(id: UUID) =>
-              setSelectedTagId(prev => (prev === id ? null : id))
-            }
+            selectedTagIds={selectedTagIds}
             onTagRenamed={() => setTagVersion(v => v + 1)}
           />
         </SideNavContainer>
@@ -309,6 +316,8 @@ export default function TemplateListPage() {
         <ContentWrapper>
           <PageDiv>
             <MainDiv>
+              <Heading3>Browse templates</Heading3>
+
               <SearchBarStyled>
                 <SearchInput
                   value={searchInput}
@@ -317,8 +326,34 @@ export default function TemplateListPage() {
                 />
               </SearchBarStyled>
 
-              <Heading3>Browse templates</Heading3>
-
+              <TagAutocomplete
+                availableTags={availableTags}
+                selectedTagIds={new Set(selectedTagIds)}
+                onSelect={(id: UUID) =>
+                  setSelectedTagIds(prev => {
+                    if (prev === null) return [id];
+                    if (prev.includes(id)) return prev;
+                    return [...prev, id];
+                  })
+                }
+                onRemove={tagId =>
+                  setSelectedTagIds(prev =>
+                    prev !== null ? prev.filter(id => id !== tagId) : null,
+                  )
+                }
+                onCreate={name =>
+                  setAvailableTags(prev => [
+                    ...prev,
+                    {
+                      name,
+                      color: "tagYellow",
+                      tag_id: "67",
+                      user_group_id: "6767",
+                      number: 67,
+                    },
+                  ])
+                }
+              />
               <GeneralTitle>
                 <span>
                   Name{" "}
@@ -352,13 +387,18 @@ export default function TemplateListPage() {
               </GeneralTitle>
 
               {filteredTemplates.map(t => (
-                <GeneralList key={t.template_id}>
-                  <div
-                    onClick={() => router.replace(`/sessions/${t.template_id}`)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    {t.template_name}
-                  </div>
+                <TemplateRow key={t.template_id}>
+                  <NameColumn>
+                    <span
+                      onClick={() =>
+                        router.replace(
+                          `/facilitator/exercises/start?templateId=${t.template_id}`,
+                        )
+                      }
+                    >
+                      {t.template_name}
+                    </span>
+                  </NameColumn>
 
                   <div>
                     {new Date(t.timestamp).toLocaleDateString("en-GB", {
@@ -398,7 +438,20 @@ export default function TemplateListPage() {
                       }
                     />
                   </AssociatedTags>
-                </GeneralList>
+
+                  <RowActions className="row-actions">
+                    <EditIconWrapper
+                      onClick={e => {
+                        e.stopPropagation();
+                        router.push(
+                          `/facilitator/edit-template/${t.template_id}`,
+                        );
+                      }}
+                    >
+                      <Pencil size={16} />
+                    </EditIconWrapper>
+                  </RowActions>
+                </TemplateRow>
               ))}
             </MainDiv>
           </PageDiv>

@@ -18,8 +18,7 @@ export type Tag = Tables<"tag">;
 
 type TagCreatorProps = {
   user_group_id: UUID;
-  onTagClick: (tag_id: UUID) => void;
-  selectedTagId: UUID | null;
+  selectedTagIds: UUID[] | null;
   onTagRenamed?: () => void;
   onDeleteTag: (tag_id: UUID) => Promise<boolean>;
 };
@@ -30,8 +29,7 @@ const TAG_COLOR_ORDER: ColorKey[] = ["tagYellow"];
 
 export function TagCreator({
   user_group_id,
-  onTagClick,
-  selectedTagId,
+  selectedTagIds,
   onTagRenamed,
   onDeleteTag,
 }: TagCreatorProps) {
@@ -106,14 +104,10 @@ export function TagCreator({
         New Tag
       </NewTag>
       {tags.map(tag => (
-        <SidebarTag
-          key={tag.tag_id}
-          $isSelected={selectedTagId === tag.tag_id}
-          onClick={() => onTagClick(tag.tag_id)}
-        >
+        <SidebarTag key={tag.tag_id}>
           <TagComponent
             color={tag.color as ColorKey}
-            name={tag.name}
+            name={tag.name ?? "No name"}
             tag_id={tag.tag_id}
             sidebar={true}
             onRename={handleRename}
