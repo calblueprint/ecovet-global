@@ -2,7 +2,7 @@
 
 import type { UUID } from "@/types/schema";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { setIsFinished } from "@/actions/supabase/queries/sessions";
 import { Button } from "../styles";
 
@@ -40,7 +40,8 @@ export default function NextButton({
       }
       await setIsFinished(user_id, role_id, session_id);
       if (isLastPhase) {
-        router.push("/sessions/session-finish");
+        // console.log("sessionId ", session_id);
+        router.push(`/sessions/session-finish/${session_id}`);
       }
     } catch (err) {
       console.error(err);

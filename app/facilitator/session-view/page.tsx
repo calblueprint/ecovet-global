@@ -42,7 +42,7 @@ export default function FacilitatorSessionView() {
     if (!data) {
       try {
         await finishSession(sessionId);
-        router.push("/sessions/session-finish/");
+        router.push(`/sessions/session-finish/${sessionId}`);
       } catch (err) {
         console.error("Failed to finish session:", err);
       }
