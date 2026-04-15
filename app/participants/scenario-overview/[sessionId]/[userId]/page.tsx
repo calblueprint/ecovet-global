@@ -11,6 +11,7 @@ import type {
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import supabase from "@/actions/supabase/client";
+import { fetchOptionsForPrompts } from "@/actions/supabase/queries/prompt";
 import {
   createPromptAnswer,
   fetchMostRecentPhase,
@@ -26,6 +27,7 @@ import {
   sessionParticipantsBulk,
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
+import { PromptOption } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import { useAnnouncements } from "@/utils/UseAnnouncements";
 import NextPhaseButton from "./components/NextPhaseButton";
@@ -52,6 +54,9 @@ export default function SessionFlowPage() {
   const [roleId, setRoleId] = useState<string | null>(null);
   const [rolePhase, setRolePhase] = useState<RolePhase | null>(null);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [optionsByPromptId, setOptionsByPromptId] = useState<
+    Record<string, PromptOption[]>
+  >({});
   const [answers, setAnswers] = useState<string[]>([]);
   const [completedPrompts, setCompletedPrompts] = useState<Set<string>>(
     new Set(),
@@ -149,6 +154,21 @@ export default function SessionFlowPage() {
         setRolePhase(rp);
         const p = rp ? await fetchPrompts(rp.role_phase_id) : [];
         setPrompts(p);
+
+        const nonTextPromptIds = p
+          .filter(pr => pr.prompt_type !== "text")
+          .map(pr => pr.prompt_id);
+
+        if (nonTextPromptIds.length > 0) {
+          const options = await fetchOptionsForPrompts(nonTextPromptIds);
+          const grouped: Record<string, PromptOption[]> = {};
+          for (const opt of options) {
+            (grouped[opt.prompt_id] ||= []).push(opt);
+          }
+          setOptionsByPromptId(grouped);
+        } else {
+          setOptionsByPromptId({});
+        }
       } catch (err) {
         console.error("Error loading phase content:", err);
         setPrompts([]);
@@ -263,24 +283,51 @@ export default function SessionFlowPage() {
     setAnswers(updated);
   }
 
-  async function handleBlur(index: number) {
-    const answer = answers[index]?.trim();
-    if (
-      !answer ||
-      !userId ||
-      !sessionIdStr ||
-      !currentPhase ||
-      !rolePhase?.role_phase_id
-    )
+  function isAnswerEmpty(
+    rawAnswer: string | undefined,
+    promptType: string | null,
+  ) {
+    if (!rawAnswer) return true;
+    if (promptType === "checkbox") {
+      try {
+        const parsed = JSON.parse(rawAnswer);
+        return !Array.isArray(parsed) || parsed.length === 0;
+      } catch {
+        return true;
+      }
+    }
+    return rawAnswer.trim() === "";
+  }
+
+  async function handleBlur(index: number, rawAnswer: string) {
+    console.log("raw", rawAnswer);
+
+    if (!userId || !sessionIdStr || !currentPhase || !rolePhase?.role_phase_id)
       return;
+
+    const promptType = prompts[index].prompt_type;
     const promptId = prompts[index].prompt_id;
+
+    console.log("raw", rawAnswer);
+
+    if (isAnswerEmpty(rawAnswer, promptType)) {
+      setCompletedPrompts(prev => {
+        const next = new Set(prev);
+        next.delete(promptId);
+        return next;
+      });
+      return;
+    }
+
+    console.log(completedPrompts);
 
     await createPromptAnswer(
       userId,
       promptId,
       sessionIdStr,
       rolePhase.role_phase_id,
-      answer,
+      rawAnswer,
+      promptType,
     );
 
     setCompletedPrompts(prev => new Set(prev).add(promptId));
@@ -292,6 +339,8 @@ export default function SessionFlowPage() {
     const promises = answers
       .map((answer, i) => {
         if (!answer.trim()) return null;
+        const promptType = prompts[i].prompt_type;
+        if (isAnswerEmpty(answer, promptType)) return null;
         const promptId = prompts[i].prompt_id;
         return createPromptAnswer(
           userId,
@@ -299,12 +348,19 @@ export default function SessionFlowPage() {
           sessionIdStr,
           rolePhase.role_phase_id,
           answer,
+          promptType,
         );
       })
       .filter(Boolean);
 
     await Promise.all(promises);
-    setCompletedPrompts(new Set(prompts.map(p => p.prompt_id)));
+    setCompletedPrompts(
+      new Set(
+        prompts
+          .filter((p, i) => !isAnswerEmpty(answers[i], p.prompt_type))
+          .map(p => p.prompt_id),
+      ),
+    );
   }
 
   async function handleContinue() {
@@ -332,6 +388,7 @@ export default function SessionFlowPage() {
       <PromptsRightPanel
         prompts={isOverview ? [] : prompts}
         answers={answers}
+        optionsByPromptId={optionsByPromptId}
         completedPrompts={completedPrompts}
         phaseName={phases[phaseIdx]?.phase_name ?? "Unnamed Phase"}
         isOverview={isOverview}

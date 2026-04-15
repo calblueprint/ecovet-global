@@ -392,7 +392,7 @@ export async function fetchPhases(sessionId: string) {
   return phases ?? [];
 }
 
-// Can merge with fetchRole so that we dont have to call twice
+// Can merge with fetchRole so that we dont have to call twice.
 export async function fetchMostRecentPhase(
   userId: string,
   sessionId: string,
@@ -415,7 +415,7 @@ export async function fetchMostRecentPhase(
   if (!data) {
     throw new Error("No phase id found");
   }
-  if (data.phase_index == null) {
+  if (data.phase_index === null || data.phase_index === undefined) {
     throw new Error(`No phase index`);
   }
 
@@ -491,40 +491,93 @@ export async function createPromptAnswer(
   sessionId: UUID,
   rolePhaseId: UUID,
   answer: string,
+  promptType: string | null,
 ) {
-  console.log("Creating prompt answer with:", {
-    userId,
-    promptId,
-    sessionId,
-    answer,
-  });
-
   const supabase = await getSupabaseServerClient();
+
+  const baseRow = {
+    session_id: sessionId,
+    role_phase_id: rolePhaseId,
+    user_id: userId,
+    prompt_id: promptId,
+  };
+
+  if (promptType === "checkbox") {
+    const { error: deleteError } = await supabase
+      .from("prompt_response")
+      .delete()
+      .match({
+        user_id: userId,
+        prompt_id: promptId,
+        session_id: sessionId,
+      });
+
+    if (deleteError) {
+      console.error("Error clearing previous checkbox responses:", deleteError);
+      return null;
+    }
+
+    let optionIds: string[] = [];
+    try {
+      const parsed = JSON.parse(answer);
+      if (Array.isArray(parsed)) optionIds = parsed;
+    } catch {
+      optionIds = [];
+    }
+
+    if (optionIds.length === 0) return [];
+
+    const rows = optionIds.map(optId => ({
+      ...baseRow,
+      prompt_response_id: crypto.randomUUID(),
+      prompt_option_id: optId,
+      prompt_answer: null,
+    }));
+
+    const { data, error } = await supabase
+      .from("prompt_response")
+      .insert(rows)
+      .select("prompt_response_id");
+
+    if (error) console.error("Error inserting checkbox responses:", error);
+    return data;
+  }
+
+  if (promptType === "multiple_choice") {
+    await supabase.from("prompt_response").delete().match({
+      user_id: userId,
+      prompt_id: promptId,
+      session_id: sessionId,
+    });
+
+    const { data, error } = await supabase
+      .from("prompt_response")
+      .insert({
+        ...baseRow,
+        prompt_response_id: crypto.randomUUID(),
+        prompt_option_id: answer,
+        prompt_answer: null,
+      })
+      .select("prompt_response_id");
+
+    if (error) console.error("Error inserting MCQ response:", error);
+    return data;
+  }
+
   const { data, error } = await supabase
     .from("prompt_response")
     .upsert(
-      [
-        {
-          prompt_response_id: crypto.randomUUID(),
-          user_id: userId,
-          prompt_id: promptId,
-          prompt_answer: answer,
-          prompt_option_id: null,
-          session_id: sessionId,
-          role_phase_id: rolePhaseId,
-        },
-      ],
-      { onConflict: "user_id,prompt_id,session_id,role_phase_id" },
+      {
+        ...baseRow,
+        prompt_response_id: crypto.randomUUID(),
+        prompt_answer: answer,
+        prompt_option_id: null,
+      },
+      { onConflict: "user_id,prompt_id,session_id,prompt_option_id" },
     )
     .select("prompt_response_id");
 
-  if (error) {
-    console.error(
-      "Error creating prompt answer:",
-      JSON.stringify(error, null, 2),
-    );
-  }
-
+  if (error) console.error("Error upserting text response:", error);
   return data;
 }
 
