@@ -199,7 +199,6 @@ export default function SessionFlowPage() {
 
         setAnswers(ordered.map(r => r?.prompt_answer ?? ""));
         setCompletedPrompts(completed);
-        console.log(completed)
       } catch (err) {
         console.error("Response load failed:", err);
       }
@@ -367,7 +366,7 @@ export default function SessionFlowPage() {
 
   async function handleBack() {
     if (isOverview) return;
-    setPhaseIdx(i => i - 1);
+    setPhaseIdx(i => Math.max(i - 1, -1));
   }
 
   if (loading) return <div>Loading session...</div>;
