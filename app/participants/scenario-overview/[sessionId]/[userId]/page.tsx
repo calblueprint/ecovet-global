@@ -199,6 +199,7 @@ export default function SessionFlowPage() {
 
         setAnswers(ordered.map(r => r?.prompt_answer ?? ""));
         setCompletedPrompts(completed);
+        console.log(completed)
       } catch (err) {
         console.error("Response load failed:", err);
       }
@@ -316,8 +317,6 @@ export default function SessionFlowPage() {
       });
       return;
     }
-
-    console.log(completedPrompts);
 
     await createPromptAnswer(
       userId,
