@@ -156,7 +156,7 @@ export default function PromptsRightPanel({
     }
 
     return (
-      <StyledTextarea
+      <StyledTextArea
         value={typeof answer === "string" ? answer : ""}
         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
           onInputAnswer(index, e.target.value)

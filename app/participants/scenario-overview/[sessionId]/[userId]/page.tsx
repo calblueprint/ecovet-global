@@ -213,13 +213,12 @@ export default function SessionFlowPage() {
     async function loadPhaseIndex() {
       if (!sessionIdStr) return;
       const phaseIdx = await fetchSessionGlobalPhaseIndex(sessionIdStr);
-      console.log('new phase index found: '+ phaseIdx)
       setMaxPhaseIndex(phaseIdx);
     }
     loadPhaseIndex();
 
     const sessionChannel = supabase
-      .channel(`session_updates_${sessionIdStr}`)
+      .channel(`session_phase_updates_${sessionIdStr}`)
       .on(
         "postgres_changes",
         {
@@ -230,7 +229,6 @@ export default function SessionFlowPage() {
         },
         payload => {
           const newPhaseIndex = payload.new.phase_index;
-          console.log('new phase index found: '+ newPhaseIndex)
           if (newPhaseIndex != null) setMaxPhaseIndex(newPhaseIndex);
         },
       )
