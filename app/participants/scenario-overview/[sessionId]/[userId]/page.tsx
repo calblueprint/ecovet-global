@@ -193,6 +193,7 @@ export default function SessionFlowPage() {
     async function loadPhaseIndex() {
       if (!sessionIdStr) return;
       const phaseIdx = await fetchSessionGlobalPhaseIndex(sessionIdStr);
+      console.log('new phase index found: '+ phaseIdx)
       setMaxPhaseIndex(phaseIdx);
     }
     loadPhaseIndex();
@@ -209,6 +210,7 @@ export default function SessionFlowPage() {
         },
         payload => {
           const newPhaseIndex = payload.new.phase_index;
+          console.log('new phase index found: '+ newPhaseIndex)
           if (newPhaseIndex != null) setMaxPhaseIndex(newPhaseIndex);
         },
       )
