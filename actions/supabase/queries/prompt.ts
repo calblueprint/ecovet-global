@@ -1,17 +1,19 @@
 import { PromptType, UUID } from "@/types/schema";
 import supabase from "../client";
 
-export async function getOptionsForPrompt(prompt_id: UUID) {
+export async function fetchOptionsForPrompts(prompt_ids: UUID[]) {
+  if (prompt_ids.length === 0) return [];
+
   const { data, error } = await supabase
     .from("prompt_option")
     .select("*")
-    .eq("prompt_id", prompt_id);
+    .in("prompt_id", prompt_ids);
 
   if (error) {
     throw new Error(`Error fetching data: ${error.message}`);
   }
 
-  return data;
+  return data ?? [];
 }
 
 export async function addNewPrompt(
