@@ -36,6 +36,8 @@ export type PromptAnswer = Tables<"prompt_response">;
 export type Tag = Tables<"tag">;
 export type TemplateTag = Tables<"template_tag">;
 export type Invite = Tables<"invite">;
+export type ChatRoom = Tables<"chat_room">;
+export type ChatMessage = Tables<"chat_message">;
 export type PromptOption = Tables<"prompt_option">;
 
 /* ============================
@@ -68,6 +70,9 @@ export type ParticipantSessionWithProfile = ParticipantSession & {
     first_name: string;
     last_name: string;
   };
+  role: {
+    role_name: string;
+  } | null;
 };
 
 export type StagedOption = {
@@ -100,6 +105,7 @@ export type RoleFormInput = {
 
 export type Participant = {
   id: UUID;
+  invite_id: UUID;
   name?: string | null; // optional because database doesn't have it
   email: string | null;
   role: string | null;

@@ -1,22 +1,20 @@
 "use client";
 
-import type { Tag, Template, UUID } from "@/types/schema";
+import type { Template, UUID } from "@/types/schema";
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Pencil } from "lucide-react";
 import {
   assignTagToTemplate,
+  createTag,
   deleteTag,
   getAllTags,
   removeTagFromTemplate,
 } from "@/actions/supabase/queries/tag";
 import { fetchTemplatesWithTags } from "@/actions/supabase/queries/templates";
-import img from "@/assets/images/NewTagPlus.png";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
-import InputDropdown from "@/components/InputDropdown/InputDropdown";
-import { TagComponent } from "@/components/Tag/Tag";
-import { TagCreator } from "@/components/Tag/TagCreator";
+import { Tag } from "@/components/Tag/TagCreator";
+import { TagAutocomplete } from "@/components/TagAutoComplete/TagAutoComplete";
 import COLORS from "@/styles/colors";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
@@ -33,7 +31,13 @@ import {
   SortButton,
 } from "../styles";
 import TemplateSideBar from "./components/TemplateSidebar";
-import { AddNewTagPlus, AssociatedTags, NewTag, TemplateTag } from "./styles";
+import {
+  AssociatedTags,
+  EditIconWrapper,
+  NameColumn,
+  RowActions,
+  TemplateRow,
+} from "./styles";
 
 type TemplateWithTags = Template & {
   associated_tags: Tag[];
@@ -55,7 +59,7 @@ export default function TemplateListPage() {
   const [sortKey, setSortKey] = useState<"name" | "date">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  const [selectedTagId, setSelectedTagId] = useState<UUID | null>(null);
+  const [selectedTagIds, setSelectedTagIds] = useState<UUID[] | null>([]);
   const [openTagDropdownFor, setOpenTagDropdownFor] = useState<UUID | null>(
     null,
   );
@@ -67,8 +71,12 @@ export default function TemplateListPage() {
     if (!user_group_id) return;
 
     const load = async () => {
-      const allTemplates = (await fetchTemplatesWithTags()) || [];
-      setTemplates(allTemplates);
+      const [allTemplates, allTags] = await Promise.all([
+        fetchTemplatesWithTags(),
+        getAllTags(user_group_id),
+      ]);
+      setTemplates(allTemplates || []);
+      setAvailableTags(allTags);
     };
 
     load();
@@ -87,11 +95,13 @@ export default function TemplateListPage() {
       updated = updated.filter(t => t.accessible_to_all);
     }
 
-    if (selectedTagId) {
-      updated = updated.filter(t =>
-        t.associated_tags.some(tag => tag.tag_id === selectedTagId),
-      );
-    }
+    if (selectedTagIds) {
+      if (selectedTagIds.length > 0) {
+        updated = updated.filter(t =>
+          t.associated_tags.some(tag => selectedTagIds.includes(tag.tag_id)),
+        );
+      }
+    } // update to multiselect
 
     updated = updated.filter(t =>
       t.template_name?.toLowerCase().includes(searchInput.trim().toLowerCase()),
@@ -113,7 +123,7 @@ export default function TemplateListPage() {
   }, [
     templates,
     filterMode,
-    selectedTagId,
+    selectedTagIds,
     searchInput,
     sortKey,
     sortOrder,
@@ -160,7 +170,9 @@ export default function TemplateListPage() {
         })),
       );
 
-      setSelectedTagId(prev => (prev === tag_id ? null : prev));
+      setSelectedTagIds(prev =>
+        prev ? prev.filter(tag => tag !== tag_id) : null,
+      );
     }
 
     return true;
@@ -173,19 +185,103 @@ export default function TemplateListPage() {
     }
 
     const allTags = await getAllTags(user_group_id);
-    const template = templates.find(t => t.template_id === template_id);
-    if (!template) return;
 
-    const assigned = new Set(template.associated_tags.map(t => t.tag_id));
-    setAvailableTags(allTags.filter(t => !assigned.has(t.tag_id)));
+    setAvailableTags(allTags);
     setOpenTagDropdownFor(template_id);
   }
 
-  async function handleSelectTag(template_id: UUID, tag_id: UUID) {
+  async function handleCreateAndAssign(template_id: UUID, name: string) {
+    const newTagId = await createTag({
+      name,
+      user_group_id,
+      color: "yellow",
+      number: 0,
+    });
+
+    if (newTagId) {
+      const newlyCreatedTag: Tag = {
+        tag_id: newTagId as UUID,
+        name: name ?? "No Name",
+        color: "yellow",
+        number: 0,
+        user_group_id: user_group_id,
+      };
+
+      setAvailableTags(prev => [...prev, newlyCreatedTag]);
+
+      const currentTags =
+        templates.find(t => t.template_id === template_id)?.associated_tags ||
+        [];
+      const nextIds = new Set([
+        ...currentTags.map(t => t.tag_id),
+        newlyCreatedTag.tag_id,
+      ]);
+
+      await handleMultiTagChange(template_id, nextIds);
+      setTagVersion(v => v + 1);
+    }
+  }
+
+  async function handleClearAllTags(template_id: UUID) {
+    const currentTemplate = templates.find(t => t.template_id === template_id);
+    if (!currentTemplate) return;
+
+    // remove from database
+    const deletePromises = currentTemplate.associated_tags.map(tag =>
+      removeTagFromTemplate(template_id, tag.tag_id),
+    );
+    await Promise.all(deletePromises);
+
+    // update local state
+    setTemplates(prev =>
+      prev.map(t =>
+        t.template_id === template_id ? { ...t, associated_tags: [] } : t,
+      ),
+    );
+  }
+
+  async function handleMultiTagChange(
+    template_id: UUID,
+    nextTagIds: Set<UUID>,
+  ) {
+    const currentTemplate = templates.find(t => t.template_id === template_id);
+    if (!currentTemplate) return;
+
+    const currentTagIds = new Set(
+      currentTemplate.associated_tags.map(tag => tag.tag_id),
+    );
+
+    for (const id of nextTagIds) {
+      if (!currentTagIds.has(id)) await assignTagToTemplate(template_id, id);
+    }
+    for (const id of currentTagIds) {
+      if (!nextTagIds.has(id)) await removeTagFromTemplate(template_id, id);
+    }
+
+    const updatedAssociatedTags = availableTags.filter((tag: Tag) =>
+      nextTagIds.has(tag.tag_id),
+    );
+
+    setTemplates(prev =>
+      prev.map(t =>
+        t.template_id === template_id
+          ? { ...t, associated_tags: updatedAssociatedTags }
+          : t,
+      ),
+    );
+  }
+
+  // NO LONGER USING, REPLACED WITH handleMultiTagChange()
+  async function handleSelectTag(
+    template_id: UUID,
+    tag_id: UUID,
+    passedTag?: Tag,
+  ) {
     const success = await assignTagToTemplate(template_id, tag_id);
     if (!success) return;
 
-    const tag = availableTags.find(t => t.tag_id === tag_id);
+    const tag = passedTag || availableTags.find(t => t.tag_id === tag_id);
+
     if (!tag) return;
 
     setTemplates(prev =>
@@ -210,21 +306,18 @@ export default function TemplateListPage() {
           <TemplateSideBar
             filterMode={filterMode}
             setFilterMode={setFilterMode}
-          />
-          <TagCreator
+            onDeleteConfirmed={deleteTagComponent}
             user_group_id={user_group_id}
-            selectedTagId={selectedTagId}
-            onTagClick={(id: UUID) =>
-              setSelectedTagId(prev => (prev === id ? null : id))
-            }
+            selectedTagIds={selectedTagIds}
             onTagRenamed={() => setTagVersion(v => v + 1)}
-            onDeleteTag={deleteTagComponent}
           />
         </SideNavContainer>
 
         <ContentWrapper>
           <PageDiv>
             <MainDiv>
+              <Heading3>Browse templates</Heading3>
+
               <SearchBarStyled>
                 <SearchInput
                   value={searchInput}
@@ -233,8 +326,34 @@ export default function TemplateListPage() {
                 />
               </SearchBarStyled>
 
-              <Heading3>Browse templates</Heading3>
-
+              <TagAutocomplete
+                availableTags={availableTags}
+                selectedTagIds={new Set(selectedTagIds)}
+                onSelect={(id: UUID) =>
+                  setSelectedTagIds(prev => {
+                    if (prev === null) return [id];
+                    if (prev.includes(id)) return prev;
+                    return [...prev, id];
+                  })
+                }
+                onRemove={tagId =>
+                  setSelectedTagIds(prev =>
+                    prev !== null ? prev.filter(id => id !== tagId) : null,
+                  )
+                }
+                onCreate={name =>
+                  setAvailableTags(prev => [
+                    ...prev,
+                    {
+                      name,
+                      color: "tagYellow",
+                      tag_id: "67",
+                      user_group_id: "6767",
+                      number: 67,
+                    },
+                  ])
+                }
+              />
               <GeneralTitle>
                 <span>
                   Name{" "}
@@ -250,7 +369,6 @@ export default function TemplateListPage() {
                     )}
                   </SortButton>
                 </span>
-                <span>Tags</span>
                 <span>
                   Created{" "}
                   <SortButton onClick={() => toggleSort("date")}>
@@ -265,52 +383,22 @@ export default function TemplateListPage() {
                     )}
                   </SortButton>
                 </span>
+                <span>Tags</span>
               </GeneralTitle>
 
               {filteredTemplates.map(t => (
-                <GeneralList key={t.template_id}>
-                  <div
-                    onClick={() => router.replace(`/sessions/${t.template_id}`)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    {t.template_name}
-                  </div>
-
-                  <AssociatedTags>
-                    {t.associated_tags.map(tag => (
-                      <TemplateTag key={tag.tag_id}>
-                        <TagComponent
-                          name={tag.name}
-                          color={tag.color as ColorKey}
-                          tag_id={tag.tag_id}
-                          sidebar={false}
-                          onDelete={(id: UUID) =>
-                            deleteTagComponent(id, t.template_id)
-                          }
-                        />
-                      </TemplateTag>
-                    ))}
-
-                    {openTagDropdownFor === t.template_id && (
-                      <InputDropdown
-                        label="Select tag"
-                        options={
-                          new Map(
-                            availableTags.map(tag => [tag.tag_id, tag.name]),
-                          )
-                        }
-                        onChange={value =>
-                          value && handleSelectTag(t.template_id, value as UUID)
-                        }
-                      />
-                    )}
-                    <NewTag onClick={() => addNewTag(t.template_id)}>
-                      <AddNewTagPlus>
-                        <Image src={img} alt="Add tag" />
-                      </AddNewTagPlus>
-                      New Tag
-                    </NewTag>
-                  </AssociatedTags>
+                <TemplateRow key={t.template_id}>
+                  <NameColumn>
+                    <span
+                      onClick={() =>
+                        router.replace(
+                          `/facilitator/exercises/start?templateId=${t.template_id}`,
+                        )
+                      }
+                    >
+                      {t.template_name}
+                    </span>
+                  </NameColumn>
 
                   <div>
                     {new Date(t.timestamp).toLocaleDateString("en-GB", {
@@ -319,7 +407,51 @@ export default function TemplateListPage() {
                       year: "numeric",
                     })}
                   </div>
-                </GeneralList>
+
+                  <AssociatedTags>
+                    <TagAutocomplete
+                      availableTags={availableTags}
+                      selectedTagIds={
+                        new Set(t.associated_tags.map(tag => tag.tag_id))
+                      }
+                      onSelect={tagId =>
+                        handleMultiTagChange(
+                          t.template_id,
+                          new Set([
+                            ...t.associated_tags.map(tag => tag.tag_id),
+                            tagId,
+                          ]),
+                        )
+                      }
+                      onRemove={tagId =>
+                        handleMultiTagChange(
+                          t.template_id,
+                          new Set(
+                            t.associated_tags
+                              .map(tag => tag.tag_id)
+                              .filter(id => id !== tagId),
+                          ),
+                        )
+                      }
+                      onCreate={name =>
+                        handleCreateAndAssign(t.template_id, name)
+                      }
+                    />
+                  </AssociatedTags>
+
+                  <RowActions className="row-actions">
+                    <EditIconWrapper
+                      onClick={e => {
+                        e.stopPropagation();
+                        router.push(
+                          `/facilitator/edit-template/${t.template_id}`,
+                        );
+                      }}
+                    >
+                      <Pencil size={16} />
+                    </EditIconWrapper>
+                  </RowActions>
+                </TemplateRow>
               ))}
             </MainDiv>
           </PageDiv>

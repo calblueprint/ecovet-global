@@ -14,6 +14,77 @@ export type Database = {
   };
   public: {
     Tables: {
+      chat_message: {
+        Row: {
+          created_at: string;
+          id: string;
+          message: string;
+          room_id: string | null;
+          sender: string | null;
+          sender_name: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          message: string;
+          room_id?: string | null;
+          sender?: string | null;
+          sender_name?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          message?: string;
+          room_id?: string | null;
+          sender?: string | null;
+          sender_name?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "chat_message_sender_fkey";
+            columns: ["sender"];
+            isOneToOne: false;
+            referencedRelation: "profile";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      chat_room: {
+        Row: {
+          is_annoucement: boolean;
+          room_id: string;
+          session_id: string | null;
+          user_id: string;
+        };
+        Insert: {
+          is_annoucement?: boolean;
+          room_id?: string;
+          session_id?: string | null;
+          user_id?: string;
+        };
+        Update: {
+          is_annoucement?: boolean;
+          room_id?: string;
+          session_id?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "chat_rooms_session_id_fkey";
+            columns: ["session_id"];
+            isOneToOne: false;
+            referencedRelation: "session";
+            referencedColumns: ["session_id"];
+          },
+          {
+            foreignKeyName: "chat_rooms_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profile";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       invite: {
         Row: {
           email: string | null;
@@ -48,16 +119,18 @@ export type Database = {
       };
       participant_session: {
         Row: {
-          created_at: string;
+          created_at: string | null;
           is_finished: boolean;
-          phase_index: number;
-          role_id: string;
+          phase_id: string | null;
+          phase_index: number | null;
+          role_id: string | null;
           session_id: string;
           user_id: string;
         };
         Insert: {
           created_at?: string | null;
-          is_finished?: boolean | null;
+          is_finished: boolean;
+          phase_id?: string | null;
           phase_index?: number | null;
           role_id?: string | null;
           session_id: string;
@@ -65,13 +138,28 @@ export type Database = {
         };
         Update: {
           created_at?: string | null;
-          is_finished?: boolean | null;
+          is_finished?: boolean;
+          phase_id?: string | null;
           phase_index?: number | null;
           role_id?: string | null;
           session_id?: string;
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "fk_participant_profile";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profile";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "participant_session_phase_id_fkey";
+            columns: ["phase_id"];
+            isOneToOne: false;
+            referencedRelation: "phase";
+            referencedColumns: ["phase_id"];
+          },
           {
             foreignKeyName: "participant_session_role_id_fkey";
             columns: ["role_id"];
@@ -97,40 +185,27 @@ export type Database = {
       };
       phase: {
         Row: {
-          is_finished: boolean | null;
           phase_description: string | null;
           phase_id: string;
           phase_name: string | null;
           phase_number: number;
-          session_id: string;
-          template_id: string;
+          template_id: string | null;
         };
         Insert: {
-          is_finished?: boolean | null;
           phase_description?: string | null;
           phase_id?: string;
           phase_name?: string | null;
-          phase_number?: number | null;
-          session_id?: string | null;
+          phase_number: number;
           template_id?: string | null;
         };
         Update: {
-          is_finished?: boolean | null;
           phase_description?: string | null;
           phase_id?: string;
           phase_name?: string | null;
-          phase_number?: number | null;
-          session_id?: string | null;
+          phase_number?: number;
           template_id?: string | null;
         };
         Relationships: [
-          {
-            foreignKeyName: "phase_session_id_fkey";
-            columns: ["session_id"];
-            isOneToOne: false;
-            referencedRelation: "session";
-            referencedColumns: ["session_id"];
-          },
           {
             foreignKeyName: "phase_template_id_fkey";
             columns: ["template_id"];
@@ -146,12 +221,8 @@ export type Database = {
           email: string | null;
           first_name: string | null;
           id: string;
-          is_finished: string | null;
           last_name: string | null;
           org_role: string | null;
-          phase_id: string | null;
-          role_id: string | null;
-          session_id: string | null;
           user_group_id: string | null;
           user_type: string | null;
         };
@@ -160,12 +231,8 @@ export type Database = {
           email?: string | null;
           first_name?: string | null;
           id?: string;
-          is_finished?: string | null;
           last_name?: string | null;
           org_role?: string | null;
-          phase_id?: string | null;
-          role_id?: string | null;
-          session_id?: string | null;
           user_group_id?: string | null;
           user_type?: string | null;
         };
@@ -174,37 +241,12 @@ export type Database = {
           email?: string | null;
           first_name?: string | null;
           id?: string;
-          is_finished?: string | null;
           last_name?: string | null;
           org_role?: string | null;
-          phase_id?: string | null;
-          role_id?: string | null;
-          session_id?: string | null;
           user_group_id?: string | null;
           user_type?: string | null;
         };
         Relationships: [
-          {
-            foreignKeyName: "profile_phase_id_fkey";
-            columns: ["phase_id"];
-            isOneToOne: false;
-            referencedRelation: "phase";
-            referencedColumns: ["phase_id"];
-          },
-          {
-            foreignKeyName: "profile_role_id_fkey";
-            columns: ["role_id"];
-            isOneToOne: false;
-            referencedRelation: "role";
-            referencedColumns: ["role_id"];
-          },
-          {
-            foreignKeyName: "profile_session_id_fkey";
-            columns: ["session_id"];
-            isOneToOne: false;
-            referencedRelation: "session";
-            referencedColumns: ["session_id"];
-          },
           {
             foreignKeyName: "profile_user_group_id_fkey";
             columns: ["user_group_id"];
@@ -216,25 +258,25 @@ export type Database = {
       };
       prompt: {
         Row: {
+          prompt_follow_ups: string | null;
           prompt_id: string;
           prompt_text: string | null;
           prompt_type: Database["public"]["Enums"]["prompt_type"] | null;
           role_phase_id: string | null;
-          user_id: string | null;
         };
         Insert: {
+          prompt_follow_ups?: string | null;
           prompt_id?: string;
           prompt_text?: string | null;
           prompt_type?: Database["public"]["Enums"]["prompt_type"] | null;
           role_phase_id?: string | null;
-          user_id?: string | null;
         };
         Update: {
+          prompt_follow_ups?: string | null;
           prompt_id?: string;
           prompt_text?: string | null;
           prompt_type?: Database["public"]["Enums"]["prompt_type"] | null;
           role_phase_id?: string | null;
-          user_id?: string | null;
         };
         Relationships: [
           {
@@ -243,13 +285,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "role_phase";
             referencedColumns: ["role_phase_id"];
-          },
-          {
-            foreignKeyName: "prompt_user_id_fkey1";
-            columns: ["user_id"];
-            isOneToOne: false;
-            referencedRelation: "profile";
-            referencedColumns: ["id"];
           },
         ];
       };
@@ -282,26 +317,29 @@ export type Database = {
       prompt_response: {
         Row: {
           prompt_answer: string | null;
-          prompt_id: string | null;
+          prompt_id: string;
           prompt_option_id: string | null;
           prompt_response_id: string;
-          session_id: string | null;
+          role_phase_id: string;
+          session_id: string;
           user_id: string;
         };
         Insert: {
           prompt_answer?: string | null;
-          prompt_id?: string | null;
+          prompt_id: string;
           prompt_option_id?: string | null;
           prompt_response_id: string;
-          session_id?: string | null;
+          role_phase_id: string;
+          session_id: string;
           user_id?: string;
         };
         Update: {
           prompt_answer?: string | null;
-          prompt_id?: string | null;
+          prompt_id?: string;
           prompt_option_id?: string | null;
           prompt_response_id?: string;
-          session_id?: string | null;
+          role_phase_id?: string;
+          session_id?: string;
           user_id?: string;
         };
         Relationships: [
@@ -320,11 +358,25 @@ export type Database = {
             referencedColumns: ["option_id"];
           },
           {
+            foreignKeyName: "prompt_response_role_phase_id_fkey";
+            columns: ["role_phase_id"];
+            isOneToOne: false;
+            referencedRelation: "role_phase";
+            referencedColumns: ["role_phase_id"];
+          },
+          {
             foreignKeyName: "prompt_response_session_id_fkey";
             columns: ["session_id"];
             isOneToOne: false;
             referencedRelation: "session";
             referencedColumns: ["session_id"];
+          },
+          {
+            foreignKeyName: "prompt_response_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profile";
+            referencedColumns: ["id"];
           },
         ];
       };
@@ -349,7 +401,7 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: "roles_template_id_fkey";
+            foreignKeyName: "role_template_id_fkey";
             columns: ["template_id"];
             isOneToOne: false;
             referencedRelation: "template";
@@ -359,21 +411,21 @@ export type Database = {
       };
       role_phase: {
         Row: {
-          description: string | null;
           phase_id: string;
           role_id: string;
+          role_phase_description: string | null;
           role_phase_id: string;
         };
         Insert: {
-          description?: string | null;
           phase_id: string;
           role_id: string;
+          role_phase_description?: string | null;
           role_phase_id?: string;
         };
         Update: {
-          description?: string | null;
           phase_id?: string;
           role_id?: string;
+          role_phase_description?: string | null;
           role_phase_id?: string;
         };
         Relationships: [
@@ -396,19 +448,19 @@ export type Database = {
       session: {
         Row: {
           after_action_report_id: string | null;
+          force_advance: boolean;
           is_async: boolean;
           is_finished: boolean | null;
-          phase_id: string | null;
           session_id: string;
           session_name: string | null;
-          template_id: string;
-          user_group_id: string;
+          template_id: string | null;
+          user_group_id: string | null;
         };
         Insert: {
           after_action_report_id?: string | null;
+          force_advance?: boolean;
           is_async?: boolean;
           is_finished?: boolean | null;
-          phase_id?: string | null;
           session_id?: string;
           session_name?: string | null;
           template_id?: string | null;
@@ -416,22 +468,15 @@ export type Database = {
         };
         Update: {
           after_action_report_id?: string | null;
+          force_advance?: boolean;
           is_async?: boolean;
           is_finished?: boolean | null;
-          phase_id?: string | null;
           session_id?: string;
           session_name?: string | null;
           template_id?: string | null;
           user_group_id?: string | null;
         };
         Relationships: [
-          {
-            foreignKeyName: "session_phase_id_fkey";
-            columns: ["phase_id"];
-            isOneToOne: false;
-            referencedRelation: "phase";
-            referencedColumns: ["phase_id"];
-          },
           {
             foreignKeyName: "session_template_id_fkey";
             columns: ["template_id"];
@@ -458,14 +503,14 @@ export type Database = {
         };
         Insert: {
           color?: string | null;
-          name?: string | null;
+          name: string;
           number?: number | null;
           tag_id?: string;
           user_group_id: string;
         };
         Update: {
           color?: string | null;
-          name?: string | null;
+          name?: string;
           number?: number | null;
           tag_id?: string;
           user_group_id?: string;
@@ -500,7 +545,7 @@ export type Database = {
           summary?: string | null;
           template_id?: string;
           template_name?: string | null;
-          timestamp?: string | null;
+          timestamp?: string;
           user_group_id?: string | null;
         };
         Update: {
@@ -511,7 +556,7 @@ export type Database = {
           summary?: string | null;
           template_id?: string;
           template_name?: string | null;
-          timestamp?: string | null;
+          timestamp?: string;
           user_group_id?: string | null;
         };
         Relationships: [
