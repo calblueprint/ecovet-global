@@ -2,87 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import styled from "styled-components";
 import { useProfile } from "@/utils/ProfileProvider";
-import { Button, Main } from "../../styles";
-import COLORS from "@/styles/colors";
-import { Sans } from "@/styles/fonts";
+import { Main } from "../../styles";
+import { Button, Container, DownloadBox, DownloadButton, FileName, FileSize, HomeLink, Section, TextArea, Title } from "./styles"
 import { useParams } from "next/navigation";
-
-const Title = styled.h1`
-  font-family: ${Sans.style.fontFamily};
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: ${COLORS.black100};
-  margin-bottom: 0.5rem;
-  text-align: center;
-`;
-
-const SubHeader = styled.h2`
-  font-family: ${Sans.style.fontFamily};
-  font-size: 1rem;
-  font-weight: 500;
-  color: ${COLORS.black70};
-  margin-bottom: 0.75rem;
-`;
-
-const Section = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  width: 20rem;
-`;
-
-const TextArea = styled.textarea`
-  width: 100%;
-  min-height: 120px;
-  border: 1px solid ${COLORS.black20};
-  border-radius: 0.25rem;
-  padding: 0.75rem;
-  font-family: ${Sans.style.fontFamily};
-  font-size: 0.875rem;
-  resize: vertical;
-  outline: none;
-  &:focus {
-    border-color: ${COLORS.darkElectricBlue};
-  }
-`;
-
-const DownloadBox = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1rem;
-  border: 1px solid ${COLORS.black20};
-  border-radius: 0.25rem;
-  background: ${COLORS.oat_light};
-  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
-  opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
-  width: 100%;
-  &:hover:not(:disabled) {
-    background: ${COLORS.oat_medium};
-  }
-`;
-
-const FileName = styled.span`
-  font-family: ${Sans.style.fontFamily};
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: ${COLORS.black100};
-`;
-
-const FileSize = styled.span`
-  font-family: ${Sans.style.fontFamily};
-  font-size: 0.75rem;
-  color: ${COLORS.black40};
-`;
-
-const Divider = styled.div`
-  height: 1px;
-  background: ${COLORS.black20};
-  width: 20rem;
-  margin: 0.5rem 0;
-`;
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -92,7 +15,9 @@ function formatBytes(bytes: number): string {
 
 export default function SessionFinish() {
   const { profile } = useProfile();
-  const isFacilitator = profile?.user_type === "Facilitator";
+  
+  // const isFacilitator = profile?.user_type === "Facilitator";
+  const isFacilitator = true;
 
   const { sessionId } = useParams() as { sessionId: string };
 
@@ -101,7 +26,32 @@ export default function SessionFinish() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfSize, setPdfSize] = useState<number | null>(null);
 
-  async function generateReport(commentsText: string | null) {
+  async function fetchOrGenerateReport() {
+    if (!sessionId) return;
+    setIsGenerating(true);
+    setPdfUrl(null);
+    setPdfSize(null);
+
+    try {
+      const res = await fetch(`/api/reports/session/${sessionId}`);
+
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        console.error("Report API error:", res.status, errBody);
+        throw new Error(errBody.error ?? "Failed to fetch report");
+      }
+
+      const data = await res.json();
+      setPdfUrl(data.url);
+      setPdfSize(data.sizeBytes ?? null);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
+  async function regenerateReportWithComments(commentsText: string | null) {
     if (!sessionId) return;
     setIsGenerating(true);
     setPdfUrl(null);
@@ -121,7 +71,8 @@ export default function SessionFinish() {
       }
 
       const data = await res.json();
-      setPdfUrl(data.url);
+      // Append cache-buster so the CDN doesn't serve the previous version
+      setPdfUrl(`${data.url}?t=${Date.now()}`);
       setPdfSize(data.sizeBytes ?? null);
     } catch (err) {
       console.error(err);
@@ -130,33 +81,38 @@ export default function SessionFinish() {
     }
   }
 
-  // Auto-generate PDF on page load
+  // Load existing report on page load, generate if none exists
   useEffect(() => {
-    generateReport(null);
+    fetchOrGenerateReport();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
   async function handleSave() {
-    await generateReport(comments.trim() || null);
+    await regenerateReportWithComments(comments.trim() || null);
   }
 
-  function handleDownload() {
+  async function handleDownload() {
     if (!pdfUrl) return;
+    const res = await fetch(pdfUrl);
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.href = pdfUrl;
+    link.href = objectUrl;
     link.download = "Exercise X.pdf";
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(objectUrl);
   }
 
   return (
     <Main>
+      <Container>
       <Title>Exercise complete.</Title>
 
       {isFacilitator && (
         <>
-          <Divider />
           <Section>
-            <SubHeader>Add reflections and comments</SubHeader>
             <TextArea
               value={comments}
               onChange={e => setComments(e.target.value)}
@@ -170,8 +126,6 @@ export default function SessionFinish() {
         </>
       )}
 
-      <Divider />
-
       <Section>
         <DownloadBox onClick={handleDownload} disabled={!pdfUrl || isGenerating}>
           <FileName>Exercise X.pdf</FileName>
@@ -179,13 +133,15 @@ export default function SessionFinish() {
             {isGenerating ? "Generating..." : pdfSize !== null ? formatBytes(pdfSize) : "—"}
           </FileSize>
         </DownloadBox>
+        <DownloadButton onClick={handleDownload} disabled={!pdfUrl || isGenerating}>
+          {isGenerating ? "Generating..." : "Download"}
+        </DownloadButton>
       </Section>
 
-      <Divider />
-
-      <Link href="/facilitator/template-list">
-        <Button>Return to Homepage</Button>
+      <Link href="/facilitator/template-list" style={{ width: "100%", textAlign: "center" }}>
+        <HomeLink as="span">Return to Homepage</HomeLink>
       </Link>
+      </Container>
     </Main>
   );
 }

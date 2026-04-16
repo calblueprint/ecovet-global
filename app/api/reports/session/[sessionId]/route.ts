@@ -25,6 +25,19 @@ export async function GET(
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 
+  // Return cached report if it already exists in storage
+  const reportFileName = `sessions/${sessionId}/report.pdf`;
+  const { data: existingFiles } = await supabase.storage
+    .from("reports")
+    .list(`sessions/${sessionId}`, { search: "report.pdf" });
+
+  if (existingFiles && existingFiles.length > 0) {
+    const { data: urlData } = supabase.storage
+      .from("reports")
+      .getPublicUrl(reportFileName);
+    return Response.json({ url: urlData.publicUrl });
+  }
+
   const { data: session, error: sessionError } = await supabase
     .from("session")
     .select(
@@ -44,7 +57,7 @@ export async function GET(
 
   const template = session.template as unknown as NestedTemplate | null;
 
-  // Phases (ordered)
+  // Phases (ordered) — soft fail to empty array
   const { data: phases, error: phasesError } = await supabase
     .from("phase")
     .select("phase_id, phase_name, phase_number, phase_description")
@@ -52,48 +65,65 @@ export async function GET(
     .order("phase_number", { ascending: true });
 
   if (phasesError) {
-    return Response.json({ error: "Failed to fetch phases" }, { status: 500 });
+    console.error("Failed to fetch phases:", phasesError.message);
   }
 
-  // Participants with profiles and roles
-  const { data: participants, error: participantsError } = await supabase
+  // Participants — soft fail to empty array, PDF will still render template structure
+  const { data: participantsRaw, error: participantsError } = await supabase
     .from("participant_session")
     .select(
       `
       user_id,
       role_id,
       is_finished,
-      profile ( first_name, last_name ),
+      profile!fk_participant_profile ( first_name, last_name ),
       role ( role_name )
     `,
     )
     .eq("session_id", sessionId);
 
-  if (participantsError || !participants?.length) {
-    return Response.json({ error: "No participants found" }, { status: 404 });
+  if (participantsError) {
+    console.error("Failed to fetch participants:", participantsError.message);
   }
 
-  // Role-phases (role × phase combos)
-  const roleIds = [
-    ...new Set(
-      participants.map(p => p.role_id).filter((id): id is string => !!id),
-    ),
-  ];
+  const participants = participantsRaw ?? [];
+
+  // Role-phases: query by phaseIds only so all template roles are included
+  // even when there are no participants
   const phaseIds = (phases ?? []).map(p => p.phase_id);
 
-  const { data: rolePhases } = await supabase
-    .from("role_phase")
-    .select("role_phase_id, role_id, phase_id")
-    .in("role_id", roleIds)
-    .in("phase_id", phaseIds);
+  const { data: rolePhases } = phaseIds.length
+    ? await supabase
+        .from("role_phase")
+        .select("role_phase_id, role_id, phase_id")
+        .in("phase_id", phaseIds)
+    : { data: [] };
+
+  // Derive all roleIds from role_phases (not from participants)
+  const roleIds = [...new Set((rolePhases ?? []).map(rp => rp.role_id))];
+
+  // Role name lookup from role table
+  const { data: rolesData } = roleIds.length
+    ? await supabase
+        .from("role")
+        .select("role_id, role_name")
+        .in("role_id", roleIds)
+    : { data: [] };
+
+  const roleNameById: Record<string, string> = {};
+  for (const r of rolesData ?? []) {
+    roleNameById[r.role_id] = r.role_name ?? "Unknown Role";
+  }
 
   // Prompts for all role-phases
   const rolePhaseIds = (rolePhases ?? []).map(rp => rp.role_phase_id);
 
-  const { data: prompts } = await supabase
-    .from("prompt")
-    .select("prompt_id, prompt_text, role_phase_id")
-    .in("role_phase_id", rolePhaseIds);
+  const { data: prompts } = rolePhaseIds.length
+    ? await supabase
+        .from("prompt")
+        .select("prompt_id, prompt_text, role_phase_id")
+        .in("role_phase_id", rolePhaseIds)
+    : { data: [] };
 
   // All responses for this session
   const { data: responses } = await supabase
@@ -149,13 +179,8 @@ export async function GET(
       // Participants who have this role
       const roleParticipants = participants.filter(p => p.role_id === roleId);
 
-      // Role name (look up from any participant with this role)
-      const roleParticipant = roleParticipants[0];
-      const role = roleParticipant?.role as unknown as NestedRole | null;
-      const roleName = role?.role_name ?? "Unknown Role";
-
       return {
-        roleName,
+        roleName: roleNameById[roleId] ?? "Unknown Role",
         prompts: phasePrompts.map(prompt => ({
           question: prompt.prompt_text ?? "",
           responses: roleParticipants.map(p => ({
@@ -206,7 +231,7 @@ export async function GET(
   }
 
   // Upload to Supabase Storage
-  const fileName = `sessions/${sessionId}/report-${Date.now()}.pdf`;
+  const fileName = `sessions/${sessionId}/report.pdf`;
 
   const { error: uploadError } = await supabase.storage
     .from("reports")
@@ -226,12 +251,6 @@ export async function GET(
   const { data: urlData } = supabase.storage
     .from("reports")
     .getPublicUrl(fileName);
-
-  // Save URL back to session row
-  await supabase
-    .from("session")
-    .update({ after_action_report_id: urlData.publicUrl })
-    .eq("session_id", sessionId);
 
   return Response.json({ url: urlData.publicUrl });
 }
@@ -268,6 +287,7 @@ export async function POST(
 
   const template = session.template as unknown as NestedTemplate | null;
 
+  // Phases (ordered) — soft fail to empty array
   const { data: phases, error: phasesError } = await supabase
     .from("phase")
     .select("phase_id, phase_name, phase_number, phase_description")
@@ -275,46 +295,67 @@ export async function POST(
     .order("phase_number", { ascending: true });
 
   if (phasesError) {
-    return Response.json({ error: "Failed to fetch phases" }, { status: 500 });
+    console.error("Failed to fetch phases:", phasesError.message);
   }
 
-  const { data: participants, error: participantsError } = await supabase
+  // Participants — soft fail to empty array, PDF will still render template structure
+  const { data: participantsRaw, error: participantsError } = await supabase
     .from("participant_session")
     .select(
       `
       user_id,
       role_id,
       is_finished,
-      profile ( first_name, last_name ),
+      profile!fk_participant_profile ( first_name, last_name ),
       role ( role_name )
     `,
     )
     .eq("session_id", sessionId);
 
-  if (participantsError || !participants?.length) {
-    return Response.json({ error: "No participants found" }, { status: 404 });
+  if (participantsError) {
+    console.error("Failed to fetch participants:", participantsError.message);
   }
 
-  const roleIds = [
-    ...new Set(
-      participants.map(p => p.role_id).filter((id): id is string => !!id),
-    ),
-  ];
+  const participants = participantsRaw ?? [];
+
+  // Role-phases: query by phaseIds only so all template roles are included
+  // even when there are no participants
   const phaseIds = (phases ?? []).map(p => p.phase_id);
 
-  const { data: rolePhases } = await supabase
-    .from("role_phase")
-    .select("role_phase_id, role_id, phase_id")
-    .in("role_id", roleIds)
-    .in("phase_id", phaseIds);
+  const { data: rolePhases } = phaseIds.length
+    ? await supabase
+        .from("role_phase")
+        .select("role_phase_id, role_id, phase_id")
+        .in("phase_id", phaseIds)
+    : { data: [] };
 
+  // Derive all roleIds from role_phases (not from participants)
+  const roleIds = [...new Set((rolePhases ?? []).map(rp => rp.role_id))];
+
+  // Role name lookup from role table
+  const { data: rolesData } = roleIds.length
+    ? await supabase
+        .from("role")
+        .select("role_id, role_name")
+        .in("role_id", roleIds)
+    : { data: [] };
+
+  const roleNameById: Record<string, string> = {};
+  for (const r of rolesData ?? []) {
+    roleNameById[r.role_id] = r.role_name ?? "Unknown Role";
+  }
+
+  // Prompts for all role-phases
   const rolePhaseIds = (rolePhases ?? []).map(rp => rp.role_phase_id);
 
-  const { data: prompts } = await supabase
-    .from("prompt")
-    .select("prompt_id, prompt_text, role_phase_id")
-    .in("role_phase_id", rolePhaseIds);
+  const { data: prompts } = rolePhaseIds.length
+    ? await supabase
+        .from("prompt")
+        .select("prompt_id, prompt_text, role_phase_id")
+        .in("role_phase_id", rolePhaseIds)
+    : { data: [] };
 
+  // All responses for this session
   const { data: responses } = await supabase
     .from("prompt_response")
     .select("user_id, prompt_id, prompt_answer")
@@ -358,12 +399,9 @@ export async function POST(
         : [];
 
       const roleParticipants = participants.filter(p => p.role_id === roleId);
-      const roleParticipant = roleParticipants[0];
-      const role = roleParticipant?.role as unknown as NestedRole | null;
-      const roleName = role?.role_name ?? "Unknown Role";
 
       return {
-        roleName,
+        roleName: roleNameById[roleId] ?? "Unknown Role",
         prompts: phasePrompts.map(prompt => ({
           question: prompt.prompt_text ?? "",
           responses: roleParticipants.map(p => ({
@@ -412,7 +450,7 @@ export async function POST(
     return Response.json({ error: "PDF generation failed" }, { status: 500 });
   }
 
-  const fileName = `sessions/${sessionId}/report-${Date.now()}.pdf`;
+  const fileName = `sessions/${sessionId}/report.pdf`;
 
   const { error: uploadError } = await supabase.storage
     .from("reports")
@@ -432,11 +470,6 @@ export async function POST(
   const { data: urlData } = supabase.storage
     .from("reports")
     .getPublicUrl(fileName);
-
-  await supabase
-    .from("session")
-    .update({ after_action_report_id: urlData.publicUrl })
-    .eq("session_id", sessionId);
 
   return Response.json({ url: urlData.publicUrl, sizeBytes: pdfBytes.length });
 }
