@@ -108,7 +108,6 @@ export default function ParticipantsPage() {
             </ParticipantsSearchWrapper>
           </ListControlsWrapper>
 
-          {/* 3. Filtered list component */}
           <ParticipantsList participants={filteredParticipants} />
         </ContentWrapper>
       </LayoutWrapper>

@@ -51,16 +51,19 @@ export type Database = {
       };
       chat_room: {
         Row: {
+          is_annoucement: boolean;
           room_id: string;
           session_id: string | null;
           user_id: string;
         };
         Insert: {
+          is_annoucement?: boolean;
           room_id?: string;
           session_id?: string | null;
           user_id?: string;
         };
         Update: {
+          is_annoucement?: boolean;
           room_id?: string;
           session_id?: string | null;
           user_id?: string;
@@ -116,17 +119,17 @@ export type Database = {
       };
       participant_session: {
         Row: {
-          created_at: string;
+          created_at: string | null;
           is_finished: boolean;
           phase_id: string | null;
-          phase_index: number;
-          role_id: string;
+          phase_index: number | null;
+          role_id: string | null;
           session_id: string;
           user_id: string;
         };
         Insert: {
           created_at?: string | null;
-          is_finished?: boolean | null;
+          is_finished: boolean;
           phase_id?: string | null;
           phase_index?: number | null;
           role_id?: string | null;
@@ -135,7 +138,7 @@ export type Database = {
         };
         Update: {
           created_at?: string | null;
-          is_finished?: boolean | null;
+          is_finished?: boolean;
           phase_id?: string | null;
           phase_index?: number | null;
           role_id?: string | null;
@@ -143,6 +146,13 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "fk_participant_profile";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profile";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "participant_session_phase_id_fkey";
             columns: ["phase_id"];
@@ -179,20 +189,20 @@ export type Database = {
           phase_id: string;
           phase_name: string | null;
           phase_number: number;
-          template_id: string;
+          template_id: string | null;
         };
         Insert: {
           phase_description?: string | null;
           phase_id?: string;
           phase_name?: string | null;
-          phase_number?: number | null;
+          phase_number: number;
           template_id?: string | null;
         };
         Update: {
           phase_description?: string | null;
           phase_id?: string;
           phase_name?: string | null;
-          phase_number?: number | null;
+          phase_number?: number;
           template_id?: string | null;
         };
         Relationships: [
@@ -248,18 +258,21 @@ export type Database = {
       };
       prompt: {
         Row: {
+          prompt_follow_ups: string | null;
           prompt_id: string;
           prompt_text: string | null;
           prompt_type: Database["public"]["Enums"]["prompt_type"] | null;
           role_phase_id: string | null;
         };
         Insert: {
+          prompt_follow_ups?: string | null;
           prompt_id?: string;
           prompt_text?: string | null;
           prompt_type?: Database["public"]["Enums"]["prompt_type"] | null;
           role_phase_id?: string | null;
         };
         Update: {
+          prompt_follow_ups?: string | null;
           prompt_id?: string;
           prompt_text?: string | null;
           prompt_type?: Database["public"]["Enums"]["prompt_type"] | null;
@@ -358,6 +371,13 @@ export type Database = {
             referencedRelation: "session";
             referencedColumns: ["session_id"];
           },
+          {
+            foreignKeyName: "prompt_response_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profile";
+            referencedColumns: ["id"];
+          },
         ];
       };
       role: {
@@ -381,7 +401,7 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: "roles_template_id_fkey";
+            foreignKeyName: "role_template_id_fkey";
             columns: ["template_id"];
             isOneToOne: false;
             referencedRelation: "template";
@@ -433,8 +453,8 @@ export type Database = {
           is_finished: boolean | null;
           session_id: string;
           session_name: string | null;
-          template_id: string;
-          user_group_id: string;
+          template_id: string | null;
+          user_group_id: string | null;
         };
         Insert: {
           after_action_report_id?: string | null;
@@ -483,14 +503,14 @@ export type Database = {
         };
         Insert: {
           color?: string | null;
-          name?: string | null;
+          name: string;
           number?: number | null;
           tag_id?: string;
           user_group_id: string;
         };
         Update: {
           color?: string | null;
-          name?: string | null;
+          name?: string;
           number?: number | null;
           tag_id?: string;
           user_group_id?: string;
@@ -525,7 +545,7 @@ export type Database = {
           summary?: string | null;
           template_id?: string;
           template_name?: string | null;
-          timestamp?: string | null;
+          timestamp?: string;
           user_group_id?: string | null;
         };
         Update: {
@@ -536,7 +556,7 @@ export type Database = {
           summary?: string | null;
           template_id?: string;
           template_name?: string | null;
-          timestamp?: string | null;
+          timestamp?: string;
           user_group_id?: string | null;
         };
         Relationships: [
