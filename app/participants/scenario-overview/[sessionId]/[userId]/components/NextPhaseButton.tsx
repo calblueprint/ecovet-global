@@ -33,7 +33,7 @@ export default function NextPhaseButton({
   currentPhaseIndex,
   onClick,
 }: NextButtonProps) {
-  const [isLoading, startTransition] = useTransition()
+  const [isLoading, startTransition] = useTransition();
   const [clicked, setClicked] = useState(false);
   const router = useRouter();
 
@@ -65,12 +65,15 @@ export default function NextPhaseButton({
       } else {
         await advancePhaseForSingleUser(userId, roleId, sessionId);
       }
-    })
+    });
   }
 
   return (
     <div>
-      <Button onClick={handleClick} disabled={!promptsCompleted || clicked || isLoading}>
+      <Button
+        onClick={handleClick}
+        disabled={!promptsCompleted || clicked || isLoading}
+      >
         {isLastPhase ? "Finish Game" : "Next"}
       </Button>
 

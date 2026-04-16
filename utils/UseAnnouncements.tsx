@@ -4,11 +4,8 @@ import { v5 as uuidv5 } from "uuid";
 import { persistChatMessage } from "@/actions/supabase/queries/chat";
 import { sessionParticipants } from "@/actions/supabase/queries/sessions";
 import { supabase } from "@/lib/supabase/client";
-import {
-  EVENT_MESSAGE_TYPE,
-  useRealtimeChat,
-} from "./UseChat";
 import { ChatMessage } from "@/types/schema";
+import { EVENT_MESSAGE_TYPE, useRealtimeChat } from "./UseChat";
 
 export type AnnouncementRoom =
   | { to: "everyone"; sessionId: string }
@@ -80,7 +77,7 @@ export function sendAnnouncement({
     message: message,
     sender: userId,
     sender_name: username,
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   };
 
   channel.send({

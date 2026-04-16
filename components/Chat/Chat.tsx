@@ -3,8 +3,8 @@ import { H2 } from "@/styles/text";
 import { UUID } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import { useRealtimeChat as useChat } from "@/utils/UseChat";
-import ChatUsers from "./ChatUsers";
 import ChatMessage from "./ChatMessageBubble";
+import ChatUsers from "./ChatUsers";
 import { ChatMessageContainer } from "./styles";
 import { TimeSeparator } from "./TimeSeparator";
 
@@ -22,21 +22,26 @@ export default function Chat({ roomId }: { roomId: UUID }) {
   const shouldShowTime = (index: number) => {
     if (index === 0) return true;
 
-    const prevTime = new Date(chatMessages[index - 1].created_at)
-    const thisTime = new Date(chatMessages[index].created_at)
+    const prevTime = new Date(chatMessages[index - 1].created_at);
+    const thisTime = new Date(chatMessages[index].created_at);
 
     return thisTime.getTime() - prevTime.getTime() >= ONE_HOUR_MS;
-  }
+  };
 
   return (
     <div>
       <H2>Chat Room: {roomId}</H2>
       {loading && <p>Loading chat...</p>}
       <ChatMessageContainer>
-        {chatMessages.map((chatMessage , i) => (
+        {chatMessages.map((chatMessage, i) => (
           <>
-            {shouldShowTime(i) && <TimeSeparator date={new Date(chatMessage.created_at)} />}
-            <ChatMessage chatMessage={chatMessage} fromUser={chatMessage.sender === userId} />
+            {shouldShowTime(i) && (
+              <TimeSeparator date={new Date(chatMessage.created_at)} />
+            )}
+            <ChatMessage
+              chatMessage={chatMessage}
+              fromUser={chatMessage.sender === userId}
+            />
           </>
         ))}
       </ChatMessageContainer>

@@ -28,7 +28,7 @@ export default function PrevPhaseButton({
   isFirstPhase,
   onClick,
 }: PrevButtonProps) {
-  const [isLoading, startTransition] = useTransition()
+  const [isLoading, startTransition] = useTransition();
 
   function handleClick() {
     startTransition(async () => {
@@ -39,7 +39,7 @@ export default function PrevPhaseButton({
       if (!isFirstPhase) {
         await backPhaseForSingleUser(userId, roleId, sessionId);
       }
-    })
+    });
   }
 
   return (

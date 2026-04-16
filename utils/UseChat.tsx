@@ -72,7 +72,7 @@ export function useRealtimeChat({
         message: message,
         sender: userId,
         sender_name: username,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       };
 
       setChatMessages(current => [...current, chatMessage]);

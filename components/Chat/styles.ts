@@ -1,39 +1,42 @@
+import { FaCircle } from "react-icons/fa6";
 import Image from "next/image";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
-import { FaCircle } from "react-icons/fa6";
 import { Sans } from "@/styles/fonts";
 import { B2, Caption } from "@/styles/text";
 
 export const MessageContent = styled(B2)`
-color: ${COLORS.black70};
-`
+  color: ${COLORS.black70};
+`;
 
-export const MessageContentBubble = styled.div<{fromUser: boolean}>`
-display: flex;
-padding: 0.4375rem 0.75rem;
-flex-direction: column;
-justify-content: center;
-align-items: flex-start;
-gap: 0.625rem;
-border-radius: 0.5rem;
-background: ${({fromUser}) => fromUser ? COLORS.lightEletricBlue : COLORS.oat_medium}`
+export const MessageContentBubble = styled.div<{ fromUser: boolean }>`
+  display: flex;
+  padding: 0.4375rem 0.75rem;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0.625rem;
+  border-radius: 0.5rem;
+  background: ${({ fromUser }) =>
+    fromUser ? COLORS.lightEletricBlue : COLORS.oat_medium};
+`;
 
-export const NameMessageContentContainer = styled.div<{fromUser: boolean}>`
-display: flex;
-flex-direction: column;
-align-items: ${({fromUser}) => fromUser ? 'flex-end' : 'flex-start'};
-gap: 0.5rem;
-align-self: stretch;`
+export const NameMessageContentContainer = styled.div<{ fromUser: boolean }>`
+  display: flex;
+  flex-direction: column;
+  align-items: ${({ fromUser }) => (fromUser ? "flex-end" : "flex-start")};
+  gap: 0.5rem;
+  align-self: stretch;
+`;
 
 export const NameContent = styled(Caption)`
-display: flex;
-padding: 0 0.5rem;
-justify-content: center;
-align-items: center;
-gap: 0.25rem;
-color: ${COLORS.black70};
-`
+  display: flex;
+  padding: 0 0.5rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+  color: ${COLORS.black70};
+`;
 
 export const NameRoleSeparator = styled.div`
   width: 2px;
@@ -46,38 +49,41 @@ export const NameRoleSeparator = styled.div`
 `;
 
 export const FullMessageContainer = styled.div`
-display: flex;
-flex-direction: row;
-align-items: center;
-gap: 0.5rem;
-align-self: stretch;`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  align-self: stretch;
+`;
 
-export const ProfileColor = styled.div<{color: string}>`
-width: 1rem;
-height: 1rem;
-aspect-ratio: 1/1;
-border-radius: 0.25rem;
-background: ${({color}) => color};`
+export const ProfileColor = styled.div<{ color: string }>`
+  width: 1rem;
+  height: 1rem;
+  aspect-ratio: 1/1;
+  border-radius: 0.25rem;
+  background: ${({ color }) => color};
+`;
 
 export const ChatMessageContainer = styled.div`
-display: flex;
-flex-direction: column;
-align-items: flex-start;
-gap: 0.75rem;
-align-self: stretch;`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  align-self: stretch;
+`;
 
 export const TimeSeparatorBold = styled(Caption)`
-color: ${COLORS.black70};
-`
+  color: ${COLORS.black70};
+`;
 
 export const TimeSeparatorNormal = styled(Caption)`
-color: ${COLORS.black20};
-`
+  color: ${COLORS.black20};
+`;
 
 export const TimeSeparatorContainer = styled.div`
-display: flex;
-justify-content: center;
-align-items: flex-start;
-gap: 0.25rem;
-align-self: stretch;
-`
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0.25rem;
+  align-self: stretch;
+`;
