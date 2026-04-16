@@ -1,7 +1,7 @@
 "use client";
 
 import type { UUID } from "@/types/schema";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   advancePhaseForSingleUser,
@@ -33,6 +33,7 @@ export default function NextPhaseButton({
   currentPhaseIndex,
   onClick,
 }: NextButtonProps) {
+  const [isLoading, startTransition] = useTransition()
   const [clicked, setClicked] = useState(false);
   const router = useRouter();
 
@@ -40,32 +41,36 @@ export default function NextPhaseButton({
     setClicked(false);
   }, [currentPhaseIndex]);
 
-  async function handleClick() {
-    await onClick();
+  function handleClick() {
+    startTransition(async () => {
+      if (isLoading) return;
 
-    if (isLastPhase) {
-      await setIsFinished(userId, roleId, sessionId);
-      router.push("/sessions/session-finish");
-      return;
-    }
+      await onClick();
 
-    if (isForceAdvance && currentPhaseIndex >= forceAdvanceMaxPhaseIndex) {
-      setClicked(true);
-
-      try {
+      if (isLastPhase) {
         await setIsFinished(userId, roleId, sessionId);
-      } catch (err) {
-        console.error(err);
-        setClicked(false);
+        router.push("/sessions/session-finish");
+        return;
       }
-    } else {
-      await advancePhaseForSingleUser(userId, roleId, sessionId);
-    }
+
+      if (isForceAdvance && currentPhaseIndex >= forceAdvanceMaxPhaseIndex) {
+        setClicked(true);
+
+        try {
+          await setIsFinished(userId, roleId, sessionId);
+        } catch (err) {
+          console.error(err);
+          setClicked(false);
+        }
+      } else {
+        await advancePhaseForSingleUser(userId, roleId, sessionId);
+      }
+    })
   }
 
   return (
     <div>
-      <Button onClick={handleClick} disabled={!promptsCompleted || clicked}>
+      <Button onClick={handleClick} disabled={!promptsCompleted || clicked || isLoading}>
         {isLastPhase ? "Finish Game" : "Next"}
       </Button>
 

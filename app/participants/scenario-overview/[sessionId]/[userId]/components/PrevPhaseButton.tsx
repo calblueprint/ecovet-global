@@ -1,7 +1,7 @@
 "use client";
 
 import type { UUID } from "@/types/schema";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   advancePhaseForSingleUser,
@@ -28,18 +28,23 @@ export default function PrevPhaseButton({
   isFirstPhase,
   onClick,
 }: PrevButtonProps) {
-  async function handleClick() {
-    if (isOnOverview) return;
-    await onClick();
+  const [isLoading, startTransition] = useTransition()
 
-    if (!isFirstPhase) {
-      await backPhaseForSingleUser(userId, roleId, sessionId);
-    }
+  function handleClick() {
+    startTransition(async () => {
+      if (isLoading) return;
+      if (isOnOverview) return;
+      await onClick();
+
+      if (!isFirstPhase) {
+        await backPhaseForSingleUser(userId, roleId, sessionId);
+      }
+    })
   }
 
   return (
     <Clickable>
-      <Button onClick={handleClick} disabled={isOnOverview}>
+      <Button onClick={handleClick} disabled={isOnOverview || isLoading}>
         Back
       </Button>
     </Clickable>
