@@ -1,11 +1,22 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useProfile } from "@/utils/ProfileProvider";
 import { Main } from "../../styles";
-import { Button, Container, DownloadBox, DownloadButton, FileName, FileSize, HomeLink, Section, TextArea, Title } from "./styles"
-import { useParams } from "next/navigation";
+import {
+  Button,
+  Container,
+  DownloadBox,
+  DownloadButton,
+  FileName,
+  FileSize,
+  HomeLink,
+  Section,
+  TextArea,
+  Title,
+} from "./styles";
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -15,7 +26,7 @@ function formatBytes(bytes: number): string {
 
 export default function SessionFinish() {
   const { profile } = useProfile();
-  
+
   // const isFacilitator = profile?.user_type === "Facilitator";
   const isFacilitator = true;
 
@@ -108,39 +119,52 @@ export default function SessionFinish() {
   return (
     <Main>
       <Container>
-      <Title>Exercise complete.</Title>
+        <Title>Exercise complete.</Title>
 
-      {isFacilitator && (
-        <>
-          <Section>
-            <TextArea
-              value={comments}
-              onChange={e => setComments(e.target.value)}
-              placeholder="Enter your comments here..."
-              disabled={isGenerating}
-            />
-            <Button onClick={handleSave} disabled={isGenerating}>
-              {isGenerating ? "Saving..." : "Save comments to Report"}
-            </Button>
-          </Section>
-        </>
-      )}
+        {isFacilitator && (
+          <>
+            <Section>
+              <TextArea
+                value={comments}
+                onChange={e => setComments(e.target.value)}
+                placeholder="Enter your comments here..."
+                disabled={isGenerating}
+              />
+              <Button onClick={handleSave} disabled={isGenerating}>
+                {isGenerating ? "Saving..." : "Save comments to Report"}
+              </Button>
+            </Section>
+          </>
+        )}
 
-      <Section>
-        <DownloadBox onClick={handleDownload} disabled={!pdfUrl || isGenerating}>
-          <FileName>Exercise X.pdf</FileName>
-          <FileSize>
-            {isGenerating ? "Generating..." : pdfSize !== null ? formatBytes(pdfSize) : "—"}
-          </FileSize>
-        </DownloadBox>
-        <DownloadButton onClick={handleDownload} disabled={!pdfUrl || isGenerating}>
-          {isGenerating ? "Generating..." : "Download"}
-        </DownloadButton>
-      </Section>
+        <Section>
+          <DownloadBox
+            onClick={handleDownload}
+            disabled={!pdfUrl || isGenerating}
+          >
+            <FileName>Exercise X.pdf</FileName>
+            <FileSize>
+              {isGenerating
+                ? "Generating..."
+                : pdfSize !== null
+                  ? formatBytes(pdfSize)
+                  : "—"}
+            </FileSize>
+          </DownloadBox>
+          <DownloadButton
+            onClick={handleDownload}
+            disabled={!pdfUrl || isGenerating}
+          >
+            {isGenerating ? "Generating..." : "Download"}
+          </DownloadButton>
+        </Section>
 
-      <Link href="/facilitator/template-list" style={{ width: "100%", textAlign: "center" }}>
-        <HomeLink as="span">Return to Homepage</HomeLink>
-      </Link>
+        <Link
+          href="/facilitator/template-list"
+          style={{ width: "100%", textAlign: "center" }}
+        >
+          <HomeLink as="span">Return to Homepage</HomeLink>
+        </Link>
       </Container>
     </Main>
   );

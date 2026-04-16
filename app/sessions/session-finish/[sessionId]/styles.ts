@@ -1,7 +1,6 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
-
 import { Button as BaseButton, Container as BaseContainer } from "../../styles";
 
 export const Container = styled(BaseContainer)`
