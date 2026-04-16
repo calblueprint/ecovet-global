@@ -178,9 +178,7 @@ export default function FacilitatorSessionView() {
             ),
           );
 
-          if (!isForceAdvance) {
-            setCurrentPhase(updated.phase_index ?? 0);
-          }
+          setCurrentPhase(phase => Math.max(phase, updated.phase_index ?? 0));
         },
       )
       .subscribe();
