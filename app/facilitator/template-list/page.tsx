@@ -19,6 +19,7 @@ import COLORS from "@/styles/colors";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
   ContentWrapper,
+  FilterPlusSearch,
   GeneralList,
   GeneralTitle,
   Heading3,
@@ -32,6 +33,7 @@ import {
 } from "../styles";
 import TemplateSideBar from "./components/TemplateSidebar";
 import { AssociatedTags } from "./styles";
+import { FilterAutocomplete } from "@/components/TagAutoComplete/FilterAutoComplete";
 
 type TemplateWithTags = Template & {
   associated_tags: Tag[];
@@ -314,20 +316,24 @@ export default function TemplateListPage() {
           />
         </SideNavContainer>
 
+        
+
         <ContentWrapper>
           <PageDiv>
             <MainDiv>
               <Heading3>Browse templates</Heading3>
 
-              <SearchBarStyled>
-                <SearchInput
-                  value={searchInput}
-                  onChange={e => setSearchInput(e.target.value)}
-                  placeholder="Search templates..."
-                />
-              </SearchBarStyled>
+              <FilterPlusSearch> 
 
-              <TagAutocomplete
+                <SearchBarStyled>
+              <SearchInput
+                value={searchInput}
+                onChange={e => setSearchInput(e.target.value)}
+                placeholder="Search templates..."
+              />
+            </SearchBarStyled>
+                
+              <FilterAutocomplete
                 availableTags={availableTags}
                 selectedTagIds={new Set(selectedTagIds)}
                 onSelect={(id: UUID) =>
@@ -355,6 +361,11 @@ export default function TemplateListPage() {
                   ])
                 }
               />
+
+              </FilterPlusSearch>
+
+              <PageDiv>
+
               <GeneralTitle>
                 <span>
                   Name{" "}
@@ -386,6 +397,8 @@ export default function TemplateListPage() {
                 </span>
                 <span>Tags</span>
               </GeneralTitle>
+
+              </PageDiv>
 
               {filteredTemplates.map(t => (
                 <GeneralList key={t.template_id}>

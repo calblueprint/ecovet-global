@@ -3,6 +3,8 @@ import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
 import { DropdownOption } from "@/types/dropdown";
+import { Flex } from "@/styles/containers";
+import { CgSpaceBetween } from "react-icons/cg";
 
 export const LayoutWrapper = styled.div`
   display: flex;
@@ -50,6 +52,7 @@ export const MainDiv = styled.main`
   display: flex;
   flex-direction: column;
   width: 100%;
+  heigth: 32px;
   padding: 2rem;
   padding-top: 1rem;
   background-color: ${COLORS.white};
@@ -57,7 +60,8 @@ export const MainDiv = styled.main`
 `;
 
 export const SearchBarStyled = styled.div`
-  width: 100%;
+  width: 24rem;
+  height: 24px;
   margin-bottom: 1rem;
 `;
 
@@ -403,4 +407,12 @@ export const DeleteButton = styled.button`
   &:hover {
     color: #e53e3e;
   }
+`;
+
+export const FilterPlusSearch = styled.main`
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-direction: row;
+  width: 100%;
 `;
