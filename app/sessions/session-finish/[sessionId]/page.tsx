@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import {
+  fetchSessionCreatedAt,
+  fetchTemplateNameBySession,
+} from "@/actions/supabase/queries/sessions";
 import { useProfile } from "@/utils/ProfileProvider";
 import { Main } from "../../styles";
 import {
@@ -27,8 +31,8 @@ function formatBytes(bytes: number): string {
 export default function SessionFinish() {
   const { profile } = useProfile();
 
-  // const isFacilitator = profile?.user_type === "Facilitator";
-  const isFacilitator = true;
+  const isFacilitator = profile?.user_type !== "Participant";
+  console.log(profile?.user_type);
 
   const { sessionId } = useParams() as { sessionId: string };
 
@@ -36,9 +40,15 @@ export default function SessionFinish() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfSize, setPdfSize] = useState<number | null>(null);
+  const [templateName, setTemplateName] = useState<string | null>(null);
+  const [sessionCreatedAt, setSessionCreatedAt] = useState<Date | null>(null);
 
   async function fetchOrGenerateReport() {
     if (!sessionId) return;
+    const templateName = await fetchTemplateNameBySession(sessionId);
+    const createdAt = await fetchSessionCreatedAt(sessionId);
+    setTemplateName(templateName);
+    setSessionCreatedAt(createdAt ? new Date(createdAt) : null);
     setIsGenerating(true);
     setPdfUrl(null);
     setPdfSize(null);
@@ -109,7 +119,7 @@ export default function SessionFinish() {
     const objectUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = objectUrl;
-    link.download = "Exercise X.pdf";
+    link.download = "{templateName}.pdf";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -142,7 +152,9 @@ export default function SessionFinish() {
             onClick={handleDownload}
             disabled={!pdfUrl || isGenerating}
           >
-            <FileName>Exercise X.pdf</FileName>
+            <FileName>
+              {templateName}_{sessionCreatedAt?.toLocaleDateString("en-CA")}.pdf
+            </FileName>
             <FileSize>
               {isGenerating
                 ? "Generating..."
