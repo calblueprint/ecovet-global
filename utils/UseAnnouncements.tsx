@@ -6,9 +6,9 @@ import { sessionParticipants } from "@/actions/supabase/queries/sessions";
 import { supabase } from "@/lib/supabase/client";
 import {
   EVENT_MESSAGE_TYPE,
-  LocalChatMessage,
   useRealtimeChat,
 } from "./UseChat";
+import { ChatMessage } from "@/types/schema";
 
 export type AnnouncementRoom =
   | { to: "everyone"; sessionId: string }
@@ -74,12 +74,13 @@ export function sendAnnouncement({
   const roomId = announcementToRoomId(room);
   const channel = supabase.channel(roomId);
 
-  const chatMessage: LocalChatMessage = {
+  const chatMessage: ChatMessage = {
     id: crypto.randomUUID(),
     room_id: roomId,
     message: message,
     sender: userId,
     sender_name: username,
+    created_at: new Date().toISOString()
   };
 
   channel.send({

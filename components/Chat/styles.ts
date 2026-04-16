@@ -65,3 +65,19 @@ flex-direction: column;
 align-items: flex-start;
 gap: 0.75rem;
 align-self: stretch;`
+
+export const TimeSeparatorBold = styled(Caption)`
+color: ${COLORS.black70};
+`
+
+export const TimeSeparatorNormal = styled(Caption)`
+color: ${COLORS.black20};
+`
+
+export const TimeSeparatorContainer = styled.div`
+display: flex;
+justify-content: center;
+align-items: flex-start;
+gap: 0.25rem;
+align-self: stretch;
+`

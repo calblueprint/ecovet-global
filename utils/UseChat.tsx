@@ -6,11 +6,9 @@ import {
   persistChatMessage,
 } from "@/actions/supabase/queries/chat";
 import { supabase } from "@/lib/supabase/client";
-import { ChatMessage, Profile } from "@/types/schema";
+import { ChatMessage } from "@/types/schema";
 
 export const EVENT_MESSAGE_TYPE = "message";
-
-export type LocalChatMessage = Omit<ChatMessage, "created_at">;
 
 export function useRealtimeChat({
   roomId,
@@ -23,7 +21,7 @@ export function useRealtimeChat({
 }) {
   const [loading, startFetching] = useTransition();
 
-  const [chatMessages, setChatMessages] = useState<LocalChatMessage[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [channel, setChannel] = useState<ReturnType<
     typeof supabase.channel
   > | null>(null);
@@ -68,12 +66,13 @@ export function useRealtimeChat({
     async (message: string) => {
       if (!channel || !isConnected) return;
 
-      const chatMessage: LocalChatMessage = {
+      const chatMessage: ChatMessage = {
         id: crypto.randomUUID(),
         room_id: roomId,
         message: message,
         sender: userId,
         sender_name: username,
+        created_at: new Date().toISOString()
       };
 
       setChatMessages(current => [...current, chatMessage]);
