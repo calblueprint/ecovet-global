@@ -4,6 +4,8 @@ import { UUID } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import { useRealtimeChat as useChat } from "@/utils/UseChat";
 import ChatUsers from "./ChatUsers";
+import ChatMessage from "./ChatMessageBubble";
+import { ChatMessageContainer } from "./styles";
 
 export default function Chat({ roomId }: { roomId: UUID }) {
   const { userId, profile } = useProfile();
@@ -19,13 +21,11 @@ export default function Chat({ roomId }: { roomId: UUID }) {
     <div>
       <H2>Chat Room: {roomId}</H2>
       {loading && <p>Loading chat...</p>}
-      <div>
+      <ChatMessageContainer>
         {chatMessages.map(chatMessage => (
-          <div key={chatMessage.id}>
-            <strong>{chatMessage.sender_name}:</strong> {chatMessage.message}
-          </div>
+          <ChatMessage chatMessage={chatMessage} fromUser={chatMessage.sender === userId} />
         ))}
-      </div>
+      </ChatMessageContainer>
       <input
         type="text"
         placeholder="Type a message..."

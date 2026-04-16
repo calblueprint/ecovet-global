@@ -50,7 +50,7 @@ export async function fetchChatUserOptions(
     .select(
       `
     *,
-    participant_session!inner(session_id)
+    participant_session!participant_session_user_id_fkey!inner(session_id)
   `,
     )
     .eq("user_group_id", userGroupId)

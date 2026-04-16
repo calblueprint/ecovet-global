@@ -39,7 +39,7 @@ export default function ChatPage() {
     if (!userId) return;
 
     const roomId = crypto.randomUUID() as UUID;
-    await createChatRoom(roomId, userId, HARDCODED_SESSION_ID);
+    await createChatRoom(roomId, userId, sessionId);
     await loadRooms();
   }
 
