@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { H2 } from "@/styles/text";
 import { UUID } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
@@ -34,7 +34,7 @@ export default function Chat({ roomId }: { roomId: UUID }) {
       {loading && <p>Loading chat...</p>}
       <ChatMessageContainer>
         {chatMessages.map((chatMessage, i) => (
-          <>
+          <Fragment key={i}>
             {shouldShowTime(i) && (
               <TimeSeparator date={new Date(chatMessage.created_at)} />
             )}
@@ -42,7 +42,7 @@ export default function Chat({ roomId }: { roomId: UUID }) {
               chatMessage={chatMessage}
               fromUser={chatMessage.sender === userId}
             />
-          </>
+          </Fragment>
         ))}
       </ChatMessageContainer>
       <input
