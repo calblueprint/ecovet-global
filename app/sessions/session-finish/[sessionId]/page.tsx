@@ -105,7 +105,6 @@ export default function SessionFinish() {
   // Load existing report on page load, generate if none exists
   useEffect(() => {
     fetchOrGenerateReport();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
   async function handleSave() {
