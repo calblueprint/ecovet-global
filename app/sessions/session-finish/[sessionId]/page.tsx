@@ -119,7 +119,7 @@ export default function SessionFinish() {
     const objectUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = objectUrl;
-    link.download = "{templateName}.pdf";
+    link.download = `${templateName}_${sessionCreatedAt?.toLocaleDateString("en-CA")}.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
