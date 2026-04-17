@@ -2,7 +2,7 @@
 
 import type { UUID } from "@/types/schema";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   advancePhaseForSingleUser,
   setIsFinished,
@@ -43,9 +43,8 @@ export default function NextButton({
     await onClick();
 
     if (isLastPhase) {
-      await setIsFinished(user_id, role_id, session_id);
-      router.push("/sessions/session-finish");
-      return;
+      // console.log("sessionId ", session_id);
+      router.push(`/sessions/session-finish/${session_id}`);
     }
 
     if (is_force_advance) {
