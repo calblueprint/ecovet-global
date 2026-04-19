@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   checkProfileExists,
-  fetchProfileByUserId,
   fetchSessionById,
 } from "@/actions/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
