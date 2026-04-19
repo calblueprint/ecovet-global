@@ -23,7 +23,7 @@ export const MessageContentBubble = styled.div<{ fromUser: boolean }>`
 
 export const NameMessageContentContainer = styled.div<{ fromUser: boolean }>`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: ${({ fromUser }) => (fromUser ? "flex-end" : "flex-start")};
   gap: 0.5rem;
   align-self: stretch;
@@ -34,7 +34,9 @@ export const NameContent = styled(Caption)`
   padding: 0 0.5rem;
   justify-content: center;
   align-items: center;
+  align-self: end;
   gap: 0.25rem;
+  margin: 0 1rem;
   color: ${COLORS.black70};
 `;
 
@@ -48,12 +50,12 @@ export const NameRoleSeparator = styled.div`
   align-self: center;
 `;
 
-export const FullMessageContainer = styled.div`
+export const FullMessageContainer = styled.div<{ doubleText: boolean, fromUser: boolean }>`
   display: flex;
-  flex-direction: row;
-  align-items: center;
+  flex-direction: column;
   gap: 0.5rem;
-  align-self: stretch;
+  align-self: ${({ fromUser }) => fromUser ? 'end' : 'start'};
+  padding-top: ${({ doubleText }) => doubleText ? '0.1rem' : '0rem'}
 `;
 
 export const ProfileColor = styled.div<{ color: string }>`
@@ -61,6 +63,7 @@ export const ProfileColor = styled.div<{ color: string }>`
   height: 1rem;
   aspect-ratio: 1/1;
   border-radius: 0.25rem;
+  align-self: start;
   background: ${({ color }) => color};
 `;
 

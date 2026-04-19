@@ -9,6 +9,7 @@ import { ChatMessageContainer } from "./styles";
 import { TimeSeparator } from "./TimeSeparator";
 
 const ONE_HOUR_MS = 1000 * 60 * 60;
+const DOUBLE_TEXT_MS = 1000 * 60 * 2;
 export default function Chat({ roomId }: { roomId: UUID }) {
   const { userId, profile } = useProfile();
 
@@ -18,6 +19,26 @@ export default function Chat({ roomId }: { roomId: UUID }) {
     userId: userId ?? "unknown-user",
     username: profile?.first_name ?? "Unknown User",
   });
+
+  const isDoubleText = (index: number) => {
+    if (index === 0) return false;
+    if (shouldShowSender(index)) return false;
+
+    const prevTime = new Date(chatMessages[index - 1].created_at);
+    const thisTime = new Date(chatMessages[index].created_at);
+
+    return thisTime.getTime() - prevTime.getTime() >= DOUBLE_TEXT_MS;
+  };
+
+  const shouldShowSender = (index: number) => {
+    if (index === 0) return true;
+    if (shouldShowTime(index)) return true;
+
+    const prevSender = chatMessages[index - 1].sender;
+    const thisSender = chatMessages[index].sender;
+
+    return prevSender !== thisSender;
+  };
 
   const shouldShowTime = (index: number) => {
     if (index === 0) return true;
@@ -40,6 +61,8 @@ export default function Chat({ roomId }: { roomId: UUID }) {
             )}
             <ChatMessage
               chatMessage={chatMessage}
+              showName={shouldShowSender(i)}
+              isDoubleText={isDoubleText(i)}
               fromUser={chatMessage.sender === userId}
             />
           </Fragment>

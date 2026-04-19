@@ -13,30 +13,41 @@ import {
 
 export default function ChatMessage({
   chatMessage,
+  showName,
+  isDoubleText,
   fromUser,
 }: {
   chatMessage: ChatMessageType;
+  showName: boolean;
+  isDoubleText: boolean;
   fromUser: boolean;
 }) {
   const senderName = fromUser ? "You" : chatMessage.sender_name;
 
   return (
-    <FullMessageContainer>
-      {!fromUser && <ProfileColor color="#8E44AD" />}
-
-      <NameMessageContentContainer fromUser={fromUser}>
+    <FullMessageContainer doubleText={isDoubleText} fromUser={fromUser}>
+      {showName && (
         <NameContent>
           {senderName}
-          <NameRoleSeparator />
-          {"ROLE PLACEHOLDER"}
+          {!fromUser && (
+            <>
+              <NameRoleSeparator />
+              {"ROLE PLACEHOLDER"}
+            </>
+          )}
         </NameContent>
+      )}
+
+      <NameMessageContentContainer fromUser={fromUser}>
+        {!fromUser && <ProfileColor color="#8E44AD" />}
 
         <MessageContentBubble fromUser={fromUser}>
           <MessageContent>{chatMessage.message}</MessageContent>
         </MessageContentBubble>
+
+        {fromUser && <ProfileColor color="#8E44AD" />}
       </NameMessageContentContainer>
 
-      {fromUser && <ProfileColor color="#8E44AD" />}
     </FullMessageContainer>
   );
 }
