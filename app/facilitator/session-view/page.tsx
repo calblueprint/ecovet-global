@@ -447,6 +447,14 @@ export default function FacilitatorSessionView() {
                 </h3>
               )}
             </Container>
+
+            <Button
+              onClick={() =>
+                router.push(`app/sessions/session-finish/${sessionId}/page.tsx`)
+              }
+            >
+              End Game
+            </Button>
           </MainDiv>
         </ContentWrapper>
       </LayoutWrapper>

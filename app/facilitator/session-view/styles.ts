@@ -25,6 +25,29 @@ export const MainDiv = styled.main`
   max-width: 1100px;
 `;
 
+export const PageLayout = styled.div`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100vh;
+`;
+
+export const AnnouncementsPanel = styled.div`
+  width: 280px;
+  min-width: 280px;
+  border-left: 1px solid var(--Oat-Medium, #eee);
+`;
+
+export const ContentDiv = styled.div`
+  display: flex;
+  padding: 32px 0 32px 48px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 32px;
+  flex: 1;
+  overflow-y: auto;
+`;
+
 export const HeadingBox = styled.main`
   display: flex;
   padding: 1rem 1.25rem;
@@ -37,15 +60,52 @@ export const HeadingBox = styled.main`
 
 export const PhaseInformation = styled.div`
   display: flex;
-  padding: 16px 20px;
+  padding: 1rem 1.25rem;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 16px;
+  gap: 1rem;
   align-self: stretch;
   border-radius: 8px;
   border: 1px solid var(--Oat-Medium, #eee);
   background: var(--Oat-Light, #f9f9f9);
+`;
+
+export const ParticipantInformation = styled.div`
+  display: flex;
+  padding: 1rem 1.25rem;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  max-width: 60rem;
+  gap: 1.25rem;
+  align-self: stretch;
+  border-radius: 8px;
+  border: 1px solid var(--Oat-Medium, #e8e8e8);
+  background: var(--Oat-Light, #f9f9f9);
+`;
+
+export const InfoGrid = styled.div`
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 8px 16px;
+  width: 100%;
+`;
+
+export const InfoLabel = styled.span`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 15px;
+  font-style: normal;
+  color: var(--Black-40, #959492);
+  font-weight: 500;
+`;
+
+export const InfoValue = styled.span`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 15px;
+  font-style: normal;
+  color: var(--Black-70, #4b4a49);
+  font-weight: 500;
 `;
 
 export const PhaseTitle = styled.h2`
@@ -196,7 +256,7 @@ export const Button = styled.button<{ disabled?: boolean }>`
 export const SilverText = styled.span`
   color: var(--Black-40, #959492);
   font-family: ${Sans.style.fontFamily};
-  font-size: 14px;
+  font-size: 16px;
   font-style: normal;
   font-weight: 500;
   line-height: normal;
@@ -210,4 +270,60 @@ export const NormalText = styled.span`
   font-style: normal;
   font-weight: 500;
   line-height: normal;
+`;
+
+export const PromptCard = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+`;
+
+export const PromptText = styled.p`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: ${COLORS.black};
+  padding-bottom: 0.5rem;
+`;
+
+export const PromptWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-left: 2.5rem;
+  position: relative;
+`;
+
+export const PromptQuestionNumber = styled.span`
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${COLORS.black70};
+`;
+
+export const PromptQuestionText = styled.p`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: ${COLORS.black70};
+  margin: 0;
+`;
+
+export const PromptAnswer = styled.div`
+  display: flex;
+  padding: 12px 16px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  align-self: stretch;
+  border-radius: 8px;
+  border: 1px solid var(--Black-20, #c7c6c3);
+  background: var(--Oat-LM, #f5f5f5);
+  font-family: ${Sans.style.fontFamily};
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 500;
 `;
