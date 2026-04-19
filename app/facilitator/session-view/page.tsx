@@ -354,7 +354,7 @@ export default function FacilitatorSessionView() {
 
       setOpenWarning(false);
 
-      await sendEmailReminder(em, sessionId, selectedUID);
+      await sendEmailReminder(em);
     } catch (error) {
       console.error("Error in sending nuge email to user:", error);
     } finally {
