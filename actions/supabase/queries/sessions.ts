@@ -797,3 +797,21 @@ export async function fetchSessionName(
 
   return data?.session_name ?? null;
 }
+
+export async function fetchSessionCreatedAt(
+  session_id: UUID,
+): Promise<string | null> {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("session")
+    .select("created_at")
+    .eq("session_id", session_id)
+    .single();
+
+  if (error) {
+    console.error("Error fetching session name:", error);
+    throw error;
+  }
+
+  return data?.created_at;
+}

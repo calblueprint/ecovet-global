@@ -10,7 +10,6 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
-import { isForInitializer } from "typescript";
 import supabase from "@/actions/supabase/client";
 import {
   fetchPhases,
@@ -279,7 +278,7 @@ export default function FacilitatorSessionView() {
     });
   }
 
-  async function advancePhase() {
+async function advancePhase() {
     if (!sessionId || isAdvancing) return;
     setIsAdvancing(true);
 
