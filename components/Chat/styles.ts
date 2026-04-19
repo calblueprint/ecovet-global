@@ -21,13 +21,32 @@ export const MessageContentBubble = styled.div<{ fromUser: boolean }>`
     fromUser ? COLORS.lightEletricBlue : COLORS.oat_medium};
 `;
 
-export const NameMessageContentContainer = styled.div<{ fromUser: boolean }>`
+export const TimeMessageContainer = styled.div<{ fromUser: boolean }>`
+  display: flex;
+  flex-direction: column;
+  align-items: ${({ fromUser }) => fromUser ? 'flex-end' : 'flex-start'};
+  gap: 0.25rem;
+`
+
+export const PfpMessageContentContainer = styled.div<{ fromUser: boolean }>`
   display: flex;
   flex-direction: row;
   align-items: ${({ fromUser }) => (fromUser ? "flex-end" : "flex-start")};
   gap: 0.5rem;
   align-self: stretch;
 `;
+
+export const TimeLabelContainer = styled.div`
+  display: flex;
+  padding: 0 0.5rem;
+  align-items: center;
+  gap: 0.3rem;
+  color: ${COLORS.black20};
+`
+
+export const TimeLabel = styled(Caption)`
+  color: ${COLORS.black20};
+`
 
 export const NameContent = styled(Caption)`
   display: flex;
@@ -55,7 +74,7 @@ export const FullMessageContainer = styled.div<{ doubleText: boolean, fromUser: 
   flex-direction: column;
   gap: 0.5rem;
   align-self: ${({ fromUser }) => fromUser ? 'end' : 'start'};
-  padding-top: ${({ doubleText }) => doubleText ? '0.1rem' : '0rem'}
+  padding-top: ${({ doubleText }) => doubleText ? '0.4rem' : '0rem'}
 `;
 
 export const ProfileColor = styled.div<{ color: string }>`

@@ -6,10 +6,15 @@ import {
   MessageContent,
   MessageContentBubble,
   NameContent,
-  NameMessageContentContainer,
+  PfpMessageContentContainer,
   NameRoleSeparator,
   ProfileColor,
+  TimeLabelContainer,
+  TimeLabel,
+  TimeMessageContainer,
 } from "./styles";
+import { useState } from "react";
+import { getMessageDateLabel } from "./TimeSeparator";
 
 export default function ChatMessage({
   chatMessage,
@@ -22,7 +27,9 @@ export default function ChatMessage({
   isDoubleText: boolean;
   fromUser: boolean;
 }) {
+  const [showTime, setShowTime] = useState(false)
   const senderName = fromUser ? "You" : chatMessage.sender_name;
+  const { day, time } = getMessageDateLabel(new Date(chatMessage.created_at))
 
   return (
     <FullMessageContainer doubleText={isDoubleText} fromUser={fromUser}>
@@ -38,15 +45,25 @@ export default function ChatMessage({
         </NameContent>
       )}
 
-      <NameMessageContentContainer fromUser={fromUser}>
+      <PfpMessageContentContainer fromUser={fromUser} onClick={() => setShowTime(show => !show)}>
         {!fromUser && <ProfileColor color="#8E44AD" />}
 
-        <MessageContentBubble fromUser={fromUser}>
-          <MessageContent>{chatMessage.message}</MessageContent>
-        </MessageContentBubble>
+        <TimeMessageContainer fromUser={fromUser}>
+          <MessageContentBubble fromUser={fromUser}>
+            <MessageContent>{chatMessage.message}</MessageContent>
+          </MessageContentBubble>
+
+          {showTime && (
+            <TimeLabelContainer>
+              <TimeLabel>{day}</TimeLabel>
+              <TimeLabel>{time}</TimeLabel>
+            </TimeLabelContainer>
+          )}
+
+        </TimeMessageContainer>
 
         {fromUser && <ProfileColor color="#8E44AD" />}
-      </NameMessageContentContainer>
+      </PfpMessageContentContainer>
 
     </FullMessageContainer>
   );
