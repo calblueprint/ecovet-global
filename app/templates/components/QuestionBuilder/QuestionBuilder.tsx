@@ -1,12 +1,4 @@
-import {
-  Button,
-  Checkbox,
-  FormControl,
-  MenuItem,
-  Radio,
-  RadioGroup,
-  Select,
-} from "@mui/material";
+import { Button, Checkbox, Radio, RadioGroup } from "@mui/material";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import {
   EditablePhase,
@@ -26,7 +18,9 @@ import {
   FieldCard,
   FieldLegend,
   FormStack,
-  GhostButton,
+  HeaderButtonDark,
+  HeaderButtonGroup,
+  HeaderButtonLight,
   LegendFlex,
   McqOptionStyled,
   MultipleChoicePromptStyled,
@@ -66,6 +60,8 @@ export default function QuestionBuilder({
   rolePhaseId,
   phase,
   onChange,
+  onNextPhase, // NEW PROP
+  onSaveAndExit, // NEW PROP
 }: {
   value: RoleFormInput;
   rolePhaseId: UUID;
@@ -75,6 +71,8 @@ export default function QuestionBuilder({
     field: string,
     v: string | PromptType | StagedOption[],
   ) => void;
+  onNextPhase: () => void; // NEW PROP
+  onSaveAndExit: () => void; // NEW PROP
 }) {
   const rolePhase = value.rolePhases[rolePhaseId];
 
@@ -114,17 +112,40 @@ export default function QuestionBuilder({
     );
     onChange(promptID, "options", updated);
   }
+
   return (
     <FormStack>
       <RoleHeaderContainer>
         <RoleHeader>
-          <PhaseTemplateHeader>{phase.phase_name}</PhaseTemplateHeader>
-          <RoleTemplateName>{value.role.role_name}</RoleTemplateName>
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <RoleTemplateName>{value.role.role_name}</RoleTemplateName>
+            <PhaseTemplateHeader>{phase.phase_name}</PhaseTemplateHeader>
+          </div>
+
+          <HeaderButtonGroup>
+            <HeaderButtonLight
+              onClick={() =>
+                onChange(
+                  rolePhase.role_phase_id,
+                  "add_prompt",
+                  rolePhase.role_phase_id,
+                )
+              }
+            >
+              + Question
+            </HeaderButtonLight>
+            <HeaderButtonDark onClick={onNextPhase}>
+              + Next phase
+            </HeaderButtonDark>
+            <HeaderButtonDark onClick={onSaveAndExit}>
+              + Save and exit
+            </HeaderButtonDark>
+          </HeaderButtonGroup>
         </RoleHeader>
 
         <RoleDescriptionTemplate>
           <RolePhaseDescriptionInput
-            placeholder="Enter phase description here..."
+            placeholder="Phase description..."
             value={rolePhase.role_phase_description ?? ""}
             onChange={e => onChange(rolePhaseId, "description", e.target.value)}
           />
@@ -146,6 +167,7 @@ export default function QuestionBuilder({
                     Delete
                   </DeleteButton>
                 </LegendFlex>
+
                 <QuestionRowStyled>
                   <BigInput
                     name="prompt"
@@ -155,7 +177,6 @@ export default function QuestionBuilder({
                       onChange(promptID, "prompt_text", e.target.value)
                     }
                   />
-
                   <PromptTypeDropdownStyled>
                     <InputDropdown
                       label=""
@@ -279,18 +300,6 @@ export default function QuestionBuilder({
           },
         )}
       </PhaseCard>
-
-      <GhostButton
-        onClick={() =>
-          onChange(
-            rolePhase.role_phase_id,
-            "add_prompt",
-            rolePhase.role_phase_id,
-          )
-        }
-      >
-        + New Prompt
-      </GhostButton>
     </FormStack>
   );
 }

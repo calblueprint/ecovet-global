@@ -99,7 +99,7 @@ export default function EditTemplatePage() {
 
     const rolePhaseId = localStore.rolePhaseIndex[roleId]?.[selectedPhaseId];
     if (rolePhaseId) {
-      setActiveIds({ roleId: Number(roleId), rolePhaseId });
+      setActiveIds({ roleId: roleId, rolePhaseId });
     }
   };
 

@@ -363,6 +363,27 @@ export default function TemplateBuilder({
     localStore?.rolePhaseIndex[activeIds.roleId as UUID] || {},
   ).map(([_, rolePhaseID]) => rolePhaseID);
 
+  const handleNextPhase = () => {
+    if (!localStore || !activeIds.rolePhaseId) return;
+
+    const currentPhaseId =
+      localStore.rolePhasesById[activeIds.rolePhaseId].phase_id;
+    const currentPhaseIndex = localStore.phaseIds.indexOf(currentPhaseId);
+
+    if (
+      currentPhaseIndex !== -1 &&
+      currentPhaseIndex < localStore.phaseIds.length - 1
+    ) {
+      const nextPhaseId = localStore.phaseIds[currentPhaseIndex + 1];
+      const nextRolePhaseId =
+        localStore.rolePhaseIndex[activeIds.roleId as UUID][nextPhaseId];
+
+      setActiveIds({ roleId: activeIds.roleId, rolePhaseId: nextRolePhaseId });
+    } else {
+      alert("This is the last phase for this role.");
+    }
+  };
+
   return (
     <div>
       <div>
@@ -465,6 +486,8 @@ export default function TemplateBuilder({
                   ]
                 }
                 onChange={setActiveUpdate}
+                onNextPhase={handleNextPhase}
+                onSaveAndExit={saveTemplate}
               />
             )}
           </PanelCard>

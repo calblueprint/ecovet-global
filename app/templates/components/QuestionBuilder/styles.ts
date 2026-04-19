@@ -97,15 +97,61 @@ export const FormStack = styled(Flex).attrs({
 
 export const RoleHeader = styled(Flex)`
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end; /* Aligns the text block and buttons nicely */
 `;
 
 export const RoleHeaderContainer = styled(Flex).attrs({
   $direction: "column",
   $gap: "1rem",
 })`
+  padding-top: 1rem; /* Added padding so it looks good when sticky */
   padding-bottom: 1rem;
   border-bottom: 1px solid ${COLORS.oat_medium};
+
+  /* --- NEW STICKY BEHAVIOR --- */
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: ${COLORS.white};
+`;
+
+export const HeaderButtonGroup = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+
+export const HeaderButtonLight = styled.button`
+  background: #e8ecef;
+  color: #476c77;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: filter 0.15s ease;
+  &:hover {
+    filter: brightness(0.95);
+  }
+`;
+
+export const HeaderButtonDark = styled.button`
+  background: #476c77;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: filter 0.15s ease;
+  &:hover {
+    filter: brightness(1.1);
+  }
 `;
 
 export const FieldCard = styled.div`
@@ -218,9 +264,21 @@ export const BigInput = styled(TextField).attrs({
 // TODO: placeholder color not working
 
 export const RolePhaseDescriptionInput = styled.input.attrs({ type: "text" })`
-  border: none;
-  font-style: italic;
   width: 100%;
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  border-radius: 4px;
+  border: 1px solid ${COLORS.oat_medium};
+  background: ${COLORS.white};
+  color: ${COLORS.black70};
+
+  &::placeholder {
+    color: ${COLORS.black20};
+  }
+
+  &:focus {
+    outline: 1px solid ${COLORS.black40};
+  }
 `;
 
 export const TextFieldStyled = styled(TextField)`
