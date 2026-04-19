@@ -264,14 +264,6 @@ export default function ParticipantDetailView() {
               ))}
             </PromptCard>
           ))}
-          <Button
-            onClick={() =>
-              router.push(`/facilitator/session-view?sessionId=${sessionId}`)
-            }
-          >
-            {" "}
-            Back{" "}
-          </Button>
         </ContentDiv>
       </PageLayout>
     </>
