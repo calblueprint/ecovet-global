@@ -60,8 +60,7 @@ export default function SignIn() {
       if (searchParams.get("fromNudge") == "true") {
         const session_id = await fetchSessionById(data.user.id);
         router.push(
-          "/participants/scenario-overview/" + session_id + "/" + data.user.id,
-        );
+          "/participants/scenario-overview/" + session_id + "/" + data.user.id);
       } else {
         router.push(doesNotHaveProfile ? "/onboarding" : "/test-page");
       }
