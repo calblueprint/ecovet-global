@@ -3,8 +3,12 @@
 import { useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { checkProfileExists } from "@/actions/supabase/queries/profile";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  checkProfileExists,
+  fetchProfileByUserId,
+  fetchSessionById,
+} from "@/actions/supabase/queries/profile";
 import { useSession } from "@/utils/AuthProvider";
 import {
   BrandingText,
@@ -24,6 +28,7 @@ import {
 } from "./styles";
 
 export default function SignIn() {
+  const searchParams = useSearchParams();
   const router = useRouter();
   const { signInWithEmail } = useSession();
   const [email, setEmail] = useState("");
@@ -53,7 +58,14 @@ export default function SignIn() {
       }
 
       const doesNotHaveProfile = await checkProfileExists(data.user.id);
-      router.push(doesNotHaveProfile ? "/onboarding" : "/test-page");
+      if (searchParams.get("fromNudge") == "true") {
+        const session_id = await fetchSessionById(data.user.id);
+        router.push(
+          "/participants/scenario-overview/" + session_id + "/" + data.user.id,
+        );
+      } else {
+        router.push(doesNotHaveProfile ? "/onboarding" : "/test-page");
+      }
     } catch {
       setErrorMessage("An unexpected error occurred. Please try again.");
     } finally {

@@ -38,11 +38,7 @@ export async function autoEmailSender(
 
 export default autoEmailSender;
 
-export async function sendEmailReminder(
-  email: string,
-  session_id: string,
-  user_id: string,
-) {
+export async function sendEmailReminder(email: string) {
   if (!process.env.BREVO_SMTP_USER || !process.env.BREVO_SMTP_KEY) {
     throw new Error(
       "Missing email configuration: BREVO_SMTP_USER and BREVO_SMTP_KEY must be set in environment variables.",
@@ -52,10 +48,7 @@ export async function sendEmailReminder(
   const text =
     "Hi,\nThis is a reminder that you have an ongoing game. Go to " +
     process.env.NEXT_PUBLIC_SITE_URL +
-    "/participants/scenario-overview/" +
-    session_id +
-    "/" +
-    user_id +
+    "/auth/sign-in?fromNudge=true" +
     ` to login to join the game.`;
 
   await autoEmailSender(text, "Reminder to Re-join Your Ongoing Game", email);
