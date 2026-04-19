@@ -80,3 +80,18 @@ export const DummyInput = styled.input`
     color: ${COLORS.black20};
   }
 `;
+
+export const SmallButton = styled.button`
+  height: 45px;
+  width: 10rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: ${COLORS.lightEletricBlue};
+  font-size: 14px;
+  color: black;
+  border: 1px solid black;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 1rem auto;
+`;

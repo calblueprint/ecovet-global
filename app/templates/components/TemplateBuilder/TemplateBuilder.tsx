@@ -1,4 +1,4 @@
-import type { UUID } from "@/types/schema";
+import type { EditablePhase, RolePhase, UUID } from "@/types/schema";
 import { useState } from "react";
 import Link from "next/link";
 import { addNewOption } from "@/actions/supabase/queries/prompt";
@@ -26,6 +26,7 @@ import {
   DummyInput,
   ListCard,
   PanelCard,
+  SmallButton,
   SubmitButton,
   TabButton,
   TabsContainer,
@@ -121,6 +122,73 @@ export default function TemplateBuilder({
       draft.phaseIds.forEach((pid, index) => {
         draft.phasesById[pid].phase_name = `Phase ${index + 1}`;
         draft.phasesById[pid].phase_number = index + 1;
+      });
+    });
+  }
+
+  function addPhase(): void {
+    if (!localStore) return;
+
+    update(draft => {
+      const newPhaseId = crypto.randomUUID();
+      const nextNumber = draft.phaseIds.length + 1;
+
+      draft.phaseIds.push(newPhaseId);
+      draft.phasesById[newPhaseId] = {
+        phase_id: newPhaseId,
+        template_id: draft.templateID,
+        phase_name: `Phase ${nextNumber}`,
+        phase_description: "",
+        phase_number: nextNumber,
+      } as EditablePhase;
+
+      draft.roleIds.forEach(roleId => {
+        if (roleId === 1) return;
+
+        const newRolePhaseId = crypto.randomUUID();
+        draft.rolePhasesById[newRolePhaseId] = {
+          role_phase_id: newRolePhaseId,
+          role_id: roleId as UUID,
+          phase_id: newPhaseId,
+          role_phase_description: "",
+        } as RolePhase;
+
+        if (!draft.rolePhaseIndex[roleId]) draft.rolePhaseIndex[roleId] = {};
+        draft.rolePhaseIndex[roleId][newPhaseId] = newRolePhaseId;
+        draft.promptIndex[newRolePhaseId] = [];
+      });
+    });
+  }
+
+  function addRole(): void {
+    if (!localStore) return;
+
+    update(draft => {
+      const newRoleId = crypto.randomUUID();
+      const nextNumber = draft.roleIds.length;
+
+      // 1. Create the new Role
+      draft.roleIds.push(newRoleId);
+      draft.rolesById[newRoleId] = {
+        role_id: newRoleId,
+        template_id: draft.templateID,
+        role_name: `Role ${nextNumber}`,
+        role_description: "",
+      } as Role;
+
+      draft.rolePhaseIndex[newRoleId] = {};
+
+      draft.phaseIds.forEach(phaseId => {
+        const newRolePhaseId = crypto.randomUUID();
+        draft.rolePhasesById[newRolePhaseId] = {
+          role_phase_id: newRolePhaseId,
+          role_id: newRoleId,
+          phase_id: phaseId,
+          role_phase_description: "",
+        } as RolePhase;
+
+        draft.rolePhaseIndex[newRoleId][phaseId] = newRolePhaseId;
+        draft.promptIndex[newRolePhaseId] = [];
       });
     });
   }
@@ -307,61 +375,72 @@ export default function TemplateBuilder({
                   onChange={setActiveUpdate}
                 />
 
-                {/* --- NEW TABS UI (Only show for Scenario Settings) --- */}
-                {activeIds.roleId == TEMPLATE_INDEX && (
-                  <div style={{ marginTop: "2rem" }}>
-                    <TabsContainer>
-                      <TabButton
-                        $active={activeTab === "phases"}
-                        onClick={e => {
-                          e.preventDefault();
-                          setActiveTab("phases");
-                        }}
-                      >
-                        Phases ({phaseCount})
-                      </TabButton>
-                      <TabButton
-                        $active={activeTab === "roles"}
-                        onClick={e => {
-                          e.preventDefault();
-                          setActiveTab("roles");
-                        }}
-                      >
-                        Roles ({roleCount})
-                      </TabButton>
-                    </TabsContainer>
+                <TabsContainer>
+                  <TabButton
+                    $active={activeTab === "phases"}
+                    onClick={e => {
+                      e.preventDefault();
+                      setActiveTab("phases");
+                    }}
+                  >
+                    Phases ({phaseCount})
+                  </TabButton>
+                  <TabButton
+                    $active={activeTab === "roles"}
+                    onClick={e => {
+                      e.preventDefault();
+                      setActiveTab("roles");
+                    }}
+                  >
+                    Roles ({roleCount})
+                  </TabButton>
+                </TabsContainer>
 
-                    {activeTab === "phases" && (
-                      <div>
-                        {phases.map((phase, index) => (
-                          <ListCard key={phase.phase_id}>
-                            <CardTitle>
-                              {phase.phase_name || `Phase ${index + 1}`}
-                            </CardTitle>
-                            <DummyInput
-                              placeholder="Phase description..."
-                              readOnly
-                            />
-                          </ListCard>
-                        ))}
-                      </div>
-                    )}
+                {activeTab === "phases" && (
+                  <div>
+                    {phases.map((phase, index) => (
+                      <ListCard key={phase.phase_id}>
+                        <CardTitle>
+                          {phase.phase_name || `Phase ${index + 1}`}
+                        </CardTitle>
+                        <DummyInput
+                          placeholder="Phase description..."
+                          readOnly
+                        />
+                      </ListCard>
+                    ))}
+                    <SmallButton
+                      onClick={e => {
+                        e.preventDefault();
+                        addPhase();
+                      }}
+                    >
+                      + Add Phase
+                    </SmallButton>
+                  </div>
+                )}
 
-                    {activeTab === "roles" && (
-                      <div>
-                        {roles.map((role, index) => (
-                          <ListCard key={role.role_id}>
-                            <CardTitle>
-                              {role.role_name || `Role ${index + 1}`}
-                            </CardTitle>
-                            <DummyInput
-                              placeholder="Role description..."
-                              readOnly
-                            />
-                          </ListCard>
-                        ))}
-                      </div>
-                    )}
+                {activeTab === "roles" && (
+                  <div>
+                    {roles.map((role, index) => (
+                      <ListCard key={role.role_id}>
+                        <CardTitle>
+                          {role.role_name || `Role ${index + 1}`}
+                        </CardTitle>
+                        <DummyInput
+                          placeholder="Role description..."
+                          readOnly
+                        />
+                      </ListCard>
+                    ))}
+                    <SmallButton
+                      onClick={e => {
+                        e.preventDefault();
+                        addRole();
+                      }}
+                    >
+                      + Add Role
+                    </SmallButton>
                   </div>
                 )}
               </>
@@ -375,7 +454,7 @@ export default function TemplateBuilder({
                   promptById: localStore.promptById,
                   promptIndex: localStore.promptIndex,
                   phasesById: localStore.phasesById,
-                  optionsByPromptId: localStore.optionsByPromptId, // NEW
+                  optionsByPromptId: localStore.optionsByPromptId,
                 }}
                 rolePhaseId={activeIds.rolePhaseId || rolePhases[0]}
                 phase={
