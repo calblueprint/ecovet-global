@@ -21,10 +21,16 @@ import { useProfile } from "@/utils/ProfileProvider";
 import { ActiveIds } from "../../page";
 import QuestionBuilder from "../QuestionBuilder/QuestionBuilder";
 import TemplateOverviewForm from "../TemplateOverviewForm/TemplateOverviewForm";
-import { PanelCard, SubmitButton } from "./styles";
+import {
+  CardTitle,
+  DummyInput,
+  ListCard,
+  PanelCard,
+  SubmitButton,
+  TabButton,
+  TabsContainer,
+} from "./styles";
 
-// TODO: add an active phase id
-// TODO: add an active phase id
 export default function TemplateBuilder({
   activeIds,
   setActiveIds,
@@ -41,6 +47,20 @@ export default function TemplateBuilder({
   const [saving, setSaving] = useState(false);
   const { profile } = useProfile();
   const TEMPLATE_INDEX = 1;
+
+  const [activeTab, setActiveTab] = useState<"phases" | "roles">("phases");
+
+  const phaseCount = localStore?.phaseIds.length || 0;
+  const roleCount = localStore ? localStore.roleIds.length - 1 : 0;
+
+  const phases = localStore
+    ? localStore.phaseIds.map(id => localStore.phasesById[id])
+    : [];
+  const roles = localStore
+    ? localStore.roleIds
+        .filter(id => id !== 1)
+        .map(id => localStore.rolesById[id] as Role)
+    : [];
 
   function removeRole(role_id: UUID | number): void {
     if (localStore == null || typeof role_id == "number") return;
@@ -281,10 +301,70 @@ export default function TemplateBuilder({
         {localStore && (
           <PanelCard key={`panel-${String(activeIds.roleId)}`}>
             {activeIds.roleId == TEMPLATE_INDEX || rolePhases.length == 0 ? (
-              <TemplateOverviewForm
-                value={localStore.rolesById[TEMPLATE_INDEX] as Template}
-                onChange={setActiveUpdate}
-              />
+              <>
+                <TemplateOverviewForm
+                  value={localStore.rolesById[TEMPLATE_INDEX] as Template}
+                  onChange={setActiveUpdate}
+                />
+
+                {/* --- NEW TABS UI (Only show for Scenario Settings) --- */}
+                {activeIds.roleId == TEMPLATE_INDEX && (
+                  <div style={{ marginTop: "2rem" }}>
+                    <TabsContainer>
+                      <TabButton
+                        $active={activeTab === "phases"}
+                        onClick={e => {
+                          e.preventDefault();
+                          setActiveTab("phases");
+                        }}
+                      >
+                        Phases ({phaseCount})
+                      </TabButton>
+                      <TabButton
+                        $active={activeTab === "roles"}
+                        onClick={e => {
+                          e.preventDefault();
+                          setActiveTab("roles");
+                        }}
+                      >
+                        Roles ({roleCount})
+                      </TabButton>
+                    </TabsContainer>
+
+                    {activeTab === "phases" && (
+                      <div>
+                        {phases.map((phase, index) => (
+                          <ListCard key={phase.phase_id}>
+                            <CardTitle>
+                              {phase.phase_name || `Phase ${index + 1}`}
+                            </CardTitle>
+                            <DummyInput
+                              placeholder="Phase description..."
+                              readOnly
+                            />
+                          </ListCard>
+                        ))}
+                      </div>
+                    )}
+
+                    {activeTab === "roles" && (
+                      <div>
+                        {roles.map((role, index) => (
+                          <ListCard key={role.role_id}>
+                            <CardTitle>
+                              {role.role_name || `Role ${index + 1}`}
+                            </CardTitle>
+                            <DummyInput
+                              placeholder="Role description..."
+                              readOnly
+                            />
+                          </ListCard>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
             ) : (
               <QuestionBuilder
                 value={{

@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { produce } from "immer";
 import { fetchFullTemplate } from "@/actions/supabase/queries/templates";
+import { SideNavContainer } from "@/app/facilitator/styles";
 import TemplateBuilder from "@/app/templates/components/TemplateBuilder/TemplateBuilder";
-import TemplateBuilderSideBar from "@/app/templates/components/TemplateBuilderSidebar/TemplateBuilderSidebar";
 import { ActiveIds } from "@/app/templates/page";
 import { LayoutWrapper, TemplateMainBox } from "@/app/templates/styles";
-import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
+import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import {
   EditablePhase,
   LocalStore,
@@ -18,15 +18,23 @@ import {
   Template,
   UUID,
 } from "@/types/schema";
-import { SideNavContainer } from "../../styles";
-import { LoadingMessages } from "../styles";
+import {
+  ActionRow,
+  ActionText,
+  BackLink,
+  LoadingMessages,
+  RoleItem,
+  RolesListContainer,
+  RolesTitle,
+  SettingsBlock,
+  SidebarContent,
+  Title,
+} from "../styles";
 
 interface FullTemplateResponse extends Template {
   roles: Role[];
   phases: (EditablePhase & {
-    role_phases: (RolePhase & {
-      prompts: Prompt[];
-    })[];
+    role_phases: (RolePhase & { prompts: Prompt[] })[];
   })[];
 }
 
@@ -36,22 +44,22 @@ export default function EditTemplatePage() {
 
   const [localStore, setLocalStore] = useState<LocalStore | null>(null);
   const [loading, setLoading] = useState(true);
+
   const [activeIds, setActiveIds] = useState<ActiveIds>({
     roleId: 1,
     rolePhaseId: null,
   });
 
+  const [selectedPhaseId, setSelectedPhaseId] = useState<string | null>(null);
+
   useEffect(() => {
     async function load() {
       if (!templateId) return;
-
       try {
         const data = (await fetchFullTemplate(
           templateId,
         )) as FullTemplateResponse | null;
-        if (data) {
-          setLocalStore(transformToLocalStore(data));
-        }
+        if (data) setLocalStore(transformToLocalStore(data));
       } catch (err) {
         console.error("Load failed", err);
       } finally {
@@ -65,20 +73,97 @@ export default function EditTemplatePage() {
     setLocalStore(prev => (prev ? produce(prev, updater) : prev));
   };
 
+  const phaseOptionsMap = useMemo(() => {
+    const map = new Map<string, string>();
+    if (!localStore) return map;
+    localStore.phaseIds.forEach(id => {
+      const phase = localStore.phasesById[id];
+      if (phase)
+        map.set(String(phase.phase_id), phase.phase_name || "Unnamed Phase");
+    });
+    return map;
+  }, [localStore]);
+
+  const availableRoles = useMemo(() => {
+    if (!localStore) return [];
+    return localStore.roleIds
+      .filter(id => id !== 1)
+      .map(id => localStore.rolesById[id] as Role);
+  }, [localStore]);
+
+  const rootTemplate = localStore?.rolesById[1] as Template | undefined;
+  const templateName = rootTemplate?.template_name || "Loading...";
+
+  const handleRoleClick = (roleId: number | string) => {
+    if (!selectedPhaseId || !localStore) return;
+
+    const rolePhaseId = localStore.rolePhaseIndex[roleId]?.[selectedPhaseId];
+    if (rolePhaseId) {
+      setActiveIds({ roleId: Number(roleId), rolePhaseId });
+    }
+  };
+
+  const handleScenarioSettingsClick = () => {
+    setActiveIds({ roleId: 1, rolePhaseId: null });
+  };
+
   if (loading) return <LoadingMessages>Loading template...</LoadingMessages>;
   if (!localStore)
     return <LoadingMessages>Template not found.</LoadingMessages>;
 
   return (
     <>
-      <TopNavBar />
       <LayoutWrapper>
         <SideNavContainer>
-          <TemplateBuilderSideBar
-            localStore={localStore}
-            updateLocalStore={updateLocalStore}
-            setActiveIds={setActiveIds}
-          />
+          <SidebarContent>
+            <div>
+              <BackLink>← Catalogue</BackLink>
+              <Title>{templateName}</Title>
+              <ActionRow>
+                <ActionText>✎ Rename</ActionText>
+                <ActionText>▷ Start exercise</ActionText>
+              </ActionRow>
+            </div>
+
+            <SettingsBlock
+              $active={activeIds.roleId === 1}
+              onClick={handleScenarioSettingsClick}
+            >
+              Scenario Settings
+            </SettingsBlock>
+
+            <InputDropdown
+              label="Select field..."
+              placeholder="Select field..."
+              options={phaseOptionsMap}
+              value={selectedPhaseId}
+              onChange={(val: string | null) => {
+                setSelectedPhaseId(val);
+                if (activeIds.roleId !== 1) {
+                  setActiveIds({ roleId: 1, rolePhaseId: null });
+                }
+              }}
+              isClearable
+            />
+
+            <RolesListContainer>
+              <RolesTitle>Roles</RolesTitle>
+              {availableRoles.map(role => {
+                const isActive = activeIds.roleId === role.role_id;
+                return (
+                  <RoleItem
+                    key={role.role_id}
+                    $isDisabled={!selectedPhaseId}
+                    $active={isActive}
+                    disabled={!selectedPhaseId}
+                    onClick={() => handleRoleClick(role.role_id)}
+                  >
+                    {role.role_name}
+                  </RoleItem>
+                );
+              })}
+            </RolesListContainer>
+          </SidebarContent>
         </SideNavContainer>
 
         <TemplateMainBox>
