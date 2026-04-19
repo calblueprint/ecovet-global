@@ -134,6 +134,7 @@ export default function Page() {
         selectedTemplateId as UUID,
         profile.user_group_id as UUID,
         isForceAdvance,
+        isSync,
       )) as UUID;
 
       console.log(sessionId);

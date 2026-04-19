@@ -32,8 +32,8 @@ export const ButtonDiv = styled.div`
   gap: 2rem;
 `;
 
-export const NudgeButton = styled.button`
-  display: flex;
+export const NudgeButton = styled.button<{ async?: boolean }>`
+  display: ${({ async }) => (async ? "none" : "flex")};
   padding: 0.5rem 0.75rem;
   justify-content: center;
   align-items: center;
@@ -48,6 +48,9 @@ export const NudgeButton = styled.button`
   font-weight: 700;
   line-height: normal;
   letter-spacing: 0.2px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease;
 `;
 
 export const HeadingBox = styled.main`
@@ -140,6 +143,10 @@ export const TableRow = styled.div`
 
   &:hover {
     background-color: ${COLORS.oat_light};
+  }
+  &:hover .nudge-button {
+    opacity: 1;
+    visibility: visible;
   }
 `;
 

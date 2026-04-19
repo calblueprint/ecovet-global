@@ -9,6 +9,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 import supabase from "@/actions/supabase/client";
 import { fetchEmailByUserId } from "@/actions/supabase/queries/profile";
 import {
+  fetchIsSessionAsync,
   fetchPhases,
   fetchPromptsWithResponses,
   fetchRolePhases,
@@ -78,6 +79,7 @@ export default function FacilitatorSessionView() {
   const [sending, setSending] = useState(false);
   const [email, setEmail] = useState<string>("");
   const [selectedUID, setSelectedUID] = useState<string>("");
+  const [isAsync, setIsAsync] = useState<boolean>(true);
 
   const [isForceAdvance, setIsForceAdvance] = useState(false);
   const isLastPhase = currentPhase >= phases.length - 1;
@@ -98,6 +100,12 @@ export default function FacilitatorSessionView() {
       } catch (err) {
         console.error("Failed to load participants:", err);
       }
+    }
+
+    async function loadIsAsync() {
+      if (!sessionId) return;
+      const is_async = await fetchIsSessionAsync(sessionId);
+      setIsAsync(is_async ? is_async : false);
     }
 
     async function checkIfForceAdvance() {
@@ -128,6 +136,7 @@ export default function FacilitatorSessionView() {
     }
 
     loadParticipants();
+    loadIsAsync();
     checkIfForceAdvance();
     loadPhases();
     loadTemplateName();
@@ -331,6 +340,7 @@ export default function FacilitatorSessionView() {
   };
   const handleConfirm = async () => {
     if (!selectedUID) return;
+    if (!sessionId) return;
     try {
       setSending(true);
 
@@ -344,7 +354,7 @@ export default function FacilitatorSessionView() {
 
       setOpenWarning(false);
 
-      await sendEmailReminder(em);
+      await sendEmailReminder(em, sessionId, selectedUID);
     } catch (error) {
       console.error("Error in sending nuge email to user:", error);
     } finally {
@@ -447,12 +457,14 @@ export default function FacilitatorSessionView() {
                             <ButtonDiv>
                               {p.profile?.first_name} {p.profile?.last_name}
                               <NudgeButton
+                                className="nudge-button"
                                 onClick={e => {
                                   e.stopPropagation();
                                   e.preventDefault();
                                   setSelectedUID(p.user_id);
                                   setOpenWarning(true);
                                 }}
+                                async={isAsync}
                               >
                                 Nudge
                               </NudgeButton>
