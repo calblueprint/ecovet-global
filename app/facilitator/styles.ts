@@ -67,21 +67,26 @@ export const SearchBarStyled = styled.div`
 
 export const SearchInput = styled.input`
   border: 1px solid ${COLORS.oat_medium};
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 0.5rem 1rem;
   width: 100%;
-  height: 2.75rem;
+  height: 32px;
   margin-bottom: 1rem;
   font-family: ${Sans.style.fontFamily};
+  color: #C7C6C3;
   font-size: 12px;
-  background-color: ${COLORS.oat_light};
+  background-color: ${COLORS.white};
+  &::placeholder {
+    color: #C7C6C3;  /* 👈 placeholder color */
+    opacity: 1;      /* 👈 important (browsers reduce opacity by default) */
+  }
 `;
 
 export const Heading3 = styled.h3`
   font-family: ${Sans.style.fontFamily};
   font-size: 24px;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  
   font-style: normal;
   line-height: normal;
 `;
@@ -373,4 +378,27 @@ export const FilterPlusSearch = styled.main`
   gap: 16px;
   flex-direction: row;
   width: 100%;
+  height: 32px;
+`;
+
+export const TemplatesAndFilterPlusSearch = styled.main`
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  flex-direction: column;
+  width: 100%;
+`;
+
+export const InputWrapper = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+export const Icon = styled.div`
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #C7C6C3;
+  pointer-events: none;
 `;

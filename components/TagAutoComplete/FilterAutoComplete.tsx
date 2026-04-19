@@ -115,35 +115,56 @@ export function FilterAutocomplete({
         <li
           {...props}
           key={option.value}
-          style={{ fontFamily: Sans.style.fontFamily, fontSize: "13px" }}
+          style={{ fontFamily: Sans.style.fontFamily, fontSize: "12px" }}
         >
           {option.label}
         </li>
       )}
       renderInput={params => (
     <TextField
-        {...params}
-        placeholder="Search or create tag..."
+        {...params} 
+        placeholder={value.length === 0 ? "Search or create tag..." : ""}
         sx={{
+          "& .MuiOutlinedInput-root": {
+        height: "32px",
+        minHeight: "32px",
+        borderRadius: "4px",
+        padding: "0 8px",
+        display: "flex",
+        alignItems: "center",
 
-                     
-            "& .MuiOutlinedInput-root": {
-                borderRadius: "4px",
-                width: "100%",
-                maxHeight: "44px",
-                leftpadding: "12px",
-                alignItems: "center",
-                "& fieldset": {
+        // 👇 THIS is the missing piece
+        fontSize: "12px",
+        fontFamily: Sans.style.fontFamily,
 
-                border: "1px solid #ccc", // default border
-                },
-                "&:hover fieldset": {
-                border: "1px solid #888", // hover
-                },
-                "&.Mui-focused fieldset": {
-                border: "2px solid #1976d2", // focus (blue)
-                },
-            },
+        "& fieldset": {
+          border: "1px solid #EEEDE9",
+        },
+        "&:hover fieldset": {
+          border: "1px solid #EEEDE9",
+        },
+        "&.Mui-focused fieldset": {
+          border: "2px solid #000000",
+        },
+      },
+
+      // 👇 THE important part (fixes your font jump issue)
+      "& .MuiAutocomplete-input": {
+        fontSize: "12px",
+        fontFamily: Sans.style.fontFamily,
+        padding: 0,
+        margin: 0,
+      },
+
+      "& .MuiAutocomplete-input::placeholder": {
+        color: "#C7C6C3",
+        opacity: 1,
+      },    
+
+      "& .MuiOutlinedInput-root, & .MuiAutocomplete-input": {
+        fontSize: "12px !important",
+         fontFamily: Sans.style.fontFamily,
+      }
         }}
     />
     )}

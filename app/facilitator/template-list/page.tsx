@@ -30,6 +30,7 @@ import {
   SearchInput,
   SideNavContainer,
   SortButton,
+  TemplatesAndFilterPlusSearch,
 } from "../styles";
 import TemplateSideBar from "./components/TemplateSidebar";
 import { AssociatedTags } from "./styles";
@@ -197,7 +198,7 @@ export default function TemplateListPage() {
     if (newTagId) {
       const newlyCreatedTag: Tag = {
         tag_id: newTagId as UUID,
-        name: name ?? "No Name",
+        name: name,
         color: "yellow",
         number: 0,
         user_group_id: user_group_id,
@@ -321,6 +322,8 @@ export default function TemplateListPage() {
         <ContentWrapper>
           <PageDiv>
             <MainDiv>
+              <TemplatesAndFilterPlusSearch>
+
               <Heading3>Browse templates</Heading3>
 
               <FilterPlusSearch> 
@@ -364,7 +367,7 @@ export default function TemplateListPage() {
 
               </FilterPlusSearch>
 
-              <PageDiv>
+              <div>
 
               <GeneralTitle>
                 <span>
@@ -398,7 +401,7 @@ export default function TemplateListPage() {
                 <span>Tags</span>
               </GeneralTitle>
 
-              </PageDiv>
+            
 
               {filteredTemplates.map(t => (
                 <GeneralList key={t.template_id}>
@@ -453,6 +456,10 @@ export default function TemplateListPage() {
                   </AssociatedTags>
                 </GeneralList>
               ))}
+
+            </div>
+            </TemplatesAndFilterPlusSearch>
+
             </MainDiv>
           </PageDiv>
         </ContentWrapper>
