@@ -9,7 +9,9 @@ export const SidebarContent = styled.div`
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: ${COLORS.white};
+  background: ${COLORS.oat_light};
+  width: 18rem;
+  padding: 1.5rem 1.25rem;
 `;
 
 export const BackLink = styled.button`
@@ -49,7 +51,7 @@ export const ActionText = styled.span`
 export const SettingsBlock = styled.button<{ $active: boolean }>`
   width: 100%;
   text-align: left;
-  background-color: ${COLORS.oat_light};
+  background-color: ${COLORS.oat_medium};
   padding: 0.75rem 1rem;
   border-radius: 0.375rem;
   font-size: 0.875rem;
