@@ -3,6 +3,7 @@ import { H2 } from "@/styles/text";
 import { UUID } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import { useRealtimeChat as useChat } from "@/utils/UseChat";
+import ChatInputBar from "./ChatInputBar";
 import ChatMessage from "./ChatMessageBubble";
 import ChatUsers from "./ChatUsers";
 import { ChatMessageContainer } from "./styles";
@@ -68,14 +69,8 @@ export default function Chat({ roomId }: { roomId: UUID }) {
           </Fragment>
         ))}
       </ChatMessageContainer>
-      <input
-        type="text"
-        placeholder="Type a message..."
-        value={userInput}
-        onChange={e => setUserInput(e.target.value)}
-      />
-      <button onClick={() => sendMessage(userInput)}>Send Message</button>
 
+      <ChatInputBar sendMessage={sendMessage} />
       <ChatUsers roomId={roomId} />
     </div>
   );

@@ -278,7 +278,7 @@ export default function FacilitatorSessionView() {
     });
   }
 
-async function advancePhase() {
+  async function advancePhase() {
     if (!sessionId || isAdvancing) return;
     setIsAdvancing(true);
 

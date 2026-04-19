@@ -7,7 +7,7 @@ interface TextProps {
   $align?: "left" | "right" | "center" | "end" | "justify" | "start";
 }
 
-const TextStyles = css<TextProps>`
+export const TextStyles = css<TextProps>`
   ${Sans.style}
   font-weight: ${({ $fontWeight }) => $fontWeight || "400"};
   color: ${({ $color }) => $color || "black"};

@@ -3,7 +3,7 @@ import Image from "next/image";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
-import { B2, Caption } from "@/styles/text";
+import { B2, Caption, TextStyles } from "@/styles/text";
 
 export const MessageContent = styled(B2)`
   color: ${COLORS.black70};
@@ -24,9 +24,9 @@ export const MessageContentBubble = styled.div<{ fromUser: boolean }>`
 export const TimeMessageContainer = styled.div<{ fromUser: boolean }>`
   display: flex;
   flex-direction: column;
-  align-items: ${({ fromUser }) => fromUser ? 'flex-end' : 'flex-start'};
+  align-items: ${({ fromUser }) => (fromUser ? "flex-end" : "flex-start")};
   gap: 0.25rem;
-`
+`;
 
 export const PfpMessageContentContainer = styled.div<{ fromUser: boolean }>`
   display: flex;
@@ -42,13 +42,13 @@ export const TimeLabelContainer = styled.div`
   align-items: center;
   gap: 0.3rem;
   color: ${COLORS.black20};
-`
+`;
 
 export const TimeLabel = styled(Caption)`
   color: ${COLORS.black20};
-`
+`;
 
-export const NameContent = styled(Caption)`
+export const NameContainer = styled.div`
   display: flex;
   padding: 0 0.5rem;
   justify-content: center;
@@ -56,6 +56,10 @@ export const NameContent = styled(Caption)`
   align-self: end;
   gap: 0.25rem;
   margin: 0 1rem;
+  color: ${COLORS.black70};
+`;
+
+export const NameText = styled(Caption)`
   color: ${COLORS.black70};
 `;
 
@@ -69,12 +73,15 @@ export const NameRoleSeparator = styled.div`
   align-self: center;
 `;
 
-export const FullMessageContainer = styled.div<{ doubleText: boolean, fromUser: boolean }>`
+export const FullMessageContainer = styled.div<{
+  doubleText: boolean;
+  fromUser: boolean;
+}>`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  align-self: ${({ fromUser }) => fromUser ? 'end' : 'start'};
-  padding-top: ${({ doubleText }) => doubleText ? '0.4rem' : '0rem'}
+  align-self: ${({ fromUser }) => (fromUser ? "end" : "start")};
+  padding-top: ${({ doubleText }) => (doubleText ? "0.4rem" : "0rem")};
 `;
 
 export const ProfileColor = styled.div<{ color: string }>`
@@ -108,4 +115,39 @@ export const TimeSeparatorContainer = styled.div`
   align-items: flex-start;
   gap: 0.25rem;
   align-self: stretch;
+`;
+
+export const ChatInputContainer = styled.div`
+  display: flex;
+  padding: 0.75rem 1.25rem 1.25rem 1.25rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  align-self: stretch;
+  border: none;
+  border-top: 1px solid ${COLORS.oat_medium};
+`;
+
+export const ChatInput = styled.textarea`
+  width: 100%;
+  border: none;
+  align-self: flex-start;
+  justify-content: flex-start;
+  resize: none;
+
+  // B2 styles
+  ${TextStyles as any}
+  color: ${COLORS.black20}
+  font-weight: 500;
+  font-size: 0.875rem;
+
+  &:focus {
+    outline: none;
+  }
+`;
+
+export const ChatSendButton = styled.button`
+  border: none;
+  align-self: flex-end;
+  justify-content: flex-end;
 `;

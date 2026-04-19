@@ -149,7 +149,7 @@ export async function setSessionGlobalPhaseIndex(
   sessionId: string,
   newPhaseIndex: number,
 ) {
-  console.log(`set session global phase index ${newPhaseIndex}`)
+  console.log(`set session global phase index ${newPhaseIndex}`);
   const supabase = await getSupabaseServerClient();
   const { error } = await supabase
     .from("session")
