@@ -166,6 +166,20 @@ const SyncBadge = styled.span`
   color: ${COLORS.black70};
 `;
 
+const PdfLabel = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+`;
+
+const PdfArrow = styled.svg`
+  transform: rotate(-45deg);
+  padding: 0.15rem;
+  box-sizing: content-box;
+  flex-shrink: 0;
+`;
+
 const PdfButton = styled.button`
   background: none;
   border: none;
@@ -362,9 +376,35 @@ export default function FacilitatorExercisesPage() {
                           }}
                           disabled={pdfLoading === session.session_id}
                         >
-                          {pdfLoading === session.session_id
-                            ? "Loading..."
-                            : "View PDF"}
+                          {pdfLoading === session.session_id ? (
+                            "Loading..."
+                          ) : (
+                            <PdfLabel>
+                              View PDF
+                              <PdfArrow
+                                width="0.65rem"
+                                height="0.65rem"
+                                viewBox="0 0 10 10"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <g clipPath="url(#clip0_3667_21991)">
+                                  <path
+                                    d="M1 5H9M9 5L5 1M9 5L5 9"
+                                    stroke="#4B4A49"
+                                    strokeWidth="1.2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </g>
+                                <defs>
+                                  <clipPath id="clip0_3667_21991">
+                                    <rect width="10" height="10" fill="white" />
+                                  </clipPath>
+                                </defs>
+                              </PdfArrow>
+                            </PdfLabel>
+                          )}
                         </PdfButton>
                       </StyledTd>
                     )}
