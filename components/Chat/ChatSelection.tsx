@@ -1,11 +1,22 @@
-import { ChatButtonContainer, ChatButtonLabel, ChatSelectionButton, ChatSelectionContainer } from "./styles";
+import {
+  ChatButtonContainer,
+  ChatButtonLabel,
+  ChatSelectionButton,
+  ChatSelectionContainer,
+} from "./styles";
 
 export interface Selection {
   chatName: string;
   roomId: string;
 }
 
-export default function ChatSelection({ chats, changeRoom }: { chats: Selection[], changeRoom: (roomId: string) => void }) {
+export default function ChatSelection({
+  chats,
+  changeRoom,
+}: {
+  chats: Selection[];
+  changeRoom: (roomId: string) => void;
+}) {
   return (
     <ChatSelectionContainer>
       <ChatButtonContainer>
@@ -14,12 +25,14 @@ export default function ChatSelection({ chats, changeRoom }: { chats: Selection[
       </ChatButtonContainer>
 
       {chats.map(chat => (
-        <ChatButtonContainer key={chat.roomId} onClick={() => changeRoom(chat.roomId)}>
+        <ChatButtonContainer
+          key={chat.roomId}
+          onClick={() => changeRoom(chat.roomId)}
+        >
           <ChatSelectionButton />
           <ChatButtonLabel>{chat.chatName}</ChatButtonLabel>
         </ChatButtonContainer>
       ))}
     </ChatSelectionContainer>
-  )
+  );
 }
-

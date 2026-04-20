@@ -52,9 +52,9 @@ export async function getUserChatRooms(userId: string, sessionId: string) {
   const { data, error } = await supabase
     .from("chat_room")
     .select("room_id")
-    .eq("user_id", userId)
+    .eq("user_id", userId);
   // TODO: fix
-    // .eq("session_id", sessionId);
+  // .eq("session_id", sessionId);
 
   if (error) {
     console.error("Error getting chat rooms: ", error.message);

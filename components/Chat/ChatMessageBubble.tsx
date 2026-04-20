@@ -28,7 +28,7 @@ export default function ChatMessage({
 }) {
   const [showTime, setShowTime] = useState(false);
   const senderName = fromUser ? "You" : chatMessage.sender_name;
-  const senderRole = 'ROLE PLACEHOLDER'
+  const senderRole = "ROLE PLACEHOLDER";
   const { day, time } = getMessageDateLabel(new Date(chatMessage.created_at));
 
   return (

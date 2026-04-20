@@ -1,20 +1,28 @@
 import { Fragment, useEffect, useState } from "react";
+import {
+  createChatRoom,
+  getUserChatRooms,
+} from "@/actions/supabase/queries/chat";
 import { UUID } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import { useRealtimeChat as useChat } from "@/utils/UseChat";
 import ChatInputBar from "./ChatInputBar";
 import ChatMessage from "./ChatMessageBubble";
-import { ChatContainer, ChatHeader, ChatMessageContainer, ContentContainer } from "./styles";
-import { TimeSeparator } from "./TimeSeparator";
 import ChatSelection, { Selection } from "./ChatSelection";
-import { createChatRoom, getUserChatRooms } from "@/actions/supabase/queries/chat";
+import {
+  ChatContainer,
+  ChatHeader,
+  ChatMessageContainer,
+  ContentContainer,
+} from "./styles";
+import { TimeSeparator } from "./TimeSeparator";
 
 const ONE_HOUR_MS = 1000 * 60 * 60;
 const DOUBLE_TEXT_MS = 1000 * 60 * 2;
 export default function Chat({ sessionId }: { sessionId: UUID }) {
   const { userId, profile } = useProfile();
-  const [chatRooms, setChatRooms] = useState<Selection[]>([])
-  const [roomId, setRoomId] = useState<string>('')
+  const [chatRooms, setChatRooms] = useState<Selection[]>([]);
+  const [roomId, setRoomId] = useState<string>("");
 
   const { loading, chatMessages, sendMessage } = useChat({
     roomId: roomId,
@@ -29,7 +37,7 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
     try {
       const rooms = await getUserChatRooms(userId, sessionId);
       // TODO: fix to have actual chat names
-      setChatRooms(rooms.map(id => ({ roomId: id, chatName: 'Unknown' })));
+      setChatRooms(rooms.map(id => ({ roomId: id, chatName: "Unknown" })));
     } catch {
       console.log("Error loading chat rooms.");
     }
@@ -81,7 +89,10 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
       <ContentContainer>
         <ChatHeader>Communication</ChatHeader>
 
-        <ChatSelection chats={chatRooms} changeRoom={(roomId) => setRoomId(roomId)}/>
+        <ChatSelection
+          chats={chatRooms}
+          changeRoom={roomId => setRoomId(roomId)}
+        />
 
         <ChatMessageContainer>
           {chatMessages.map((chatMessage, i) => (

@@ -166,12 +166,12 @@ export const ChatContainer = styled.div`
   border-radius: 1rem;
   border: 1px solid ${COLORS.oat_medium};
   background: ${COLORS.oat_light};
-`
+`;
 
 export const ChatHeader = styled(B1)`
   color: ${COLORS.black70};
   align-self: center;
-`
+`;
 
 export const ContentContainer = styled.div`
   display: flex;
@@ -179,7 +179,7 @@ export const ContentContainer = styled.div`
   width: 100%;
   height: 100%;
   gap: 1rem;
-`
+`;
 
 export const ChatSelectionButton = styled.div<{ color?: string }>`
   display: flex;
@@ -193,7 +193,7 @@ export const ChatSelectionButton = styled.div<{ color?: string }>`
   border-radius: 0.5rem;
   border: 1px solid ${COLORS.darkElectricBlue};
   background: ${({ color }) => color ?? COLORS.teal};
-`
+`;
 
 export const ChatButtonContainer = styled.div`
   display: flex;
@@ -201,14 +201,14 @@ export const ChatButtonContainer = styled.div`
   justify-content: center;
   align-items: center;
   gap: 0.25rem;
-`
+`;
 
 export const ChatButtonLabel = styled(Caption)`
   color: ${COLORS.darkElectricBlue};
-`
+`;
 export const ChatSelectionContainer = styled.div`
   display: flex;
   align-items: flex-start;
   gap: 1rem;
   margin-left: 1.25rem;
-`
+`;
