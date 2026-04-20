@@ -1,13 +1,27 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { produce } from "immer";
-import { fetchFullTemplate } from "@/actions/supabase/queries/templates";
-import { SideNavContainer } from "@/app/facilitator/styles";
+import { addNewOption } from "@/actions/supabase/queries/prompt";
+import {
+  createPhases,
+  createPrompts,
+  createRolePhases,
+  createRoles,
+  createTemplates,
+  fetchFullTemplate,
+} from "@/actions/supabase/queries/templates";
 import TemplateBuilder from "@/app/templates/components/TemplateBuilder/TemplateBuilder";
-import { LayoutWrapper, TemplateMainBox } from "@/app/templates/styles";
+import {
+  LayoutWrapper,
+  TemplateMainBox,
+  TitleInput,
+} from "@/app/templates/styles";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
+import WarningModal, {
+  WarningAction,
+} from "@/components/WarningModal/WarningModal";
 import {
   EditablePhase,
   LocalStore,
@@ -17,6 +31,8 @@ import {
   Template,
   UUID,
 } from "@/types/schema";
+import { useProfile } from "@/utils/ProfileProvider";
+import { SideNavTemplatesContainer } from "../facilitator/template-list/components/styles";
 import {
   ActionRow,
   ActionText,
@@ -27,6 +43,7 @@ import {
   RolesTitle,
   SettingsBlock,
   SidebarContent,
+  SideNavContainer,
   Title,
 } from "./styles";
 
@@ -70,158 +87,6 @@ const createInitialStore = (): LocalStore => {
     optionsByPromptId: {},
   };
 };
-
-export default function TemplateBuilderPage() {
-  const searchParams = useSearchParams();
-  const templateId = searchParams.get("templateId") as UUID | null;
-  const isFromTemplateList = searchParams.get("fromTemplateList") === "true";
-
-  const [localStore, setLocalStore] = useState<LocalStore>(() =>
-    createInitialStore(),
-  );
-  const [loading, setLoading] = useState(isFromTemplateList);
-
-  const [activeIds, setActiveIds] = useState<ActiveIds>({
-    roleId: 1,
-    rolePhaseId: null,
-  });
-
-  const [selectedPhaseId, setSelectedPhaseId] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function load() {
-      if (isFromTemplateList && templateId) {
-        try {
-          const data = (await fetchFullTemplate(
-            templateId,
-          )) as FullTemplateResponse | null;
-          if (data) setLocalStore(transformToLocalStore(data));
-        } catch (err) {
-          console.error("Load failed", err);
-        } finally {
-          setLoading(false);
-        }
-      }
-    }
-    load();
-  }, [isFromTemplateList, templateId]);
-
-  const updateLocalStore = (updater: (draft: LocalStore) => void) => {
-    setLocalStore(prev => produce(prev, updater));
-  };
-
-  const resetTemplate = () => {
-    setLocalStore(createInitialStore());
-    setActiveIds({ roleId: 1, rolePhaseId: null });
-    setSelectedPhaseId(null);
-  };
-
-  const phaseOptionsMap = useMemo(() => {
-    const map = new Map<string, string>();
-    if (!localStore) return map;
-    localStore.phaseIds.forEach(id => {
-      const phase = localStore.phasesById[id];
-      if (phase)
-        map.set(String(phase.phase_id), phase.phase_name || "Unnamed Phase");
-    });
-    return map;
-  }, [localStore]);
-
-  const availableRoles = useMemo(() => {
-    if (!localStore) return [];
-    return localStore.roleIds
-      .filter(id => id !== 1)
-      .map(id => localStore.rolesById[id] as Role);
-  }, [localStore]);
-
-  const rootTemplate = localStore?.rolesById[1] as Template | undefined;
-  const templateName = rootTemplate?.template_name || "Loading...";
-
-  const handleRoleClick = (roleId: number | string) => {
-    if (!selectedPhaseId || !localStore) return;
-
-    const rolePhaseId = localStore.rolePhaseIndex[roleId]?.[selectedPhaseId];
-    if (rolePhaseId) {
-      setActiveIds({ roleId: roleId, rolePhaseId });
-    }
-  };
-
-  const handleScenarioSettingsClick = () => {
-    setActiveIds({ roleId: 1, rolePhaseId: null });
-  };
-
-  if (loading) return <LoadingMessages>Loading template...</LoadingMessages>;
-  if (!localStore)
-    return <LoadingMessages>Template not found.</LoadingMessages>;
-
-  return (
-    <>
-      <LayoutWrapper>
-        <SideNavContainer>
-          <SidebarContent>
-            <div>
-              <BackLink>← Catalogue</BackLink>
-              <Title>{templateName}</Title>
-              <ActionRow>
-                <ActionText>✎ Rename</ActionText>
-                <ActionText>▷ Start exercise</ActionText>
-              </ActionRow>
-            </div>
-
-            <SettingsBlock
-              $active={activeIds.roleId === 1}
-              onClick={handleScenarioSettingsClick}
-            >
-              Scenario Settings
-            </SettingsBlock>
-
-            <InputDropdown
-              label="Select field..."
-              placeholder="Select field..."
-              options={phaseOptionsMap}
-              value={selectedPhaseId}
-              onChange={(val: string | null) => {
-                setSelectedPhaseId(val);
-                if (activeIds.roleId !== 1) {
-                  setActiveIds({ roleId: 1, rolePhaseId: null });
-                }
-              }}
-              isClearable
-            />
-
-            <RolesListContainer>
-              <RolesTitle>Roles</RolesTitle>
-              {availableRoles.map(role => {
-                const isActive = activeIds.roleId === role.role_id;
-                return (
-                  <RoleItem
-                    key={role.role_id}
-                    $isDisabled={!selectedPhaseId}
-                    $active={isActive}
-                    disabled={!selectedPhaseId}
-                    onClick={() => handleRoleClick(role.role_id)}
-                  >
-                    {role.role_name}
-                  </RoleItem>
-                );
-              })}
-            </RolesListContainer>
-          </SidebarContent>
-        </SideNavContainer>
-
-        <TemplateMainBox>
-          <TemplateBuilder
-            activeIds={activeIds}
-            setActiveIds={setActiveIds}
-            localStore={localStore}
-            onFinish={resetTemplate}
-            update={updateLocalStore}
-          />
-        </TemplateMainBox>
-      </LayoutWrapper>
-    </>
-  );
-}
 
 function transformToLocalStore(data: FullTemplateResponse): LocalStore {
   const rolesById: Record<number | UUID, Role | Template> = { 1: data };
@@ -267,4 +132,325 @@ function transformToLocalStore(data: FullTemplateResponse): LocalStore {
     promptIndex,
     optionsByPromptId: {},
   };
+}
+
+export default function TemplateBuilderPage() {
+  const { profile } = useProfile();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const templateId = searchParams.get("templateId") as UUID | null;
+  const isFromTemplateList = searchParams.get("fromTemplateList") === "true";
+
+  const [saving, setSaving] = useState(false);
+
+  const [localStore, setLocalStore] = useState<LocalStore>(() =>
+    createInitialStore(),
+  );
+  const [loading, setLoading] = useState(isFromTemplateList);
+
+  const [activeIds, setActiveIds] = useState<ActiveIds>({
+    roleId: 1,
+    rolePhaseId: null,
+  });
+
+  const [selectedPhaseId, setSelectedPhaseId] = useState<string | null>(null);
+  const [isRenaming, setIsRenaming] = useState(false);
+
+  const [showBackWarning, setShowBackWarning] = useState(false);
+
+  async function saveTemplate(): Promise<void> {
+    if (!localStore) return;
+    setSaving(true);
+    try {
+      const saveStore: LocalStore = structuredClone(localStore);
+
+      const realtemplateID = await createTemplates(
+        saveStore.templateID,
+        (saveStore.rolesById[1] as Template).template_name,
+        null,
+        (saveStore.rolesById[1] as Template).objective,
+        (saveStore.rolesById[1] as Template).summary,
+        (saveStore.rolesById[1] as Template).setting,
+        (saveStore.rolesById[1] as Template).current_activity,
+        profile?.user_group_id,
+      );
+
+      for (const roleID of saveStore.roleIds) {
+        if (typeof roleID !== "number") {
+          await createRoles(
+            roleID,
+            realtemplateID,
+            (saveStore.rolesById[roleID] as Role).role_name,
+            (saveStore.rolesById[roleID] as Role).role_description,
+          );
+        }
+      }
+
+      for (const phaseID of saveStore.phaseIds) {
+        console.log("saving phase:", saveStore.phasesById[phaseID]);
+        await createPhases(
+          phaseID,
+          saveStore.phasesById[phaseID].template_id,
+          saveStore.phasesById[phaseID].phase_name,
+          saveStore.phasesById[phaseID].phase_description,
+          saveStore.phasesById[phaseID].phase_number,
+        );
+      }
+
+      for (const [roleID, obj] of Object.entries(saveStore.rolePhaseIndex) as [
+        UUID,
+        Record<UUID, UUID>,
+      ][]) {
+        for (const [phaseID, rolePhaseID] of Object.entries(obj) as [
+          UUID,
+          UUID,
+        ][]) {
+          try {
+            await createRolePhases(
+              rolePhaseID,
+              phaseID,
+              roleID,
+              saveStore.rolePhasesById[rolePhaseID].role_phase_description,
+            );
+          } catch (err) {
+            console.error("createRolePhases error:", err);
+          }
+        }
+      }
+
+      for (const [promptID, prompt] of Object.entries(saveStore.promptById) as [
+        UUID,
+        Prompt,
+      ][]) {
+        await createPrompts(
+          promptID,
+          prompt.role_phase_id ?? "",
+          prompt.prompt_text,
+          prompt.prompt_follow_ups,
+          prompt.prompt_type,
+        );
+        const options = saveStore.optionsByPromptId[promptID] ?? [];
+        for (const opt of options) {
+          await addNewOption(promptID, opt.option_text ?? "");
+        }
+      }
+    } catch (err) {
+      console.error("Save failed", err);
+      throw err; // re-throw so callers can react
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const handleBackToList = () => {
+    setShowBackWarning(true);
+  };
+
+  const handleBackWarningClose = async (action: WarningAction) => {
+    if (action === "cancel") {
+      setShowBackWarning(false);
+      return;
+    }
+    if (action === "primary") {
+      try {
+        await saveTemplate();
+      } catch {
+        // leave modal open so user can retry or choose "leave without saving"
+        return;
+      }
+    }
+    setShowBackWarning(false);
+    router.push(`/facilitator/template-list`);
+  };
+
+  useEffect(() => {
+    async function load() {
+      if (isFromTemplateList && templateId) {
+        try {
+          const data = (await fetchFullTemplate(
+            templateId,
+          )) as FullTemplateResponse | null;
+          if (data) setLocalStore(transformToLocalStore(data));
+        } catch (err) {
+          console.error("Load failed", err);
+        } finally {
+          setLoading(false);
+        }
+      }
+    }
+    load();
+  }, [isFromTemplateList, templateId]);
+
+  const updateLocalStore = (updater: (draft: LocalStore) => void) => {
+    setLocalStore(prev => produce(prev, updater));
+  };
+
+  const handleBackConfirm = (shouldLeave: boolean) => {
+    setShowBackWarning(false);
+    if (shouldLeave) {
+      router.push(`/facilitator/template-list`);
+    }
+  };
+
+  const handleStartExercise = () => {
+    if (!localStore) return;
+    if (!isFromTemplateList) {
+      alert("Please save the template before starting.");
+      return;
+    }
+    router.push(
+      `/facilitator/exercises/start?templateId=${localStore.templateID}`,
+    );
+  };
+
+  const handleTemplateRename = (newName: string) => {
+    updateLocalStore(draft => {
+      (draft.rolesById[1] as Template).template_name = newName;
+    });
+  };
+
+  const resetTemplate = () => {
+    setLocalStore(createInitialStore());
+    setActiveIds({ roleId: 1, rolePhaseId: null });
+    setSelectedPhaseId(null);
+  };
+
+  const phaseOptionsMap = useMemo(() => {
+    const map = new Map<string, string>();
+    if (!localStore) return map;
+    localStore.phaseIds.forEach(id => {
+      const phase = localStore.phasesById[id];
+      if (phase)
+        map.set(String(phase.phase_id), phase.phase_name || "Unnamed Phase");
+    });
+    return map;
+  }, [localStore]);
+
+  const availableRoles = useMemo(() => {
+    if (!localStore) return [];
+    return localStore.roleIds
+      .filter(id => id !== 1)
+      .map(id => localStore.rolesById[id] as Role);
+  }, [localStore]);
+
+  const rootTemplate = localStore?.rolesById[1] as Template | undefined;
+  const templateName = rootTemplate?.template_name;
+
+  const handleRoleClick = (roleId: number | string) => {
+    if (!selectedPhaseId || !localStore) return;
+
+    const rolePhaseId = localStore.rolePhaseIndex[roleId]?.[selectedPhaseId];
+    if (rolePhaseId) {
+      setActiveIds({ roleId: roleId, rolePhaseId });
+    }
+  };
+
+  const handleScenarioSettingsClick = () => {
+    setActiveIds({ roleId: 1, rolePhaseId: null });
+  };
+
+  if (loading) return <LoadingMessages>Loading template...</LoadingMessages>;
+  if (!localStore)
+    return <LoadingMessages>Template not found.</LoadingMessages>;
+
+  return (
+    <>
+      <LayoutWrapper>
+        <SideNavContainer>
+          <SidebarContent>
+            <div>
+              <BackLink onClick={handleBackToList}>← Catalogue</BackLink>
+              {isRenaming ? (
+                <Title
+                  as="input"
+                  value={templateName as string}
+                  autoFocus
+                  onChange={e => handleTemplateRename(e.target.value)}
+                  onBlur={() => setIsRenaming(false)}
+                  onKeyDown={e => {
+                    if (e.key === "Enter") setIsRenaming(false);
+                  }}
+                />
+              ) : (
+                <Title>{templateName || "Untitled"}</Title>
+              )}
+              <ActionRow>
+                <ActionText onClick={() => setIsRenaming(true)}>
+                  {" "}
+                  # Rename
+                </ActionText>
+                <ActionText onClick={handleStartExercise}>
+                  {" "}
+                  # Start exercise
+                </ActionText>
+              </ActionRow>
+            </div>
+
+            <SettingsBlock
+              $active={activeIds.roleId === 1}
+              onClick={handleScenarioSettingsClick}
+            >
+              Scenario Settings
+            </SettingsBlock>
+
+            <InputDropdown
+              label="Select field..."
+              placeholder="Select field..."
+              options={phaseOptionsMap}
+              value={selectedPhaseId}
+              onChange={(val: string | null) => {
+                setSelectedPhaseId(val);
+                if (activeIds.roleId !== 1) {
+                  setActiveIds({ roleId: 1, rolePhaseId: null });
+                }
+              }}
+              isClearable
+              outlined={false}
+            />
+
+            <RolesListContainer>
+              <RolesTitle>Roles</RolesTitle>
+              {availableRoles.map(role => {
+                const isActive = activeIds.roleId === role.role_id;
+                return (
+                  <RoleItem
+                    key={role.role_id}
+                    $isDisabled={!selectedPhaseId}
+                    $active={isActive}
+                    disabled={!selectedPhaseId}
+                    onClick={() => handleRoleClick(role.role_id)}
+                  >
+                    {role.role_name}
+                  </RoleItem>
+                );
+              })}
+            </RolesListContainer>
+          </SidebarContent>
+        </SideNavContainer>
+
+        <TemplateMainBox>
+          <TemplateBuilder
+            activeIds={activeIds}
+            setActiveIds={setActiveIds}
+            localStore={localStore}
+            onFinish={resetTemplate}
+            update={updateLocalStore}
+            saveTemplate={saveTemplate}
+            setSelectedPhaseId={setSelectedPhaseId}
+          />
+        </TemplateMainBox>
+      </LayoutWrapper>
+
+      <WarningModal
+        open={showBackWarning}
+        onClose={handleBackWarningClose}
+        title="Unsaved changes"
+        caption="You have unsaved changes. What would you like to do?"
+        cancelLabel="Keep editing"
+        confirmLabel="Leave without saving"
+        primaryLabel="Save and leave"
+        loading={saving}
+      />
+    </>
+  );
 }

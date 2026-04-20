@@ -3,6 +3,7 @@ import COLORS from "@/styles/colors";
 
 export const WarningDialog = styled.div`
   width: 25rem;
+  height: 10rem;
   padding: 0.9375rem 1rem 1rem 1rem;
   display: flex;
   flex-direction: column;
@@ -29,6 +30,31 @@ export const WarningCaption = styled.p`
   line-height: 150%;
 };`;
 
+export const PrimaryButton = styled.button`
+  display: flex;
+  padding: 0.5rem 2rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.625rem;
+  border-radius: 0.25rem;
+  border: 1px solid ${COLORS.oat_medium};
+  background: ${COLORS.lightEletricBlue};
+  color: ${COLORS.black70};
+  font-size: 0.625rem;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
 export const ButtonContainer = styled.div`
   display: flex;
   justify-content: flex-end;
@@ -43,13 +69,22 @@ export const CancelButton = styled.button`
   align-items: center;
   gap: 0.625rem;
   border-radius: 0.25rem;
-  border: 1px solid ${COLORS.oat_medium};
+  border: 1px solid ${COLORS.oat_dark};
   background: ${COLORS.white};
   color: ${COLORS.black70};
   font-size: 0.625rem;
   font-style: normal;
   font-weight: 700;
   line-height: normal;
+
+    &:hover {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 };`;
 
 export const DeleteButton = styled.button`
@@ -66,4 +101,13 @@ export const DeleteButton = styled.button`
   font-style: normal;
   font-weight: 700;
   line-height: normal;
+
+    &:hover {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 };`;

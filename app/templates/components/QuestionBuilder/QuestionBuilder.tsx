@@ -60,8 +60,8 @@ export default function QuestionBuilder({
   rolePhaseId,
   phase,
   onChange,
-  onNextPhase, // NEW PROP
-  onSaveAndExit, // NEW PROP
+  onNextPhase,
+  onSaveAndExit,
 }: {
   value: RoleFormInput;
   rolePhaseId: UUID;
@@ -71,8 +71,8 @@ export default function QuestionBuilder({
     field: string,
     v: string | PromptType | StagedOption[],
   ) => void;
-  onNextPhase: () => void; // NEW PROP
-  onSaveAndExit: () => void; // NEW PROP
+  onNextPhase: () => void;
+  onSaveAndExit: () => void;
 }) {
   const rolePhase = value.rolePhases[rolePhaseId];
 
@@ -145,7 +145,7 @@ export default function QuestionBuilder({
 
         <RoleDescriptionTemplate>
           <RolePhaseDescriptionInput
-            placeholder="Phase description..."
+            placeholder="Role Phase description..."
             value={rolePhase.role_phase_description ?? ""}
             onChange={e => onChange(rolePhaseId, "description", e.target.value)}
           />

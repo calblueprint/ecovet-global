@@ -108,7 +108,6 @@ export const RoleHeaderContainer = styled(Flex).attrs({
   padding-bottom: 1rem;
   border-bottom: 1px solid ${COLORS.oat_medium};
 
-  /* --- NEW STICKY BEHAVIOR --- */
   position: sticky;
   top: 0;
   z-index: 10;

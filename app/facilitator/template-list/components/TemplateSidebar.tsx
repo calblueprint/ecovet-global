@@ -8,7 +8,9 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import Plus from "@/assets/images/plus.svg";
 import { TagCreator } from "@/components/Tag/TagCreator";
-import WarningModal from "@/components/WarningModal/WarningModal";
+import WarningModal, {
+  WarningAction,
+} from "@/components/WarningModal/WarningModal";
 import { Caption } from "@/styles/text";
 import { UUID } from "@/types/schema";
 import {
@@ -53,13 +55,13 @@ export default function TemplateSideBar({
     });
   };
 
-  const handleModalClose = (shouldDel: boolean) => {
-    if (shouldDel && tagToDelete && onDeleteConfirmed) {
+  const handleModalClose = (action: WarningAction) => {
+    if (action === "confirm" && tagToDelete && onDeleteConfirmed) {
       onDeleteConfirmed(tagToDelete);
     }
 
     if (resolveDelete) {
-      resolveDelete(shouldDel);
+      resolveDelete(action === "confirm");
     }
 
     setIsWarningOpen(false);
