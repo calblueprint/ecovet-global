@@ -3,163 +3,31 @@
 import type { Session } from "@/types/schema";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
-import styled from "styled-components";
 import { fetchSessionsByParticipantId } from "@/actions/supabase/queries/sessions";
 import ParticipantNavBar from "@/components/ParticipantsNavBar/ParticipantsNavBar";
-import COLORS from "@/styles/colors";
-import { Sans } from "@/styles/fonts";
 import { useProfile } from "@/utils/ProfileProvider";
+import {
+  ContentWrapper,
+  EmptyMessage,
+  LayoutWrapper,
+  PageTitle,
+  PdfButton,
+  SearchBarStyled,
+  SearchIconWrapper,
+  SearchInput,
+  StyledTab,
+  StyledTable,
+  StyledTableHead,
+  StyledTableRow,
+  StyledTd,
+  StyledTh,
+  SyncBadge,
+  TabControlsWrapper,
+  TabSection,
+} from "./styles";
 
 type ActiveTab = "active" | "past";
-
-const LayoutWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  padding: 2rem;
-`;
-
-const ContentWrapper = styled.div`
-  max-width: 68.5rem;
-  width: 100%;
-  padding: 2rem 3rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-`;
-
-const TabSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`;
-
-const PageTitle = styled.h1`
-  font-family: ${Sans.style.fontFamily};
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: ${COLORS.black100};
-`;
-
-const TabControlsWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid ${COLORS.oat_medium};
-
-  .MuiTabs-indicator {
-    background-color: ${COLORS.darkElectricBlue};
-  }
-`;
-
-const SearchBarStyled = styled.div`
-  position: relative;
-  width: 20rem;
-  margin-left: auto;
-  margin-right: 0;
-`;
-
-const SearchIconWrapper = styled.span`
-  position: absolute;
-  top: 50%;
-  left: 1rem;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  pointer-events: none;
-  color: ${COLORS.black40};
-`;
-
-const SearchInput = styled.input`
-  border: 1px solid ${COLORS.oat_medium};
-  border-radius: 8px;
-  padding: 0.5rem 1rem 0.5rem 2.25rem;
-  width: 100%;
-  height: 2.75rem;
-  font-family: ${Sans.style.fontFamily};
-  font-size: 0.8125rem;
-  background-color: transparent;
-`;
-
-const StyledTab = styled(Tab)`
-  && {
-    text-transform: none;
-    font-weight: 500;
-    font-size: 0.9375rem;
-    font-family: ${Sans.style.fontFamily};
-    &.Mui-selected {
-      color: ${COLORS.darkElectricBlue};
-    }
-  }
-`;
-
-const StyledTable = styled.table`
-  width: 100%;
-  text-align: left;
-  border-collapse: collapse;
-  font-family: ${Sans.style.fontFamily};
-`;
-
-const StyledTableHead = styled.thead`
-  border-bottom: 1px solid ${COLORS.oat_medium};
-  color: ${COLORS.black40};
-  font-size: 14px;
-`;
-
-const StyledTh = styled.th`
-  padding: 0.75rem 1.5rem;
-  font-weight: 500;
-  font-size: 0.8125rem;
-`;
-
-const StyledTableRow = styled.tr<{ $clickable: boolean }>`
-  border-bottom: 1px solid ${COLORS.oat_light};
-  cursor: ${({ $clickable }) => ($clickable ? "pointer" : "default")};
-
-  &:hover {
-    background-color: ${({ $clickable }) =>
-      $clickable ? COLORS.oat_light : "transparent"};
-  }
-`;
-
-const StyledTd = styled.td`
-  padding: 0.75rem 1.5rem;
-  color: ${COLORS.black70};
-  font-weight: 500;
-  font-size: 0.9375rem;
-  font-family: ${Sans.style.fontFamily};
-  line-height: normal;
-`;
-
-const EmptyMessage = styled.td`
-  padding: 2rem 0;
-  color: ${COLORS.black40};
-  font-size: 0.9375rem;
-  font-family: ${Sans.style.fontFamily};
-  text-align: center;
-`;
-
-const SyncBadge = styled.span`
-  font-size: 0.9375rem;
-  color: ${COLORS.black70};
-`;
-
-const PdfButton = styled.button`
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: 0.9375rem;
-  font-family: ${Sans.style.fontFamily};
-  color: ${COLORS.black70};
-  cursor: pointer;
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return "—";
