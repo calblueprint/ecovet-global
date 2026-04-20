@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { FaCircle } from "react-icons/fa6";
-import { B2, Caption } from "@/styles/text";
 import { ChatMessage as ChatMessageType } from "@/types/schema";
 import {
   FullMessageContainer,
@@ -30,6 +28,7 @@ export default function ChatMessage({
 }) {
   const [showTime, setShowTime] = useState(false);
   const senderName = fromUser ? "You" : chatMessage.sender_name;
+  const senderRole = 'ROLE PLACEHOLDER'
   const { day, time } = getMessageDateLabel(new Date(chatMessage.created_at));
 
   return (
@@ -40,7 +39,7 @@ export default function ChatMessage({
           {!fromUser && (
             <>
               <NameRoleSeparator />
-              {"ROLE PLACEHOLDER"}
+              <NameText>{senderRole}</NameText>
             </>
           )}
         </NameContainer>

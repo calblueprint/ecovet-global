@@ -28,6 +28,8 @@ export function useRealtimeChat({
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    if (roomId.length === 0) return;
+
     startFetching(async () => {
       try {
         const messageHistory = await getMessageHistory(roomId, null, 100);

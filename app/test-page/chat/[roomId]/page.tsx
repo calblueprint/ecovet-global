@@ -8,7 +8,7 @@ export default function ChatPage() {
 
   return (
     <div>
-      <Chat roomId={roomId} />
+      <Chat sessionId={""} />
     </div>
   );
 }

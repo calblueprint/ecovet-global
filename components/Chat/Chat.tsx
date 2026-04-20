@@ -1,25 +1,51 @@
-import { Fragment, useState } from "react";
-import { H2 } from "@/styles/text";
+import { Fragment, useEffect, useState } from "react";
 import { UUID } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import { useRealtimeChat as useChat } from "@/utils/UseChat";
 import ChatInputBar from "./ChatInputBar";
 import ChatMessage from "./ChatMessageBubble";
-import ChatUsers from "./ChatUsers";
-import { ChatMessageContainer } from "./styles";
+import { ChatContainer, ChatHeader, ChatMessageContainer, ContentContainer } from "./styles";
 import { TimeSeparator } from "./TimeSeparator";
+import ChatSelection, { Selection } from "./ChatSelection";
+import { createChatRoom, getUserChatRooms } from "@/actions/supabase/queries/chat";
 
 const ONE_HOUR_MS = 1000 * 60 * 60;
 const DOUBLE_TEXT_MS = 1000 * 60 * 2;
-export default function Chat({ roomId }: { roomId: UUID }) {
+export default function Chat({ sessionId }: { sessionId: UUID }) {
   const { userId, profile } = useProfile();
+  const [chatRooms, setChatRooms] = useState<Selection[]>([])
+  const [roomId, setRoomId] = useState<string>('')
 
-  const [userInput, setUserInput] = useState("");
   const { loading, chatMessages, sendMessage } = useChat({
     roomId: roomId,
     userId: userId ?? "unknown-user",
     username: profile?.first_name ?? "Unknown User",
   });
+
+  async function loadRooms() {
+    console.log(userId);
+    if (!userId) return;
+
+    try {
+      const rooms = await getUserChatRooms(userId, sessionId);
+      // TODO: fix to have actual chat names
+      setChatRooms(rooms.map(id => ({ roomId: id, chatName: 'Unknown' })));
+    } catch {
+      console.log("Error loading chat rooms.");
+    }
+  }
+
+  useEffect(() => {
+    loadRooms();
+  }, [userId]);
+
+  async function onCreateRoom() {
+    if (!userId) return;
+
+    const roomId = crypto.randomUUID() as UUID;
+    await createChatRoom(roomId, userId, sessionId);
+    await loadRooms();
+  }
 
   const isDoubleText = (index: number) => {
     if (index === 0) return false;
@@ -51,27 +77,30 @@ export default function Chat({ roomId }: { roomId: UUID }) {
   };
 
   return (
-    <div>
-      <H2>Chat Room: {roomId}</H2>
-      {loading && <p>Loading chat...</p>}
-      <ChatMessageContainer>
-        {chatMessages.map((chatMessage, i) => (
-          <Fragment key={i}>
-            {shouldShowTime(i) && (
-              <TimeSeparator date={new Date(chatMessage.created_at)} />
-            )}
-            <ChatMessage
-              chatMessage={chatMessage}
-              showName={shouldShowSender(i)}
-              isDoubleText={isDoubleText(i)}
-              fromUser={chatMessage.sender === userId}
-            />
-          </Fragment>
-        ))}
-      </ChatMessageContainer>
+    <ChatContainer>
+      <ContentContainer>
+        <ChatHeader>Communication</ChatHeader>
+
+        <ChatSelection chats={chatRooms} changeRoom={(roomId) => setRoomId(roomId)}/>
+
+        <ChatMessageContainer>
+          {chatMessages.map((chatMessage, i) => (
+            <Fragment key={i}>
+              {shouldShowTime(i) && (
+                <TimeSeparator date={new Date(chatMessage.created_at)} />
+              )}
+              <ChatMessage
+                chatMessage={chatMessage}
+                showName={shouldShowSender(i)}
+                isDoubleText={isDoubleText(i)}
+                fromUser={chatMessage.sender === userId}
+              />
+            </Fragment>
+          ))}
+        </ChatMessageContainer>
+      </ContentContainer>
 
       <ChatInputBar sendMessage={sendMessage} />
-      <ChatUsers roomId={roomId} />
-    </div>
+    </ChatContainer>
   );
 }

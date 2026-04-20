@@ -46,13 +46,15 @@ export async function getChatRoomSessionId(roomId: string) {
   return data[0].session_id;
 }
 
-export async function getUserChatRooms(userId: string) {
+export async function getUserChatRooms(userId: string, sessionId: string) {
   const supabase = await getSupabaseServerClient();
 
   const { data, error } = await supabase
     .from("chat_room")
     .select("room_id")
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+  // TODO: fix
+    // .eq("session_id", sessionId);
 
   if (error) {
     console.error("Error getting chat rooms: ", error.message);
@@ -161,7 +163,7 @@ export async function addUserToChatRoom(
 }
 
 export async function createChatRoom(
-  roomId: UUID,
+  roomId: string,
   userId: string,
   sessionId: string,
 ) {

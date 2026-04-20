@@ -3,7 +3,7 @@ import Image from "next/image";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
-import { B2, Caption, TextStyles } from "@/styles/text";
+import { B1, B2, Caption, TextStyles } from "@/styles/text";
 
 export const MessageContent = styled(B2)`
   color: ${COLORS.black70};
@@ -99,6 +99,7 @@ export const ChatMessageContainer = styled.div`
   align-items: flex-start;
   gap: 0.75rem;
   align-self: stretch;
+  margin: 0 1.25rem;
 `;
 
 export const TimeSeparatorBold = styled(Caption)`
@@ -134,6 +135,7 @@ export const ChatInput = styled.textarea`
   align-self: flex-start;
   justify-content: flex-start;
   resize: none;
+  background: ${COLORS.oat_light};
 
   // B2 styles
   ${TextStyles as any}
@@ -151,3 +153,61 @@ export const ChatSendButton = styled.button`
   align-self: flex-end;
   justify-content: flex-end;
 `;
+
+export const ChatContainer = styled.div`
+  display: flex;
+  width: 19.375rem;
+  height: 100%;
+  padding-top: 0.75rem;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex: 1 0 0;
+  border-radius: 1rem;
+  border: 1px solid ${COLORS.oat_medium};
+  background: ${COLORS.oat_light};
+`
+
+export const ChatHeader = styled(B1)`
+  color: ${COLORS.black70};
+  align-self: center;
+`
+
+export const ContentContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  gap: 1rem;
+`
+
+export const ChatSelectionButton = styled.div<{ color?: string }>`
+  display: flex;
+  width: 2rem;
+  height: 2rem;
+  padding: 0.375rem;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 1/1;
+  border-radius: 0.5rem;
+  border: 1px solid ${({color}) => color ?? COLORS.darkElectricBlue};
+`
+
+export const ChatButtonContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+`
+
+export const ChatButtonLabel = styled(Caption)`
+  color: ${COLORS.darkElectricBlue};
+`
+export const ChatSelectionContainer = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-left: 1.25rem;
+`

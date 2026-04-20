@@ -9,6 +9,8 @@ export default function ChatInputBar({
   const [userInput, setUserInput] = useState("");
 
   const onClick = () => {
+    if (userInput.length === 0) return;
+
     sendMessage(userInput);
     setUserInput("");
   };
