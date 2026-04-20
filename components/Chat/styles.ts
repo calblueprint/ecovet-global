@@ -191,7 +191,8 @@ export const ChatSelectionButton = styled.div<{ color?: string }>`
   align-items: center;
   aspect-ratio: 1/1;
   border-radius: 0.5rem;
-  border: 1px solid ${({color}) => color ?? COLORS.darkElectricBlue};
+  border: 1px solid ${COLORS.darkElectricBlue};
+  background: ${({ color }) => color ?? COLORS.teal};
 `
 
 export const ChatButtonContainer = styled.div`
