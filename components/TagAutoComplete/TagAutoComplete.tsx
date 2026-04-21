@@ -18,6 +18,7 @@ interface TagAutocompleteProps {
   onCreate: (name: string) => void;
   onRemove: (tagId: string) => void;
   onBlur?: () => void;
+  showBorder?: boolean;
 }
 
 export function TagAutocomplete({
@@ -27,6 +28,7 @@ export function TagAutocomplete({
   onCreate,
   onRemove,
   onBlur,
+  showBorder = false,
 }: TagAutocompleteProps) {
   const [inputValue, setInputValue] = useState("");
 
@@ -127,11 +129,11 @@ export function TagAutocomplete({
         paper: {
           sx: {
             boxShadow: "none",
-            border: `1px solid ${COLORS.darkElectricBlue}`,
+            border: `1px solid ${COLORS.oat_dark}`,
           },
         },
       }}
-      sx={autocompletesx}
+      sx={autocompletesx(showBorder ?? false)}
     />
   );
 }
