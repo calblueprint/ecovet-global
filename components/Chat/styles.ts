@@ -158,6 +158,7 @@ export const ChatContainer = styled.div`
   display: flex;
   width: 19.375rem;
   height: 100%;
+  gap: 1rem;
   padding-top: 0.75rem;
   flex-direction: column;
   justify-content: space-between;

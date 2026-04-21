@@ -56,21 +56,23 @@ export async function getUserChatRooms(userId: string, sessionId: string) {
 
   if (roomsError) throw roomsError;
 
-  const roomIds = userRooms.map((room) => room.room_id);
+  const roomIds = userRooms.map(room => room.room_id);
 
   const { data: roomParticipants, error: participantsError } = await supabase
     .from("chat_room")
-    .select(`
+    .select(
+      `
       room_id,
       user_id,
       profile (*)
-    `)
+    `,
+    )
     .in("room_id", roomIds);
 
   if (participantsError) throw participantsError;
   const roomsMap = new Map<string, Profile[]>();
 
-  (roomParticipants || []).forEach((current) => {
+  (roomParticipants || []).forEach(current => {
     const existingProfiles = roomsMap.get(current.room_id) || [];
     existingProfiles.push(current.profile);
     roomsMap.set(current.room_id, existingProfiles);

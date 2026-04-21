@@ -3,6 +3,7 @@ import {
   createChatRoom,
   getUserChatRooms,
 } from "@/actions/supabase/queries/chat";
+import { Caption } from "@/styles/text";
 import { Profile, UUID } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import { useRealtimeChat as useChat } from "@/utils/UseChat";
@@ -17,7 +18,6 @@ import {
   ContentContainer,
 } from "./styles";
 import { TimeSeparator } from "./TimeSeparator";
-import { Caption } from "@/styles/text";
 
 const ONE_HOUR_MS = 1000 * 60 * 60;
 const DOUBLE_TEXT_MS = 1000 * 60 * 2;
@@ -39,18 +39,22 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
 
     try {
       const rooms = await getUserChatRooms(userId, sessionId);
-      const entries = [...rooms.entries()]
+      const entries = [...rooms.entries()];
       setChatRooms(
         entries.map(([roomId, users]) => {
-          const otherUsers = users.filter((user) => user.id !== userId)
-          const firstUser = otherUsers.length > 0 ? `${otherUsers[0].first_name} ${otherUsers[0].last_name}` : 'Unknown';
+          const otherUsers = users.filter(user => user.id !== userId);
+          const firstUser =
+            otherUsers.length > 0
+              ? `${otherUsers[0].first_name} ${otherUsers[0].last_name}`
+              : "Unknown";
           let chatName = firstUser;
-          if (otherUsers.length > 1) chatName += ` + ${otherUsers.length - 1}`
+          if (otherUsers.length > 1) chatName += ` + ${otherUsers.length - 1}`;
 
-          return { roomId, chatName }
-      }));
+          return { roomId, chatName };
+        }),
+      );
 
-      console.log(chatRooms)
+      console.log(chatRooms);
       if (entries.length > 0) setRoomId(entries[0][0]);
     } catch {
       console.log("Error loading chat rooms.");
@@ -97,9 +101,8 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
     await createChatRoom(roomId, userId, sessionId);
     await loadRooms();
     setIsSelectingUsers(true);
-    setRoomId(roomId)
+    setRoomId(roomId);
   }
-
 
   return (
     <ChatContainer>
@@ -107,20 +110,25 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
         <ChatHeader>Communication</ChatHeader>
 
         {isSelectingUsers ? (
-          <ChatUsers sessionId={sessionId} roomId={roomId} onDone={() => setIsSelectingUsers(false)}/>
+          <ChatUsers
+            sessionId={sessionId}
+            roomId={roomId}
+            onDone={() => setIsSelectingUsers(false)}
+          />
         ) : (
           <ChatSelection
             chats={chatRooms}
             changeRoom={roomId => {
-              setRoomId(roomId)
+              setRoomId(roomId);
               setIsSelectingUsers(true);
             }}
             createRoom={onCreateRoom}
           />
         )}
 
-        {loading ?
-          <Caption>Loading...</Caption> :
+        {loading ? (
+          <Caption>Loading...</Caption>
+        ) : (
           <ChatMessageContainer>
             {chatMessages.map((chatMessage, i) => (
               <Fragment key={i}>
@@ -136,7 +144,7 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
               </Fragment>
             ))}
           </ChatMessageContainer>
-        }
+        )}
       </ContentContainer>
 
       <ChatInputBar sendMessage={sendMessage} />

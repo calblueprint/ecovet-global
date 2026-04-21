@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { StylesConfig } from "react-select";
 import {
   addUserToChatRoom,
   getChatParticipants,
@@ -8,6 +9,7 @@ import {
 import { fetchChatUserOptions } from "@/actions/supabase/queries/sessions";
 import COLORS from "@/styles/colors";
 import { H3 } from "@/styles/text";
+import { DropdownOption } from "@/types/dropdown";
 import { useProfile } from "@/utils/ProfileProvider";
 import InputDropdown from "../InputDropdown/InputDropdown";
 import {
@@ -17,15 +19,21 @@ import {
   ProfileColor,
   SelectUsersContainer,
 } from "./styles";
-import { StylesConfig } from "react-select";
-import { DropdownOption } from "@/types/dropdown";
 
 type User = {
   id: string;
   name: string;
 };
 
-export default function ChatUsers({ sessionId, roomId, onDone }: { sessionId: string, roomId: string, onDone: () => void }) {
+export default function ChatUsers({
+  sessionId,
+  roomId,
+  onDone,
+}: {
+  sessionId: string;
+  roomId: string;
+  onDone: () => void;
+}) {
   const { profile } = useProfile();
 
   const [currentParticipants, setCurrentParticipants] = useState<string[]>([]);
@@ -33,11 +41,14 @@ export default function ChatUsers({ sessionId, roomId, onDone }: { sessionId: st
 
   const currentParticipantSelections = participantOptions
     .filter(
-      user => user.id != profile?.id && user.name != "null null" && currentParticipants.includes(user.id),
+      user =>
+        user.id != profile?.id &&
+        user.name != "null null" &&
+        currentParticipants.includes(user.id),
     )
     .map(p => ({ id: p.id, name: p.name }));
 
- const avaliableParticipantSelections = useMemo(
+  const avaliableParticipantSelections = useMemo(
     () =>
       new Map(
         participantOptions
@@ -94,7 +105,6 @@ export default function ChatUsers({ sessionId, roomId, onDone }: { sessionId: st
     }
   }
 
-
   const captionStyles = {
     color: COLORS.black40,
     fontFamily: '"Public Sans", sans-serif',
@@ -106,31 +116,31 @@ export default function ChatUsers({ sessionId, roomId, onDone }: { sessionId: st
   };
 
   const dropdownStyles: StylesConfig<DropdownOption, boolean> = {
-    container: (base) => ({
+    container: base => ({
       ...base,
       width: "100%",
     }),
-    control: (base) => ({
-      ...base,
-      ...captionStyles,
-      width: "100%",
-    }),
-    placeholder: (base) => ({
+    control: base => ({
       ...base,
       ...captionStyles,
       width: "100%",
     }),
-    singleValue: (base) => ({
+    placeholder: base => ({
       ...base,
       ...captionStyles,
       width: "100%",
     }),
-    option: (base) => ({
+    singleValue: base => ({
       ...base,
       ...captionStyles,
       width: "100%",
     }),
-    multiValueLabel: (base) => ({
+    option: base => ({
+      ...base,
+      ...captionStyles,
+      width: "100%",
+    }),
+    multiValueLabel: base => ({
       ...base,
       ...captionStyles,
       width: "100%",
