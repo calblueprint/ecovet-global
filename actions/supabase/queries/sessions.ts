@@ -4,6 +4,9 @@ import type {
   ParticipantSessionWithProfile,
   Prompt,
   PromptAnswer,
+  PromptOption,
+  PromptOptionsSelected,
+  PromptWithResponse,
   RolePhase,
   Session,
   UUID,
@@ -642,19 +645,17 @@ export async function getRespondedPromptsByRolePhase(
   return data?.map(d => d.prompt_id) ?? null;
 }
 
-// DEPRECATED - query moved into fetchPromptsWithResponses
-// kept for future use
 export async function fetchPromptsWithResponses(
   rolePhaseId: UUID,
   userId: UUID,
   sessionId: UUID,
-) {
+): Promise<PromptWithResponse[]> {
   const supabase = await getSupabaseServerClient();
 
-  // 1. Get all prompts (questions)
+  // 1. Prompts for this role_phase
   const { data: prompts, error: promptsError } = await supabase
     .from("prompt")
-    .select("prompt_id, prompt_text")
+    .select("*")
     .eq("role_phase_id", rolePhaseId);
 
   if (promptsError) {
@@ -662,10 +663,10 @@ export async function fetchPromptsWithResponses(
     throw promptsError;
   }
 
-  // 2. Get responses for each particular user/session/rolePhase
+  // 2. This user's responses for this session/role_phase
   const { data: responses, error: responsesError } = await supabase
     .from("prompt_response")
-    .select("prompt_id, prompt_answer")
+    .select("*")
     .eq("user_id", userId)
     .eq("session_id", sessionId)
     .eq("role_phase_id", rolePhaseId);
@@ -675,17 +676,57 @@ export async function fetchPromptsWithResponses(
     throw responsesError;
   }
 
-  // 3. Map responses by prompt_id for fast lookup
-  const responseMap = new Map(
-    responses?.map(r => [r.prompt_id, r.prompt_answer]),
-  );
+  // 3. All options for these prompts (not only selected ones)
+  const promptIds = (prompts ?? []).map(p => p.prompt_id);
+  const optionsByPrompt = new Map<UUID, PromptOptionsSelected[]>();
 
-  // 4. Merge
-  return prompts.map(p => ({
-    promptId: p.prompt_id,
-    question: p.prompt_text ?? "Missing Question",
-    answer: responseMap.get(p.prompt_id) ?? null,
-  }));
+  if (promptIds.length > 0) {
+    const { data: options, error: optionsError } = await supabase
+      .from("prompt_option")
+      .select("option_id, prompt_id, option_text")
+      .in("prompt_id", promptIds);
+
+    if (optionsError) {
+      console.error("Error fetching options:", optionsError);
+      throw optionsError;
+    }
+
+    const selectedOptionIds = new Set(
+      (responses ?? [])
+        .map(r => r.prompt_option_id)
+        .filter((id): id is UUID => Boolean(id)),
+    );
+
+    for (const o of options ?? []) {
+      if (!o.option_text) continue;
+      const list = optionsByPrompt.get(o.prompt_id) ?? [];
+      list.push({
+        optionId: o.option_id,
+        text: o.option_text,
+        selected: selectedOptionIds.has(o.option_id),
+      });
+      optionsByPrompt.set(o.prompt_id, list);
+    }
+  }
+
+  // 4. Free-text answers keyed by prompt_id
+  const textAnswerByPrompt = new Map<UUID, string>();
+  for (const r of responses ?? []) {
+    if (r.prompt_answer) {
+      textAnswerByPrompt.set(r.prompt_id, r.prompt_answer);
+    }
+  }
+
+  // 5. Merge into UI shape
+  return (prompts ?? []).map(p => {
+    const options = optionsByPrompt.get(p.prompt_id) ?? null;
+    return {
+      promptId: p.prompt_id,
+      question: p.prompt_text ?? "Missing Question",
+      answer: textAnswerByPrompt.get(p.prompt_id) ?? null,
+      options,
+    };
+  });
 }
 
 export async function fetchRolePhasesBatch(

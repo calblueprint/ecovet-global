@@ -1,6 +1,6 @@
 "use client";
 
-import type { Phase, UUID } from "@/types/schema";
+import type { Phase, PromptWithResponse, UUID } from "@/types/schema";
 import { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Box from "@mui/material/Box";
@@ -32,13 +32,12 @@ import {
   PromptWrapper,
   SilverText,
 } from "../styles";
-
-type PromptData = { question: string; answer: string | null };
+import { OptionList, OptionRow, RadioCircle } from "./styles";
 
 type PhasePromptData = {
   phaseId: UUID;
   phaseName: string | null;
-  prompts: PromptData[];
+  prompts: PromptWithResponse[];
 };
 
 export default function ParticipantDetailView() {
@@ -48,7 +47,7 @@ export default function ParticipantDetailView() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState<string | null>(null);
-  const [prompts, setPrompts] = useState<PromptData[]>([]);
+  const [prompts, setPrompts] = useState<PromptWithResponse[]>([]);
   const [phaseIds, setPhaseIds] = useState<UUID[]>([]);
   const [phases, setPhases] = useState<Phase[]>([]);
   const [currentPhaseName, setCurrentPhaseName] = useState<string | null>(null);
@@ -163,7 +162,10 @@ export default function ParticipantDetailView() {
     setPhases(phases);
     setCurrentPhaseName(phases[phaseIndex]?.phase_name ?? null);
     setPrompts(promptData);
-    setDone(promptData.filter(p => p.answer).length);
+    setDone(
+      promptData.filter(p => p.answer || p.options?.some(o => o.selected))
+        .length,
+    );
     setLoading(false);
     setRoleId(roleId);
     setPhaseIds(phaseIds);
@@ -257,9 +259,20 @@ export default function ParticipantDetailView() {
                   <PromptQuestionText>
                     Question: {prompt.question}
                   </PromptQuestionText>{" "}
-                  <PromptAnswer>
-                    {prompt.answer ?? <i>No response</i>}
-                  </PromptAnswer>
+                  {prompt.options && prompt.options.length > 0 ? (
+                    <OptionList>
+                      {prompt.options.map(opt => (
+                        <OptionRow key={opt.optionId} $selected={opt.selected}>
+                          <RadioCircle $selected={opt.selected} />
+                          <span>{opt.text}</span>
+                        </OptionRow>
+                      ))}
+                    </OptionList>
+                  ) : (
+                    <PromptAnswer>
+                      {prompt.answer ?? <i>No response</i>}
+                    </PromptAnswer>
+                  )}
                 </PromptWrapper>
               ))}
             </PromptCard>

@@ -56,15 +56,6 @@ export type EditablePhase = Omit<Tables<"phase">, "session_id">;
    (NOT direct DB rows)
 ============================ */
 
-export interface PromptAnswer {
-  prompt_response_id: UUID; // prompt_answer_id
-  session_id: UUID;
-  user_id: UUID;
-  prompt_id: UUID;
-  prompt_option_id: UUID;
-  prompt_answer: string;
-}
-
 export type ParticipantSessionWithProfile = ParticipantSession & {
   profile: {
     first_name: string;
@@ -73,6 +64,19 @@ export type ParticipantSessionWithProfile = ParticipantSession & {
   role: {
     role_name: string;
   } | null;
+};
+
+export type PromptOptionsSelected = {
+  optionId: UUID;
+  text: string;
+  selected: boolean;
+};
+
+export type PromptWithResponse = {
+  promptId: UUID;
+  question: string;
+  answer: string | null;
+  options: PromptOptionsSelected[] | null;
 };
 
 export type StagedOption = {
