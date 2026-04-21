@@ -4,7 +4,7 @@ import type { SelectInstance } from "react-select";
 import { useCallback, useId, useMemo } from "react";
 import Select, { MultiValue, SingleValue, StylesConfig } from "react-select";
 import { DropdownOption } from "@/types/dropdown";
-import { selectStyles } from "./styles";
+import { getSelectStyles, selectStyles } from "./styles";
 
 // for map: key is actual data stored, value is displayed
 interface CommonProps {
@@ -19,6 +19,7 @@ interface CommonProps {
   selectRef?: React.Ref<SelectInstance<DropdownOption>>;
   defaultValue?: string;
   isClearable?: boolean;
+  outlined?: boolean;
 }
 
 interface MultiSelectProps extends CommonProps {
@@ -48,6 +49,7 @@ export default function InputDropdown(props: InputDropdownProps) {
     selectRef,
     defaultValue,
     isClearable,
+    outlined = true,
   } = props;
 
   const optionsArray = useMemo(
@@ -108,7 +110,7 @@ export default function InputDropdown(props: InputDropdownProps) {
       value={controlledValue}
       defaultValue={defaultOption}
       styles={{
-        ...((customStyles || selectStyles) as StylesConfig<
+        ...((customStyles || getSelectStyles(outlined)) as StylesConfig<
           DropdownOption,
           boolean
         >),

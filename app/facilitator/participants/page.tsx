@@ -10,7 +10,9 @@ import {
 } from "@/actions/supabase/queries/profile";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import InviteComponent from "@/components/InviteComponent/InviteComponent";
-import WarningModal from "@/components/WarningModal/WarningModal";
+import WarningModal, {
+  WarningAction,
+} from "@/components/WarningModal/WarningModal";
 import { useProfile } from "@/utils/ProfileProvider";
 import ParticipantsList from "./components/ParticipantsList";
 import {
@@ -92,9 +94,9 @@ export default function ParticipantsPage() {
     setWarningModalOpen(true);
   };
 
-  const handleModalClose = async (shouldDelete: boolean) => {
+  const handleModalClose = async (action: WarningAction) => {
     setWarningModalOpen(false);
-    if (shouldDelete && pendingDelete) {
+    if (action === "confirm" && pendingDelete) {
       // Only delete profile is invite accepted and there is one
       if (pendingDelete.invite_accepted && pendingDelete.id) {
         console.log("deleting profile: ", pendingDelete);

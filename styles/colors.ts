@@ -10,7 +10,7 @@ const COLORS = {
   oat_medium: "#EEEDE9",
   oat_light: "#F9F7F4",
   white: "#FFFFFF",
-  lightEletricBlue: "##DAE2E4",
+  lightEletricBlue: "#DAE2E4",
   darkElectricBlue: "#476c77",
 
   tagRed: "#EF4444",
