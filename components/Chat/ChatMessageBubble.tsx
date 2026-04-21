@@ -32,7 +32,7 @@ export default function ChatMessage({
   const { day, time } = getMessageDateLabel(new Date(chatMessage.created_at));
 
   return (
-    <FullMessageContainer doubletext={isDoubleText} fromuser={fromUser}>
+    <FullMessageContainer $doubletext={isDoubleText} $fromuser={fromUser}>
       {showName && (
         <NameContainer>
           <NameText>{senderName}</NameText>

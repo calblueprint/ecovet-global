@@ -1,7 +1,7 @@
 import styled, { css } from "styled-components";
 import { Sans } from "./fonts";
 
-interface TextProps {
+export interface TextProps {
   $color?: string;
   $fontWeight?: number | string;
   $align?: "left" | "right" | "center" | "end" | "justify" | "start";

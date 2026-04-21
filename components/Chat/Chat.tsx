@@ -4,7 +4,7 @@ import {
   getUserChatRooms,
 } from "@/actions/supabase/queries/chat";
 import { Caption } from "@/styles/text";
-import { Profile, UUID } from "@/types/schema";
+import { UUID } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import { useRealtimeChat as useChat } from "@/utils/UseChat";
 import ChatInputBar from "./ChatInputBar";

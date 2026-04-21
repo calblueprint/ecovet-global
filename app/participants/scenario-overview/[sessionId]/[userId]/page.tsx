@@ -27,6 +27,7 @@ import {
   sessionParticipantsBulk,
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
+import Chat from "@/components/Chat/Chat";
 import { PromptOption } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import { useAnnouncements } from "@/utils/UseAnnouncements";
@@ -427,6 +428,8 @@ export default function SessionFlowPage() {
           )
         }
       />
+
+      {sessionIdStr && <Chat sessionId={sessionIdStr} />}
     </Main>
   );
 }

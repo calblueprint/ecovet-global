@@ -6,9 +6,23 @@ import { Sans } from "@/styles/fonts";
 export const Main = styled.main`
   display: flex;
   flex-direction: row;
+  width: 100%;
   height: 100vh;
-  min-height: 100vh;
-  background-color: ${COLORS.white};
+  overflow: hidden;
+
+  > *:nth-child(1) {
+    flex: 0.5 0.5 auto;
+  }
+
+  > *:nth-child(2) {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  > *:nth-child(3) {
+    flex: 0 0 360px;
+    border-left: 1px solid #e5e7eb;
+  }
 `;
 
 export const ContentDiv = styled.div`

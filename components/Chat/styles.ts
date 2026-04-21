@@ -3,7 +3,7 @@ import Image from "next/image";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
-import { B1, B2, Caption, TextStyles } from "@/styles/text";
+import { B1, B2, Caption, TextProps, TextStyles } from "@/styles/text";
 
 export const MessageContent = styled(B2)`
   color: ${COLORS.black70};
@@ -74,14 +74,14 @@ export const NameRoleSeparator = styled.div`
 `;
 
 export const FullMessageContainer = styled.div<{
-  doubletext: boolean;
-  fromuser: boolean;
+  $doubletext: boolean;
+  $fromuser: boolean;
 }>`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  align-self: ${({ fromuser }) => (fromuser ? "end" : "start")};
-  padding-top: ${({ doubletext }) => (doubletext ? "0.4rem" : "0rem")};
+  align-self: ${({ $fromuser }) => ($fromuser ? "end" : "start")};
+  padding-top: ${({ $doubletext }) => ($doubletext ? "0.4rem" : "0rem")};
 `;
 
 export const ProfileColor = styled.div<{ color: string; size?: number }>`
@@ -129,7 +129,7 @@ export const ChatInputContainer = styled.div`
   border-top: 1px solid ${COLORS.oat_medium};
 `;
 
-export const ChatInput = styled.textarea`
+export const ChatInput = styled.textarea<TextProps>`
   width: 100%;
   border: none;
   align-self: flex-start;
@@ -138,7 +138,7 @@ export const ChatInput = styled.textarea`
   background: ${COLORS.oat_light};
 
   // B2 styles
-  ${TextStyles as any}
+  ${TextStyles}
   color: ${COLORS.black20}
   font-weight: 500;
   font-size: 0.875rem;
