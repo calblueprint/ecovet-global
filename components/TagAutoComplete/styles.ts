@@ -2,7 +2,7 @@ import { SxProps, Theme } from "@mui/material";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
 
-export const autocompletesx: SxProps<Theme> = {
+export const autocompletesx = (showBorder: boolean): SxProps<Theme> => ({
   width: "100%",
 
   "& .MuiAutocomplete-clearIndicator": {
@@ -10,20 +10,23 @@ export const autocompletesx: SxProps<Theme> = {
   },
 
   "& .MuiOutlinedInput-root": {
-    borderRadius: "2rem",
+    borderRadius: "0.4rem",
     flexWrap: "wrap",
     paddingTop: "0 !important",
     padding: "0.1rem 0.5rem",
     gap: "0.25rem",
     backgroundColor: "transparent",
     minHeight: "2.25rem",
-    alignItems: "start",
+    alignItems: "center",
 
     "& fieldset": {
-      border: "none",
+      border: showBorder ? `1px solid ${COLORS.oat_medium}` : "none",
+    },
+    "&:hover fieldset": {
+      border: showBorder ? `1px solid ${COLORS.oat_medium}` : "none",
     },
     "&.Mui-focused fieldset": {
-      border: "none",
+      border: showBorder ? `1px solid ${COLORS.oat_dark}` : "none",
       borderWidth: "0.0625rem",
     },
   },
@@ -78,9 +81,10 @@ export const autocompletesx: SxProps<Theme> = {
   "& .MuiAutocomplete-popper": {
     border: "none",
   },
-};
+});
 
 export const chipSx: SxProps<Theme> = {
+  clipPath: "inset(0)",
   backgroundColor: `${COLORS.tagYellow}`,
   fontWeight: 500,
   fontSize: "0.75rem",
