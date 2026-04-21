@@ -227,6 +227,18 @@ export async function sessionParticipantsBulk(
   return data ?? [];
 }
 
+export async function getAllPhaseIds(templateId: UUID): Promise<UUID[] | null> {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("phase")
+    .select("phase_id")
+    .eq("template_id", templateId);
+
+  if (error) throw error;
+
+  return data?.map(p => p.phase_id) ?? null;
+}
+
 export async function advancePhaseForSingleUser(
   userId: UUID,
   roleId: UUID,

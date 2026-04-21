@@ -15,7 +15,6 @@ import supabase from "@/actions/supabase/client";
 import {
   fetchPhases,
   fetchPromptsWithResponses,
-  fetchRolePhases,
   fetchRolePhasesBatch,
   fetchTemplateNameBySession,
   finishSession,

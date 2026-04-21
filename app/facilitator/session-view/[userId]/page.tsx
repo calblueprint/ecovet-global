@@ -6,33 +6,37 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import supabase from "@/actions/supabase/client";
+import { getProfileById } from "@/actions/supabase/queries/profile";
 import {
   fetchPhases,
   fetchPromptsWithResponses,
   fetchRoleName,
+  fetchRolePhases,
   fetchRolePhasesBatch,
   fetchTemplateId,
+  getAllPhaseIds,
   sessionParticipants,
 } from "@/actions/supabase/queries/sessions";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
+import { SilverText } from "../styles";
 import {
   AnnouncementsPanel,
-  Button,
   ContentDiv,
+  InfoBox,
   InfoGrid,
   InfoLabel,
   InfoValue,
+  OptionList,
+  OptionRow,
   PageLayout,
   ParticipantInformation,
   PromptAnswer,
   PromptCard,
   PromptQuestionNumber,
   PromptQuestionText,
-  PromptText,
   PromptWrapper,
-  SilverText,
-} from "../styles";
-import { OptionList, OptionRow, RadioCircle } from "./styles";
+  RadioCircle,
+} from "./styles";
 
 type PhasePromptData = {
   phaseId: UUID;
@@ -60,42 +64,6 @@ export default function ParticipantDetailView() {
   const [roleName, setRoleName] = useState<string | null>(null);
   const router = useRouter();
 
-  async function getAllPhaseIds(templateId: UUID): Promise<UUID[] | null> {
-    const { data, error } = await supabase
-      .from("phase")
-      .select("phase_id")
-      .eq("template_id", templateId);
-
-    if (error) throw error;
-
-    return data?.map(p => p.phase_id) ?? null;
-  }
-
-  async function fetchRolePhaseClent(roleId: UUID, phaseId: UUID) {
-    const { data, error } = await supabase
-      .from("role_phase")
-      .select("*")
-      .eq("role_id", roleId)
-      .eq("phase_id", phaseId)
-      .single();
-
-    if (error) throw error;
-
-    return data;
-  }
-
-  async function fetchEmail(id: UUID): Promise<string | null> {
-    const { data, error } = await supabase
-      .from("profile")
-      .select("email")
-      .eq("id", id)
-      .single();
-
-    if (error) throw error;
-
-    return data?.email ?? null;
-  }
-
   async function loadData() {
     if (!sessionId || !userId) return;
 
@@ -103,8 +71,8 @@ export default function ParticipantDetailView() {
     const participant = participants.find(p => p.user_id === userId);
     if (!participant) return;
 
-    const email = await fetchEmail(userId);
-    setEmail(email);
+    const email = await getProfileById(userId);
+    setEmail(email.email);
 
     setName(
       `${participant.profile?.first_name} ${participant.profile?.last_name}`,
@@ -141,7 +109,7 @@ export default function ParticipantDetailView() {
 
     const allPhasePrompts: PhasePromptData[] = [];
     for (const phaseId of phaseIds) {
-      const rolePhase = await fetchRolePhaseClent(roleId, phaseId);
+      const rolePhase = await fetchRolePhases(roleId, phaseId);
       if (!rolePhase) continue;
 
       const prompts = await fetchPromptsWithResponses(
@@ -201,7 +169,6 @@ export default function ParticipantDetailView() {
     <>
       <TopNavBar />
       <PageLayout>
-        <AnnouncementsPanel>{/* Announcements content */}</AnnouncementsPanel>
         <ContentDiv>
           <SilverText
             onClick={() =>
@@ -224,16 +191,7 @@ export default function ParticipantDetailView() {
               <InfoValue>{currentPhaseName ?? "N/A"}</InfoValue>
               <InfoLabel>Answered</InfoLabel>{" "}
               <InfoValue>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "1rem",
-                    width: "auto",
-                    maxWidth: "300px",
-                    justifyContent: "",
-                  }}
-                >
+                <InfoBox>
                   <span>
                     {done} / {prompts.length}
                   </span>
@@ -243,9 +201,9 @@ export default function ParticipantDetailView() {
                   <LinearProgress
                     variant="determinate"
                     value={percent}
-                    sx={{ flex: 1 }}
+                    sx={{ flex: 1, width: "100%" }}
                   />
-                </Box>
+                </InfoBox>
               </InfoValue>
             </InfoGrid>
           </ParticipantInformation>
@@ -270,7 +228,7 @@ export default function ParticipantDetailView() {
                     </OptionList>
                   ) : (
                     <PromptAnswer>
-                      {prompt.answer ?? <i>No response</i>}
+                      {prompt.answer ?? "No response"}
                     </PromptAnswer>
                   )}
                 </PromptWrapper>
