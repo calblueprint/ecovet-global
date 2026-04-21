@@ -1,3 +1,4 @@
+import Link from "next/link";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Flex } from "@/styles/containers";
@@ -10,6 +11,11 @@ export const PhaseCaption = styled(Caption)`
 
 export const SidebarCaption = styled(Caption)`
   color: ${COLORS.black40};
+`;
+
+export const SidebarLink = styled(Link)`
+  text-decoration: none;
+  color: inherit;
 `;
 
 export const SidebarTemplateName = styled(B2)`

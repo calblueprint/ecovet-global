@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import img from "@/assets/images/BlackPlus.svg";
 import { Caption } from "@/styles/text";
@@ -17,6 +18,7 @@ import {
   SidebarContainer,
   SideBarEntry,
   SideBarHeader,
+  SidebarLink,
   SideBarSection,
   SidebarTemplateName,
 } from "./styles";
@@ -115,7 +117,9 @@ export default function TemplateBuilderSideBar({
     <SidebarContainer>
       <SideBarSection $isFirst={true}>
         <SideBarHeader>
-          <SidebarCaption>← Catalogue</SidebarCaption>
+          <SidebarLink href="/facilitator/template-list">
+            <SidebarCaption>← Catalogue</SidebarCaption>
+          </SidebarLink>
           <SidebarTemplateName
             contentEditable
             suppressContentEditableWarning

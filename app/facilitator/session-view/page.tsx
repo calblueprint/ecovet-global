@@ -3,7 +3,6 @@
 import type { ParticipantSession, Phase, UUID } from "@/types/schema";
 import { useEffect, useState } from "react";
 import * as React from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -274,23 +273,24 @@ export default function FacilitatorSessionView() {
 
   async function advancePhase() {
     if (!sessionId || isAdvancing) return;
+
     setIsAdvancing(true);
 
-    if (!isLastPhase) {
-      const { data, error } = await supabase.rpc("advance_phase", {
-        p_session_id: sessionId,
-        p_current_phase_num: currentPhase,
-      });
+    const { data, error } = await supabase.rpc("advance_phase", {
+      p_session_id: sessionId,
+      p_current_phase_num: currentPhase,
+    });
 
-      if (error) {
-        console.error("Failed to advance phase:", error);
-        setIsAdvancing(false);
-        return;
-      }
-    } else {
+    if (error) {
+      console.error("Failed to advance phase:", error);
+      setIsAdvancing(false);
+      return;
+    }
+
+    if (!data) {
       try {
         await finishSession(sessionId);
-        router.push("/sessions/session-finish/");
+        router.push(`/sessions/session-finish/${sessionId}`);
       } catch (err) {
         console.error("Failed to finish session:", err);
       }
