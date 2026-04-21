@@ -2,7 +2,7 @@
 
 import { UUID } from "crypto";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
-import { ChatMessage } from "@/types/schema";
+import { ChatMessage, Profile } from "@/types/schema";
 
 export async function getChatParticipants(roomId: string) {
   const supabase = await getSupabaseServerClient();
@@ -46,24 +46,39 @@ export async function getChatRoomSessionId(roomId: string) {
   return data[0].session_id;
 }
 
-export async function getUserChatRooms(userId: string) {
+export async function getUserChatRooms(userId: string, sessionId: string) {
   const supabase = await getSupabaseServerClient();
-
-  const { data, error } = await supabase
+  const { data: userRooms, error: roomsError } = await supabase
     .from("chat_room")
     .select("room_id")
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .eq("session_id", sessionId);
 
-  if (error) {
-    console.error("Error getting chat rooms: ", error.message);
-    throw new Error("Failed to get chat rooms.");
-  }
+  if (roomsError) throw roomsError;
 
-  const roomIds = data
-    .filter(({ room_id }) => room_id)
-    .map(({ room_id }) => room_id);
+  const roomIds = userRooms.map(room => room.room_id);
 
-  return roomIds as string[];
+  const { data: roomParticipants, error: participantsError } = await supabase
+    .from("chat_room")
+    .select(
+      `
+      room_id,
+      user_id,
+      profile (*)
+    `,
+    )
+    .in("room_id", roomIds);
+
+  if (participantsError) throw participantsError;
+  const roomsMap = new Map<string, Profile[]>();
+
+  (roomParticipants || []).forEach(current => {
+    const existingProfiles = roomsMap.get(current.room_id) || [];
+    existingProfiles.push(current.profile);
+    roomsMap.set(current.room_id, existingProfiles);
+  });
+
+  return roomsMap;
 }
 
 export async function persistChatMessage(
@@ -161,7 +176,7 @@ export async function addUserToChatRoom(
 }
 
 export async function createChatRoom(
-  roomId: UUID,
+  roomId: string,
   userId: string,
   sessionId: string,
 ) {

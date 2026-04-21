@@ -53,14 +53,18 @@ export async function fetchChatUserOptions(
     .select(
       `
     *,
-    participant_session!inner(session_id)
+    participant_session!participant_session_user_id_fkey!inner(session_id)
   `,
     )
     .eq("user_group_id", userGroupId)
     .eq("participant_session.session_id", sessionId);
 
   if (error) {
-    console.error("Error fetching chat users options:", error);
+    console.error(
+      "Error fetching chat users options:",
+      error,
+      ` userGroupId=${userGroupId}, sessionId=${sessionId}`,
+    );
     throw new Error("Error fetching chat users options");
   }
 
@@ -130,6 +134,38 @@ export async function assignParticipantToSession(
   }
 }
 
+export async function fetchSessionGlobalPhaseIndex(sessionId: string) {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("session")
+    .select("phase_index")
+    .eq("session_id", sessionId)
+    .single();
+
+  if (error) throw error;
+  if (data == null)
+    throw new Error(
+      `Session with sessionId ${sessionId} not found while trying to fetchSessionGlobalPhaseIndex`,
+    );
+
+  return data.phase_index ?? 0;
+}
+
+// only for force advance sessions, so we make sure people don't advance further than they should
+export async function setSessionGlobalPhaseIndex(
+  sessionId: string,
+  newPhaseIndex: number,
+) {
+  console.log(`set session global phase index ${newPhaseIndex}`);
+  const supabase = await getSupabaseServerClient();
+  const { error } = await supabase
+    .from("session")
+    .update({ phase_index: newPhaseIndex })
+    .eq("session_id", sessionId);
+
+  if (error) throw error;
+}
+
 export async function createSession(
   templateId: string,
   userGroupId: string,
@@ -143,6 +179,7 @@ export async function createSession(
         template_id: templateId,
         user_group_id: userGroupId,
         force_advance: forceAdvance,
+        phase_index: forceAdvance ? 0 : null,
       },
     ])
     .select("session_id")
@@ -185,12 +222,13 @@ export async function sessionParticipants(
       session_id,
       phase_index,
       is_finished,
+      role (
+        role_name
+      ),
       profile!fk_participant_profile (
         first_name,
         last_name
-      ),
-        role(
-        role_name)
+      )
     `,
     )
     .eq("session_id", session_id)
@@ -244,7 +282,24 @@ export async function advancePhaseForSingleUser(
   roleId: UUID,
   sessionId: UUID,
 ): Promise<void> {
-  console.log("Advancing phase for user:", { userId, roleId, sessionId });
+  changePhaseForSingleUser(userId, roleId, sessionId, 1);
+}
+
+export async function backPhaseForSingleUser(
+  userId: UUID,
+  roleId: UUID,
+  sessionId: UUID,
+): Promise<void> {
+  changePhaseForSingleUser(userId, roleId, sessionId, -1);
+}
+
+export async function changePhaseForSingleUser(
+  userId: UUID,
+  roleId: UUID,
+  sessionId: UUID,
+  phaseChange: number,
+): Promise<void> {
+  console.log("Changing phase for user:", { userId, roleId, sessionId });
   const supabase = await getSupabaseServerClient();
 
   const { data: currentData, error: fetchError } = await supabase
@@ -257,15 +312,22 @@ export async function advancePhaseForSingleUser(
 
   if (fetchError) {
     throw new Error(
-      `Failed to fetch current phase index for user in advancePhaseForUser: ${fetchError.message}`,
+      `Failed to fetch current phase index for user in changePhaseForUser: ${fetchError.message}`,
     );
   }
-  if (!currentData.phase_index) {
-    throw new Error(`Phase Index is null`);
+  if (currentData.phase_index == null) {
+    throw new Error(`Phase Index is null: ${JSON.stringify(currentData)}`);
   }
+
+  if (currentData.phase_index + phaseChange < -1) {
+    throw new Error(
+      `Cannot change phase from "${currentData.phase_index}" to "${currentData.phase_index + phaseChange}"`,
+    );
+  }
+
   const { data, error } = await supabase
     .from("participant_session")
-    .update({ phase_index: currentData.phase_index + 1 })
+    .update({ phase_index: currentData.phase_index + phaseChange })
     .eq("user_id", userId)
     .eq("role_id", roleId)
     .eq("session_id", sessionId)
@@ -273,7 +335,7 @@ export async function advancePhaseForSingleUser(
 
   if (error) {
     throw new Error(
-      `Failed to set advance phase for single user: ${error.message}`,
+      `Failed to set change phase for single user: ${error.message}`,
     );
   }
 
@@ -373,7 +435,6 @@ export async function fetchMostRecentPhase(
   if (!data) {
     throw new Error("No phase id found");
   }
-  console.log("Phase Index:", data);
   if (data.phase_index === null || data.phase_index === undefined) {
     throw new Error(`No phase index`);
   }

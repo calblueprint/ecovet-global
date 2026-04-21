@@ -20,19 +20,25 @@ import {
   fetchPrompts,
   fetchRole,
   fetchRolePhases,
+  fetchSessionGlobalPhaseIndex,
   fetchTemplateId,
   isSessionForceAdvance,
+  sessionParticipants,
+  sessionParticipantsBulk,
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
+import Chat from "@/components/Chat/Chat";
 import { PromptOption } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
-import NextButton from "./components/ParticipantNextButton";
+import { useAnnouncements } from "@/utils/UseAnnouncements";
+import NextPhaseButton from "./components/NextPhaseButton";
+import PrevPhaseButton from "./components/PrevPhaseButton";
 import PromptsRightPanel from "./components/PromptsRightPanel";
 import ScenarioLeftPanel from "./components/ScenarioLeftPanel";
 import { Main } from "./styles";
 
 export default function SessionFlowPage() {
-  const { userId: profileUserId } = useProfile();
+  const { userId: profileUserId, profile } = useProfile();
   const { sessionId, userId: paramUserId } = useParams();
 
   const userId = (profileUserId ?? paramUserId) as UUID | null;
@@ -42,6 +48,9 @@ export default function SessionFlowPage() {
   const [phases, setPhases] = useState<Phase[]>([]);
 
   const [phaseIdx, setPhaseIdx] = useState(-1);
+
+  // only used for force advance sessions
+  const [maxPhaseIndex, setMaxPhaseIndex] = useState(0);
 
   const [roleId, setRoleId] = useState<string | null>(null);
   const [rolePhase, setRolePhase] = useState<RolePhase | null>(null);
@@ -58,7 +67,44 @@ export default function SessionFlowPage() {
 
   const currentPhase = phases[phaseIdx] ?? null;
   const isLastPhase = phaseIdx === phases.length - 1;
+  const isFirstPhase = phaseIdx === 0;
   const isOverview = phaseIdx === -1;
+
+  const { everyoneAnnouncements, roleAnnouncements, userAnnouncements } =
+    useAnnouncements({
+      sessionId: sessionIdStr ?? "unknown session id",
+      userId: userId ?? "unknown user id",
+      username: profile?.first_name ?? "Unknown Users",
+      roleId: roleId ?? "unknown role id",
+    });
+
+  useEffect(() => {
+    if (everyoneAnnouncements.chatMessages.length == 0) return;
+
+    const message =
+      everyoneAnnouncements.chatMessages[
+        everyoneAnnouncements.chatMessages.length - 1
+      ].message;
+    alert("New @everyone message: " + message);
+  }, [everyoneAnnouncements.chatMessages]);
+
+  useEffect(() => {
+    if (roleAnnouncements.chatMessages.length == 0) return;
+
+    const message =
+      roleAnnouncements.chatMessages[roleAnnouncements.chatMessages.length - 1]
+        .message;
+    alert("New @role message: " + message);
+  }, [roleAnnouncements.chatMessages]);
+
+  useEffect(() => {
+    if (userAnnouncements.chatMessages.length == 0) return;
+
+    const message =
+      userAnnouncements.chatMessages[userAnnouncements.chatMessages.length - 1]
+        .message;
+    alert("New @user message: " + message);
+  }, [userAnnouncements.chatMessages]);
 
   const loadData = useCallback(async () => {
     if (!userId || !sessionIdStr) return;
@@ -108,14 +154,6 @@ export default function SessionFlowPage() {
         );
         setRolePhase(rp);
         const p = rp ? await fetchPrompts(rp.role_phase_id) : [];
-        console.log("sessionId", sessionId);
-        console.log("currentPhase", currentPhase);
-        console.log("phases", phases);
-        console.log("phaseInd", phaseIdx);
-        console.log("roleID", roleId);
-        console.log("currentPhaseId", currentPhase.phase_id);
-        console.log("rp", rp);
-        console.log("rolePhaseId", rp?.role_phase_id, p);
         setPrompts(p);
 
         const nonTextPromptIds = p
@@ -146,25 +184,22 @@ export default function SessionFlowPage() {
 
     async function loadResponses() {
       try {
-        let mostRecentPhaseIndex: number;
-        try {
-          mostRecentPhaseIndex = await fetchMostRecentPhase(
-            userId!,
-            sessionIdStr!,
-          );
-        } catch {
-          return;
-        }
-        if (phaseIdx < mostRecentPhaseIndex) {
-          const responses = await fetchPromptResponses(
-            userId!,
-            sessionIdStr!,
-            rolePhase!.role_phase_id,
-          );
-          if (!responses) return;
-          const ordered = sortResponsesByPromptOrder(prompts, responses);
-          setAnswers(ordered.map(r => r?.prompt_answer ?? ""));
-        }
+        const responses = await fetchPromptResponses(
+          userId!,
+          sessionIdStr!,
+          rolePhase!.role_phase_id,
+        );
+        if (!responses) return;
+
+        const ordered = sortResponsesByPromptOrder(prompts, responses);
+        const completed = new Set(
+          ordered
+            .filter(r => r?.prompt_answer)
+            .map(r => r?.prompt_id as string),
+        );
+
+        setAnswers(ordered.map(r => r?.prompt_answer ?? ""));
+        setCompletedPrompts(completed);
       } catch (err) {
         console.error("Response load failed:", err);
       }
@@ -174,13 +209,33 @@ export default function SessionFlowPage() {
   }, [userId, sessionIdStr, rolePhase, prompts, phaseIdx]);
 
   useEffect(() => {
-    console.log("Phase index changed:", phaseIdx);
-  }, [phaseIdx]);
-
-  useEffect(() => {
     if (!userId || !sessionIdStr) return;
 
-    const channel = supabase
+    async function loadPhaseIndex() {
+      if (!sessionIdStr) return;
+      const phaseIdx = await fetchSessionGlobalPhaseIndex(sessionIdStr);
+      setMaxPhaseIndex(phaseIdx);
+    }
+    loadPhaseIndex();
+
+    const sessionChannel = supabase
+      .channel(`session_phase_updates_${sessionIdStr}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "session",
+          filter: `session_id=eq.${sessionIdStr}`,
+        },
+        payload => {
+          const newPhaseIndex = payload.new.phase_index;
+          if (newPhaseIndex != null) setMaxPhaseIndex(newPhaseIndex);
+        },
+      )
+      .subscribe();
+
+    const participantSessionChannel = supabase
       .channel(`participant_session_updates_${userId}_${sessionIdStr}`)
       .on(
         "postgres_changes",
@@ -203,7 +258,8 @@ export default function SessionFlowPage() {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(sessionChannel);
+      supabase.removeChannel(participantSessionChannel);
     };
   }, [userId, sessionIdStr]);
 
@@ -262,8 +318,6 @@ export default function SessionFlowPage() {
       return;
     }
 
-    console.log(completedPrompts);
-
     await createPromptAnswer(
       userId,
       promptId,
@@ -308,9 +362,13 @@ export default function SessionFlowPage() {
   }
 
   async function handleContinue() {
-    if (phaseIdx + 1 >= phases.length) return;
-    const nextInd = phaseIdx + 1;
-    setPhaseIdx(nextInd);
+    if (isLastPhase) return;
+    setPhaseIdx(i => i + 1);
+  }
+
+  async function handleBack() {
+    if (isOverview) return;
+    setPhaseIdx(i => Math.max(i - 1, -1));
   }
 
   if (loading) return <div>Loading session...</div>;
@@ -334,26 +392,45 @@ export default function SessionFlowPage() {
         isOverview={isOverview}
         onInputAnswer={handleInputAnswer}
         onBlur={handleBlur}
+        backButton={
+          !isOverview &&
+          roleId &&
+          userId &&
+          sessionIdStr &&
+          currentPhase && (
+            <PrevPhaseButton
+              userId={userId as UUID}
+              roleId={roleId as UUID}
+              sessionId={sessionIdStr}
+              isOnOverview={isOverview}
+              isFirstPhase={isFirstPhase}
+              onClick={handleBack}
+            />
+          )
+        }
         nextButton={
           !isOverview &&
           roleId &&
           userId &&
           sessionIdStr &&
           currentPhase && (
-            <NextButton
-              user_id={userId as UUID}
-              role_id={roleId as UUID}
-              session_id={sessionIdStr}
-              is_force_advance={isForceAdvance}
+            <NextPhaseButton
+              userId={userId as UUID}
+              roleId={roleId as UUID}
+              sessionId={sessionIdStr}
+              isForceAdvance={isForceAdvance}
+              forceAdvanceMaxPhaseIndex={maxPhaseIndex}
               promptsCompleted={completedPrompts.size == prompts.length}
               isLastPhase={isLastPhase}
               currentPhaseIndex={phaseIdx}
-              phase_id={currentPhase.phase_id as UUID}
+              phaseId={currentPhase.phase_id as UUID}
               onClick={submitAnswers}
             />
           )
         }
       />
+
+      {sessionIdStr && <Chat sessionId={sessionIdStr} />}
     </Main>
   );
 }

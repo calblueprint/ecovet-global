@@ -14,7 +14,7 @@ import {
   PromptQuestionText,
   PromptText,
   PromptWrapper,
-  StyledTextarea,
+  StyledTextArea,
 } from "../styles";
 import {
   CheckboxOptionParticipantStyled,
@@ -35,6 +35,7 @@ interface PromptsRightPanelProps {
   onInputAnswer: (index: number, value: string) => void;
   onBlur: (index: number, value: string) => void;
   nextButton: ReactNode;
+  backButton: ReactNode;
 }
 
 function parseCheckboxAnswer(raw: string): string[] {
@@ -56,10 +57,11 @@ export default function PromptsRightPanel({
   isOverview,
   onInputAnswer,
   onBlur,
+  backButton,
   nextButton,
 }: PromptsRightPanelProps) {
   const totalPrompts = prompts.length;
-  const completedCount = completedPrompts.size;
+  const completedCount = Math.min(completedPrompts.size, totalPrompts);
   const progressPercentage =
     totalPrompts > 0 ? Math.round((completedCount / totalPrompts) * 100) : 0;
 
@@ -154,7 +156,7 @@ export default function PromptsRightPanel({
     }
 
     return (
-      <StyledTextarea
+      <StyledTextArea
         value={typeof answer === "string" ? answer : ""}
         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
           onInputAnswer(index, e.target.value)
@@ -190,7 +192,10 @@ export default function PromptsRightPanel({
         )}
       </PromptCard>
 
-      <ContinueButtonDiv>{nextButton}</ContinueButtonDiv>
+      <ContinueButtonDiv>
+        {backButton}
+        {nextButton}
+      </ContinueButtonDiv>
     </ContentDiv>
   );
 }

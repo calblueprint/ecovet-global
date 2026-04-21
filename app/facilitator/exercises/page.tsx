@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Tabs from "@mui/material/Tabs";
 import { fetchSessionsbyUserGroup } from "@/actions/supabase/queries/sessions";
+import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import FacilitatorNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
 import {

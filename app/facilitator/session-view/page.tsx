@@ -2,12 +2,12 @@
 
 import type {
   ParticipantSession,
+  ParticipantSessionWithProfile,
   Phase,
   PromptWithResponse,
   UUID,
 } from "@/types/schema";
 import { useEffect, useState } from "react";
-import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -19,11 +19,13 @@ import {
   fetchTemplateNameBySession,
   finishSession,
   isSessionForceAdvance,
-  SessionParticipant,
   sessionParticipants,
+  setSessionGlobalPhaseIndex,
 } from "@/actions/supabase/queries/sessions";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
+import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import { useProfile } from "@/utils/ProfileProvider";
+import { AnnouncementRoom, sendAnnouncement } from "@/utils/UseAnnouncements";
 import {
   Button,
   Container,
@@ -58,10 +60,12 @@ type ParticipantPromptData = Record<
 export default function FacilitatorSessionView() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId") as UUID | null;
-  const { profile } = useProfile();
+  const { userId, profile } = useProfile();
   const router = useRouter();
 
-  const [participants, setParticipants] = useState<SessionParticipant[]>([]);
+  const [participants, setParticipants] = useState<
+    ParticipantSessionWithProfile[]
+  >([]);
   const [currentPhase, setCurrentPhase] = useState(0);
   const [phases, setPhases] = useState<Phase[]>([]);
   const [allDone, setAllDone] = useState(false);
@@ -72,13 +76,31 @@ export default function FacilitatorSessionView() {
   const [promptData, setPromptData] = useState<ParticipantPromptData>({});
   const [templateName, setTemplateName] = useState<string | null>(null);
 
+  const [announcementMessage, setAnnouncementMessage] = useState<string>("");
+  const [announcementType, setAnnouncementType] = useState<
+    "everyone" | "role" | "user" | null
+  >("everyone");
+  const [announcementRoom, setAnnouncementRoom] = useState<AnnouncementRoom>({
+    to: "everyone",
+    sessionId: sessionId ?? "unknown session",
+  });
+  const roleOptions = participants.map((p): [string, string] => [
+    p.role_id ?? "unknown role",
+    p.role?.role_name ?? "unknown role",
+  ]);
+  const userOptions = participants.map((p): [string, string] => [
+    p.user_id,
+    `${p.profile.first_name} ${p.profile.last_name}`,
+  ]);
+
   useEffect(() => {
     if (!sessionId) return;
+    if (!profile) return;
 
     async function loadParticipants() {
       try {
         const psData = await sessionParticipants(sessionId as UUID);
-        setParticipants(psData);
+        setParticipants(psData.filter(p => p.user_id !== profile?.id));
         if (psData && psData.length > 0) {
           setCurrentPhase(psData[0].phase_index ?? 0);
         }
@@ -117,8 +139,10 @@ export default function FacilitatorSessionView() {
     loadParticipants();
     checkIfForceAdvance();
     loadPhases();
+
+    // TODO: check this call from the merge
     loadTemplateName();
-  }, [sessionId]);
+  }, [sessionId, profile]);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -148,7 +172,7 @@ export default function FacilitatorSessionView() {
             ),
           );
 
-          setCurrentPhase(updated.phase_index ?? 0);
+          setCurrentPhase(phase => Math.max(phase, updated.phase_index ?? 0));
         },
       )
       .subscribe();
@@ -160,8 +184,7 @@ export default function FacilitatorSessionView() {
 
   useEffect(() => {
     if (!profile?.id || participants.length === 0) return;
-    const nonFacilitators = participants.filter(p => p.user_id !== profile.id);
-    setAllDone(nonFacilitators.every(p => p.is_finished));
+    setAllDone(participants.every(p => p.is_finished));
   }, [participants, profile?.id]);
 
   useEffect(() => {
@@ -244,26 +267,38 @@ export default function FacilitatorSessionView() {
     };
   }, [sessionId, participants, currentPhase, phases, isForceAdvance]);
 
+  function sendSessionAnnouncement(to: AnnouncementRoom, message: string) {
+    sendAnnouncement({
+      room: to,
+      userId: userId ?? "unknown user",
+      username: profile?.first_name ?? "Unknown User",
+      message,
+    });
+  }
+
   async function advancePhase() {
     if (!sessionId || isAdvancing) return;
-
     setIsAdvancing(true);
 
-    const { data, error } = await supabase.rpc("advance_phase", {
-      p_session_id: sessionId,
-      p_current_phase_num: currentPhase,
-    });
+    if (!isLastPhase) {
+      if (isForceAdvance) {
+        await setSessionGlobalPhaseIndex(sessionId, currentPhase + 1);
+      }
 
-    if (error) {
-      console.error("Failed to advance phase:", error);
-      setIsAdvancing(false);
-      return;
-    }
+      const { error } = await supabase.rpc("advance_phase", {
+        p_session_id: sessionId,
+        p_current_phase_num: currentPhase,
+      });
 
-    if (!data) {
+      if (error) {
+        console.error("Failed to advance phase:", error);
+        setIsAdvancing(false);
+        return;
+      }
+    } else {
       try {
         await finishSession(sessionId);
-        router.push(`/sessions/session-finish/${sessionId}`);
+        router.push("/sessions/session-finish/");
       } catch (err) {
         console.error("Failed to finish session:", err);
       }
@@ -271,11 +306,6 @@ export default function FacilitatorSessionView() {
 
     setIsAdvancing(false);
   }
-
-  console.log("isForceAdvance:", isForceAdvance);
-  console.log("participants:", participants);
-  console.log("profile:", profile?.id);
-  console.log("Template Name:", templateName);
 
   const completedCount = participants
     .filter(p => p.user_id !== profile?.id)
@@ -413,6 +443,62 @@ export default function FacilitatorSessionView() {
                     })}
                 </ParticipantTable>
               </div>
+
+              <input
+                placeholder="Type announcement..."
+                value={announcementMessage}
+                onChange={e => setAnnouncementMessage(e.target.value)}
+              />
+
+              <InputDropdown
+                label={`Participant user`}
+                options={new Set(["everyone", "role", "user"])}
+                placeholder="Select type of announcement"
+                onChange={type => {
+                  setAnnouncementType(type as "everyone" | "role" | "user");
+                  if (type == "everyone") {
+                    setAnnouncementRoom({
+                      to: "everyone",
+                      sessionId: sessionId ?? "unknown session",
+                    });
+                  }
+                }}
+              />
+
+              {announcementType != "everyone" && (
+                <InputDropdown
+                  label={`Participant user`}
+                  options={
+                    new Map(
+                      announcementType == "role" ? roleOptions : userOptions,
+                    )
+                  }
+                  placeholder="Select thing to send to"
+                  onChange={id => {
+                    if (announcementType == "role") {
+                      setAnnouncementRoom({
+                        to: "role",
+                        sessionId: sessionId ?? "unknown session",
+                        roleId: id ?? "unknown role",
+                      });
+                    } else if (announcementType == "user") {
+                      setAnnouncementRoom({
+                        to: "user",
+                        sessionId: sessionId ?? "unknown session",
+                        userId: id ?? "unknown user",
+                      });
+                    }
+                  }}
+                />
+              )}
+
+              <button
+                onClick={() =>
+                  sendSessionAnnouncement(announcementRoom, announcementMessage)
+                }
+              >
+                click to send to {}
+              </button>
 
               {allDone && (
                 <h3 style={{ marginTop: "1rem" }}>

@@ -8,9 +8,7 @@ import {
 import { supabase } from "@/lib/supabase/client";
 import { ChatMessage } from "@/types/schema";
 
-const EVENT_MESSAGE_TYPE = "message";
-
-type LocalChatMessage = Omit<ChatMessage, "created_at">;
+export const EVENT_MESSAGE_TYPE = "message";
 
 export function useRealtimeChat({
   roomId,
@@ -23,17 +21,18 @@ export function useRealtimeChat({
 }) {
   const [loading, startFetching] = useTransition();
 
-  const [chatMessages, setChatMessages] = useState<LocalChatMessage[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [channel, setChannel] = useState<ReturnType<
     typeof supabase.channel
   > | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    if (roomId.length === 0) return;
+
     startFetching(async () => {
       try {
         const messageHistory = await getMessageHistory(roomId, null, 100);
-        console.log("Loaded message history:", messageHistory);
         setChatMessages(messageHistory);
       } catch (error) {
         console.error("Error loading message history:", error);
@@ -69,12 +68,13 @@ export function useRealtimeChat({
     async (message: string) => {
       if (!channel || !isConnected) return;
 
-      const chatMessage: LocalChatMessage = {
+      const chatMessage: ChatMessage = {
         id: crypto.randomUUID(),
         room_id: roomId,
         message: message,
         sender: userId,
         sender_name: username,
+        created_at: new Date().toISOString(),
       };
 
       setChatMessages(current => [...current, chatMessage]);
