@@ -55,6 +55,7 @@ export const SideNavContainer = styled.div`
   flex-direction: column;
   background-color: ${COLORS.oat_light};
   min-height: 100vh;
+  width: 18rem;
 `;
 
 export const SideNavTemplatesContainer = styled.div`
