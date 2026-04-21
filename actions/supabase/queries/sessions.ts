@@ -560,6 +560,33 @@ export async function fetchSessionsbyUserGroup(
   return data ?? [];
 }
 
+export async function fetchSessionsByParticipantId(
+  userId: string,
+): Promise<Session[]> {
+  const supabase = await getSupabaseServerClient();
+
+  const { data: participantSessions, error: psError } = await supabase
+    .from("participant_session")
+    .select("session_id")
+    .eq("user_id", userId);
+
+  if (psError || !participantSessions?.length) return [];
+
+  const sessionIds = participantSessions.map(ps => ps.session_id);
+
+  const { data, error } = await supabase
+    .from("session")
+    .select("*")
+    .in("session_id", sessionIds);
+
+  if (error) {
+    console.error("Error fetching sessions by participant:", error);
+    return [];
+  }
+
+  return data ?? [];
+}
+
 export async function getPhaseId(sessionId: UUID): Promise<UUID | null> {
   const supabase = await getSupabaseServerClient();
 
