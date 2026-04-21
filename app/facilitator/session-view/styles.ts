@@ -37,11 +37,11 @@ export const HeadingBox = styled.main`
 
 export const PhaseInformation = styled.div`
   display: flex;
-  padding: 16px 20px;
+  padding: 1rem 1.25rem;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 16px;
+  gap: 1rem;
   align-self: stretch;
   border-radius: 8px;
   border: 1px solid var(--Oat-Medium, #eee);
@@ -196,7 +196,7 @@ export const Button = styled.button<{ disabled?: boolean }>`
 export const SilverText = styled.span`
   color: var(--Black-40, #959492);
   font-family: ${Sans.style.fontFamily};
-  font-size: 14px;
+  font-size: 16px;
   font-style: normal;
   font-weight: 500;
   line-height: normal;

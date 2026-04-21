@@ -1,6 +1,11 @@
 "use client";
 
-import type { ParticipantSession, Phase, UUID } from "@/types/schema";
+import type {
+  ParticipantSession,
+  Phase,
+  PromptWithResponse,
+  UUID,
+} from "@/types/schema";
 import { useEffect, useState } from "react";
 import * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -10,7 +15,6 @@ import supabase from "@/actions/supabase/client";
 import {
   fetchPhases,
   fetchPromptsWithResponses,
-  fetchRolePhases,
   fetchRolePhasesBatch,
   fetchTemplateNameBySession,
   finishSession,
@@ -42,18 +46,12 @@ import {
   TableRow,
 } from "./styles";
 
-type PromptCounts = Record<UUID, { done: number; total: number }>;
-type PromptData = {
-  question: string;
-  answer: string | null;
-};
-
 type ParticipantPromptData = Record<
   UUID,
   {
     done: number;
     total: number;
-    prompts: PromptData[];
+    prompts: PromptWithResponse[];
   }
 >;
 
@@ -174,34 +172,6 @@ export default function FacilitatorSessionView() {
 
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
-    async function loadDataForParticipant(
-      p: SessionParticipant,
-      phaseIndex: number,
-    ) {
-      if (!p.role_id) return null;
-
-      const phaseId = phases[phaseIndex]?.phase_id;
-      if (!phaseId) return null;
-
-      const rolePhase = await fetchRolePhases(p.role_id, phaseId);
-      if (!rolePhase) return null;
-
-      const prompts = await fetchPromptsWithResponses(
-        rolePhase.role_phase_id,
-        p.user_id,
-        sessionId as UUID,
-      );
-
-      const total = prompts.length;
-      const done = prompts.filter(p => p.answer).length;
-
-      return {
-        total,
-        done,
-        prompts,
-      };
-    }
-
     async function loadCounts() {
       console.log("loadCounts sessionId:", sessionId);
       console.log("loadCounts participants:", participants.length);
@@ -235,7 +205,10 @@ export default function FacilitatorSessionView() {
 
             data[p.user_id] = {
               total: prompts.length,
-              done: prompts.filter(prompt => prompt.answer).length,
+              done: prompts.filter(
+                prompt =>
+                  prompt.answer || prompt.options?.some(o => o.selected),
+              ).length,
               prompts,
             };
           } catch (err) {
@@ -387,6 +360,7 @@ export default function FacilitatorSessionView() {
                       console.log("first_name:", p.profile?.first_name);
                       console.log("last_name:", p.profile?.last_name);
                       console.log("user_id:", p.user_id);
+                      console.log("role_id:", p.role_id);
                       const data = promptData[p.user_id];
                       const percent =
                         data && data.total > 0
@@ -446,6 +420,14 @@ export default function FacilitatorSessionView() {
                 </h3>
               )}
             </Container>
+
+            <Button
+              onClick={() =>
+                router.push(`app/sessions/session-finish/${sessionId}/page.tsx`)
+              }
+            >
+              End Game
+            </Button>
           </MainDiv>
         </ContentWrapper>
       </LayoutWrapper>
