@@ -448,9 +448,11 @@ export type Database = {
       session: {
         Row: {
           after_action_report_id: string | null;
+          created_at: string | null;
           force_advance: boolean;
           is_async: boolean;
           is_finished: boolean | null;
+          phase_index: number | null;
           session_id: string;
           session_name: string | null;
           template_id: string | null;
@@ -458,9 +460,11 @@ export type Database = {
         };
         Insert: {
           after_action_report_id?: string | null;
+          created_at?: string | null;
           force_advance?: boolean;
           is_async?: boolean;
           is_finished?: boolean | null;
+          phase_index?: number | null;
           session_id?: string;
           session_name?: string | null;
           template_id?: string | null;
@@ -468,9 +472,11 @@ export type Database = {
         };
         Update: {
           after_action_report_id?: string | null;
+          created_at?: string | null;
           force_advance?: boolean;
           is_async?: boolean;
           is_finished?: boolean | null;
+          phase_index?: number | null;
           session_id?: string;
           session_name?: string | null;
           template_id?: string | null;
