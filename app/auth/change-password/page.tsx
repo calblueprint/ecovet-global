@@ -80,10 +80,10 @@ export default function ChangePassword() {
                 <Input
                   name="password"
                   placeholder="New Password"
-                  onChange={e => (
-                    setPassword(e.target.value),
-                    setPasswordTouched(true)
-                  )}
+                  onChange={e => {
+                    setPassword(e.target.value);
+                    setPasswordTouched(true);
+                  }}
                   type={showPassword ? "text" : "password"}
                   value={password}
                 />
