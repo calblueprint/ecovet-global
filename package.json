@@ -36,6 +36,7 @@
     "react-select": "^5.10.2",
     "styled-components": "^6.3.11",
     "uuid": "^13.0.0"
+    "web-app-template": "link:"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",

@@ -331,16 +331,15 @@ export const ExerciseSelectStyles: StylesConfig<DropdownOption, boolean> = {
 
 export const SideNavContainer = styled.div`
   display: flex;
-  width: 100vh;
-  height: 100vh;
   flex-direction: column;
+  width: fit-content;
+  height: 100vh;
   background-color: ${COLORS.oat_light};
 
   position: sticky;
   top: 0;
   z-index: 10;
   overflow-y: auto;
-  background-color: ${COLORS.white};
 `;
 
 export const DeleteButton = styled.button`

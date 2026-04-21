@@ -331,6 +331,7 @@ export default function SessionFlowPage() {
   }
 
   async function submitAnswers() {
+    console.log("tyring to submut");
     if (!userId || !sessionIdStr || !currentPhase || !rolePhase) return;
 
     const promises = answers

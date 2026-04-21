@@ -351,6 +351,7 @@ export default function TemplateListPage() {
                     },
                   ])
                 }
+                showBorder={true}
               />
               <GeneralTitle>
                 <span>

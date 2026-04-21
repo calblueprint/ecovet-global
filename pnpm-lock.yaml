@@ -74,6 +74,9 @@ importers:
       uuid:
         specifier: ^13.0.0
         version: 13.0.0
+      web-app-template:
+        specifier: 'link:'
+        version: 'link:'
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3.3.1
