@@ -70,7 +70,7 @@ importers:
         version: 5.10.2(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       styled-components:
         specifier: ^6.3.11
-        version: 6.3.11(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: 6.4.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       web-app-template:
         specifier: 'link:'
         version: 'link:'
