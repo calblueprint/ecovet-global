@@ -9,7 +9,7 @@ export const MessageContent = styled(B2)`
   color: ${COLORS.black70};
 `;
 
-export const MessageContentBubble = styled.div<{ fromUser: boolean }>`
+export const MessageContentBubble = styled.div<{ fromuser: boolean }>`
   display: flex;
   padding: 0.4375rem 0.75rem;
   flex-direction: column;
@@ -17,21 +17,21 @@ export const MessageContentBubble = styled.div<{ fromUser: boolean }>`
   align-items: flex-start;
   gap: 0.625rem;
   border-radius: 0.5rem;
-  background: ${({ fromUser }) =>
-    fromUser ? COLORS.lightEletricBlue : COLORS.oat_medium};
+  background: ${({ fromuser }) =>
+    fromuser ? COLORS.lightEletricBlue : COLORS.oat_medium};
 `;
 
-export const TimeMessageContainer = styled.div<{ fromUser: boolean }>`
+export const TimeMessageContainer = styled.div<{ fromuser: boolean }>`
   display: flex;
   flex-direction: column;
-  align-items: ${({ fromUser }) => (fromUser ? "flex-end" : "flex-start")};
+  align-items: ${({ fromuser }) => (fromuser ? "flex-end" : "flex-start")};
   gap: 0.25rem;
 `;
 
-export const PfpMessageContentContainer = styled.div<{ fromUser: boolean }>`
+export const PfpMessageContentContainer = styled.div<{ fromuser: boolean }>`
   display: flex;
   flex-direction: row;
-  align-items: ${({ fromUser }) => (fromUser ? "flex-end" : "flex-start")};
+  align-items: ${({ fromuser }) => (fromuser ? "flex-end" : "flex-start")};
   gap: 0.5rem;
   align-self: stretch;
 `;
@@ -74,19 +74,19 @@ export const NameRoleSeparator = styled.div`
 `;
 
 export const FullMessageContainer = styled.div<{
-  doubleText: boolean;
-  fromUser: boolean;
+  doubletext: boolean;
+  fromuser: boolean;
 }>`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  align-self: ${({ fromUser }) => (fromUser ? "end" : "start")};
-  padding-top: ${({ doubleText }) => (doubleText ? "0.4rem" : "0rem")};
+  align-self: ${({ fromuser }) => (fromuser ? "end" : "start")};
+  padding-top: ${({ doubletext }) => (doubletext ? "0.4rem" : "0rem")};
 `;
 
-export const ProfileColor = styled.div<{ color: string }>`
-  width: 1rem;
-  height: 1rem;
+export const ProfileColor = styled.div<{ color: string; size?: number }>`
+  width: ${({ size }) => size ?? 1}rem;
+  height: ${({ size }) => size ?? 1}rem;
   aspect-ratio: 1/1;
   border-radius: 0.25rem;
   align-self: start;
@@ -201,14 +201,49 @@ export const ChatButtonContainer = styled.div`
   justify-content: center;
   align-items: center;
   gap: 0.25rem;
+  cursor: pointer;
+  overflow: hide;
 `;
 
 export const ChatButtonLabel = styled(Caption)`
   color: ${COLORS.darkElectricBlue};
+  white-space: nowrap;
 `;
 export const ChatSelectionContainer = styled.div`
   display: flex;
   align-items: flex-start;
   gap: 1rem;
   margin-left: 1.25rem;
+`;
+
+export const SelectUsersContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  align-self: stretch;
+  margin: 0 1.25rem;
+`;
+
+export const ChatUserList = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  align-self: stretch;
+  overflow: auto;
+`;
+
+export const ClickableUser = styled.div`
+  display: flex;
+  padding: 0.25rem 0.75rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.625rem;
+  border-radius: 0.5rem;
+  background: ${COLORS.lightEletricBlue};
+`;
+
+export const ClickableUserText = styled(Caption)`
+  color: ${COLORS.darkElectricBlue};
+  white-space: nowrap;
 `;

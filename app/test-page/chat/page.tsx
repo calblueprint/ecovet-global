@@ -1,14 +1,11 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import Chat from "@/components/Chat/Chat";
 
 export default function ChatPage() {
-  const { roomId } = useParams<{ roomId: string }>();
-
   return (
     <div>
-      <Chat sessionId={""} />
+      <Chat sessionId={"289a8763-88bd-4bc3-a69c-604ce9f77cae"} />
     </div>
   );
 }

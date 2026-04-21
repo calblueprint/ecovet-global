@@ -13,13 +13,15 @@ export interface Selection {
 export default function ChatSelection({
   chats,
   changeRoom,
+  createRoom,
 }: {
   chats: Selection[];
   changeRoom: (roomId: string) => void;
+  createRoom: () => void;
 }) {
   return (
     <ChatSelectionContainer>
-      <ChatButtonContainer>
+      <ChatButtonContainer onClick={createRoom}>
         <ChatSelectionButton color="">+</ChatSelectionButton>
         <ChatButtonLabel>New Room</ChatButtonLabel>
       </ChatButtonContainer>

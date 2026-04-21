@@ -57,7 +57,7 @@ export async function fetchChatUserOptions(
     .eq("participant_session.session_id", sessionId);
 
   if (error) {
-    console.error("Error fetching chat users options:", error);
+    console.error("Error fetching chat users options:", error, ` userGroupId=${userGroupId}, sessionId=${sessionId}`);
     throw new Error("Error fetching chat users options");
   }
 

@@ -32,7 +32,7 @@ export default function ChatMessage({
   const { day, time } = getMessageDateLabel(new Date(chatMessage.created_at));
 
   return (
-    <FullMessageContainer doubleText={isDoubleText} fromUser={fromUser}>
+    <FullMessageContainer doubletext={isDoubleText} fromuser={fromUser}>
       {showName && (
         <NameContainer>
           <NameText>{senderName}</NameText>
@@ -46,13 +46,13 @@ export default function ChatMessage({
       )}
 
       <PfpMessageContentContainer
-        fromUser={fromUser}
+        fromuser={fromUser}
         onClick={() => setShowTime(show => !show)}
       >
         {!fromUser && <ProfileColor color="#8E44AD" />}
 
-        <TimeMessageContainer fromUser={fromUser}>
-          <MessageContentBubble fromUser={fromUser}>
+        <TimeMessageContainer fromuser={fromUser}>
+          <MessageContentBubble fromuser={fromUser}>
             <MessageContent>{chatMessage.message}</MessageContent>
           </MessageContentBubble>
 
