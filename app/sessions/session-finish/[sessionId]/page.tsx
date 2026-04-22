@@ -3,10 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import {
-  fetchSessionCreatedAt,
-  fetchTemplateNameBySession,
-} from "@/actions/supabase/queries/sessions";
+import { fetchPDFName } from "@/actions/supabase/queries/sessions";
 import { useProfile } from "@/utils/ProfileProvider";
 import { Main } from "../../styles";
 import {
@@ -31,7 +28,7 @@ function formatBytes(bytes: number): string {
 export default function SessionFinish() {
   const { profile } = useProfile();
 
-  const isFacilitator = profile?.user_type !== "Participant";
+  const isParticipant = profile?.user_type == "Participant";
   console.log(profile?.user_type);
 
   const { sessionId } = useParams() as { sessionId: string };
@@ -45,10 +42,11 @@ export default function SessionFinish() {
 
   async function fetchOrGenerateReport() {
     if (!sessionId) return;
-    const templateName = await fetchTemplateNameBySession(sessionId);
-    const createdAt = await fetchSessionCreatedAt(sessionId);
-    setTemplateName(templateName);
-    setSessionCreatedAt(createdAt ? new Date(createdAt) : null);
+    const pdfInfo = await fetchPDFName(sessionId);
+    setTemplateName(pdfInfo.template_name);
+    setSessionCreatedAt(
+      pdfInfo.created_at ? new Date(pdfInfo.created_at) : null,
+    );
     setIsGenerating(true);
     setPdfUrl(null);
     setPdfSize(null);
@@ -130,7 +128,7 @@ export default function SessionFinish() {
       <Container>
         <Title>Exercise complete.</Title>
 
-        {isFacilitator && (
+        {!isParticipant && (
           <>
             <Section>
               <TextArea

@@ -1,10 +1,15 @@
 "use client";
 
-import type { Session } from "@/types/schema";
+import type { PDFSession, Session } from "@/types/schema";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Tabs from "@mui/material/Tabs";
-import { fetchSessionsbyUserGroup } from "@/actions/supabase/queries/sessions";
+import {
+  fetchPDFName,
+  fetchSessionCreatedAt,
+  fetchSessionsbyUserGroup,
+  fetchTemplateNameBySession,
+} from "@/actions/supabase/queries/sessions";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import FacilitatorNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
@@ -45,29 +50,47 @@ function formatDate(dateStr: string | null): string {
 export default function FacilitatorExercisesPage() {
   const { profile } = useProfile();
   const router = useRouter();
-  const [sessions, setSessions] = useState<Session[]>([]);
+  const [sessions, setSessions] = useState<PDFSession[]>([]);
   const [activeTab, setActiveTab] = useState<ActiveTab>("active");
   const [pdfLoading, setPdfLoading] = useState<string | null>(null);
   const [searchInput, setSearchInput] = useState("");
+  console.log("render", {
+    profileUserGroupId: profile?.user_group_id,
+    sessionsLen: sessions.length,
+  });
 
   useEffect(() => {
     if (!profile?.user_group_id) return;
+    const userGroupId = profile.user_group_id;
 
     (async () => {
-      const data =
-        (await fetchSessionsbyUserGroup(profile.user_group_id!)) ?? [];
-      setSessions(data);
+      const data = (await fetchSessionsbyUserGroup(userGroupId)) ?? [];
+
+      const enriched = await Promise.all(
+        data.map(async s => {
+          const [pdfInfo] = await Promise.all([fetchPDFName(s.session_id)]);
+          const tn = pdfInfo.template_name ?? "Untitled";
+          const dateSource = pdfInfo.created_at ?? s.created_at;
+          const dateStr = dateSource
+            ? new Date(dateSource).toLocaleDateString("en-CA")
+            : "";
+          return {
+            ...s,
+            displayName: `${tn}_${dateStr}`,
+          };
+        }),
+      );
+
+      setSessions(enriched);
     })();
-  }, [profile]);
+  }, [profile?.user_group_id]);
 
   const activeSessions = sessions.filter(s => !s.is_finished);
   const pastSessions = sessions.filter(s => s.is_finished === true);
   const displayedSessions = (
     activeTab === "active" ? activeSessions : pastSessions
   ).filter(s =>
-    (s.session_name ?? "")
-      .toLowerCase()
-      .includes(searchInput.trim().toLowerCase()),
+    s.displayName.toLowerCase().includes(searchInput.trim().toLowerCase()),
   );
 
   const handleTabChange = (
@@ -77,7 +100,7 @@ export default function FacilitatorExercisesPage() {
     setActiveTab(newValue);
   };
 
-  function handleRowClick(session: Session) {
+  function handleRowClick(session: PDFSession) {
     if (activeTab === "active") {
       router.push(`/facilitator/session-view?sessionId=${session.session_id}`);
     } else {
@@ -196,9 +219,7 @@ export default function FacilitatorExercisesPage() {
                     key={session.session_id}
                     onClick={() => handleRowClick(session)}
                   >
-                    <StyledTd>
-                      {session.session_name ?? "Unnamed Session"}
-                    </StyledTd>
+                    <StyledTd>{session.displayName}</StyledTd>
                     <StyledTd>
                       <SyncBadge>
                         {session.is_async ? "Async" : "Sync"}

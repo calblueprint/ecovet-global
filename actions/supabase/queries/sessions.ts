@@ -110,6 +110,33 @@ export async function fetchTemplateNameBySession(session_id: string) {
   return template?.template_name ?? null;
 }
 
+export async function fetchPDFName(session_id: string) {
+  const supabase = await getSupabaseServerClient();
+
+  const { data: session, error: e1 } = await supabase
+    .from("session")
+    .select("template_id, created_at")
+    .eq("session_id", session_id)
+    .single();
+  if (e1) throw e1;
+
+  if (!session.template_id) {
+    throw new Error(`No session template`);
+  }
+
+  const { data: template, error: e2 } = await supabase
+    .from("template")
+    .select("template_name")
+    .eq("template_id", session.template_id)
+    .single();
+  if (e2) throw e2;
+
+  return {
+    template_name: template?.template_name ?? null,
+    created_at: session.created_at as string | null,
+  };
+}
+
 export async function assignParticipantToSession(
   userId: UUID,
   sessionId: UUID,

@@ -72,6 +72,10 @@ export type PromptOptionsSelected = {
   selected: boolean;
 };
 
+export type PDFSession = Session & {
+  displayName: string;
+};
+
 export type PromptWithResponse = {
   promptId: UUID;
   question: string;
