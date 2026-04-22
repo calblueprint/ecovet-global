@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button, Checkbox, Radio, RadioGroup } from "@mui/material";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import {
@@ -21,6 +22,8 @@ import {
   HeaderButtonDark,
   HeaderButtonGroup,
   HeaderButtonLight,
+  InsertQuestionButton,
+  InsertQuestionRow,
   LegendFlex,
   McqOptionStyled,
   MultipleChoicePromptStyled,
@@ -36,25 +39,6 @@ import {
   TextFieldStyled,
 } from "./styles";
 
-const PlusIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="10"
-    height="10"
-    viewBox="0 0 10 10"
-    fill="none"
-  >
-    <rect y="4.44434" width="10" height="1.11111" fill="#476C77" />
-    <rect
-      x="5.55566"
-      width="10"
-      height="1.11111"
-      transform="rotate(90 5.55566 0)"
-      fill="#476C77"
-    />
-  </svg>
-);
-
 export default function QuestionBuilder({
   value,
   rolePhaseId,
@@ -69,12 +53,13 @@ export default function QuestionBuilder({
   onChange: (
     id: UUID,
     field: string,
-    v: string | PromptType | StagedOption[],
+    v: string | PromptType | StagedOption[] | number,
   ) => void;
   onNextPhase: () => void;
   onSaveAndExit: () => void;
 }) {
   const rolePhase = value.rolePhases[rolePhaseId];
+  const [focusedPromptId, setFocusedPromptId] = useState<UUID | null>(null);
 
   function handleTypeChange(promptID: UUID, newType: PromptType) {
     onChange(promptID, "prompt_type", newType);
@@ -82,6 +67,7 @@ export default function QuestionBuilder({
 
   function deletePrompt(promptID: UUID) {
     onChange(promptID, "remove_prompt", rolePhase.role_phase_id);
+    if (focusedPromptId === promptID) setFocusedPromptId(null);
   }
 
   function addOption(promptID: UUID) {
@@ -112,6 +98,14 @@ export default function QuestionBuilder({
     );
     onChange(promptID, "options", updated);
   }
+
+  function insertAfter(index: number) {
+    onChange(rolePhase.role_phase_id, "insert_prompt_at", index + 1);
+    // Focus stays on the question we inserted after; user can re-click to move it.
+    // (Alternatively we could clear focus here.)
+  }
+
+  const promptIds = value.promptIndex[rolePhase.role_phase_id] ?? [];
 
   return (
     <FormStack>
@@ -152,18 +146,34 @@ export default function QuestionBuilder({
         </RoleDescriptionTemplate>
       </RoleHeaderContainer>
 
-      <PhaseCard key={rolePhase.role_phase_id}>
-        {(value.promptIndex[rolePhase.role_phase_id] ?? []).map(
-          (promptID, j) => {
-            const prompt = value.promptById[promptID];
-            const promptType = (prompt.prompt_type ?? "text") as PromptType;
-            const options = value.optionsByPromptId[promptID] ?? [];
+      <PhaseCard
+        key={rolePhase.role_phase_id}
+        onClick={e => {
+          // Clicking the card background (not a question) clears focus
+          if (e.target === e.currentTarget) setFocusedPromptId(null);
+        }}
+      >
+        {promptIds.map((promptID, j) => {
+          const prompt = value.promptById[promptID];
+          const promptType = (prompt.prompt_type ?? "text") as PromptType;
+          const options = value.optionsByPromptId[promptID] ?? [];
+          const isFocused = focusedPromptId === promptID;
+          const isLast = j === promptIds.length - 1;
 
-            return (
-              <FieldCard key={promptID}>
+          return (
+            <div key={promptID}>
+              <FieldCard
+                onClick={() => setFocusedPromptId(promptID)}
+                $focused={isFocused}
+              >
                 <LegendFlex>
                   <FieldLegend>Question {j + 1}</FieldLegend>
-                  <DeleteButton onClick={() => deletePrompt(promptID)}>
+                  <DeleteButton
+                    onClick={e => {
+                      e.stopPropagation();
+                      deletePrompt(promptID);
+                    }}
+                  >
                     Delete
                   </DeleteButton>
                 </LegendFlex>
@@ -229,9 +239,10 @@ export default function QuestionBuilder({
                           <DeleteMcqOptionButton>
                             <Button
                               color="error"
-                              onClick={() =>
-                                deleteOption(promptID, opt.option_number)
-                              }
+                              onClick={e => {
+                                e.stopPropagation();
+                                deleteOption(promptID, opt.option_number);
+                              }}
                             >
                               Delete
                             </Button>
@@ -240,13 +251,15 @@ export default function QuestionBuilder({
                       ))}
                     </RadioGroup>
                     <Button
-                      onClick={() => addOption(promptID)}
+                      onClick={e => {
+                        e.stopPropagation();
+                        addOption(promptID);
+                      }}
                       sx={{ textTransform: "none" }}
                     >
                       <AddNewOptionStyled>
-                        <PlusIcon />
                         <AddNewOptionTextStyled>
-                          Add Option
+                          + Add Option
                         </AddNewOptionTextStyled>
                       </AddNewOptionStyled>
                     </Button>
@@ -273,9 +286,10 @@ export default function QuestionBuilder({
                         <DeleteMcqOptionButton>
                           <Button
                             color="error"
-                            onClick={() =>
-                              deleteOption(promptID, opt.option_number)
-                            }
+                            onClick={e => {
+                              e.stopPropagation();
+                              deleteOption(promptID, opt.option_number);
+                            }}
                           >
                             Delete
                           </Button>
@@ -283,22 +297,37 @@ export default function QuestionBuilder({
                       </McqOptionStyled>
                     ))}
                     <Button
-                      onClick={() => addOption(promptID)}
+                      onClick={e => {
+                        e.stopPropagation();
+                        addOption(promptID);
+                      }}
                       sx={{ textTransform: "none" }}
                     >
                       <AddNewOptionStyled>
-                        <PlusIcon />
                         <AddNewOptionTextStyled>
-                          Add Option
+                          + Add Option
                         </AddNewOptionTextStyled>
                       </AddNewOptionStyled>
                     </Button>
                   </CheckboxPromptStyled>
                 )}
               </FieldCard>
-            );
-          },
-        )}
+
+              {isFocused && !isLast && (
+                <InsertQuestionRow>
+                  <InsertQuestionButton
+                    onClick={e => {
+                      e.stopPropagation();
+                      insertAfter(j);
+                    }}
+                  >
+                    + Add question
+                  </InsertQuestionButton>
+                </InsertQuestionRow>
+              )}
+            </div>
+          );
+        })}
       </PhaseCard>
     </FormStack>
   );

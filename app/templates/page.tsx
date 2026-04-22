@@ -218,20 +218,26 @@ export default function TemplateBuilderPage() {
         }
       }
 
-      for (const [promptID, prompt] of Object.entries(saveStore.promptById) as [
-        UUID,
-        Prompt,
-      ][]) {
-        await createPrompts(
-          promptID,
-          prompt.role_phase_id ?? "",
-          prompt.prompt_text,
-          prompt.prompt_follow_ups,
-          prompt.prompt_type,
-        );
-        const options = saveStore.optionsByPromptId[promptID] ?? [];
-        for (const opt of options) {
-          await addNewOption(promptID, opt.option_text ?? "");
+      for (const [rolePhaseID, promptIDs] of Object.entries(
+        saveStore.promptIndex,
+      ) as [UUID, UUID[]][]) {
+        for (let i = 0; i < promptIDs.length; i++) {
+          const promptID = promptIDs[i];
+          const prompt = saveStore.promptById[promptID];
+          if (!prompt) continue;
+
+          await createPrompts(
+            promptID,
+            prompt.role_phase_id ?? rolePhaseID,
+            prompt.prompt_text,
+            prompt.prompt_follow_ups,
+            prompt.prompt_type,
+            i + 1,
+          );
+          const options = saveStore.optionsByPromptId[promptID] ?? [];
+          for (const opt of options) {
+            await addNewOption(promptID, opt.option_text ?? "");
+          }
         }
       }
     } catch (err) {
@@ -394,8 +400,8 @@ export default function TemplateBuilderPage() {
             </SettingsBlock>
 
             <InputDropdown
-              label="Select field..."
-              placeholder="Select field..."
+              label="Select a phase..."
+              placeholder="Select a phase..."
               options={phaseOptionsMap}
               value={selectedPhaseId}
               onChange={(val: string | null) => {

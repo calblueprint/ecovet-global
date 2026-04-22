@@ -1,6 +1,6 @@
 import { GroupBase, StylesConfig } from "react-select";
 import { TextField } from "@mui/material";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import COLORS from "@/styles/colors";
 import { Flex } from "@/styles/containers";
 import { Sans } from "@/styles/fonts";
@@ -153,18 +153,26 @@ export const HeaderButtonDark = styled.button`
   }
 `;
 
-export const FieldCard = styled.div`
+export const FieldCard = styled.div<{ $focused?: boolean }>`
   display: flex;
-  padding: 16px;
+  padding: 1rem;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 16px;
+  gap: 1rem;
   align-self: stretch;
 
-  border-radius: 8px;
+  border-radius: 0.5rem;
   border: 1px solid ${COLORS.oat_medium};
   background: ${COLORS.oat_light};
+
+  ${({ $focused }) =>
+    $focused &&
+    css`
+      border-color: ${COLORS.mediumElectricBlue};
+      border-width: 0.1rem;
+      padding: 0.9rem;
+    `}
 `;
 
 export const PhaseCard = styled.div`
@@ -377,5 +385,27 @@ export const DeleteButton = styled.button`
 
   &:hover {
     color: #e53e3e;
+  }
+`;
+
+export const InsertQuestionRow = styled.div`
+  display: flex;
+  justify-content: center;
+  padding-top: 1rem;
+`;
+
+export const InsertQuestionButton = styled.button`
+  background: ${COLORS.darkElectricBlue};
+  color: ${COLORS.white};
+  border: none;
+  border-radius: 0.4rem;
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: ${COLORS.mediumElectricBlue};
   }
 `;

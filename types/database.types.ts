@@ -260,6 +260,7 @@ export type Database = {
         Row: {
           prompt_follow_ups: string | null;
           prompt_id: string;
+          prompt_number: number | null;
           prompt_text: string | null;
           prompt_type: Database["public"]["Enums"]["prompt_type"] | null;
           role_phase_id: string | null;
@@ -267,6 +268,7 @@ export type Database = {
         Insert: {
           prompt_follow_ups?: string | null;
           prompt_id?: string;
+          prompt_number?: number | null;
           prompt_text?: string | null;
           prompt_type?: Database["public"]["Enums"]["prompt_type"] | null;
           role_phase_id?: string | null;
@@ -274,6 +276,7 @@ export type Database = {
         Update: {
           prompt_follow_ups?: string | null;
           prompt_id?: string;
+          prompt_number?: number | null;
           prompt_text?: string | null;
           prompt_type?: Database["public"]["Enums"]["prompt_type"] | null;
           role_phase_id?: string | null;

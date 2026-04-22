@@ -12,6 +12,7 @@ const COLORS = {
   white: "#FFFFFF",
   lightEletricBlue: "#EBF5F7",
   darkElectricBlue: "#476c77",
+  mediumElectricBlue: "#6194A4",
 
   tagRed: "#EF4444",
   tagOrange: "#FB923C",

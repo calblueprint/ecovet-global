@@ -517,7 +517,8 @@ export async function fetchPrompts(rolePhaseId: UUID): Promise<Prompt[]> {
   const { data, error } = await supabase
     .from("prompt")
     .select("*")
-    .eq("role_phase_id", rolePhaseId);
+    .eq("role_phase_id", rolePhaseId)
+    .order("prompt_number");
   if (error) {
     console.error("Error fetching prompts:", error);
   }
@@ -794,7 +795,8 @@ export async function fetchPromptsWithResponses(
   const { data: prompts, error: promptsError } = await supabase
     .from("prompt")
     .select("*")
-    .eq("role_phase_id", rolePhaseId);
+    .eq("role_phase_id", rolePhaseId)
+    .order("prompt_number");
 
   if (promptsError) {
     console.error("Error fetching prompts:", promptsError);
