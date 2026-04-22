@@ -9,6 +9,7 @@ import type {
   PromptWithResponse,
   RolePhase,
   Session,
+  SessionWithTemplate,
   UUID,
 } from "@/types/schema";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
@@ -135,6 +136,31 @@ export async function fetchPDFName(session_id: string) {
     template_name: template?.template_name ?? null,
     created_at: session.created_at as string | null,
   };
+}
+
+export async function fetchSessionsbyUserGroup(
+  userGroupId: string,
+): Promise<SessionWithTemplate[] | null> {
+  const supabase = await getSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("session")
+    .select(
+      `
+      *,
+      template (
+        template_name
+      )
+    `,
+    )
+    .eq("user_group_id", userGroupId);
+
+  if (error) {
+    console.error("Error fetching sessions:", error);
+    return [];
+  }
+
+  return data ?? [];
 }
 
 export async function assignParticipantToSession(
@@ -641,21 +667,6 @@ export async function fetchPromptResponses(
     .eq("user_id", userId)
     .eq("session_id", sessionId)
     .eq("role_phase_id", rolePhaseId);
-  if (error) {
-    console.error("Error fetching prompts:", error);
-  }
-
-  return data ?? [];
-}
-
-export async function fetchSessionsbyUserGroup(
-  userGroupId: string,
-): Promise<Session[] | null> {
-  const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("session")
-    .select("*")
-    .eq("user_group_id", userGroupId);
   if (error) {
     console.error("Error fetching prompts:", error);
   }

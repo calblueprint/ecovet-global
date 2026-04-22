@@ -17,19 +17,20 @@ export const ContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  font-family: ${Sans.style.fontFamily};
+`;
+
+export const PageTitle = styled.h1`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${COLORS.black100};
+  margin: 0;
 `;
 
 export const TabSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-`;
-
-export const PageTitle = styled.h1`
-  font-family: ${Sans.style.fontFamily};
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: ${COLORS.black100};
 `;
 
 export const TabControlsWrapper = styled.div`
@@ -40,6 +41,19 @@ export const TabControlsWrapper = styled.div`
 
   .MuiTabs-indicator {
     background-color: ${COLORS.darkElectricBlue};
+  }
+`;
+
+export const StyledTab = styled(Tab)`
+  && {
+    text-transform: none;
+    font-weight: 500;
+    font-size: 0.8rem;
+    font-family: ${Sans.style.fontFamily};
+
+    &.Mui-selected {
+      color: ${COLORS.darkElectricBlue};
+    }
   }
 `;
 
@@ -54,10 +68,8 @@ export const StartExerciseButton = styled.button`
   padding: 0.45rem 0.7rem;
   font-size: 0.8125rem;
   font-weight: 600;
-  font-family: ${Sans.style.fontFamily};
   cursor: pointer;
   white-space: nowrap;
-  transition: opacity 0.15s ease;
 
   &:hover {
     opacity: 0.85;
@@ -68,7 +80,6 @@ export const SearchBarStyled = styled.div`
   position: relative;
   width: 20rem;
   margin-left: auto;
-  margin-right: 0;
 `;
 
 export const SearchIconWrapper = styled.span`
@@ -77,52 +88,39 @@ export const SearchIconWrapper = styled.span`
   left: 1rem;
   transform: translateY(-50%);
   display: flex;
-  align-items: center;
-  pointer-events: none;
   color: ${COLORS.black40};
+  pointer-events: none;
 `;
 
 export const SearchInput = styled.input`
+  width: 100%;
+  height: 2.5em;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
   border: 1px solid ${COLORS.oat_medium};
   border-radius: 8px;
-  padding: 0.5rem 1rem 0.5rem 2.25rem;
-  width: 100%;
-  height: 2.75rem;
-  font-family: ${Sans.style.fontFamily};
   font-size: 0.8125rem;
   background-color: transparent;
 `;
 
-export const StyledTab = styled(Tab)`
-  && {
-    text-transform: none;
-    font-weight: 500;
-    font-size: 0.9375rem;
-    font-family: ${Sans.style.fontFamily};
-    &.Mui-selected {
-      color: ${COLORS.darkElectricBlue};
-    }
-  }
-`;
-
 export const StyledTable = styled.table`
   width: 100%;
-  text-align: left;
   border-collapse: collapse;
-  font-family: ${Sans.style.fontFamily};
+  text-align: left;
 `;
 
 export const StyledTableHead = styled.thead`
-  border-bottom: 1px solid ${COLORS.oat_medium};
   color: ${COLORS.black40};
-  font-size: 14px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+
+  th {
+    padding: 0.75rem 1.5rem;
+    border-bottom: 1px solid ${COLORS.oat_medium};
+    font-weight: 500;
+  }
 `;
 
-export const StyledTh = styled.th`
-  padding: 0.75rem 1.5rem;
-  font-weight: 500;
-  font-size: 0.8125rem;
-`;
+export const StyledTh = styled.th``;
 
 export const StyledTableRow = styled.tr`
   border-bottom: 1px solid ${COLORS.oat_light};
@@ -135,24 +133,34 @@ export const StyledTableRow = styled.tr`
 
 export const StyledTd = styled.td`
   padding: 0.75rem 1.5rem;
-  color: ${COLORS.black70};
-  font-weight: 500;
   font-size: 0.9375rem;
-  font-family: ${Sans.style.fontFamily};
-  line-height: normal;
+  color: ${COLORS.black100};
 `;
 
 export const EmptyMessage = styled.td`
   padding: 2rem 0;
   color: ${COLORS.black40};
   font-size: 0.9375rem;
-  font-family: ${Sans.style.fontFamily};
   text-align: center;
 `;
 
 export const SyncBadge = styled.span`
   font-size: 0.9375rem;
   color: ${COLORS.black70};
+`;
+
+export const PdfButton = styled.button`
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.9375rem;
+  color: ${COLORS.black70};
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
 
 export const PdfLabel = styled.span`
@@ -164,22 +172,5 @@ export const PdfLabel = styled.span`
 
 export const PdfArrow = styled.svg`
   transform: rotate(-45deg);
-  padding: 0.15rem;
-  box-sizing: content-box;
   flex-shrink: 0;
-`;
-
-export const PdfButton = styled.button`
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: 0.9375rem;
-  font-family: ${Sans.style.fontFamily};
-  color: ${COLORS.black70};
-  cursor: pointer;
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 `;

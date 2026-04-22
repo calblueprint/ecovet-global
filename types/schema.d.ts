@@ -76,6 +76,10 @@ export type PDFSession = Session & {
   displayName: string;
 };
 
+export type SessionWithTemplate = Session & {
+  template: { template_name: string | null } | null;
+};
+
 export type PromptWithResponse = {
   promptId: UUID;
   question: string;

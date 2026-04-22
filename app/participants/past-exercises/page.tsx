@@ -6,9 +6,7 @@ import { useRouter } from "next/navigation";
 import Tabs from "@mui/material/Tabs";
 import {
   fetchPDFName,
-  fetchSessionsByParticipantId,
   fetchSessionsbyUserGroup,
-  fetchTemplateNameBySession,
 } from "@/actions/supabase/queries/sessions";
 import ParticipantNavBar from "@/components/ParticipantsNavBar/ParticipantsNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
@@ -56,22 +54,17 @@ export default function ParticipantPastSessionsPage() {
     const userGroupId = profile.user_group_id;
 
     (async () => {
-      const data = (await fetchSessionsbyUserGroup(userGroupId)) ?? [];
+      if (!profile.user_group_id) return;
+      const data =
+        (await fetchSessionsbyUserGroup(profile.user_group_id)) ?? [];
 
-      const enriched = await Promise.all(
-        data.map(async s => {
-          const [pdfInfo] = await Promise.all([fetchPDFName(s.session_id)]);
-          const tn = pdfInfo.template_name ?? "Untitled";
-          const dateSource = pdfInfo.created_at ?? s.created_at;
-          const dateStr = dateSource
-            ? new Date(dateSource).toLocaleDateString("en-CA")
-            : "";
-          return {
-            ...s,
-            displayName: `${tn}_${dateStr}`,
-          };
-        }),
-      );
+      const enriched = data.map(s => {
+        const tn = s.template?.template_name ?? "Untitled";
+        const dateStr = s.created_at
+          ? new Date(s.created_at).toLocaleDateString("en-CA")
+          : "";
+        return { ...s, displayName: `${tn}_${dateStr}` };
+      });
 
       setSessions(enriched);
     })();
@@ -135,29 +128,6 @@ export default function ParticipantPastSessionsPage() {
             </TabControlsWrapper>
 
             <SearchBarStyled>
-              <SearchIconWrapper>
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 10 10"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <g clipPath="url(#clip0_search_par)">
-                    <path
-                      d="M8.75 8.75L6.9375 6.9375M7.91667 4.58333C7.91667 6.42428 6.42428 7.91667 4.58333 7.91667C2.74238 7.91667 1.25 6.42428 1.25 4.58333C1.25 2.74238 2.74238 1.25 4.58333 1.25C6.42428 1.25 7.91667 2.74238 7.91667 4.58333Z"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </g>
-                  <defs>
-                    <clipPath id="clip0_search_par">
-                      <rect width="10" height="10" fill="white" />
-                    </clipPath>
-                  </defs>
-                </svg>
-              </SearchIconWrapper>
               <SearchInput
                 value={searchInput}
                 onChange={e => setSearchInput(e.target.value)}

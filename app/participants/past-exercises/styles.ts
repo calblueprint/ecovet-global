@@ -62,12 +62,11 @@ export const SearchIconWrapper = styled.span`
 `;
 
 export const SearchInput = styled.input`
+  width: 100%;
+  height: 2.5em;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
   border: 1px solid ${COLORS.oat_medium};
   border-radius: 8px;
-  padding: 0.5rem 1rem 0.5rem 2.25rem;
-  width: 100%;
-  height: 2.75rem;
-  font-family: ${Sans.style.fontFamily};
   font-size: 0.8125rem;
   background-color: transparent;
 `;
@@ -76,8 +75,9 @@ export const StyledTab = styled(Tab)`
   && {
     text-transform: none;
     font-weight: 500;
-    font-size: 0.9375rem;
+    font-size: 0.8rem;
     font-family: ${Sans.style.fontFamily};
+
     &.Mui-selected {
       color: ${COLORS.darkElectricBlue};
     }
@@ -115,11 +115,8 @@ export const StyledTableRow = styled.tr<{ $clickable: boolean }>`
 
 export const StyledTd = styled.td`
   padding: 0.75rem 1.5rem;
-  color: ${COLORS.black70};
-  font-weight: 500;
   font-size: 0.9375rem;
-  font-family: ${Sans.style.fontFamily};
-  line-height: normal;
+  color: ${COLORS.black100};
 `;
 
 export const EmptyMessage = styled.td`
