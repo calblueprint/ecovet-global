@@ -45,7 +45,7 @@ interface Role {
 
 export default function Page() {
   const { profile } = useProfile();
-  const [isSync, setIsSync] = useState(true);
+  const [isAsync, setIsAsync] = useState(false);
   const [availableUsers, setAvailableUsers] = useState<Profile[]>([]);
   const roleRef = useRef<SelectInstance<DropdownOption> | null>(null);
   const participantRefs = useRef<(SelectInstance<DropdownOption> | null)[]>([]);
@@ -129,12 +129,12 @@ export default function Page() {
       if (validAssignments.length === 0) {
         throw new Error("Please assign at least one participant with a role.");
       }
-
+      console.log(isAsync);
       const sessionId = (await createSession(
         selectedTemplateId as UUID,
         profile.user_group_id as UUID,
         isForceAdvance,
-        isSync,
+        isAsync,
       )) as UUID;
 
       console.log(sessionId);
@@ -238,10 +238,10 @@ export default function Page() {
             </DropdownContainer>
 
             <ToggleGroup>
-              <ToggleButton $active={isSync} onClick={() => setIsSync(true)}>
+              <ToggleButton $active={isAsync} onClick={() => setIsAsync(false)}>
                 Synchronous
               </ToggleButton>
-              <ToggleButton $active={!isSync} onClick={() => setIsSync(false)}>
+              <ToggleButton $active={!isAsync} onClick={() => setIsAsync(true)}>
                 Asynchronous
               </ToggleButton>
             </ToggleGroup>

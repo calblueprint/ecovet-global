@@ -105,6 +105,7 @@ export default function FacilitatorSessionView() {
     async function loadIsAsync() {
       if (!sessionId) return;
       const is_async = await fetchIsSessionAsync(sessionId);
+      console.log(is_async);
       setIsAsync(is_async ? is_async : false);
     }
 
@@ -354,9 +355,9 @@ export default function FacilitatorSessionView() {
 
       setOpenWarning(false);
 
-      await sendEmailReminder(em);
+      await sendEmailReminder(em, sessionId);
     } catch (error) {
-      console.error("Error in sending nuge email to user:", error);
+      console.error("Error in sending nudge email to user:", error);
     } finally {
       setSending(false);
     }

@@ -131,7 +131,7 @@ export async function createSession(
   templateId: string,
   userGroupId: string,
   forceAdvance: boolean = false,
-  isSync: boolean,
+  isAsync: boolean,
 ) {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
@@ -141,7 +141,7 @@ export async function createSession(
         template_id: templateId,
         user_group_id: userGroupId,
         force_advance: forceAdvance,
-        is_async: !isSync,
+        is_async: isAsync,
       },
     ])
     .select("session_id")

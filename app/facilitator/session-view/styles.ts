@@ -33,7 +33,7 @@ export const ButtonDiv = styled.div`
 `;
 
 export const NudgeButton = styled.button<{ async?: boolean }>`
-  display: ${({ async }) => (async ? "none" : "flex")};
+  display: ${({ async }) => (async ? "flex" : "none")};
   padding: 0.5rem 0.75rem;
   justify-content: center;
   align-items: center;

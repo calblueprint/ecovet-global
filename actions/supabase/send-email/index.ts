@@ -1,57 +1,57 @@
 "use server";
 
-import nodemailer from "nodemailer";
-
 export async function autoEmailSender(
-  text: string,
+  htmlContent: string,
+  textContent: string,
   subject: string,
   recipient: string,
 ) {
-  const senderAddress = process.env.BREVO_SMTP_USER;
-  const senderAppPassword = process.env.BREVO_SMTP_KEY;
+  const apiKey = process.env.BREVO_API_KEY;
   const senderName = process.env.EMAIL_SENDER_NAME ?? "Ecovet Global Team";
-  const verifiedAddress = "ecovetadmin@gmail.com";
+  const senderEmail = process.env.BREVO_SENDER_EMAIL ?? "ecovetadmin@gmail.com";
 
-  if (!senderAddress || !senderAppPassword) {
-    throw new Error(
-      "Missing email configuration: BREVO_SMTP_USER and BREVO_SMTP_KEY must be set in environment variables.",
-    );
+  if (!apiKey) {
+    throw new Error("Missing BREVO_API_KEY env var.");
   }
 
-  const transporter = nodemailer.createTransport({
-    host: "smtp-relay.brevo.com",
-    port: 587,
-    secure: false,
-    auth: {
-      user: senderAddress,
-      pass: senderAppPassword,
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "api-key": apiKey,
+      "content-type": "application/json",
     },
+    body: JSON.stringify({
+      sender: { name: senderName, email: senderEmail },
+      to: [{ email: recipient }],
+      subject,
+      htmlContent,
+      textContent,
+    }),
   });
 
-  await transporter.sendMail({
-    from: `${senderName} <${verifiedAddress}>`,
-    to: recipient,
-    subject,
-    text,
-  });
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error(`Brevo API ${res.status}: ${errBody}`);
+  }
 }
 
-export default autoEmailSender;
+export async function sendEmailReminder(email: string, sessionId: string) {
+  const loginUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/auth/sign-in?fromNudge=true&sessionId=${sessionId}`;
 
-export async function sendEmailReminder(email: string) {
-  if (!process.env.BREVO_SMTP_USER || !process.env.BREVO_SMTP_KEY) {
-    throw new Error(
-      "Missing email configuration: BREVO_SMTP_USER and BREVO_SMTP_KEY must be set in environment variables.",
-    );
-  }
+  const htmlContent = `
+    <p>Hi, this is a reminder that you have an ongoing game. 
+    <a href="${loginUrl}">Click here to log in and re-join the current excercise</a>.</p>
+  `;
 
-  const text =
-    "Hi,\nThis is a reminder that you have an ongoing game. Go to " +
-    process.env.NEXT_PUBLIC_SITE_URL +
-    "/auth/sign-in?fromNudge=true" +
-    ` to login to join the game.`;
+  const textContent = `Hi,\nThis is a reminder that you have an ongoing game. Go to ${loginUrl} to login to join the current excercise.`;
 
-  await autoEmailSender(text, "Reminder to Re-join Your Ongoing Game", email);
+  await autoEmailSender(
+    htmlContent,
+    textContent,
+    "Reminder to Re-join Your Ongoing Game",
+    email,
+  );
 
   return "Successfully sent email reminder";
 }
