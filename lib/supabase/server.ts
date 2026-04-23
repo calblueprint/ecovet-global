@@ -39,6 +39,8 @@ export async function getSupabaseServerClient() {
   );
 }
 
+// This client has full admin privileges, including bypassing RLS
+// Do NOT use this client in client-side code, only in server-side code
 export function getSupabaseAdminClient() {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
