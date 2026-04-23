@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { createServerClient as createServerClientSB } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { Database } from "../../types/database.types";
 
 export async function getSupabaseServerClient() {
@@ -33,6 +34,28 @@ export async function getSupabaseServerClient() {
             }
           });
         },
+      },
+    },
+  );
+}
+
+export function getSupabaseAdminClient() {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY
+  ) {
+    throw new Error(
+      "Missing Supabase URL or Service Role Key. Make sure SUPABASE_SERVICE_ROLE_KEY is set in your environment variables.",
+    );
+  }
+
+  return createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
       },
     },
   );
