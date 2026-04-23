@@ -34,7 +34,6 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
   });
 
   async function loadRooms() {
-    console.log(userId);
     if (!userId) return;
 
     try {
@@ -54,7 +53,6 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
         }),
       );
 
-      console.log(chatRooms);
       if (entries.length > 0) setRoomId(entries[0][0]);
     } catch {
       console.log("Error loading chat rooms.");
@@ -118,6 +116,7 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
         ) : (
           <ChatSelection
             chats={chatRooms}
+            currentRoomId={roomId}
             changeRoom={roomId => {
               setRoomId(roomId);
               setIsSelectingUsers(true);

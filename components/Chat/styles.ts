@@ -9,7 +9,7 @@ export const MessageContent = styled(B2)`
   color: ${COLORS.black70};
 `;
 
-export const MessageContentBubble = styled.div<{ fromuser: boolean }>`
+export const MessageContentBubble = styled.div<{ $fromUser: boolean }>`
   display: flex;
   padding: 0.4375rem 0.75rem;
   flex-direction: column;
@@ -17,21 +17,21 @@ export const MessageContentBubble = styled.div<{ fromuser: boolean }>`
   align-items: flex-start;
   gap: 0.625rem;
   border-radius: 0.5rem;
-  background: ${({ fromuser }) =>
-    fromuser ? COLORS.lightEletricBlue : COLORS.oat_medium};
+  background: ${({ $fromUser }) =>
+    $fromUser ? COLORS.lightEletricBlue : COLORS.oat_medium};
 `;
 
-export const TimeMessageContainer = styled.div<{ fromuser: boolean }>`
+export const TimeMessageContainer = styled.div<{ $fromUser: boolean }>`
   display: flex;
   flex-direction: column;
-  align-items: ${({ fromuser }) => (fromuser ? "flex-end" : "flex-start")};
+  align-items: ${({ $fromUser }) => ($fromUser ? "flex-end" : "flex-start")};
   gap: 0.25rem;
 `;
 
-export const PfpMessageContentContainer = styled.div<{ fromuser: boolean }>`
+export const PfpMessageContentContainer = styled.div<{ $fromUser: boolean }>`
   display: flex;
   flex-direction: row;
-  align-items: ${({ fromuser }) => (fromuser ? "flex-end" : "flex-start")};
+  align-items: ${({ $fromUser }) => ($fromUser ? "flex-end" : "flex-start")};
   gap: 0.5rem;
   align-self: stretch;
 `;
@@ -74,19 +74,19 @@ export const NameRoleSeparator = styled.div`
 `;
 
 export const FullMessageContainer = styled.div<{
-  $doubletext: boolean;
-  $fromuser: boolean;
+  $doubleText: boolean;
+  $fromUser: boolean;
 }>`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  align-self: ${({ $fromuser }) => ($fromuser ? "end" : "start")};
-  padding-top: ${({ $doubletext }) => ($doubletext ? "0.4rem" : "0rem")};
+  align-self: ${({ $fromUser }) => ($fromUser ? "end" : "start")};
+  padding-top: ${({ $doubleText }) => ($doubleText ? "0.4rem" : "0rem")};
 `;
 
-export const ProfileColor = styled.div<{ color: string; size?: number }>`
-  width: ${({ size }) => size ?? 1}rem;
-  height: ${({ size }) => size ?? 1}rem;
+export const ProfileColor = styled.div<{ $color: string; $size?: number }>`
+  width: ${({ $size }) => $size ?? 1}rem;
+  height: ${({ $size }) => $size ?? 1}rem;
   aspect-ratio: 1/1;
   border-radius: 0.25rem;
   align-self: start;
@@ -182,6 +182,16 @@ export const ContentContainer = styled.div`
   gap: 1rem;
 `;
 
+export const ChatSelectedBorder = styled.div<{
+  color?: string;
+  selected: boolean;
+}>`
+  padding: 1px;
+  border: ${({ selected }) => (selected ? "1" : "0")}px solid
+    ${({ color }) => color ?? COLORS.teal};
+  border-radius: 8px;
+`;
+
 export const ChatSelectionButton = styled.div<{ color?: string }>`
   display: flex;
   width: 2rem;
@@ -191,7 +201,7 @@ export const ChatSelectionButton = styled.div<{ color?: string }>`
   justify-content: center;
   align-items: center;
   aspect-ratio: 1/1;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   border: 1px solid ${COLORS.darkElectricBlue};
   background: ${({ color }) => color ?? COLORS.teal};
 `;

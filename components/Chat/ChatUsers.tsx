@@ -42,8 +42,8 @@ export default function ChatUsers({
   const currentParticipantSelections = participantOptions
     .filter(
       user =>
-        user.id != profile?.id &&
-        user.name != "null null" &&
+        user.id !== profile?.id &&
+        user.name !== "null null" &&
         currentParticipants.includes(user.id),
     )
     .map(p => ({ id: p.id, name: p.name }));
@@ -54,7 +54,8 @@ export default function ChatUsers({
         participantOptions
           .filter(
             user =>
-              user.name != "null null" &&
+              user.id !== profile?.id &&
+              user.name !== "null null" &&
               !currentParticipants.includes(user.id),
           )
           .map(p => [p.id, p.name]),
@@ -150,7 +151,7 @@ export default function ChatUsers({
   return (
     <SelectUsersContainer>
       <ChatUserList>
-        <ProfileColor color="#8E44AD" size={2} onClick={onDone} />
+        <ProfileColor $color="#8E44AD" $size={2} onClick={onDone} />
         {currentParticipantSelections.map(({ id, name }) => {
           return (
             <ClickableUser key={id} onClick={() => removeUser(id)}>
