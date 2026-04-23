@@ -1,4 +1,5 @@
 import type {
+  CommunicationMatrix,
   PhaseReportData,
   SessionReportData,
 } from "@/components/pdf/SessionReport";
@@ -13,6 +14,85 @@ type NestedTemplate = {
   objective: string | null;
   summary: string | null;
 };
+
+function buildCommunicationMatrix(
+  chatRooms: { room_id: string; user_id: string }[],
+  participantUserIds: string[],
+  profileByUserId: Record<string, { firstName: string; lastName: string }>,
+): CommunicationMatrix {
+  const n = participantUserIds.length;
+  const userIdToIndex: Record<string, number> = {};
+  participantUserIds.forEach((uid, idx) => {
+    userIdToIndex[uid] = idx;
+  });
+
+  // Build disambiguated labels: "First" normally, "First L." when first names clash,
+  // "First Last" when first + last initial still clashes
+  const firstNames = participantUserIds.map(
+    uid => profileByUserId[uid]?.firstName ?? "?",
+  );
+  const firstNameCount: Record<string, number> = {};
+  for (const f of firstNames) firstNameCount[f] = (firstNameCount[f] ?? 0) + 1;
+
+  const shortLabels = participantUserIds.map(uid => {
+    const { firstName, lastName } = profileByUserId[uid] ?? {
+      firstName: "?",
+      lastName: "",
+    };
+    if (firstNameCount[firstName] <= 1) return firstName;
+    const withInitial =
+      lastName ? `${firstName} ${lastName[0]}.` : firstName;
+    return withInitial;
+  });
+
+  // If short labels are still not unique, fall back to full name for those entries
+  const labelCount: Record<string, number> = {};
+  for (const l of shortLabels) labelCount[l] = (labelCount[l] ?? 0) + 1;
+
+  const headers = participantUserIds.map((uid, i) => {
+    if (labelCount[shortLabels[i]] <= 1) return shortLabels[i];
+    const { firstName, lastName } = profileByUserId[uid] ?? {
+      firstName: "?",
+      lastName: "",
+    };
+    return lastName ? `${firstName} ${lastName}` : firstName;
+  });
+
+  const matrix: boolean[][] = Array.from({ length: n }, () =>
+    Array(n).fill(false),
+  );
+
+  // Debug
+  // console.log("[CommMatrix] participantUserIds:", participantUserIds);
+  // console.log("[CommMatrix] userIdToIndex:", userIdToIndex);
+  // console.log("[CommMatrix] raw chatRooms rows:", chatRooms);
+
+  // Group rows by room_id, then mark all intra-room participant pairs
+  const roomUsers: Record<string, string[]> = {};
+  for (const row of chatRooms) {
+    if (!(row.room_id in roomUsers)) roomUsers[row.room_id] = [];
+    roomUsers[row.room_id].push(row.user_id);
+  }
+
+  console.log("[CommMatrix] roomUsers (grouped):", roomUsers);
+
+  for (const [roomId, users] of Object.entries(roomUsers)) {
+    const inSession = users.filter(uid => uid in userIdToIndex);
+    console.log(`[CommMatrix] room ${roomId} — all users:`, users, "| in session:", inSession);
+    for (let i = 0; i < inSession.length; i++) {
+      for (let j = 0; j < inSession.length; j++) {
+        if (i !== j) {
+          matrix[userIdToIndex[inSession[i]]][userIdToIndex[inSession[j]]] =
+            true;
+        }
+      }
+    }
+  }
+
+  console.log("[CommMatrix] final matrix:", matrix);
+  console.log("[CommMatrix] headers:", headers);
+  return { headers, matrix };
+}
 
 export async function GET(
   _req: Request,
@@ -160,12 +240,33 @@ export async function GET(
 
   // Participant name lookup
   const nameByUserId: Record<string, string> = {};
+  const profileByUserId: Record<
+    string,
+    { firstName: string; lastName: string }
+  > = {};
   for (const p of participants) {
     const profile = p.profile as unknown as NestedProfile | null;
+    const firstName = profile?.first_name ?? "";
+    const lastName = profile?.last_name ?? "";
     nameByUserId[p.user_id] =
-      `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim() ||
-      "Unknown";
+      `${firstName} ${lastName}`.trim() || "Unknown";
+    profileByUserId[p.user_id] = { firstName, lastName };
   }
+
+  // Communication matrix from chat_room
+  const { data: chatRooms } = await supabase
+    .from("chat_room")
+    .select("room_id, user_id")
+    .eq("session_id", sessionId);
+
+  const communicationMatrix =
+    participants.length > 1
+      ? buildCommunicationMatrix(
+          chatRooms ?? [],
+          participants.map(p => p.user_id),
+          profileByUserId,
+        )
+      : undefined;
 
   // Assemble phase report data
   // Structure: phase → role → prompt → [participant answers]
@@ -219,6 +320,7 @@ export async function GET(
       };
     }),
     phases: phaseData,
+    communicationMatrix,
   };
 
   // Generate PDF
@@ -384,12 +486,33 @@ export async function POST(
   }
 
   const nameByUserId: Record<string, string> = {};
+  const profileByUserId: Record<
+    string,
+    { firstName: string; lastName: string }
+  > = {};
   for (const p of participants) {
     const profile = p.profile as unknown as NestedProfile | null;
+    const firstName = profile?.first_name ?? "";
+    const lastName = profile?.last_name ?? "";
     nameByUserId[p.user_id] =
-      `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim() ||
-      "Unknown";
+      `${firstName} ${lastName}`.trim() || "Unknown";
+    profileByUserId[p.user_id] = { firstName, lastName };
   }
+
+  // Communication matrix from chat_room
+  const { data: chatRooms } = await supabase
+    .from("chat_room")
+    .select("room_id, user_id")
+    .eq("session_id", sessionId);
+
+  const communicationMatrix =
+    participants.length > 1
+      ? buildCommunicationMatrix(
+          chatRooms ?? [],
+          participants.map(p => p.user_id),
+          profileByUserId,
+        )
+      : undefined;
 
   const phaseData: PhaseReportData[] = (phases ?? []).map(phase => {
     const roles = roleIds.map(roleId => {
@@ -440,6 +563,7 @@ export async function POST(
     }),
     phases: phaseData,
     facilitatorComments: comments,
+    communicationMatrix,
   };
 
   let pdfBytes: Uint8Array;

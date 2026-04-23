@@ -10,7 +10,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
 
-  // ── Cover ────────────────────────────────────────────────────────────────
+  // Cover
   coverPage: {
     fontFamily: "Helvetica",
     fontSize: 11,
@@ -63,7 +63,7 @@ export const styles = StyleSheet.create({
     marginTop: 8,
   },
 
-  // ── Participant summary (page 2) ─────────────────────────────────────────
+  // Participant summary and dep matrix (page 2) 
   pageTitle: {
     fontSize: 16,
     fontFamily: "Helvetica-Bold",
@@ -150,7 +150,105 @@ export const styles = StyleSheet.create({
   statusComplete: { fontSize: 10, color: "#059669" },
   statusPending: { fontSize: 10, color: "#d97706" },
 
-  // ── Phase pages (page 3+) ────────────────────────────────────────────────
+  // Communication matrix
+  matrixSection: {
+    marginTop: 28,
+  },
+  matrixTitle: {
+    fontSize: 12,
+    fontFamily: "Helvetica-Bold",
+    color: "#111827",
+    marginBottom: 3,
+  },
+  matrixSubtitle: {
+    fontSize: 9,
+    color: "#6b7280",
+    marginBottom: 10,
+  },
+  matrixRow: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+  },
+  matrixRowAlt: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+    backgroundColor: "#fafafa",
+  },
+  matrixCornerCell: {
+    flex: 2,
+    paddingVertical: 4,
+    paddingHorizontal: 3,
+    backgroundColor: "#f3f4f6",
+  },
+  matrixHeaderCell: {
+    flex: 1,
+    paddingVertical: 4,
+    paddingHorizontal: 3,
+    backgroundColor: "#f3f4f6",
+  },
+  matrixHeaderText: {
+    fontSize: 8,
+    fontFamily: "Helvetica-Bold",
+    color: "#374151",
+    textAlign: "center",
+  },
+  matrixRowLabelCell: {
+    flex: 2,
+    paddingVertical: 4,
+    paddingHorizontal: 3,
+  },
+  matrixRowLabelText: {
+    fontSize: 8,
+    fontFamily: "Helvetica-Bold",
+    color: "#374151",
+  },
+  matrixCell: {
+    flex: 1,
+    paddingVertical: 4,
+    paddingHorizontal: 3,
+  },
+  matrixCellDiag: {
+    flex: 1,
+    paddingVertical: 4,
+    paddingHorizontal: 3,
+    backgroundColor: "#f3f4f6",
+  },
+  matrixTextYes: {
+    fontSize: 9,
+    color: "#059669",
+    fontFamily: "Helvetica-Bold",
+    textAlign: "center",
+  },
+  matrixTextNo: {
+    fontSize: 9,
+    color: "#059669",
+    textAlign: "center",
+  },
+  matrixTextDiag: {
+    fontSize: 9,
+    color: "#9ca3af",
+    textAlign: "center",
+  },
+
+  // Network graph
+  graphSection: {
+    marginTop: 28,
+  },
+  graphTitle: {
+    fontSize: 12,
+    fontFamily: "Helvetica-Bold",
+    color: "#111827",
+    marginBottom: 3,
+  },
+  graphSubtitle: {
+    fontSize: 9,
+    color: "#6b7280",
+    marginBottom: 6,
+  },
+
+  // Phase pages (page 3+)
   phaseNumber: {
     fontSize: 10,
     fontFamily: "Helvetica-Bold",
