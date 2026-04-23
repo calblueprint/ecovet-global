@@ -260,6 +260,7 @@ export type Database = {
         Row: {
           prompt_follow_ups: string | null;
           prompt_id: string;
+          prompt_number: number | null;
           prompt_text: string | null;
           prompt_type: Database["public"]["Enums"]["prompt_type"] | null;
           role_phase_id: string | null;
@@ -267,6 +268,7 @@ export type Database = {
         Insert: {
           prompt_follow_ups?: string | null;
           prompt_id?: string;
+          prompt_number?: number | null;
           prompt_text?: string | null;
           prompt_type?: Database["public"]["Enums"]["prompt_type"] | null;
           role_phase_id?: string | null;
@@ -274,6 +276,7 @@ export type Database = {
         Update: {
           prompt_follow_ups?: string | null;
           prompt_id?: string;
+          prompt_number?: number | null;
           prompt_text?: string | null;
           prompt_type?: Database["public"]["Enums"]["prompt_type"] | null;
           role_phase_id?: string | null;
@@ -448,9 +451,11 @@ export type Database = {
       session: {
         Row: {
           after_action_report_id: string | null;
+          created_at: string | null;
           force_advance: boolean;
           is_async: boolean;
           is_finished: boolean | null;
+          phase_index: number | null;
           session_id: string;
           session_name: string | null;
           template_id: string | null;
@@ -458,9 +463,11 @@ export type Database = {
         };
         Insert: {
           after_action_report_id?: string | null;
+          created_at?: string | null;
           force_advance?: boolean;
           is_async?: boolean;
           is_finished?: boolean | null;
+          phase_index?: number | null;
           session_id?: string;
           session_name?: string | null;
           template_id?: string | null;
@@ -468,9 +475,11 @@ export type Database = {
         };
         Update: {
           after_action_report_id?: string | null;
+          created_at?: string | null;
           force_advance?: boolean;
           is_async?: boolean;
           is_finished?: boolean | null;
+          phase_index?: number | null;
           session_id?: string;
           session_name?: string | null;
           template_id?: string | null;

@@ -6,6 +6,7 @@ import { DropdownOption } from "@/types/dropdown";
 
 export const LayoutWrapper = styled.div`
   display: flex;
+  align-items: flex-start;
   width: 100%;
 `;
 
@@ -330,14 +331,15 @@ export const ExerciseSelectStyles: StylesConfig<DropdownOption, boolean> = {
 
 export const SideNavContainer = styled.div`
   display: flex;
-  padding: 0.75rem 1rem;
-  padding-right: 0;
-  width: 12rem;
-  min-width: 180px;
-  align-items: flex-start;
   flex-direction: column;
+  width: fit-content;
+  height: 100vh;
   background-color: ${COLORS.oat_light};
-  min-height: 100vh;
+
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  overflow-y: auto;
 `;
 
 export const DeleteButton = styled.button`

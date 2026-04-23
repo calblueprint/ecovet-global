@@ -49,12 +49,18 @@ export const StyledAccordion = styled(Accordion)`
 
 export const SideNavContainer = styled.div`
   display: flex;
-  padding: 0.75rem 1rem;
-  padding-right: 0;
-  align-items: flex-start;
   flex-direction: column;
+  width: fit-content;
+  min-width: 200px;
+  height: 100vh;
+  padding: 1.5rem 1rem;
   background-color: ${COLORS.oat_light};
-  min-height: 100vh;
+
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  overflow-y: auto;
+  flex-shrink: 0;
 `;
 
 export const SideNavTemplatesContainer = styled.div`

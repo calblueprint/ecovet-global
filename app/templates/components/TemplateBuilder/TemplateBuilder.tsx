@@ -1,14 +1,7 @@
-import type { UUID } from "@/types/schema";
+import type { EditablePhase, RolePhase, UUID } from "@/types/schema";
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { addNewOption } from "@/actions/supabase/queries/prompt";
-import {
-  createPhases,
-  createPrompts,
-  createRolePhases,
-  createRoles,
-  createTemplates,
-} from "@/actions/supabase/queries/templates";
 import {
   LocalStore,
   Prompt,
@@ -21,26 +14,57 @@ import { useProfile } from "@/utils/ProfileProvider";
 import { ActiveIds } from "../../page";
 import QuestionBuilder from "../QuestionBuilder/QuestionBuilder";
 import TemplateOverviewForm from "../TemplateOverviewForm/TemplateOverviewForm";
-import { PanelCard, SubmitButton } from "./styles";
+import { PanelCard } from "./styles";
 
-// TODO: add an active phase id
-// TODO: add an active phase id
 export default function TemplateBuilder({
   activeIds,
   setActiveIds,
   localStore,
   onFinish,
   update,
+  saveTemplate,
+  setSelectedPhaseId,
 }: {
   activeIds: ActiveIds;
   setActiveIds: React.Dispatch<React.SetStateAction<ActiveIds>>;
   localStore: LocalStore | null;
   onFinish: () => void;
   update: (updater: (draft: LocalStore) => void) => void;
+  saveTemplate: () => Promise<void>;
+  setSelectedPhaseId: React.Dispatch<React.SetStateAction<string | null>>;
 }) {
-  const [saving, setSaving] = useState(false);
-  const { profile } = useProfile();
+  const router = useRouter();
   const TEMPLATE_INDEX = 1;
+
+  const phases = localStore
+    ? localStore.phaseIds.map(id => localStore.phasesById[id])
+    : [];
+  const roles = localStore
+    ? localStore.roleIds
+        .filter(id => id !== 1)
+        .map(id => localStore.rolesById[id] as Role)
+    : [];
+
+  function insertPromptAt(rolePhaseId: UUID, index: number): void {
+    if (localStore == null) return;
+
+    update(draft => {
+      const newPromptID = crypto.randomUUID() as UUID;
+      draft.promptById[newPromptID] = {
+        prompt_id: newPromptID,
+        role_phase_id: rolePhaseId,
+        prompt_text: "",
+        prompt_number: index + 1,
+        prompt_follow_ups: "",
+        prompt_type: "text",
+      };
+      if (!draft.promptIndex[rolePhaseId]) {
+        draft.promptIndex[rolePhaseId] = [];
+      }
+      draft.promptIndex[rolePhaseId].splice(index, 0, newPromptID);
+      draft.optionsByPromptId[newPromptID] = [];
+    });
+  }
 
   function removeRole(role_id: UUID | number): void {
     if (localStore == null || typeof role_id == "number") return;
@@ -99,27 +123,110 @@ export default function TemplateBuilder({
       }
 
       draft.phaseIds.forEach((pid, index) => {
-        draft.phasesById[pid].phase_name = `Phase ${index + 1}`;
         draft.phasesById[pid].phase_number = index + 1;
       });
     });
   }
 
-  function addPrompt(rolePhaseID: UUID): void {
-    if (localStore == null) return;
+  function addPhase(): void {
+    if (!localStore) return;
 
     update(draft => {
-      const newPromptID = crypto.randomUUID();
-      draft.promptById[newPromptID] = {
-        prompt_id: newPromptID,
-        role_phase_id: rolePhaseID,
-        prompt_text: "",
-        prompt_follow_ups: "",
-        prompt_type: "text",
-      };
-      draft.promptIndex[rolePhaseID].push(newPromptID);
-      draft.optionsByPromptId[newPromptID] = []; // initialize empty options
+      const newPhaseId = crypto.randomUUID();
+      const nextNumber = draft.phaseIds.length + 1;
+
+      draft.phaseIds.push(newPhaseId);
+      draft.phasesById[newPhaseId] = {
+        phase_id: newPhaseId,
+        template_id: draft.templateID,
+        phase_name: `Phase ${nextNumber}`,
+        phase_description: "",
+        phase_number: nextNumber,
+      } as EditablePhase;
+
+      draft.roleIds.forEach(roleId => {
+        if (roleId === 1) return;
+
+        const newRolePhaseId = crypto.randomUUID();
+        draft.rolePhasesById[newRolePhaseId] = {
+          role_phase_id: newRolePhaseId,
+          role_id: roleId as UUID,
+          phase_id: newPhaseId,
+          role_phase_description: "",
+        } as RolePhase;
+
+        if (!draft.rolePhaseIndex[roleId]) draft.rolePhaseIndex[roleId] = {};
+        draft.rolePhaseIndex[roleId][newPhaseId] = newRolePhaseId;
+        draft.promptIndex[newRolePhaseId] = [];
+      });
     });
+  }
+
+  function addRole(): void {
+    if (!localStore) return;
+
+    update(draft => {
+      const newRoleId = crypto.randomUUID();
+      const nextNumber = draft.roleIds.length;
+
+      draft.roleIds.push(newRoleId);
+      draft.rolesById[newRoleId] = {
+        role_id: newRoleId,
+        template_id: draft.templateID,
+        role_name: `Role ${nextNumber}`,
+        role_description: "",
+      } as Role;
+
+      draft.rolePhaseIndex[newRoleId] = {};
+
+      draft.phaseIds.forEach(phaseId => {
+        const newRolePhaseId = crypto.randomUUID();
+        draft.rolePhasesById[newRolePhaseId] = {
+          role_phase_id: newRolePhaseId,
+          role_id: newRoleId,
+          phase_id: phaseId,
+          role_phase_description: "",
+        } as RolePhase;
+
+        draft.rolePhaseIndex[newRoleId][phaseId] = newRolePhaseId;
+        draft.promptIndex[newRolePhaseId] = [];
+      });
+    });
+  }
+
+  function renamePhase(phase_id: UUID, name: string): void {
+    if (!localStore) return;
+    update(draft => {
+      draft.phasesById[phase_id].phase_name = name;
+    });
+  }
+
+  function renameRole(role_id: UUID, name: string): void {
+    if (!localStore) return;
+    update(draft => {
+      (draft.rolesById[role_id] as Role).role_name = name;
+    });
+  }
+
+  function updatePhaseDescription(phase_id: UUID, description: string): void {
+    if (!localStore) return;
+    update(draft => {
+      draft.phasesById[phase_id].phase_description = description;
+    });
+  }
+
+  function updateRoleDescription(role_id: UUID, description: string): void {
+    if (!localStore) return;
+    update(draft => {
+      (draft.rolesById[role_id] as Role).role_description = description;
+    });
+  }
+
+  // Append at end — just delegates to insertPromptAt
+  function addPrompt(rolePhaseID: UUID): void {
+    if (localStore == null) return;
+    const currentLength = localStore.promptIndex[rolePhaseID]?.length ?? 0;
+    insertPromptAt(rolePhaseID, currentLength);
   }
 
   function removePrompt(rolePhaseID: UUID, promptID: UUID): void {
@@ -137,7 +244,7 @@ export default function TemplateBuilder({
   function setActiveUpdate(
     id: UUID | number,
     field: string,
-    next: string | PromptType | StagedOption[],
+    next: string | PromptType | StagedOption[] | number,
   ) {
     if (!localStore) return;
 
@@ -149,6 +256,9 @@ export default function TemplateBuilder({
     } else {
       if (field === "add_prompt") {
         addPrompt(id as UUID);
+      } else if (field === "insert_prompt_at") {
+        // `next` is the index to insert at
+        insertPromptAt(id as UUID, next as number);
       } else if (field === "remove_prompt") {
         removePrompt(next as UUID, id as UUID);
       } else if (field === "role_description") {
@@ -172,7 +282,7 @@ export default function TemplateBuilder({
       } else if (field === "prompt_type") {
         update(draft => {
           draft.promptById[id as UUID].prompt_type = next as PromptType;
-          draft.optionsByPromptId[id as UUID] = []; // clear options on type change
+          draft.optionsByPromptId[id as UUID] = [];
         });
       } else if (field === "options") {
         update(draft => {
@@ -184,96 +294,36 @@ export default function TemplateBuilder({
     }
   }
 
-  async function saveTemplate(): Promise<void> {
-    setSaving(true);
-
-    if (localStore == null) return;
-    const saveStore: LocalStore = structuredClone(localStore);
-
-    const realtemplateID = await createTemplates(
-      saveStore.templateID,
-      (saveStore.rolesById[1] as Template).template_name,
-      null,
-      (saveStore.rolesById[1] as Template).objective,
-      (saveStore.rolesById[1] as Template).summary,
-      (saveStore.rolesById[1] as Template).setting,
-      (saveStore.rolesById[1] as Template).current_activity,
-      profile?.user_group_id,
-    );
-
-    for (const roleID of saveStore.roleIds) {
-      if (!(typeof roleID == "number")) {
-        await createRoles(
-          roleID,
-          realtemplateID,
-          (saveStore.rolesById[roleID] as Role).role_name,
-          (saveStore.rolesById[roleID] as Role).role_description,
-        );
-      }
-    }
-
-    for (const phaseID of saveStore.phaseIds) {
-      await createPhases(
-        phaseID,
-        saveStore.phasesById[phaseID].template_id,
-        saveStore.phasesById[phaseID].phase_name,
-        saveStore.phasesById[phaseID].phase_description,
-        saveStore.phasesById[phaseID].phase_number,
-      );
-    }
-
-    for (const [roleID, obj] of Object.entries(saveStore.rolePhaseIndex) as [
-      UUID,
-      Record<UUID, UUID>,
-    ][]) {
-      for (const [phaseID, rolePhaseID] of Object.entries(obj) as [
-        UUID,
-        UUID,
-      ][]) {
-        console.log(
-          "saving rolePhase description:",
-
-          saveStore.rolePhasesById[rolePhaseID].role_phase_description,
-        );
-        try {
-          await createRolePhases(
-            rolePhaseID,
-            phaseID,
-            roleID,
-            saveStore.rolePhasesById[rolePhaseID].role_phase_description,
-          );
-        } catch (err) {
-          console.error("createRolePhases error:", err);
-        }
-      }
-    }
-
-    for (const [promptID, prompt] of Object.entries(saveStore.promptById) as [
-      UUID,
-      Prompt,
-    ][]) {
-      await createPrompts(
-        promptID,
-        prompt.role_phase_id ?? "",
-        prompt.prompt_text,
-        prompt.prompt_follow_ups,
-        prompt.prompt_type,
-      );
-
-      // Save options for mutlichoice prompts
-      const options = saveStore.optionsByPromptId[promptID] ?? [];
-      for (const opt of options) {
-        await addNewOption(promptID, opt.option_text ?? "");
-      }
-    }
-
-    setSaving(false);
-    onFinish();
-  }
-
   const rolePhases = Object.entries(
     localStore?.rolePhaseIndex[activeIds.roleId as UUID] || {},
   ).map(([_, rolePhaseID]) => rolePhaseID);
+
+  const handleNextPhase = () => {
+    if (!localStore || !activeIds.rolePhaseId) return;
+
+    const currentPhaseId =
+      localStore.rolePhasesById[activeIds.rolePhaseId].phase_id;
+    const currentPhaseIndex = localStore.phaseIds.indexOf(currentPhaseId);
+
+    if (
+      currentPhaseIndex !== -1 &&
+      currentPhaseIndex < localStore.phaseIds.length - 1
+    ) {
+      const nextPhaseId = localStore.phaseIds[currentPhaseIndex + 1];
+      const nextRolePhaseId =
+        localStore.rolePhaseIndex[activeIds.roleId as UUID][nextPhaseId];
+
+      setActiveIds({ roleId: activeIds.roleId, rolePhaseId: nextRolePhaseId });
+      setSelectedPhaseId(nextPhaseId);
+    } else {
+      alert("This is the last phase for this role.");
+    }
+  };
+
+  async function handleSaveAndExit() {
+    await saveTemplate();
+    router.push("/facilitator/template-list");
+  }
 
   return (
     <div>
@@ -283,7 +333,18 @@ export default function TemplateBuilder({
             {activeIds.roleId == TEMPLATE_INDEX || rolePhases.length == 0 ? (
               <TemplateOverviewForm
                 value={localStore.rolesById[TEMPLATE_INDEX] as Template}
+                phases={phases}
+                roles={roles}
                 onChange={setActiveUpdate}
+                onAddPhase={addPhase}
+                onAddRole={addRole}
+                onRenamePhase={renamePhase}
+                onRenameRole={renameRole}
+                onRemovePhase={removePhase}
+                onRemoveRole={removeRole}
+                onUpdatePhaseDescription={updatePhaseDescription}
+                onUpdateRoleDescription={updateRoleDescription}
+                onSaveAndExit={handleSaveAndExit}
               />
             ) : (
               <QuestionBuilder
@@ -295,7 +356,7 @@ export default function TemplateBuilder({
                   promptById: localStore.promptById,
                   promptIndex: localStore.promptIndex,
                   phasesById: localStore.phasesById,
-                  optionsByPromptId: localStore.optionsByPromptId, // NEW
+                  optionsByPromptId: localStore.optionsByPromptId,
                 }}
                 rolePhaseId={activeIds.rolePhaseId || rolePhases[0]}
                 phase={
@@ -306,17 +367,13 @@ export default function TemplateBuilder({
                   ]
                 }
                 onChange={setActiveUpdate}
+                onNextPhase={handleNextPhase}
+                onSaveAndExit={handleSaveAndExit}
               />
             )}
           </PanelCard>
         )}
       </div>
-
-      <Link href="/facilitator/template-list">
-        <SubmitButton onClick={saveTemplate}>
-          {saving ? "Saving..." : "Submit Template"}
-        </SubmitButton>
-      </Link>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { GroupBase, StylesConfig } from "react-select";
 import { TextField } from "@mui/material";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import COLORS from "@/styles/colors";
 import { Flex } from "@/styles/containers";
 import { Sans } from "@/styles/fonts";
@@ -97,29 +97,82 @@ export const FormStack = styled(Flex).attrs({
 
 export const RoleHeader = styled(Flex)`
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end; /* Aligns the text block and buttons nicely */
 `;
 
 export const RoleHeaderContainer = styled(Flex).attrs({
   $direction: "column",
   $gap: "1rem",
 })`
+  padding-top: 1rem; /* Added padding so it looks good when sticky */
   padding-bottom: 1rem;
   border-bottom: 1px solid ${COLORS.oat_medium};
+
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: ${COLORS.white};
 `;
 
-export const FieldCard = styled.div`
+export const HeaderButtonGroup = styled.div`
   display: flex;
-  padding: 16px;
+  gap: 8px;
+`;
+
+export const HeaderButtonLight = styled.button`
+  background: #e8ecef;
+  color: #476c77;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: filter 0.15s ease;
+  &:hover {
+    filter: brightness(0.95);
+  }
+`;
+
+export const HeaderButtonDark = styled.button`
+  background: #476c77;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: filter 0.15s ease;
+  &:hover {
+    filter: brightness(1.1);
+  }
+`;
+
+export const FieldCard = styled.div<{ $focused?: boolean }>`
+  display: flex;
+  padding: 1rem;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: 16px;
+  gap: 1rem;
   align-self: stretch;
 
-  border-radius: 8px;
+  border-radius: 0.5rem;
   border: 1px solid ${COLORS.oat_medium};
   background: ${COLORS.oat_light};
+
+  ${({ $focused }) =>
+    $focused &&
+    css`
+      border-color: ${COLORS.mediumElectricBlue};
+      border-width: 0.1rem;
+      padding: 0.9rem;
+    `}
 `;
 
 export const PhaseCard = styled.div`
@@ -218,9 +271,21 @@ export const BigInput = styled(TextField).attrs({
 // TODO: placeholder color not working
 
 export const RolePhaseDescriptionInput = styled.input.attrs({ type: "text" })`
-  border: none;
-  font-style: italic;
   width: 100%;
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  border-radius: 4px;
+  border: 1px solid ${COLORS.oat_medium};
+  background: ${COLORS.white};
+  color: ${COLORS.black70};
+
+  &::placeholder {
+    color: ${COLORS.black20};
+  }
+
+  &:focus {
+    outline: 1px solid ${COLORS.black40};
+  }
 `;
 
 export const TextFieldStyled = styled(TextField)`
@@ -320,5 +385,27 @@ export const DeleteButton = styled.button`
 
   &:hover {
     color: #e53e3e;
+  }
+`;
+
+export const InsertQuestionRow = styled.div`
+  display: flex;
+  justify-content: center;
+  padding-top: 1rem;
+`;
+
+export const InsertQuestionButton = styled.button`
+  background: ${COLORS.darkElectricBlue};
+  color: ${COLORS.white};
+  border: none;
+  border-radius: 0.4rem;
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: ${COLORS.mediumElectricBlue};
   }
 `;

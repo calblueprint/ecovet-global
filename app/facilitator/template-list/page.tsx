@@ -66,7 +66,6 @@ export default function TemplateListPage() {
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [tagVersion, setTagVersion] = useState(0);
 
-  /** Fetch templates + tags */
   useEffect(() => {
     if (!user_group_id) return;
 
@@ -139,7 +138,6 @@ export default function TemplateListPage() {
     }
   };
 
-  /** Tag actions */
   async function deleteTagComponent(tag_id: UUID, template_id?: UUID) {
     if (template_id) {
       const success = await removeTagFromTemplate(template_id, tag_id);
@@ -353,6 +351,7 @@ export default function TemplateListPage() {
                     },
                   ])
                 }
+                showBorder={true}
               />
               <GeneralTitle>
                 <span>
@@ -444,7 +443,7 @@ export default function TemplateListPage() {
                       onClick={e => {
                         e.stopPropagation();
                         router.push(
-                          `/facilitator/edit-template/${t.template_id}`,
+                          `/templates?templateId=${t.template_id}&fromTemplateList=true`,
                         );
                       }}
                     >

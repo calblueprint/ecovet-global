@@ -4,7 +4,6 @@ import { Flex } from "@/styles/containers";
 
 export const PanelCard = styled(Flex).attrs({ $direction: "column" })`
   // padding: 40px 100px 0 0;
-  gap: 32px;
 `;
 
 export const SubmitButton = styled.button`

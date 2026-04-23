@@ -6,9 +6,23 @@ import { Sans } from "@/styles/fonts";
 export const Main = styled.main`
   display: flex;
   flex-direction: row;
+  width: 100%;
   height: 100vh;
-  min-height: 100vh;
-  background-color: ${COLORS.white};
+  overflow: hidden;
+
+  > *:nth-child(1) {
+    flex: 0.5 0.5 auto;
+  }
+
+  > *:nth-child(2) {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  > *:nth-child(3) {
+    flex: 0 0 360px;
+    border-left: 1px solid #e5e7eb;
+  }
 `;
 
 export const ContentDiv = styled.div`
@@ -86,7 +100,7 @@ export const ContentBody = styled.p`
 
 export const ContinueButtonDiv = styled.div`
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   padding: 1rem 0 2rem 0;
   margin-top: auto;
 `;
@@ -142,7 +156,7 @@ export const PromptText = styled.p`
   padding-bottom: 0.5rem;
 `;
 
-export const StyledTextarea = styled(TextareaAutosize)`
+export const StyledTextArea = styled(TextareaAutosize)`
   width: 100%;
   padding: 0.75rem;
   border-radius: 0.5rem;
@@ -204,4 +218,8 @@ export const PromptWrapper = styled.div`
   gap: 0.75rem;
   padding-left: 2.5rem;
   position: relative;
+`;
+
+export const Clickable = styled.div`
+  cursor: pointer;
 `;

@@ -15,6 +15,7 @@ export async function getProfileById(uid: string) {
     data ?? {
       id: uid,
       first_name: null,
+      email: null,
       user_type: null,
       user_group_id: null,
       last_name: null,

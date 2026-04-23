@@ -32,6 +32,7 @@ export type SessionReportData = {
   generatedAt: string;
   participants: ParticipantSummary[];
   phases: PhaseReportData[];
+  facilitatorComments?: string | null;
 };
 
 export function SessionSummaryReport({
@@ -41,6 +42,7 @@ export function SessionSummaryReport({
   generatedAt,
   participants,
   phases,
+  facilitatorComments,
 }: SessionReportData) {
   // Compute role counts for the stats section
   const roleCounts: Record<string, number> = {};
@@ -143,6 +145,24 @@ export function SessionSummaryReport({
           />
         </View>
       </Page>
+
+      {/* ── Facilitator Comments ─────────────────────────────────────────── */}
+      {facilitatorComments && (
+        <Page size="A4" style={styles.page}>
+          <Text style={styles.pageTitle}>Facilitator Comments</Text>
+          <View style={styles.pageTitleDivider} />
+          <Text style={styles.coverBodyText}>{facilitatorComments}</Text>
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>{sessionName}</Text>
+            <Text
+              style={styles.footerText}
+              render={({ pageNumber, totalPages }) =>
+                `${pageNumber} / ${totalPages}`
+              }
+            />
+          </View>
+        </Page>
+      )}
 
       {/* ── Page 3+: One page per phase ──────────────────────────────────── */}
       {phases.map((phase, pi) => (

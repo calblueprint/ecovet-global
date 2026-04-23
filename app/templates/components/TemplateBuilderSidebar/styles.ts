@@ -27,6 +27,7 @@ export const SidebarContainer = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 `;
 
 export const SideBarEntry = styled.div`

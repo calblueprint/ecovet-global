@@ -64,10 +64,9 @@ export default function Page() {
   ]);
 
   const userOptions = new Map(
-    availableUsers.map(u => [
-      u.id,
-      `${u.first_name} ${u.last_name}, ${u.email}`,
-    ]),
+    availableUsers
+      .filter(u => u.id !== profile?.id)
+      .map(u => [u.id, `${u.first_name} ${u.last_name}, ${u.email}`]),
   );
 
   const roleOptions = new Map(roles.map(r => [r.id, r.name]));
