@@ -1,10 +1,8 @@
 "use client";
 
 import { SetStateAction, useState } from "react";
-import Image from "next/image";
 import { submitNewInvite } from "@/actions/supabase/queries/invites";
 import { submitNewUserGroup } from "@/actions/supabase/queries/user-groups";
-import Plus from "@/assets/images/plus.svg";
 import { Heading3, SearchInput2 } from "../../styles";
 import {
   Backdrop,
@@ -94,7 +92,9 @@ export default function AddUserGroups({ onClose }: { onClose: () => void }) {
           required
         />
 
-        <BasicText>Add Facilitator</BasicText>
+        <BasicText>
+          Add Facilitator <RequiredText>*</RequiredText>
+        </BasicText>
 
         <GroupDiv>
           <SearchInput2
@@ -103,12 +103,6 @@ export default function AddUserGroups({ onClose }: { onClose: () => void }) {
             placeholder="Email address..."
             required
           />
-
-          {/* hmm i'm not sure how you want this to look... */}
-          <SubmitButton onClick={onSubmitButtonClick}>
-            <Image src={Plus} alt="+" width={10} height={10} />
-            Add Facilitator
-          </SubmitButton>
         </GroupDiv>
 
         {facilitatorError && (

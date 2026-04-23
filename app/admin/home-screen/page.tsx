@@ -59,7 +59,7 @@ export default function AdminPage() {
 
         <InviteWrapper>
           {!selectedUserGroupId ? (
-            <div>Please select a user group.</div>
+            <div></div>
           ) : (
             <div>
               <InviteComponent user_group_id={selectedUserGroupId || ""} />
