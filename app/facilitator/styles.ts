@@ -1,10 +1,10 @@
+import { CgSpaceBetween } from "react-icons/cg";
 import { StylesConfig } from "react-select";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
+import { Flex } from "@/styles/containers";
 import { Sans } from "@/styles/fonts";
 import { DropdownOption } from "@/types/dropdown";
-import { Flex } from "@/styles/containers";
-import { CgSpaceBetween } from "react-icons/cg";
 
 export const LayoutWrapper = styled.div`
   display: flex;
@@ -68,25 +68,31 @@ export const SearchBarStyled = styled.div`
 export const SearchInput = styled.input`
   border: 1px solid ${COLORS.oat_medium};
   border-radius: 4px;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.75rem 0.5rem 1.5rem; /* 👈 extra left padding */
   width: 100%;
   height: 32px;
   margin-bottom: 1rem;
+  color: ${COLORS.black70};
   font-family: ${Sans.style.fontFamily};
-  color: #C7C6C3;
   font-size: 12px;
   background-color: ${COLORS.white};
   &::placeholder {
-    color: #C7C6C3;  /* 👈 placeholder color */
-    opacity: 1;      /* 👈 important (browsers reduce opacity by default) */
+    color: ${COLORS.black40}; /* 👈 placeholder color */
+    opacity: 1; /* 👈 important (browsers reduce opacity by default) */
   }
+  &:focus {
+    outline: none;
+    border-color: ${COLORS.darkElectricBlue}; /* ✅ same width */
+    box-shadow: 0 0 0 .75px ${COLORS.darkElectricBlue}; /* ✅ focus ring */
+  }
+}
 `;
 
 export const Heading3 = styled.h3`
   font-family: ${Sans.style.fontFamily};
   font-size: 24px;
   font-weight: 700;
-  
+
   font-style: normal;
   line-height: normal;
 `;
@@ -107,23 +113,24 @@ export const GeneralList = styled.ul`
 
   border-radius: 0.5rem 0.5rem 0 0;
   border-bottom: 1px solid ${COLORS.oat_medium};
-  padding: 1rem 2rem;
+  padding: 0.5rem 0.75rem;
   list-style-type: none;
   font-family: ${Sans.style.fontFamily};
   font-size: 12px;
   font-weight: 500;
   color: ${COLORS.black70};
-  min-height: 4rem;
-  align-items: start;
+  min-height: 2rem;
+  align-items: center;
 `;
 
 export const GeneralTitle = styled.h1`
   display: grid;
-  grid-template-columns: 1.5fr 1.1fr 1.9fr;
+  grid-template-columns: 1.5fr 1fr 2fr;
+  column-gap: 1rem;
   align-items: center;
   border-bottom: 1px solid ${COLORS.oat_medium};
   border-radius: 0.5rem 0.5rem 0 0;
-  padding: 1.25rem 2rem 1.25rem 2rem;
+  padding: 1.25rem 1.25rem 0.5rem 0.75rem;
   background: ${COLORS.white};
   font-family: ${Sans.style.fontFamily};
   color: ${COLORS.black40};
@@ -150,9 +157,11 @@ export const SortButton = styled.button`
 
 export const ConfigRow = styled.div`
   display: flex;
+  height: fit-content;
+  max-height: 3rem;
   justify-content: flex-start;
-  align-items: flex-end;
-  margin-bottom: 2rem;
+  align-items: flex-center;
+  margin-bottom: 0rem;
   gap: 2rem;
 `;
 
@@ -389,16 +398,17 @@ export const TemplatesAndFilterPlusSearch = styled.main`
   width: 100%;
 `;
 
-export const InputWrapper = styled.div`
+export const SearchWrapper = styled.div`
   position: relative;
   width: 100%;
 `;
 
-export const Icon = styled.div`
+export const SearchIcon = styled.div`
   position: absolute;
   left: 10px;
-  top: 50%;
+  top: 35%;
   transform: translateY(-50%);
-  color: #C7C6C3;
+  display: flex;
+  align-items: center;
   pointer-events: none;
 `;

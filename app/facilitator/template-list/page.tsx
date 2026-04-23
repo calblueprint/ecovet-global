@@ -14,6 +14,7 @@ import {
 import { fetchTemplatesWithTags } from "@/actions/supabase/queries/templates";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import { Tag } from "@/components/Tag/TagCreator";
+import { FilterAutocomplete } from "@/components/TagAutoComplete/FilterAutoComplete";
 import { TagAutocomplete } from "@/components/TagAutoComplete/TagAutoComplete";
 import COLORS from "@/styles/colors";
 import { useProfile } from "@/utils/ProfileProvider";
@@ -27,14 +28,15 @@ import {
   MainDiv,
   PageDiv,
   SearchBarStyled,
+  SearchIcon,
   SearchInput,
+  SearchWrapper,
   SideNavContainer,
   SortButton,
   TemplatesAndFilterPlusSearch,
 } from "../styles";
 import TemplateSideBar from "./components/TemplateSidebar";
 import { AssociatedTags } from "./styles";
-import { FilterAutocomplete } from "@/components/TagAutoComplete/FilterAutoComplete";
 
 type TemplateWithTags = Template & {
   associated_tags: Tag[];
@@ -317,149 +319,156 @@ export default function TemplateListPage() {
           />
         </SideNavContainer>
 
-        
-
         <ContentWrapper>
           <PageDiv>
             <MainDiv>
               <TemplatesAndFilterPlusSearch>
+                <Heading3>Browse templates</Heading3>
+                <FilterPlusSearch>
+                  <SearchBarStyled>
+                    <SearchWrapper>
+                      <SearchIcon>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="9"
+                          height="9"
+                          viewBox="0 0 9 9"
+                          fill="none"
+                        >
+                          <path
+                            d="M8 8L6.1875 6.1875M7.16667 3.83333C7.16667 5.67428 5.67428 7.16667 3.83333 7.16667C1.99238 7.16667 0.5 5.67428 0.5 3.83333C0.5 1.99238 1.99238 0.5 3.83333 0.5C5.67428 0.5 7.16667 1.99238 7.16667 3.83333Z"
+                            stroke="#C7C6C3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </SearchIcon>
+                      <SearchInput
+                        value={searchInput}
+                        onChange={e => setSearchInput(e.target.value)}
+                        placeholder="Search templates..."
+                      />
+                    </SearchWrapper>
+                  </SearchBarStyled>
 
-              <Heading3>Browse templates</Heading3>
-
-              <FilterPlusSearch> 
-
-                <SearchBarStyled>
-              <SearchInput
-                value={searchInput}
-                onChange={e => setSearchInput(e.target.value)}
-                placeholder="Search templates..."
-              />
-            </SearchBarStyled>
-                
-              <FilterAutocomplete
-                availableTags={availableTags}
-                selectedTagIds={new Set(selectedTagIds)}
-                onSelect={(id: UUID) =>
-                  setSelectedTagIds(prev => {
-                    if (prev === null) return [id];
-                    if (prev.includes(id)) return prev;
-                    return [...prev, id];
-                  })
-                }
-                onRemove={tagId =>
-                  setSelectedTagIds(prev =>
-                    prev !== null ? prev.filter(id => id !== tagId) : null,
-                  )
-                }
-                onCreate={name =>
-                  setAvailableTags(prev => [
-                    ...prev,
-                    {
-                      name,
-                      color: "tagYellow",
-                      tag_id: "67",
-                      user_group_id: "6767",
-                      number: 67,
-                    },
-                  ])
-                }
-              />
-
-              </FilterPlusSearch>
-
-              <div>
-
-              <GeneralTitle>
-                <span>
-                  Name{" "}
-                  <SortButton onClick={() => toggleSort("name")}>
-                    {sortKey === "name" ? (
-                      sortOrder === "asc" ? (
-                        <ArrowUp size={16} />
-                      ) : (
-                        <ArrowDown size={16} />
-                      )
-                    ) : (
-                      <ArrowUpDown size={16} />
-                    )}
-                  </SortButton>
-                </span>
-                <span>
-                  Created{" "}
-                  <SortButton onClick={() => toggleSort("date")}>
-                    {sortKey === "date" ? (
-                      sortOrder === "asc" ? (
-                        <ArrowUp size={16} />
-                      ) : (
-                        <ArrowDown size={16} />
-                      )
-                    ) : (
-                      <ArrowUpDown size={16} />
-                    )}
-                  </SortButton>
-                </span>
-                <span>Tags</span>
-              </GeneralTitle>
-
-            
-
-              {filteredTemplates.map(t => (
-                <GeneralList key={t.template_id}>
-                  <div
-                    onClick={() =>
-                      router.replace(
-                        `/facilitator/exercises/start?templateId=${t.template_id}`,
+                  <FilterAutocomplete
+                    availableTags={availableTags}
+                    selectedTagIds={new Set(selectedTagIds)}
+                    onSelect={(id: UUID) =>
+                      setSelectedTagIds(prev => {
+                        if (prev === null) return [id];
+                        if (prev.includes(id)) return prev;
+                        return [...prev, id];
+                      })
+                    }
+                    onRemove={tagId =>
+                      setSelectedTagIds(prev =>
+                        prev !== null ? prev.filter(id => id !== tagId) : null,
                       )
                     }
-                    style={{ cursor: "pointer" }}
-                  >
-                    {t.template_name}
-                  </div>
+                    onCreate={name =>
+                      setAvailableTags(prev => [
+                        ...prev,
+                        {
+                          name,
+                          color: "tagYellow",
+                          tag_id: "67",
+                          user_group_id: "6767",
+                          number: 67,
+                        },
+                      ])
+                    }
+                  />
+                </FilterPlusSearch>
 
-                  <div>
-                    {new Date(t.timestamp).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </div>
+                <div>
+                  <GeneralTitle>
+                    <span>
+                      Name{" "}
+                      <SortButton onClick={() => toggleSort("name")}>
+                        {sortKey === "name" ? (
+                          sortOrder === "asc" ? (
+                            <ArrowUp size={16} />
+                          ) : (
+                            <ArrowDown size={16} />
+                          )
+                        ) : (
+                          <ArrowUpDown size={16} />
+                        )}
+                      </SortButton>
+                    </span>
+                    <span>
+                      Created{" "}
+                      <SortButton onClick={() => toggleSort("date")}>
+                        {sortKey === "date" ? (
+                          sortOrder === "asc" ? (
+                            <ArrowUp size={16} />
+                          ) : (
+                            <ArrowDown size={16} />
+                          )
+                        ) : (
+                          <ArrowUpDown size={16} />
+                        )}
+                      </SortButton>
+                    </span>
+                    <span>Tags</span>
+                  </GeneralTitle>
 
-                  <AssociatedTags>
-                    <TagAutocomplete
-                      availableTags={availableTags}
-                      selectedTagIds={
-                        new Set(t.associated_tags.map(tag => tag.tag_id))
-                      }
-                      onSelect={tagId =>
-                        handleMultiTagChange(
-                          t.template_id,
-                          new Set([
-                            ...t.associated_tags.map(tag => tag.tag_id),
-                            tagId,
-                          ]),
-                        )
-                      }
-                      onRemove={tagId =>
-                        handleMultiTagChange(
-                          t.template_id,
-                          new Set(
-                            t.associated_tags
-                              .map(tag => tag.tag_id)
-                              .filter(id => id !== tagId),
-                          ),
-                        )
-                      }
-                      onCreate={name =>
-                        handleCreateAndAssign(t.template_id, name)
-                      }
-                    />
-                  </AssociatedTags>
-                </GeneralList>
-              ))}
+                  {filteredTemplates.map(t => (
+                    <GeneralList key={t.template_id}>
+                      <div
+                        onClick={() =>
+                          router.replace(
+                            `/facilitator/exercises/start?templateId=${t.template_id}`,
+                          )
+                        }
+                        style={{ cursor: "pointer" }}
+                      >
+                        {t.template_name}
+                      </div>
 
-            </div>
-            </TemplatesAndFilterPlusSearch>
+                      <div>
+                        {new Date(t.timestamp).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </div>
 
+                      <AssociatedTags>
+                        <TagAutocomplete
+                          availableTags={availableTags}
+                          selectedTagIds={
+                            new Set(t.associated_tags.map(tag => tag.tag_id))
+                          }
+                          onSelect={tagId =>
+                            handleMultiTagChange(
+                              t.template_id,
+                              new Set([
+                                ...t.associated_tags.map(tag => tag.tag_id),
+                                tagId,
+                              ]),
+                            )
+                          }
+                          onRemove={tagId =>
+                            handleMultiTagChange(
+                              t.template_id,
+                              new Set(
+                                t.associated_tags
+                                  .map(tag => tag.tag_id)
+                                  .filter(id => id !== tagId),
+                              ),
+                            )
+                          }
+                          onCreate={name =>
+                            handleCreateAndAssign(t.template_id, name)
+                          }
+                        />
+                      </AssociatedTags>
+                    </GeneralList>
+                  ))}
+                </div>
+              </TemplatesAndFilterPlusSearch>
             </MainDiv>
           </PageDiv>
         </ContentWrapper>

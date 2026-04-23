@@ -115,13 +115,24 @@ export function TagAutocomplete({
         <li
           {...props}
           key={option.value}
-          style={{ fontFamily: Sans.style.fontFamily, fontSize: "13px" }}
+          style={{ fontFamily: Sans.style.fontFamily, fontSize: "12px" }}
         >
           {option.label}
         </li>
       )}
       renderInput={params => (
-        <TextField {...params} placeholder="Search or create tag..." />
+        <TextField
+          {...params}
+          placeholder="Search or create tag..."
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              alignItems: "center",
+            },
+            "& .MuiOutlinedBase-root": {
+              alignItems: "center",
+            },
+          }}
+        />
       )}
       slotProps={{
         paper: {

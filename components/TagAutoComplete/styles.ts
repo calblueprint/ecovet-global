@@ -38,12 +38,12 @@ export const autocompletesx: SxProps<Theme> = {
   },
   "&:focus-within input::placeholder": {
     opacity: 1,
-    fontSize: "0.8125rem",
+    fontSize: "12px",
     color: `${COLORS.black40}`,
   },
 
   "& input": {
-    fontSize: "0.8125rem",
+    fontSize: "12px",
     padding: "0.125rem 0.25rem !important",
     minWidth: "5rem",
     width: "auto",
@@ -54,7 +54,7 @@ export const autocompletesx: SxProps<Theme> = {
     padding: "0.25rem 0",
     fontFamily: Sans.style.fontFamily,
     "& .MuiAutocomplete-option": {
-      fontSize: "0.8125rem",
+      fontSize: "12px",
       fontFamily: Sans.style.fontFamily,
       padding: "0.375rem 0.75rem",
       color: "#374151",
@@ -92,7 +92,7 @@ export const chipSx: SxProps<Theme> = {
   },
   "& .MuiChip-deleteIcon": {
     color: `${COLORS.lightEletricBlue}`,
-    fontSize: "0.875rem",
+    fontSize: "12px",
     margin: "0 0.25rem 0 -0.125rem",
     "&:hover": { color: `${COLORS.darkElectricBlue}` },
   },

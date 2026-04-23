@@ -115,65 +115,53 @@ export function FilterAutocomplete({
         <li
           {...props}
           key={option.value}
-          style={{ fontFamily: Sans.style.fontFamily, fontSize: "12px" }}
+          style={{ fontFamily: Sans.style.fontFamily, fontSize: 12 }}
         >
           {option.label}
         </li>
       )}
       renderInput={params => (
-    <TextField
-        {...params} 
-        placeholder={value.length === 0 ? "Search or create tag..." : ""}
-        sx={{
-          "& .MuiOutlinedInput-root": {
-        height: "32px",
-        minHeight: "32px",
-        borderRadius: "4px",
-        padding: "0 8px",
-        display: "flex",
-        alignItems: "center",
+        <TextField
+          {...params}
+          placeholder={value.length === 0 ? "Search or create tag..." : ""}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              height: "32px",
+              minHeight: "32px",
+              borderRadius: "4px",
+              padding: "0 8px",
+              display: "flex",
+              alignItems: "center",
 
-        // 👇 THIS is the missing piece
-        fontSize: "12px",
-        fontFamily: Sans.style.fontFamily,
+              "& fieldset": {
+                border: "1px solid #EEEDE9",
+              },
 
-        "& fieldset": {
-          border: "1px solid #EEEDE9",
-        },
-        "&:hover fieldset": {
-          border: "1px solid #EEEDE9",
-        },
-        "&.Mui-focused fieldset": {
-          border: "2px solid #000000",
-        },
-      },
+              "&.Mui-focused fieldset": {
+                border: "2px solid #476C77",
+              },
+              "& .MuiOutlinedInput-root": {
+                boxSizing: "border-box",
+              },
+            },
 
-      // 👇 THE important part (fixes your font jump issue)
-      "& .MuiAutocomplete-input": {
-        fontSize: "12px",
-        fontFamily: Sans.style.fontFamily,
-        padding: 0,
-        margin: 0,
-      },
+            "& .MuiInputBase-input": {
+              fontSize: "12px",
+              fontFamily: Sans.style.fontFamily,
+              padding: 0,
+              margin: 0,
+            },
 
-      "& .MuiAutocomplete-input::placeholder": {
-        color: "#C7C6C3",
-        opacity: 1,
-      },    
-
-      "& .MuiOutlinedInput-root, & .MuiAutocomplete-input": {
-        fontSize: "12px !important",
-         fontFamily: Sans.style.fontFamily,
-      }
-        }}
-    />
-    )}
+            "& .MuiAutocomplete-input::placeholder": {
+              color: "#C7C6C3",
+              opacity: 1,
+            },
+          }}
+        />
+      )}
       slotProps={{
         paper: {
-          sx: {
-            boxShadow: "none",
-            border: `1px solid ${COLORS.darkElectricBlue}`,
-          },
+          sx: {},
         },
       }}
       sx={autocompletesx}
