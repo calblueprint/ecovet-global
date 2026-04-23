@@ -25,6 +25,7 @@ import {
   setSessionGlobalPhaseIndex,
 } from "@/actions/supabase/queries/sessions";
 import { sendEmailReminder } from "@/actions/supabase/send-email";
+import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import TopNavBar from "@/components/NavBar/NavBar";
 import NudgeWarningModal from "@/components/NudgeWarningModal/NudgeWarningModal";
 import { useProfile } from "@/utils/ProfileProvider";

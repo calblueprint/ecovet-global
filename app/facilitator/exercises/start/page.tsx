@@ -1,7 +1,6 @@
 "use client";
 
-import type { DropdownOption } from "@/types/dropdown";
-import type { Profile, Template, UUID } from "@/types/schema";
+import type { DropdownOption, Profile, Template, UUID } from "@/types/schema";
 import type { SelectInstance } from "react-select";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";

@@ -938,7 +938,8 @@ export async function fetchIsSessionAsync(
     throw error;
   }
   return data?.is_async ?? null;
-  
+}
+
 export async function fetchSessionCreatedAt(
   session_id: UUID,
 ): Promise<string | null> {

@@ -9,7 +9,7 @@ import {
 import { fetchChatUserOptions } from "@/actions/supabase/queries/sessions";
 import COLORS from "@/styles/colors";
 import { H3 } from "@/styles/text";
-import { DropdownOption } from "@/types/dropdown";
+import { DropdownOption } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import InputDropdown from "../InputDropdown/InputDropdown";
 import {
