@@ -1,8 +1,12 @@
 "use client";
 
+import type { UserGroup } from "@/types/schema";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { fetchUserGroups } from "@/actions/supabase/queries/user-groups";
 import {
+  Heading3,
+  SearchInput2,
   SideNavButton,
   SideNavNewTemplateButton,
   SideNavTemplatesContainer,
@@ -10,28 +14,56 @@ import {
 import Plus from "@/assets/images/plus.svg";
 
 export default function UserGroupSideBar({
-  filterMode,
-  setFilterMode,
+  selectedUserGroupId,
+  setSelectedUserGroupId,
+  onAddClick,
 }: {
-  filterMode: "all" | "invites" | "usergroups";
-  setFilterMode: (val: "all" | "invites" | "usergroups") => void;
+  selectedUserGroupId: string | null;
+  setSelectedUserGroupId: (id: string) => void;
+  onAddClick: () => void;
 }) {
-  const router = useRouter();
+  const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    async function loadUserGroups() {
+      const data = await fetchUserGroups();
+      if (data) setUserGroups(data);
+    }
+
+    loadUserGroups();
+  }, []);
+
+  const filteredGroups = useMemo(() => {
+    return userGroups.filter(group =>
+      group.user_group_name?.toLowerCase().includes(search.toLowerCase()),
+    );
+  }, [userGroups, search]);
+
   return (
-    <div>
-      <SideNavNewTemplateButton
-        onClick={() => router.push("/invites/add-user-groups")}
-      >
-        <Image src={Plus} alt="+" width={10} height={10} /> New Invite
-      </SideNavNewTemplateButton>
-      <SideNavTemplatesContainer>
+    <SideNavTemplatesContainer>
+      <Heading3>Organizations</Heading3>
+
+      <SearchInput2
+        type="text"
+        placeholder="Search..."
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+      />
+
+      {filteredGroups.map(group => (
         <SideNavButton
-          $selected={filterMode === "all"}
-          onClick={() => setFilterMode("all")}
+          key={group.user_group_id}
+          $selected={selectedUserGroupId === group.user_group_id}
+          onClick={() => setSelectedUserGroupId(group.user_group_id)}
         >
-          All User Groups
+          {group.user_group_name}
         </SideNavButton>
-      </SideNavTemplatesContainer>
-    </div>
+      ))}
+
+      <SideNavNewTemplateButton onClick={onAddClick}>
+        <Image src={Plus} alt="+" width={10} height={10} /> Add Organization
+      </SideNavNewTemplateButton>
+    </SideNavTemplatesContainer>
   );
 }
