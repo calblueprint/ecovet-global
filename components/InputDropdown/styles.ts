@@ -1,7 +1,7 @@
 // components/styles.ts
 import { GroupBase, StylesConfig } from "react-select";
 import COLORS from "@/styles/colors";
-import { DropdownOption } from "@/types/dropdown";
+import { DropdownOption } from "@/types/schema";
 
 export const getSelectStyles = (
   outlined: boolean = true,

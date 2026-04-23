@@ -2,7 +2,7 @@ import { StylesConfig } from "react-select";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
-import { DropdownOption } from "@/types/dropdown";
+import { DropdownOption } from "@/types/schema";
 
 export const LayoutWrapper = styled.div`
   display: flex;
@@ -134,16 +134,15 @@ export const ToggleButton = styled.button<{ $active?: boolean }>`
   border-radius: 4px;
   font-family: ${Sans.style.fontFamily};
   font-size: 12px;
-  font-weight: 1200; /* changed from 600 to 1200 to better match Figma (for ToggleGroup on 231 of start/page.tsx) */
+  font-weight: 1200;
   cursor: pointer;
   transition:
     background-color 0.2s ease,
     color 0.2s ease;
 
-  /* The logic swap: Gray if active, White if inactive */
   background-color: ${props =>
-    props.$active ? COLORS.oat_light : COLORS.white};
-  color: ${props => (props.$active ? COLORS.black : COLORS.black40)};
+    props.$active ? COLORS.white : COLORS.oat_light};
+  color: ${props => (props.$active ? COLORS.black40 : COLORS.black)};
 
   &:hover {
     color: ${COLORS.black};

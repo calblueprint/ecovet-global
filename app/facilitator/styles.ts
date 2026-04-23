@@ -2,7 +2,7 @@ import { StylesConfig } from "react-select";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
-import { DropdownOption } from "@/types/dropdown";
+import { DropdownOption } from "@/types/schema";
 
 export const LayoutWrapper = styled.div`
   display: flex;

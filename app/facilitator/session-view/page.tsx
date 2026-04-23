@@ -12,7 +12,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import supabase from "@/actions/supabase/client";
+import { fetchEmailByUserId } from "@/actions/supabase/queries/profile";
 import {
+  fetchIsSessionAsync,
   fetchPhases,
   fetchPromptsWithResponses,
   fetchRolePhasesBatch,
@@ -22,12 +24,15 @@ import {
   sessionParticipants,
   setSessionGlobalPhaseIndex,
 } from "@/actions/supabase/queries/sessions";
-import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
+import { sendEmailReminder } from "@/actions/supabase/send-email";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
+import TopNavBar from "@/components/NavBar/NavBar";
+import NudgeWarningModal from "@/components/NudgeWarningModal/NudgeWarningModal";
 import { useProfile } from "@/utils/ProfileProvider";
 import { AnnouncementRoom, sendAnnouncement } from "@/utils/UseAnnouncements";
 import {
   Button,
+  ButtonDiv,
   Container,
   ContentWrapper,
   Heading3,
@@ -35,6 +40,7 @@ import {
   LayoutWrapper,
   MainDiv,
   NormalText,
+  NudgeButton,
   ParticipantTable,
   PhaseInformation,
   PhaseStats,
@@ -70,6 +76,13 @@ export default function FacilitatorSessionView() {
   const [phases, setPhases] = useState<Phase[]>([]);
   const [allDone, setAllDone] = useState(false);
   const [isAdvancing, setIsAdvancing] = useState(false);
+
+  const [openWarning, setOpenWarning] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [email, setEmail] = useState<string>("");
+  const [selectedUID, setSelectedUID] = useState<string>("");
+  const [isAsync, setIsAsync] = useState<boolean>(true);
+
   const [isForceAdvance, setIsForceAdvance] = useState(false);
   const isLastPhase = currentPhase >= phases.length - 1;
   const currentPhaseObject = phases[currentPhase];
@@ -109,6 +122,13 @@ export default function FacilitatorSessionView() {
       }
     }
 
+    async function loadIsAsync() {
+      if (!sessionId) return;
+      const is_async = await fetchIsSessionAsync(sessionId);
+      console.log(is_async);
+      setIsAsync(is_async ? is_async : false);
+    }
+
     async function checkIfForceAdvance() {
       try {
         const isForce = await isSessionForceAdvance(sessionId as UUID);
@@ -137,6 +157,7 @@ export default function FacilitatorSessionView() {
     }
 
     loadParticipants();
+    loadIsAsync();
     checkIfForceAdvance();
     loadPhases();
 
@@ -318,10 +339,42 @@ export default function FacilitatorSessionView() {
     p => p.user_id !== profile?.id,
   ).length;
 
+  const isEmailValid = (email: string) => {
+    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
+    return emailRegex.test(email);
+  };
+  const handleConfirm = async () => {
+    if (!selectedUID) return;
+    if (!sessionId) return;
+    try {
+      setSending(true);
+
+      const data = await fetchEmailByUserId(selectedUID);
+      const em = data?.email as string;
+      if (!isEmailValid(em)) {
+        console.log("No valid email entered. Please enter a valid email.");
+        return;
+      }
+      setEmail(em);
+
+      setOpenWarning(false);
+
+      await sendEmailReminder(em, sessionId);
+    } catch (error) {
+      console.error("Error in sending nudge email to user:", error);
+    } finally {
+      setSending(false);
+    }
+  };
+
   return (
     <>
       <TopNavBar />
-
+      <NudgeWarningModal
+        open={openWarning}
+        onCancel={() => setOpenWarning(false)}
+        onConfirm={handleConfirm}
+      />
       <LayoutWrapper>
         <ContentWrapper>
           <MainDiv>
@@ -407,7 +460,21 @@ export default function FacilitatorSessionView() {
                           style={{ cursor: "pointer" }}
                         >
                           <TableCellBold>
-                            {p.profile?.first_name} {p.profile?.last_name}
+                            <ButtonDiv>
+                              {p.profile?.first_name} {p.profile?.last_name}
+                              <NudgeButton
+                                className="nudge-button"
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                  setSelectedUID(p.user_id);
+                                  setOpenWarning(true);
+                                }}
+                                async={isAsync}
+                              >
+                                Nudge
+                              </NudgeButton>
+                            </ButtonDiv>
                           </TableCellBold>
                           <TableCell>{p.role?.role_name}</TableCell>
                           <TableCell>

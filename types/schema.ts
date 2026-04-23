@@ -124,3 +124,8 @@ export type Participant = {
   last_active?: string | null; // optional because database doesn't have it
   invite_accepted: boolean | null; // consider making boolean? leaving as string for now since that's how it's coming from the database
 };
+
+export interface DropdownOption {
+  label: string;
+  value: string;
+}

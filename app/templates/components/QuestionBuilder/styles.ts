@@ -5,7 +5,7 @@ import COLORS from "@/styles/colors";
 import { Flex } from "@/styles/containers";
 import { Sans } from "@/styles/fonts";
 import { B2, Caption, H3 } from "@/styles/text";
-import { DropdownOption } from "@/types/dropdown";
+import { DropdownOption } from "@/types/schema";
 
 export const selectStyles: StylesConfig<
   DropdownOption,

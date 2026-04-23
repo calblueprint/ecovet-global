@@ -223,6 +223,7 @@ export async function createSession(
   templateId: string,
   userGroupId: string,
   forceAdvance: boolean = false,
+  isAsync: boolean,
 ) {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
@@ -232,6 +233,7 @@ export async function createSession(
         template_id: templateId,
         user_group_id: userGroupId,
         force_advance: forceAdvance,
+        is_async: isAsync,
         phase_index: forceAdvance ? 0 : null,
       },
     ])
@@ -920,6 +922,22 @@ export async function fetchSessionName(
   }
 
   return data?.session_name ?? null;
+}
+
+export async function fetchIsSessionAsync(
+  session_id: string,
+): Promise<boolean | null> {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("session")
+    .select("is_async")
+    .eq("session_id", session_id)
+    .single();
+  if (error) {
+    console.error("Error fetching whether session is async:", error);
+    throw error;
+  }
+  return data?.is_async ?? null;
 }
 
 export async function fetchSessionCreatedAt(

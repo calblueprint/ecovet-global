@@ -132,6 +132,21 @@ export async function fetchProfileByUserId(user_id: UUID) {
   return data;
 }
 
+export async function fetchEmailByUserId(user_id: UUID) {
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("profile")
+    .select("email")
+    .eq("id", user_id)
+    .single();
+  if (error) {
+    console.error("Error fetching profile by user_id: ", error);
+    return null;
+  }
+
+  return data;
+}
+
 export async function fetchExpandedProfileByUserId(user_id: UUID) {
   const profile = await fetchProfileByUserId(user_id);
   if (profile == null) {

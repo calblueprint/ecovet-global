@@ -25,6 +25,34 @@ export const MainDiv = styled.main`
   max-width: 1100px;
 `;
 
+export const ButtonDiv = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2rem;
+`;
+
+export const NudgeButton = styled.button<{ async?: boolean }>`
+  display: ${({ async }) => (async ? "flex" : "none")};
+  padding: 0.5rem 0.75rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.625rem;
+  border-radius: 0.25rem;
+  background-color: ${COLORS.darkElectricBlue};
+  border: none;
+  font-family: ${Sans.style.fontFamily};
+  color: ${COLORS.white};
+  font-size: 0.625rem;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  letter-spacing: 0.2px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease;
+`;
+
 export const HeadingBox = styled.main`
   display: flex;
   padding: 1rem 1.25rem;
@@ -115,6 +143,10 @@ export const TableRow = styled.div`
 
   &:hover {
     background-color: ${COLORS.oat_light};
+  }
+  &:hover .nudge-button {
+    opacity: 1;
+    visibility: visible;
   }
 `;
 

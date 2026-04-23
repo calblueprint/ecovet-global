@@ -3,7 +3,7 @@
 import type { SelectInstance } from "react-select";
 import { useCallback, useId, useMemo } from "react";
 import Select, { MultiValue, SingleValue, StylesConfig } from "react-select";
-import { DropdownOption } from "@/types/dropdown";
+import { DropdownOption } from "@/types/schema";
 import { getSelectStyles, selectStyles } from "./styles";
 
 // for map: key is actual data stored, value is displayed
