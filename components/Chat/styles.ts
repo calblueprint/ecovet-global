@@ -1,12 +1,10 @@
-import { FaCircle } from "react-icons/fa6";
-import Image from "next/image";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
-import { Sans } from "@/styles/fonts";
 import { B1, B2, Caption, TextProps, TextStyles } from "@/styles/text";
 
 export const MessageContent = styled(B2)`
   color: ${COLORS.black70};
+  white-space: pre-wrap;
 `;
 
 export const MessageContentBubble = styled.div<{ $fromUser: boolean }>`
@@ -16,7 +14,7 @@ export const MessageContentBubble = styled.div<{ $fromUser: boolean }>`
   justify-content: center;
   align-items: flex-start;
   gap: 0.625rem;
-  border-radius: 0.5rem;
+  border-radius: 0.25rem;
   background: ${({ $fromUser }) =>
     $fromUser ? COLORS.lightEletricBlue : COLORS.oat_medium};
 `;
@@ -97,7 +95,7 @@ export const ChatMessageContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.75rem;
+  gap: 1.25rem;
   align-self: stretch;
   margin: 0 1.25rem;
 `;
@@ -206,6 +204,10 @@ export const ChatSelectionButton = styled.div<{ color?: string }>`
   background: ${({ color }) => color ?? COLORS.teal};
 `;
 
+export const CreateChatPlus = styled(B1)`
+  color: ${COLORS.darkElectricBlue};
+`;
+
 export const ChatButtonContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -257,4 +259,10 @@ export const ClickableUser = styled.div`
 export const ClickableUserText = styled(Caption)`
   color: ${COLORS.darkElectricBlue};
   white-space: nowrap;
+`;
+
+export const CreateChatCancelButton = styled(Caption)`
+  color: ${COLORS.black40};
+  align-self: flex-end;
+  cursor: pointer;
 `;

@@ -4,6 +4,7 @@ import {
   ChatSelectedBorder,
   ChatSelectionButton,
   ChatSelectionContainer,
+  CreateChatPlus,
 } from "./styles";
 
 export interface Selection {
@@ -26,7 +27,9 @@ export default function ChatSelection({
     <ChatSelectionContainer>
       <ChatButtonContainer onClick={createRoom}>
         <ChatSelectedBorder selected={false}>
-          <ChatSelectionButton color="">+</ChatSelectionButton>
+          <ChatSelectionButton color="">
+            <CreateChatPlus>+</CreateChatPlus>
+          </ChatSelectionButton>
         </ChatSelectedBorder>
         <ChatButtonLabel>New Room</ChatButtonLabel>
       </ChatButtonContainer>

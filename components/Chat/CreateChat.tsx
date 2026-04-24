@@ -9,6 +9,7 @@ import {
   ChatUserList,
   ClickableUser,
   ClickableUserText,
+  CreateChatCancelButton,
   ProfileColor,
   SelectUsersContainer,
 } from "./styles";
@@ -83,7 +84,7 @@ export default function CreateChat({
   return (
     <SelectUsersContainer>
       <ChatUserList>
-        <ProfileColor $color="#8E44AD" $size={2} onClick={onCancel} />
+        <ProfileColor $color="#8E44AD" $size={2} />
         {currentParticipantSelections.map(({ id, name }) => {
           return (
             <ClickableUser key={id} onClick={() => removeUser(id)}>
@@ -101,6 +102,8 @@ export default function CreateChat({
         onChange={userId => addUser(userId ?? "")}
         customStyles={dropdownStyles}
       />
+
+      <CreateChatCancelButton onClick={onCancel}>Cancel</CreateChatCancelButton>
     </SelectUsersContainer>
   );
 }

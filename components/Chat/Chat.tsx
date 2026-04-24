@@ -90,7 +90,9 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
           const otherUsers = users.filter(user => user.id !== userId);
           const firstUser =
             otherUsers.length > 0
-              ? `${otherUsers[0].first_name} ${otherUsers[0].last_name}`
+              ? truncateText(
+                  `${otherUsers[0].first_name} ${otherUsers[0].last_name}`,
+                )
               : "Unknown";
           let chatName = firstUser;
           if (otherUsers.length > 1) chatName += ` + ${otherUsers.length - 1}`;
@@ -201,7 +203,7 @@ export function truncateText(text: string, maxLength: number = 8): string {
     return text;
   }
 
-  return text.slice(0, maxLength) + "...";
+  return text.slice(0, maxLength).trim() + "...";
 }
 
 const isDoubleText = (chatMessages: ChatMessageType[], index: number) => {
