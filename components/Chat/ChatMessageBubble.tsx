@@ -17,18 +17,19 @@ import { getMessageDateLabel } from "./TimeSeparator";
 
 export default function ChatMessage({
   chatMessage,
+  senderRole,
   showName,
   isDoubleText,
   fromUser,
 }: {
   chatMessage: ChatMessageType;
+  senderRole: string;
   showName: boolean;
   isDoubleText: boolean;
   fromUser: boolean;
 }) {
   const [showTime, setShowTime] = useState(false);
   const senderName = fromUser ? "You" : chatMessage.sender_name;
-  const senderRole = "ROLE PLACEHOLDER";
   const { day, time } = getMessageDateLabel(new Date(chatMessage.created_at));
 
   return (

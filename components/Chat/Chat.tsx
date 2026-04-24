@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { setRef } from "@mui/material";
 import {
   addUserToChatRoom,
@@ -6,14 +6,15 @@ import {
   createChatRoom,
   getUserChatRooms,
 } from "@/actions/supabase/queries/chat";
+import { fetchChatUserOptions } from "@/actions/supabase/queries/sessions";
 import { supabase } from "@/lib/supabase/client";
-import { ChatMessage as ChatMessageType, UUID } from "@/types/schema";
+import { ChatMessage as ChatMessageType, UserType, UUID } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import { useRealtimeChat as useChat } from "@/utils/UseChat";
 import ChatInputBar from "./ChatInputBar";
 import ChatMessage from "./ChatMessageBubble";
 import ChatSelection, { Selection } from "./ChatSelection";
-import CreateChat from "./CreateChat";
+import CreateChat, { ChatParticipant } from "./CreateChat";
 import {
   ChatContainer,
   ChatHeader,
@@ -31,12 +32,39 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
   const [isCreatingRoom, setIsCreatingRoom] = useState<boolean>(false);
   const [newChatUserIds, setNewChatUserIds] = useState<string[]>([]);
+  const [participantsOptions, setParticipantOptions] = useState<
+    ChatParticipant[]
+  >([]);
+  const userRoles = useMemo(
+    () =>
+      new Map(
+        participantsOptions.map(participant => [
+          participant.id,
+          participant.role,
+        ]),
+      ),
+    [participantsOptions],
+  );
 
   const { chatMessages, sendMessage } = useChat({
     roomId: currentRoomId,
     userId: userId ?? "unknown-user",
     username: profile?.first_name ?? "Unknown User",
   });
+
+  useEffect(() => {
+    async function loadParticipants() {
+      if (!profile?.user_group_id) return;
+
+      const participantsOptionData = await fetchChatUserOptions(
+        profile?.user_group_id,
+        sessionId,
+      );
+      setParticipantOptions(participantsOptionData);
+    }
+
+    loadParticipants();
+  }, [profile?.user_group_id, sessionId]);
 
   useEffect(() => {
     if (!userId) return;
@@ -149,7 +177,7 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
 
         {isCreatingRoom ? (
           <CreateChat
-            sessionId={sessionId}
+            participantOptions={participantsOptions}
             newUserIds={newChatUserIds}
             setNewUserIds={setNewChatUserIds}
             onCancel={() => {
@@ -179,6 +207,7 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
               )}
               <ChatMessage
                 chatMessage={chatMessage}
+                senderRole={userRoles.get(chatMessage.sender ?? "") ?? ""}
                 showName={shouldShowSender(chatMessages, i)}
                 isDoubleText={isDoubleText(chatMessages, i)}
                 fromUser={chatMessage.sender === userId}

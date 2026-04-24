@@ -1,6 +1,5 @@
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useMemo } from "react";
 import { StylesConfig } from "react-select";
-import { fetchChatUserOptions } from "@/actions/supabase/queries/sessions";
 import COLORS from "@/styles/colors";
 import { DropdownOption } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
@@ -14,24 +13,24 @@ import {
   SelectUsersContainer,
 } from "./styles";
 
-type User = {
+export type ChatParticipant = {
   id: string;
   name: string;
+  role: string;
 };
 
 export default function CreateChat({
-  sessionId,
+  participantOptions,
   newUserIds,
   setNewUserIds,
   onCancel,
 }: {
-  sessionId: string;
+  participantOptions: ChatParticipant[];
   newUserIds: string[];
   setNewUserIds: Dispatch<SetStateAction<string[]>>;
   onCancel: () => void;
 }) {
   const { profile } = useProfile();
-  const [participantOptions, setParticipantOptions] = useState<User[]>([]);
 
   const currentParticipantSelections = participantOptions
     .filter(
@@ -56,20 +55,6 @@ export default function CreateChat({
       ),
     [newUserIds, participantOptions],
   );
-
-  useEffect(() => {
-    async function loadParticipants() {
-      if (!profile?.user_group_id) return;
-
-      const participantsOptionData = await fetchChatUserOptions(
-        profile?.user_group_id,
-        sessionId,
-      );
-      setParticipantOptions(participantsOptionData);
-    }
-
-    loadParticipants();
-  }, [profile?.user_group_id]);
 
   async function addUser(addUserId: string) {
     if (!addUserId) return;
