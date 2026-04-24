@@ -54,11 +54,44 @@ export default function SignUp() {
   useEffect(() => {
     console.log("[signup] mount");
     let mounted = true;
+    let hasVerified = false;
+
+    const verifyInvite = async (userEmail: string) => {
+      if (hasVerified) return;
+      hasVerified = true;
+
+      console.log("[signup] verifyInvite called with", userEmail);
+      const { status } = await checkInviteStatus(userEmail);
+      console.log("[signup] invite status:", status);
+      if (!mounted) return;
+
+      if (status !== "pending") {
+        setErrorMessage(
+          "No pending invitation found. If you already signed up, please sign in instead.",
+        );
+        setVerifying(false);
+        return;
+      }
+
+      setEmail(userEmail);
+      setVerifying(false);
+    };
 
     const processHashTokens = async () => {
       if (typeof window === "undefined") return;
       const hash = window.location.hash;
-      if (!hash || !hash.includes("access_token")) return;
+
+      if (!hash || !hash.includes("access_token")) {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (session?.user?.email && mounted) {
+          verifyInvite(session.user.email);
+        }
+        return;
+      }
+
+      await supabase.auth.signOut({ scope: "local" });
 
       const params = new URLSearchParams(hash.substring(1));
       const access_token = params.get("access_token");
@@ -79,64 +112,26 @@ export default function SignUp() {
 
       console.log("[signup] session set, email:", data.session?.user?.email);
       window.history.replaceState(null, "", window.location.pathname);
-    };
 
-    const verifyInvite = async (userEmail: string) => {
-      console.log("[signup] verifyInvite called with", userEmail);
-      const { status } = await checkInviteStatus(userEmail);
-      console.log("[signup] invite status:", status);
-      if (!mounted) return;
-
-      if (status !== "pending") {
-        setErrorMessage(
-          "No pending invitation found. If you already signed up, please sign in instead.",
-        );
-        setVerifying(false);
-        return;
+      if (data.session?.user?.email && mounted) {
+        verifyInvite(data.session.user.email);
       }
-
-      setEmail(userEmail);
-      setVerifying(false);
     };
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log(
-        "[signup] auth event:",
-        event,
-        "has email:",
-        !!session?.user?.email,
-      );
-      if (!mounted) return;
-      if (
-        (event === "SIGNED_IN" || event === "INITIAL_SESSION") &&
-        session?.user?.email
-      ) {
-        verifyInvite(session.user.email);
-      }
-    });
 
     processHashTokens();
 
     const timeoutId = setTimeout(() => {
       console.log("[signup] timeout fired");
-      if (mounted) {
-        setVerifying(currentlyVerifying => {
-          if (currentlyVerifying) {
-            setErrorMessage(
-              "This page is only accessible through an invite link. Please check your email or ask your facilitator to resend the invite.",
-            );
-            return false;
-          }
-          return currentlyVerifying;
-        });
+      if (mounted && !hasVerified) {
+        setErrorMessage(
+          "This page is only accessible through an invite link. Please check your email or ask your facilitator to resend the invite.",
+        );
+        setVerifying(false);
       }
     }, 3000);
 
     return () => {
       mounted = false;
-      subscription.unsubscribe();
       clearTimeout(timeoutId);
     };
   }, []);
