@@ -132,12 +132,13 @@ export const AnnouncementsPanel = styled.div`
 
 export const ContentDiv = styled.div`
   display: flex;
-  padding: 5rem 0 0 14rem;
+  padding: 2rem 0 2rem 5rem;
   flex-direction: column;
   align-items: flex-start;
   gap: 32px;
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
 `;
 
 export const InfoGrid = styled.div`

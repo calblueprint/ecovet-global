@@ -25,6 +25,38 @@ export const MainDiv = styled.main`
   max-width: 1100px;
 `;
 
+export const Sidebar = styled.aside`
+  display: flex;
+  width: 300px;
+  height: 100vh;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--Oat-Medium, #eee);
+  background: var(--Oat-Light, #f9f9f9);
+  display: inline-flex;
+  padding: 1.5rem 2rem;
+  font-family: ${Sans.style.fontFamily};
+`;
+
+export const PhaseList = styled.div`
+  display: flex;
+  padding: 6px 12px;
+  align-items: center;
+  gap: 4px;
+  align-self: stretch;
+  cursor: pointer;
+  border-radius: 4px;
+  background-color: transparent;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 500;
+  color: ${COLORS.black70};
+  line-height: 150%;
+`;
+
 export const ButtonDiv = styled.div`
   display: flex;
   flex-direction: row;
@@ -169,10 +201,22 @@ export const TableCellBold = styled(TableCell)`
 export const Heading3 = styled.h3`
   font-family: ${Sans.style.fontFamily};
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 500;
   margin-bottom: 0.5rem;
   font-style: normal;
   line-height: normal;
+  letter-spacing: -0.48px;
+`;
+
+export const SilverHeading3 = styled.text`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  font-style: normal;
+  line-height: normal;
+  letter-spacing: -0.48px;
+  color: var(--Black-40, #959492);
 `;
 
 export const Container = styled.div`
@@ -194,10 +238,9 @@ export const LayoutWrapper = styled.div`
 export const ContentWrapper = styled.div`
   flex: 1;
   padding: 2rem;
-  overflow-y: auto;
-  min-height: 0;
   display: flex;
   justify-content: center;
+  overflow-x: hidden;
 `;
 
 export const Button = styled.button<{ disabled?: boolean }>`
