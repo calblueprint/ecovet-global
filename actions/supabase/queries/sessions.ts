@@ -47,7 +47,7 @@ export async function fetchParticipants(userGroupId: string) {
 export async function fetchChatUserOptions(
   userGroupId: string,
   sessionId: string,
-) {
+): Promise<{ id: string; name: string; role: string }[]> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("profile")
@@ -74,7 +74,7 @@ export async function fetchChatUserOptions(
   }
 
   return data
-    ? data
+    ? (data
         .map(p => {
           const session = Array.isArray(p.participant_session)
             ? p.participant_session[0]
@@ -92,7 +92,7 @@ export async function fetchChatUserOptions(
             role: role?.role_name ? String(role.role_name) : "",
           };
         })
-        .filter(user => user)
+        .filter(user => user) as { id: string; name: string; role: string }[])
     : [];
 }
 export async function fetchTemplateId(session_id: string) {
