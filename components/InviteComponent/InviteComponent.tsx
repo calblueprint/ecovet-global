@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, KeyboardEvent, useState } from "react";
 import { submitNewInvite } from "@/actions/supabase/queries/invites";
 import {
   AddInviteFormDiv,
@@ -17,8 +17,6 @@ import {
   SubmitButton,
 } from "./styles";
 
-console.log(process.env.NEXT_PUBLIC_SITE_URL);
-
 const isEmailValid = (email: string) => {
   const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
   return emailRegex.test(email);
@@ -31,44 +29,52 @@ function InviteComponent({
   user_group_id: string;
   onInvitesChange?: () => void;
 }) {
-  const [email, setEmail] = useState<string>("");
+  const [emailsText, setEmailsText] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [participantSelected, setParticipantSelected] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setEmail(event.target.value);
-
-    setErrorMessage(
-      isEmailValid(event.target.value) ? "" : "Invalid email format",
-    );
+  const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    setEmailsText(event.target.value);
+    if (errorMessage) setErrorMessage("");
   };
 
   const onSubmitButtonClick = async () => {
     if (isSubmitting) return;
 
-    if (!isEmailValid(email)) {
-      setErrorMessage("Invalid email format");
+    const lines = emailsText.split("\n").filter(line => line.trim() !== "");
+
+    if (lines.length === 0) return;
+
+    const invalidEmails = lines.filter(email => !isEmailValid(email.trim()));
+    if (invalidEmails.length > 0) {
+      setErrorMessage("Please ensure all lines contain valid email addresses.");
       return;
     }
 
     setIsSubmitting(true);
+    setErrorMessage("");
 
     try {
-      const result = await submitNewInvite(
-        email,
-        user_group_id,
-        participantSelected ? "Participant" : "Facilitator",
+      const results = await Promise.all(
+        lines.map(email =>
+          submitNewInvite(
+            email.trim(),
+            user_group_id,
+            participantSelected ? "Participant" : "Facilitator",
+          ),
+        ),
       );
 
-      if (result?.error) {
-        setErrorMessage(result.message);
+      const firstError = results.find(res => res?.error);
+
+      if (firstError) {
+        setErrorMessage(firstError.message);
         if (onInvitesChange) onInvitesChange();
-        setEmail("");
       } else {
-        if (onInvitesChange) onInvitesChange();
-        setEmail("");
+        setEmailsText("");
         setErrorMessage("");
+        if (onInvitesChange) onInvitesChange();
       }
     } catch {
       setErrorMessage("Something went wrong. Please try again.");
@@ -77,8 +83,14 @@ function InviteComponent({
     }
   };
 
-  // Disable submit if any errors exist or any email is empty
-  const hasErrorsOrEmpty = errorMessage.length > 0 || email.trim() === "";
+  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      onSubmitButtonClick();
+    }
+  };
+
+  const hasErrorsOrEmpty = errorMessage.length > 0 || emailsText.trim() === "";
 
   return (
     <AddInviteMain>
@@ -89,11 +101,10 @@ function InviteComponent({
         </ErrorMessageDiv>
         <EmailDiv>
           <EmailInput
-            value={email}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              handleInputChange(e)
-            }
-            placeholder="Email Address"
+            value={emailsText}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            placeholder="email1@berkeley.edu&#10;email2@berkeley.edu"
             required
           />
           <ButtonPaddingDiv>
@@ -123,4 +134,5 @@ function InviteComponent({
     </AddInviteMain>
   );
 }
+
 export default InviteComponent;

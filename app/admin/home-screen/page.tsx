@@ -2,9 +2,17 @@
 
 import React, { useState } from "react";
 import Participants from "@/app/facilitator/participants/components/Participants";
+import InviteComponent from "@/components/InviteComponent/InviteComponent";
 import NavBar from "@/components/NavBar/NavBar";
 import { useProfile } from "@/utils/ProfileProvider";
-import { ContentWrapper, LayoutWrapper, SideNavContainer } from "../styles";
+import {
+  ContentWrapper,
+  DashboardFlexContainer,
+  LayoutWrapper,
+  MainContentColumn,
+  SidebarColumn,
+  SideNavContainer,
+} from "../styles";
 import UserGroupDetails from "./components/UserGroupDetails";
 import UserGroups from "./components/UserGroups";
 import UserGroupSideBar from "./components/UserGroupSideBar";
@@ -17,6 +25,7 @@ export default function AdminPage() {
     null,
   );
   const { profile } = useProfile();
+
   const renderComponent = () => {
     switch (filterMode) {
       case "all":
@@ -34,14 +43,30 @@ export default function AdminPage() {
         return <Participants user_group_id={profile.user_group_id} />;
       case "usergroups":
         if (!selectedUserGroupId) return <div>Please select a user group.</div>;
+
         return (
-          <UserGroupDetails
-            user_group_id={selectedUserGroupId}
-            onBack={() => {
-              setSelectedUserGroupId(null);
-              setFilterMode("all");
-            }}
-          />
+          <DashboardFlexContainer>
+            <MainContentColumn>
+              <UserGroupDetails
+                user_group_id={selectedUserGroupId}
+                onBack={() => {
+                  setSelectedUserGroupId(null);
+                  setFilterMode("all");
+                }}
+              />
+            </MainContentColumn>
+
+            <SidebarColumn>
+              <InviteComponent
+                user_group_id={selectedUserGroupId}
+                onInvitesChange={() => {
+                  console.log(
+                    "Invites changed! You might want to trigger a re-fetch here later.",
+                  );
+                }}
+              />
+            </SidebarColumn>
+          </DashboardFlexContainer>
         );
     }
   };

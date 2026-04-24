@@ -34,19 +34,19 @@ export const AddInviteFormDiv = styled.div`
 `;
 
 export const EmailDiv = styled.div`
-  flex-direction: row;
+  flex-direction: column;
   display: flex;
-  gap: 2rem;
+  gap: 1rem;
   justify-content: space-between;
   width: 100%;
 `;
 
-export const EmailInput = styled.input`
+export const EmailInput = styled.textarea`
   display: block;
   width: 100%;
-  height: 2.4rem;
+  min-height: 100px;
 
-  padding: 0 0.75rem;
+  padding: 0.75rem;
   box-sizing: border-box;
 
   border-radius: 4px;
@@ -57,10 +57,11 @@ export const EmailInput = styled.input`
   font-family: ${Sans.style.fontFamily};
   font-size: 0.7rem;
   font-weight: 500;
-  line-height: normal;
+  line-height: 1.5;
 
   outline: none;
   appearance: none;
+  resize: vertical;
 
   &::placeholder {
     color: ${COLORS.black20};
@@ -112,7 +113,9 @@ export const ErrorMessage = styled.p`
 export const ButtonPaddingDiv = styled.div`
   display: flex;
   flex-direction: row;
-  gap: 16rem;
+  gap: 1rem;
+  justify-content: space-between;
+  width: 100%;
 `;
 
 export const InviteTypeButton = styled.div`

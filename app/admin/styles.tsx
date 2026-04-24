@@ -200,17 +200,37 @@ export const SideNavNewTemplateButton = styled.button`
 `;
 
 export const StyledLink = styled(Link)`
-  color: #111827; /* or your theme color */
+  color: #111827;
   font-weight: 500;
   text-decoration: none;
   cursor: pointer;
 
   &:hover {
-    color: #3a394777; /* hover state */
+    color: #3a394777;
     text-decoration: none;
   }
 `;
 
 export const NumUsers = styled.span`
   text-align: right;
+`;
+
+export const DashboardFlexContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  width: 100%;
+  align-items: flex-start;
+`;
+
+export const MainContentColumn = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+
+export const SidebarColumn = styled.div`
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 `;
