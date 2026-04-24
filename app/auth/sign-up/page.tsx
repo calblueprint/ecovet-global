@@ -25,7 +25,6 @@ import {
   PasswordDiv,
   PasswordRule,
   PasswordText,
-  SubText,
   VisibilityToggle,
   WelcomeTag,
 } from "../styles";
@@ -52,23 +51,42 @@ export default function SignUp() {
     rules.length && rules.uppercase && rules.number && rules.specialChar;
   const passwordsMatch = password === confirmPassword;
 
-  // On mount: verify the invite session. Supabase auto-handles the token
-  // from the URL when the user lands here from the invite email.
   useEffect(() => {
-    const verifyInvite = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    console.log("[signup] mount");
+    let mounted = true;
 
-      if (!user?.email) {
-        setErrorMessage(
-          "This page is only accessible through an invite link. Please check your email or ask your facilitator to resend the invite.",
-        );
-        setVerifying(false);
+    const processHashTokens = async () => {
+      if (typeof window === "undefined") return;
+      const hash = window.location.hash;
+      if (!hash || !hash.includes("access_token")) return;
+
+      const params = new URLSearchParams(hash.substring(1));
+      const access_token = params.get("access_token");
+      const refresh_token = params.get("refresh_token");
+
+      if (!access_token || !refresh_token) return;
+
+      console.log("[signup] found hash tokens, setting session");
+      const { data, error } = await supabase.auth.setSession({
+        access_token,
+        refresh_token,
+      });
+
+      if (error) {
+        console.error("[signup] setSession error:", error);
         return;
       }
 
-      const { status } = await checkInviteStatus(user.email);
+      console.log("[signup] session set, email:", data.session?.user?.email);
+      window.history.replaceState(null, "", window.location.pathname);
+    };
+
+    const verifyInvite = async (userEmail: string) => {
+      console.log("[signup] verifyInvite called with", userEmail);
+      const { status } = await checkInviteStatus(userEmail);
+      console.log("[signup] invite status:", status);
+      if (!mounted) return;
+
       if (status !== "pending") {
         setErrorMessage(
           "No pending invitation found. If you already signed up, please sign in instead.",
@@ -77,11 +95,50 @@ export default function SignUp() {
         return;
       }
 
-      setEmail(user.email);
+      setEmail(userEmail);
       setVerifying(false);
     };
 
-    verifyInvite();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log(
+        "[signup] auth event:",
+        event,
+        "has email:",
+        !!session?.user?.email,
+      );
+      if (!mounted) return;
+      if (
+        (event === "SIGNED_IN" || event === "INITIAL_SESSION") &&
+        session?.user?.email
+      ) {
+        verifyInvite(session.user.email);
+      }
+    });
+
+    processHashTokens();
+
+    const timeoutId = setTimeout(() => {
+      console.log("[signup] timeout fired");
+      if (mounted) {
+        setVerifying(currentlyVerifying => {
+          if (currentlyVerifying) {
+            setErrorMessage(
+              "This page is only accessible through an invite link. Please check your email or ask your facilitator to resend the invite.",
+            );
+            return false;
+          }
+          return currentlyVerifying;
+        });
+      }
+    }, 3000);
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const handleSignUp = async () => {
@@ -99,8 +156,6 @@ export default function SignUp() {
         return;
       }
 
-      // Server action: reads the authenticated user from the session,
-      // sets their password, creates profile, marks invite accepted.
       const result = await completeInvitedSignUp(password);
 
       if (!result.success) {
@@ -162,7 +217,99 @@ export default function SignUp() {
               </Input>
             </InputWrapper>
           </EmailAddressDiv>
-          {/* ...password fields unchanged... */}
+          <PasswordDiv>
+            <InputWrapper>
+              <InputLabel htmlFor="password">Password</InputLabel>
+              <Input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                onChange={(e: {
+                  target: { value: SetStateAction<string> };
+                }) => {
+                  setPassword(e.target.value);
+                  setPasswordTouched(true);
+                  setErrorMessage(null);
+                }}
+                value={password}
+              />
+              <VisibilityToggle
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <FiEye size={18} /> : <FiEyeOff size={18} />}
+              </VisibilityToggle>
+            </InputWrapper>
+          </PasswordDiv>
+          <PasswordConfirmDiv>
+            <InputWrapper>
+              <InputLabel htmlFor="confirmPassword">
+                Confirm password
+              </InputLabel>
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e: {
+                  target: { value: SetStateAction<string> };
+                }) => {
+                  setConfirmPassword(e.target.value);
+                  setErrorMessage(null);
+                }}
+              />
+              <VisibilityToggle
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? (
+                  <FiEye size={18} />
+                ) : (
+                  <FiEyeOff size={18} />
+                )}
+              </VisibilityToggle>
+            </InputWrapper>
+          </PasswordConfirmDiv>
+          <PasswordCheckBox>
+            <PasswordText>Your password must contain:</PasswordText>
+            <ul>
+              <PasswordRule $touched={passwordTouched} $valid={rules.length}>
+                {passwordTouched ? rules.length ? <FiCheck /> : <FiX /> : "•"}
+                <span>12 or more characters</span>
+              </PasswordRule>
+              <PasswordRule $touched={passwordTouched} $valid={rules.uppercase}>
+                {passwordTouched ? (
+                  rules.uppercase ? (
+                    <FiCheck />
+                  ) : (
+                    <FiX />
+                  )
+                ) : (
+                  "•"
+                )}
+                <span>A capital letter (A-Z)</span>
+              </PasswordRule>
+              <PasswordRule $touched={passwordTouched} $valid={rules.number}>
+                {passwordTouched ? rules.number ? <FiCheck /> : <FiX /> : "•"}
+                <span>A number</span>
+              </PasswordRule>
+              <PasswordRule
+                $touched={passwordTouched}
+                $valid={rules.specialChar}
+              >
+                {passwordTouched ? (
+                  rules.specialChar ? (
+                    <FiCheck />
+                  ) : (
+                    <FiX />
+                  )
+                ) : (
+                  "•"
+                )}
+                <span>A special symbol</span>
+              </PasswordRule>
+            </ul>
+          </PasswordCheckBox>
         </InputFields>
         <Button
           onClick={handleSignUp}
