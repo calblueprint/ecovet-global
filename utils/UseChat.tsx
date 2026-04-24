@@ -93,7 +93,13 @@ export function useRealtimeChat({
 
       setChatMessages(current => [...current, chatMessage]);
       await Promise.all([
-        persistChatMessage(roomId, chatMessage.message, userId, username),
+        persistChatMessage(
+          roomId,
+          chatMessage.message,
+          userId,
+          username,
+          chatMessage.phase_sent_at,
+        ),
         channel.send({
           type: "broadcast",
           event: EVENT_MESSAGE_TYPE,
@@ -105,7 +111,11 @@ export function useRealtimeChat({
   );
 
   const sendMessage = useCallback(
-    async (message: string, newRoomId?: string | null) => {
+    async (
+      message: string,
+      current_phase: number,
+      newRoomId?: string | null,
+    ) => {
       const messageRoomId = newRoomId ?? roomId;
       if (!messageRoomId) return;
 
@@ -115,6 +125,7 @@ export function useRealtimeChat({
         message: message,
         sender: userId,
         sender_name: username,
+        phase_sent_at: current_phase,
         created_at: new Date().toISOString(),
       };
 

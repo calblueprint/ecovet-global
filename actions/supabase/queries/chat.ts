@@ -86,6 +86,7 @@ export async function persistChatMessage(
   message: string,
   senderId: string,
   senderName: string,
+  currentPhase: number | null,
 ) {
   const supabase = await getSupabaseServerClient();
 
@@ -94,6 +95,7 @@ export async function persistChatMessage(
     message: message,
     sender: senderId,
     sender_name: senderName,
+    phase_sent_at: currentPhase,
   });
 
   if (error) {

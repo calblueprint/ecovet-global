@@ -98,6 +98,9 @@ export const ChatMessageContainer = styled.div`
   gap: 1.25rem;
   align-self: stretch;
   margin: 0 1.25rem;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 `;
 
 export const TimeSeparatorBold = styled(Caption)`
@@ -147,9 +150,15 @@ export const ChatInput = styled.textarea<TextProps>`
 `;
 
 export const ChatSendButton = styled.button`
-  border: none;
+  border-radius: 1rem;
+  width: 3rem;
+  border: 1px solid ${COLORS.oat_dark};
+  background: ${COLORS.oat_medium};
   align-self: flex-end;
   justify-content: flex-end;
+  font-size: 13px;
+  font-weight: 500;
+  font-color: ${COLORS.black40};
 `;
 
 export const ChatContainer = styled.div`
@@ -162,9 +171,8 @@ export const ChatContainer = styled.div`
   justify-content: space-between;
   align-items: flex-start;
   flex: 1 0 0;
-  border-radius: 1rem;
-  border: 1px solid ${COLORS.oat_medium};
   background: ${COLORS.oat_light};
+  min-height: 0;
 `;
 
 export const ChatHeader = styled(B1)`
@@ -178,6 +186,9 @@ export const ContentContainer = styled.div`
   width: 100%;
   height: 100%;
   gap: 1rem;
+  overflow: hidden;
+  min-height: 0;
+  flex: 1;
 `;
 
 export const ChatSelectedBorder = styled.div<{

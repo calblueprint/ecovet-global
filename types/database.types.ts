@@ -19,6 +19,7 @@ export type Database = {
           created_at: string;
           id: string;
           message: string;
+          phase_sent_at: number | null;
           room_id: string | null;
           sender: string | null;
           sender_name: string | null;
@@ -27,6 +28,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           message: string;
+          phase_sent_at?: number | null;
           room_id?: string | null;
           sender?: string | null;
           sender_name?: string | null;
@@ -35,6 +37,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           message?: string;
+          phase_sent_at?: number | null;
           room_id?: string | null;
           sender?: string | null;
           sender_name?: string | null;
@@ -121,7 +124,6 @@ export type Database = {
         Row: {
           created_at: string | null;
           is_finished: boolean;
-          phase_id: string | null;
           phase_index: number | null;
           role_id: string | null;
           session_id: string;
@@ -130,7 +132,6 @@ export type Database = {
         Insert: {
           created_at?: string | null;
           is_finished: boolean;
-          phase_id?: string | null;
           phase_index?: number | null;
           role_id?: string | null;
           session_id: string;
@@ -139,7 +140,6 @@ export type Database = {
         Update: {
           created_at?: string | null;
           is_finished?: boolean;
-          phase_id?: string | null;
           phase_index?: number | null;
           role_id?: string | null;
           session_id?: string;
@@ -152,13 +152,6 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "profile";
             referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "participant_session_phase_id_fkey";
-            columns: ["phase_id"];
-            isOneToOne: false;
-            referencedRelation: "phase";
-            referencedColumns: ["phase_id"];
           },
           {
             foreignKeyName: "participant_session_role_id_fkey";

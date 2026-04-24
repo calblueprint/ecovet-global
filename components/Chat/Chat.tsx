@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { setRef } from "@mui/material";
 import {
   addUserToChatRoom,
@@ -6,15 +6,23 @@ import {
   createChatRoom,
   getUserChatRooms,
 } from "@/actions/supabase/queries/chat";
-import { fetchChatUserOptions } from "@/actions/supabase/queries/sessions";
+import {
+  fetchChatUserOptions,
+  fetchMostRecentPhase,
+} from "@/actions/supabase/queries/sessions";
 import { supabase } from "@/lib/supabase/client";
-import { ChatMessage as ChatMessageType, UserType, UUID } from "@/types/schema";
+import {
+  ChatMessage as ChatMessageType,
+  ChatParticipant,
+  UserType,
+  UUID,
+} from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import { useRealtimeChat as useChat } from "@/utils/UseChat";
 import ChatInputBar from "./ChatInputBar";
 import ChatMessage from "./ChatMessageBubble";
 import ChatSelection, { Selection } from "./ChatSelection";
-import CreateChat, { ChatParticipant } from "./CreateChat";
+import CreateChat from "./CreateChat";
 import {
   ChatContainer,
   ChatHeader,
@@ -35,6 +43,8 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
   const [participantsOptions, setParticipantOptions] = useState<
     ChatParticipant[]
   >([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
   const userRoles = useMemo(
     () =>
       new Map(
@@ -51,6 +61,10 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
     userId: userId ?? "unknown-user",
     username: profile?.first_name ?? "Unknown User",
   });
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages]);
 
   useEffect(() => {
     async function loadParticipants() {
@@ -140,8 +154,10 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
     if (currentRoomId === null) {
       newRoomId = await createRoom();
     }
+    if (!userId) return;
+    const currentPhase = (await fetchMostRecentPhase(userId, sessionId)) + 1;
 
-    await sendMessage(message, newRoomId);
+    await sendMessage(message, currentPhase, newRoomId);
   }
 
   async function createRoom() {
@@ -214,6 +230,7 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
               />
             </Fragment>
           ))}
+          <div ref={messagesEndRef} />
         </ChatMessageContainer>
       </ContentContainer>
 

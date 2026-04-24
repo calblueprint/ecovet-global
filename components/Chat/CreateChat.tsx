@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useMemo } from "react";
 import { StylesConfig } from "react-select";
 import COLORS from "@/styles/colors";
-import { DropdownOption } from "@/types/schema";
+import { ChatParticipant, DropdownOption } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import InputDropdown from "../InputDropdown/InputDropdown";
 import {
@@ -12,12 +12,6 @@ import {
   ProfileColor,
   SelectUsersContainer,
 } from "./styles";
-
-export type ChatParticipant = {
-  id: string;
-  name: string;
-  role: string;
-};
 
 export default function CreateChat({
   participantOptions,
