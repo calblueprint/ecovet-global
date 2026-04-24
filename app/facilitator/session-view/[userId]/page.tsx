@@ -1,7 +1,7 @@
 "use client";
 
 import type { Phase, PromptWithResponse, UUID } from "@/types/schema";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -18,14 +18,7 @@ import {
   sessionParticipants,
 } from "@/actions/supabase/queries/sessions";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
-import {
-  ContentWrapper,
-  Heading3,
-  PhaseList,
-  Sidebar,
-  SilverHeading3,
-  SilverText,
-} from "../styles";
+import { Heading3, SilverHeading3, SilverText } from "../styles";
 import {
   AnnouncementsPanel,
   ContentDiv,
@@ -37,12 +30,14 @@ import {
   OptionRow,
   PageLayout,
   ParticipantInformation,
+  PhaseList,
   PromptAnswer,
   PromptCard,
   PromptQuestionNumber,
   PromptQuestionText,
   PromptWrapper,
   RadioCircle,
+  Sidebar,
 } from "./styles";
 
 type PhasePromptData = {
@@ -71,6 +66,7 @@ export default function ParticipantDetailView() {
   const [roleId, setRoleId] = useState<UUID | null>(null);
   const [roleName, setRoleName] = useState<string | null>(null);
   const router = useRouter();
+  const userSelectedRef = useRef(false);
 
   async function loadData() {
     if (!sessionId || !userId) return;
@@ -146,7 +142,14 @@ export default function ParticipantDetailView() {
     setRoleId(roleId);
     setPhaseIds(phaseIds);
     setPhasePrompts(allPhasePrompts);
-    setSelectedPhaseId(allPhasePrompts[0]?.phaseId ?? null);
+    if (!userSelectedRef.current) {
+      const currentPhaseId = phases[phaseIndex]?.phase_id;
+      const defaultId =
+        allPhasePrompts.find(p => p.phaseId === currentPhaseId)?.phaseId ??
+        allPhasePrompts[0]?.phaseId ??
+        null;
+      setSelectedPhaseId(defaultId);
+    }
   }
 
   useEffect(() => {
@@ -184,7 +187,10 @@ export default function ParticipantDetailView() {
           {phasePrompts.map(phase => (
             <PhaseList
               key={phase.phaseId}
-              onClick={() => setSelectedPhaseId(phase.phaseId)}
+              onClick={() => {
+                userSelectedRef.current = true;
+                setSelectedPhaseId(phase.phaseId);
+              }}
             >
               {phase.phaseName}
             </PhaseList>
