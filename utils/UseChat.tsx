@@ -32,9 +32,6 @@ export function useRealtimeChat({
     if (!isConnected || !channel || !roomId || initializingMessages) return;
 
     const sendQueuedMessages = async () => {
-      console.log(
-        `context: sending queued messages (${messageQueue.current.length} messages)`,
-      );
       for (const message of messageQueue.current) {
         await sendMessageObject(message);
       }
@@ -43,12 +40,6 @@ export function useRealtimeChat({
 
     sendQueuedMessages();
   }, [isConnected, channel, roomId, initializingMessages]);
-
-  useEffect(() => {
-    console.log(
-      `new chat messages (roomId: ${roomId}): ${JSON.stringify(chatMessages)}`,
-    );
-  }, [chatMessages, roomId]);
 
   useEffect(() => {
     if (channel) {
@@ -64,12 +55,8 @@ export function useRealtimeChat({
     startFetching(async () => {
       try {
         const messageHistory = await getMessageHistory(roomId, null, 50);
-        console.log(
-          `context: initialized chatMessage (${JSON.stringify(messageHistory)})`,
-        );
         setChatMessages(messageHistory);
       } catch (error) {
-        console.error("Error loading message history:", error);
         setChatMessages([]);
       }
     });
@@ -104,7 +91,6 @@ export function useRealtimeChat({
         return;
       }
 
-      console.log(`context: sending message ${chatMessage.message}`);
       setChatMessages(current => [...current, chatMessage]);
       await Promise.all([
         persistChatMessage(roomId, chatMessage.message, userId, username),

@@ -58,9 +58,6 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
         },
         payload => {
           if (payload.new.session_id !== sessionId) return;
-          console.log(
-            `new rooms found, reloading rooms: ${JSON.stringify(payload.new)}`,
-          );
           loadRooms();
         },
       )
@@ -81,10 +78,6 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
 
     checkRoom();
   }, [newChatUserIds]);
-
-  useEffect(() => {
-    console.log(`current room id changed: ${currentRoomId}`);
-  }, [currentRoomId]);
 
   async function loadRooms() {
     if (!userId) return;
@@ -114,15 +107,11 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
 
   async function onSendMessage(message: string) {
     let newRoomId: string | null = currentRoomId;
-    console.log(
-      `trying to send message: roomId: ${currentRoomId}, message: ${message}`,
-    );
     if (currentRoomId === null) {
       newRoomId = await createRoom();
     }
 
     await sendMessage(message, newRoomId);
-    console.log(`sent message: roomId: ${newRoomId}, message: ${message}`);
   }
 
   async function createRoom() {
@@ -133,15 +122,9 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
       sessionId,
     );
 
-    console.log(
-      `check room exists: userIds: ${newChatUserIds}, newRoomId: ${newRoomId}`,
-    );
     if (!newRoomId) {
       newRoomId = crypto.randomUUID();
 
-      console.log(
-        `room did not exist, creating new room: newRoomId: ${newRoomId}`,
-      );
       await createChatRoom(newRoomId, userId, sessionId);
       await Promise.all(
         newChatUserIds.map(chatUserId =>
@@ -209,6 +192,16 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
       />
     </ChatContainer>
   );
+}
+
+export function truncateText(text: string, maxLength: number = 8): string {
+  if (!text) return "";
+
+  if (text.length <= maxLength) {
+    return text;
+  }
+
+  return text.slice(0, maxLength) + "...";
 }
 
 const isDoubleText = (chatMessages: ChatMessageType[], index: number) => {
