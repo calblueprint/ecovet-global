@@ -124,6 +124,19 @@ export async function signInWithMagicLink(email: string) {
   }
 }
 
+export async function sendInviteEmail(email: string) {
+  const adminClient = getSupabaseAdminClient();
+
+  const { error } = await adminClient.auth.admin.inviteUserByEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/sign-up`,
+  });
+
+  if (error) {
+    console.error("Error sending invite:", error.message);
+    throw error;
+  }
+}
+
 export async function checkIfUserExists(email: string): Promise<boolean> {
   const supabase = await getSupabaseServerClient();
   const lowerCaseEmail = email.toLowerCase();
@@ -154,19 +167,41 @@ export async function signUpInvitedUser(email: string, password: string) {
     };
   }
 
-  const { data, error } = await adminClient.auth.admin.createUser({
-    email: lowerCaseEmail,
-    password: password,
-    email_confirm: true,
-  });
+  const { data: listData, error: listError } =
+    await adminClient.auth.admin.listUsers();
+
+  if (listError) {
+    console.error("Error listing users:", listError.message);
+    return { success: false, error: listError.message, userId: null };
+  }
+
+  const existingUser = listData.users.find(
+    u => u.email?.toLowerCase() === lowerCaseEmail,
+  );
+
+  if (!existingUser) {
+    return {
+      success: false,
+      error: "Invited user not found in auth system",
+      userId: null,
+    };
+  }
+
+  const { data, error } = await adminClient.auth.admin.updateUserById(
+    existingUser.id,
+    {
+      password: password,
+      email_confirm: true,
+    },
+  );
 
   if (error) {
-    console.error("Error creating user:", error.message);
+    console.error("Error updating user:", error.message);
     return { success: false, error: error.message, userId: null };
   }
 
   if (!data.user) {
-    return { success: false, error: "Failed to create user", userId: null };
+    return { success: false, error: "Failed to update user", userId: null };
   }
 
   const userId = data.user.id;
