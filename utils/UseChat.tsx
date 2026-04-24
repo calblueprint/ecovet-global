@@ -60,9 +60,6 @@ export function useRealtimeChat({
       setIsConnected(false);
       return;
     }
-    console.log(
-      `main effect: roomId: ${roomId}, username: ${username}, supabase: ${supabase}`,
-    );
 
     startFetching(async () => {
       try {
