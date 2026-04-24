@@ -255,3 +255,54 @@ export async function checkInvites(email: string) {
       return "unknown_status";
   }
 }
+
+export async function completeInvitedSignUp(password: string) {
+  const supabase = await getSupabaseServerClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user?.email) {
+    return {
+      success: false,
+      error: "Not authenticated. Please use the link from your invite email.",
+      userId: null,
+    };
+  }
+
+  const lowerCaseEmail = user.email.toLowerCase();
+
+  const { status } = await checkInviteStatus(lowerCaseEmail);
+  if (status !== "pending") {
+    return {
+      success: false,
+      error: "No pending invitation found for this account.",
+      userId: null,
+    };
+  }
+
+  const { error: updateError } = await supabase.auth.updateUser({ password });
+  if (updateError) {
+    console.error("Error setting password:", updateError.message);
+    return {
+      success: false,
+      error: updateError.message,
+      userId: null,
+    };
+  }
+
+  try {
+    await addInviteInfoToProfile(user.id, lowerCaseEmail);
+    await markInviteAccepted(lowerCaseEmail);
+    return { success: true, error: null, userId: user.id };
+  } catch (err) {
+    console.error("Error finalizing sign-up:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Failed to finalize sign-up",
+      userId: null,
+    };
+  }
+}
