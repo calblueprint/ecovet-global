@@ -4,7 +4,6 @@ import {
   ChatSelectedBorder,
   ChatSelectionButton,
   ChatSelectionContainer,
-  SelectedChatContainer,
 } from "./styles";
 
 export interface Selection {
@@ -19,7 +18,7 @@ export default function ChatSelection({
   createRoom,
 }: {
   chats: Selection[];
-  currentRoomId: string;
+  currentRoomId: string | null;
   changeRoom: (roomId: string) => void;
   createRoom: () => void;
 }) {

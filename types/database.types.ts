@@ -635,6 +635,10 @@ export type Database = {
         Args: { p_current_phase_num: number; p_session_id: string };
         Returns: number;
       };
+      check_chat_room_exists: {
+        Args: { p_session_id: string; p_user_ids: string[] };
+        Returns: string;
+      };
     };
     Enums: {
       prompt_type: "text" | "multiple_choice" | "checkbox";

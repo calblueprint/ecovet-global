@@ -2,8 +2,10 @@ import { useState } from "react";
 import { ChatInput, ChatInputContainer, ChatSendButton } from "./styles";
 
 export default function ChatInputBar({
+  disabled,
   sendMessage,
 }: {
+  disabled: boolean;
   sendMessage: (message: string) => void;
 }) {
   const [userInput, setUserInput] = useState("");
@@ -23,7 +25,9 @@ export default function ChatInputBar({
         onChange={e => setUserInput(e.target.value)}
       />
 
-      <ChatSendButton onClick={onClick}>Send</ChatSendButton>
+      <ChatSendButton disabled={disabled} onClick={onClick}>
+        Send
+      </ChatSendButton>
     </ChatInputContainer>
   );
 }

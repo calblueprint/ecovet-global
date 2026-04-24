@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import {
   getMessageHistory,
   persistChatMessage,
@@ -15,24 +15,61 @@ export function useRealtimeChat({
   userId,
   username,
 }: {
-  roomId: string;
+  roomId: string | null;
   userId: string;
   username: string;
 }) {
-  const [loading, startFetching] = useTransition();
+  const [initializingMessages, startFetching] = useTransition();
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [channel, setChannel] = useState<ReturnType<
     typeof supabase.channel
   > | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const messageQueue = useRef<ChatMessage[]>([]);
 
   useEffect(() => {
-    if (roomId.length === 0) return;
+    if (!isConnected || !channel || !roomId || initializingMessages) return;
+
+    const sendQueuedMessages = async () => {
+      console.log(
+        `context: sending queued messages (${messageQueue.current.length} messages)`,
+      );
+      for (const message of messageQueue.current) {
+        await sendMessageObject(message);
+      }
+      messageQueue.current = [];
+    };
+
+    sendQueuedMessages();
+  }, [isConnected, channel, roomId, initializingMessages]);
+
+  useEffect(() => {
+    console.log(
+      `new chat messages (roomId: ${roomId}): ${JSON.stringify(chatMessages)}`,
+    );
+  }, [chatMessages, roomId]);
+
+  useEffect(() => {
+    if (channel) {
+      channel.unsubscribe();
+      setChannel(null);
+    }
+    if (!roomId) {
+      setChatMessages([]);
+      setIsConnected(false);
+      return;
+    }
+    console.log(
+      `main effect: roomId: ${roomId}, username: ${username}, supabase: ${supabase}`,
+    );
 
     startFetching(async () => {
       try {
-        const messageHistory = await getMessageHistory(roomId, null, 100);
+        const messageHistory = await getMessageHistory(roomId, null, 50);
+        console.log(
+          `context: initialized chatMessage (${JSON.stringify(messageHistory)})`,
+        );
         setChatMessages(messageHistory);
       } catch (error) {
         console.error("Error loading message history:", error);
@@ -64,21 +101,14 @@ export function useRealtimeChat({
     };
   }, [roomId, username, supabase]);
 
-  const sendMessage = useCallback(
-    async (message: string) => {
-      if (!channel || !isConnected) return;
+  const sendMessageObject = useCallback(
+    async (chatMessage: ChatMessage) => {
+      if (!channel || !isConnected || !roomId) {
+        return;
+      }
 
-      const chatMessage: ChatMessage = {
-        id: crypto.randomUUID(),
-        room_id: roomId,
-        message: message,
-        sender: userId,
-        sender_name: username,
-        created_at: new Date().toISOString(),
-      };
-
+      console.log(`context: sending message ${chatMessage.message}`);
       setChatMessages(current => [...current, chatMessage]);
-
       await Promise.all([
         persistChatMessage(roomId, chatMessage.message, userId, username),
         channel.send({
@@ -88,8 +118,36 @@ export function useRealtimeChat({
         }),
       ]);
     },
-    [channel, isConnected, username],
+    [channel, username, roomId, userId, isConnected],
   );
 
-  return { loading, chatMessages, sendMessage, isConnected };
+  const sendMessage = useCallback(
+    async (message: string, newRoomId?: string | null) => {
+      const messageRoomId = newRoomId ?? roomId;
+      if (!messageRoomId) return;
+
+      const chatMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        room_id: messageRoomId,
+        message: message,
+        sender: userId,
+        sender_name: username,
+        created_at: new Date().toISOString(),
+      };
+
+      if (!channel || !isConnected) {
+        messageQueue.current.push(chatMessage);
+      } else {
+        sendMessageObject(chatMessage);
+      }
+    },
+    [channel, username, roomId, userId, isConnected],
+  );
+
+  return {
+    loading: initializingMessages,
+    chatMessages,
+    sendMessage,
+    isConnected,
+  };
 }

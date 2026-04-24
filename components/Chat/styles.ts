@@ -90,7 +90,7 @@ export const ProfileColor = styled.div<{ $color: string; $size?: number }>`
   aspect-ratio: 1/1;
   border-radius: 0.25rem;
   align-self: start;
-  background: ${({ color }) => color};
+  background: ${({ $color }) => $color};
 `;
 
 export const ChatMessageContainer = styled.div`
@@ -186,7 +186,7 @@ export const ChatSelectedBorder = styled.div<{
   color?: string;
   selected: boolean;
 }>`
-  padding: 1px;
+  padding: ${({ selected }) => (selected ? "1" : "2")}px;
   border: ${({ selected }) => (selected ? "1" : "0")}px solid
     ${({ color }) => color ?? COLORS.teal};
   border-radius: 8px;
