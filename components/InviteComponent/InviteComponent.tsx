@@ -8,6 +8,7 @@ import {
   ButtonPaddingDiv,
   EmailDiv,
   EmailInput,
+  EmailTextArea,
   ErrorMessage,
   ErrorMessageDiv,
   FacilitatorButton,
@@ -25,16 +26,20 @@ const isEmailValid = (email: string) => {
 function InviteComponent({
   user_group_id,
   onInvitesChange,
+  isAdminDashboard,
 }: {
   user_group_id: string;
   onInvitesChange?: () => void;
+  isAdminDashboard?: boolean;
 }) {
   const [emailsText, setEmailsText] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [participantSelected, setParticipantSelected] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     setEmailsText(event.target.value);
     if (errorMessage) setErrorMessage("");
   };
@@ -83,7 +88,9 @@ function InviteComponent({
     }
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (
+    event: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       onSubmitButtonClick();
@@ -99,15 +106,27 @@ function InviteComponent({
         <ErrorMessageDiv $hasError={errorMessage}>
           <ErrorMessage>{errorMessage}</ErrorMessage>
         </ErrorMessageDiv>
-        <EmailDiv>
-          <EmailInput
-            value={emailsText}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            placeholder="email1@berkeley.edu&#10;email2@berkeley.edu"
-            required
-          />
-          <ButtonPaddingDiv>
+
+        <EmailDiv $isAdmin={isAdminDashboard}>
+          {isAdminDashboard ? (
+            <EmailTextArea
+              value={emailsText}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              placeholder="email1@berkeley.edu&#10;email2@berkeley.edu"
+              required
+            />
+          ) : (
+            <EmailInput
+              value={emailsText}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              placeholder="Email Address"
+              required
+            />
+          )}
+
+          <ButtonPaddingDiv $isAdmin={isAdminDashboard}>
             <InviteTypeButton>
               <ParticipantButton
                 $isOn={participantSelected}
@@ -122,11 +141,17 @@ function InviteComponent({
                 Facilitator
               </FacilitatorButton>
             </InviteTypeButton>
+
             <SubmitButton
+              $isAdmin={isAdminDashboard}
               onClick={onSubmitButtonClick}
               disabled={hasErrorsOrEmpty || isSubmitting}
             >
-              Send Invite
+              {isAdminDashboard
+                ? participantSelected
+                  ? "+ add participant(s)"
+                  : "+ add facilitator(s)"
+                : "Send Invite"}
             </SubmitButton>
           </ButtonPaddingDiv>
         </EmailDiv>

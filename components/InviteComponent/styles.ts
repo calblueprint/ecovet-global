@@ -33,12 +33,20 @@ export const AddInviteFormDiv = styled.div`
   width: 100%;
 `;
 
-export const EmailDiv = styled.div`
-  flex-direction: column;
+export const EmailDiv = styled.div<{ $isAdmin?: boolean }>`
   display: flex;
-  gap: 1rem;
-  justify-content: space-between;
   width: 100%;
+  ${({ $isAdmin }) =>
+    $isAdmin
+      ? `
+    flex-direction: column;
+    gap: 1rem;
+  `
+      : `
+    flex-direction: row;
+    gap: 2rem;
+    justify-content: space-between;
+  `}
 `;
 
 export const EmailInput = styled.textarea`
@@ -71,25 +79,59 @@ export const EmailInput = styled.textarea`
   }
 `;
 
-export const SubmitButton = styled.button`
+export const EmailTextArea = styled.textarea`
+  display: block;
+  width: 100%;
+  min-height: 60px;
+  padding: 0.75rem;
+  box-sizing: border-box;
+  border-radius: 4px;
+  border: 1px solid ${COLORS.oat_medium};
+  background: ${COLORS.white};
+  color: ${COLORS.black100};
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1.5;
+  outline: none;
+  resize: vertical;
+
+  &::placeholder {
+    color: ${COLORS.black20};
+    font-size: 0.7rem;
+    font-weight: 500;
+    font-family: ${Sans.style.fontFamily};
+  }
+`;
+
+export const SubmitButton = styled.button<{ $isAdmin?: boolean }>`
   display: flex;
-  padding: 0rem 2rem;
   justify-content: center;
   align-items: center;
-  gap: 0.625rem;
-  align-self: stretch;
   border-radius: 0.25rem;
   border: 1px transparent;
   background: ${COLORS.darkElectricBlue};
   cursor: pointer;
-
   color: ${COLORS.white};
   font-family: ${Sans.style.fontFamily};
   font-size: 0.7rem;
   font-style: normal;
   font-weight: 700;
   line-height: normal;
-  white-space: nowrap;
+
+  ${({ $isAdmin }) =>
+    $isAdmin
+      ? `
+    padding: 0.5rem 1rem;
+    gap: 0.625rem;
+    flex: 1;
+  `
+      : `
+    padding: 0rem 2rem;
+    gap: 0.625rem;
+    align-self: stretch;
+    white-space: nowrap;
+  `}
 
   &:disabled {
     background: ${COLORS.darkElectricBlue};
@@ -110,12 +152,20 @@ export const ErrorMessage = styled.p`
   font-family: ${Sans.style.fontFamily};
 `;
 
-export const ButtonPaddingDiv = styled.div`
+export const ButtonPaddingDiv = styled.div<{ $isAdmin?: boolean }>`
   display: flex;
   flex-direction: row;
-  gap: 1rem;
   justify-content: space-between;
   width: 100%;
+  ${({ $isAdmin }) =>
+    $isAdmin
+      ? `
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  `
+      : `
+    gap: 16rem;
+  `}
 `;
 
 export const InviteTypeButton = styled.div`

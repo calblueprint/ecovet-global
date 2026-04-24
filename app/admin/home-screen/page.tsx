@@ -64,6 +64,7 @@ export default function AdminPage() {
                     "Invites changed! You might want to trigger a re-fetch here later.",
                   );
                 }}
+                isAdminDashboard={true}
               />
             </SidebarColumn>
           </DashboardFlexContainer>
