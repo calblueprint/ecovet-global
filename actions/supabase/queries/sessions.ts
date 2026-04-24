@@ -74,21 +74,25 @@ export async function fetchChatUserOptions(
   }
 
   return data
-    ? data.map(p => {
-        const session = Array.isArray(p.participant_session)
-          ? p.participant_session[0]
-          : p.participant_session;
+    ? data
+        .map(p => {
+          const session = Array.isArray(p.participant_session)
+            ? p.participant_session[0]
+            : p.participant_session;
 
-        const role = Array.isArray(session?.role)
-          ? session?.role[0]
-          : session?.role;
+          const role = Array.isArray(session?.role)
+            ? session?.role[0]
+            : session?.role;
 
-        return {
-          id: String(p.id),
-          name: String(p.first_name + " " + p.last_name),
-          role: role?.role_name ? String(role.role_name) : "",
-        };
-      })
+          if (!role) return;
+
+          return {
+            id: String(p.id),
+            name: String(p.first_name + " " + p.last_name),
+            role: role?.role_name ? String(role.role_name) : "",
+          };
+        })
+        .filter(user => user)
     : [];
 }
 export async function fetchTemplateId(session_id: string) {
