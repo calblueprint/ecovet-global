@@ -63,7 +63,7 @@ export const styles = StyleSheet.create({
     marginTop: 8,
   },
 
-  // Participant summary and dep matrix (page 2) 
+  // Participant summary and dep matrix (page 2)
   pageTitle: {
     fontSize: 16,
     fontFamily: "Helvetica-Bold",

@@ -40,8 +40,7 @@ function buildCommunicationMatrix(
       lastName: "",
     };
     if (firstNameCount[firstName] <= 1) return firstName;
-    const withInitial =
-      lastName ? `${firstName} ${lastName[0]}.` : firstName;
+    const withInitial = lastName ? `${firstName} ${lastName[0]}.` : firstName;
     return withInitial;
   });
 
@@ -78,7 +77,12 @@ function buildCommunicationMatrix(
 
   for (const [roomId, users] of Object.entries(roomUsers)) {
     const inSession = users.filter(uid => uid in userIdToIndex);
-    console.log(`[CommMatrix] room ${roomId} — all users:`, users, "| in session:", inSession);
+    console.log(
+      `[CommMatrix] room ${roomId} — all users:`,
+      users,
+      "| in session:",
+      inSession,
+    );
     for (let i = 0; i < inSession.length; i++) {
       for (let j = 0; j < inSession.length; j++) {
         if (i !== j) {
@@ -115,7 +119,10 @@ export async function GET(
     const { data: urlData } = supabase.storage
       .from("reports")
       .getPublicUrl(reportFileName);
-    return Response.json({ url: urlData.publicUrl });
+    const updatedAt =
+      existingFiles[0].updated_at ?? existingFiles[0].created_at;
+    const bust = updatedAt ? new Date(updatedAt).getTime() : Date.now();
+    return Response.json({ url: `${urlData.publicUrl}?t=${bust}` });
   }
 
   const { data: session, error: sessionError } = await supabase
@@ -248,8 +255,7 @@ export async function GET(
     const profile = p.profile as unknown as NestedProfile | null;
     const firstName = profile?.first_name ?? "";
     const lastName = profile?.last_name ?? "";
-    nameByUserId[p.user_id] =
-      `${firstName} ${lastName}`.trim() || "Unknown";
+    nameByUserId[p.user_id] = `${firstName} ${lastName}`.trim() || "Unknown";
     profileByUserId[p.user_id] = { firstName, lastName };
   }
 
@@ -494,8 +500,7 @@ export async function POST(
     const profile = p.profile as unknown as NestedProfile | null;
     const firstName = profile?.first_name ?? "";
     const lastName = profile?.last_name ?? "";
-    nameByUserId[p.user_id] =
-      `${firstName} ${lastName}`.trim() || "Unknown";
+    nameByUserId[p.user_id] = `${firstName} ${lastName}`.trim() || "Unknown";
     profileByUserId[p.user_id] = { firstName, lastName };
   }
 

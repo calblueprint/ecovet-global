@@ -1,4 +1,13 @@
-import { Circle, Document, G, Line, Page, Svg, Text, View } from "@react-pdf/renderer";
+import {
+  Circle,
+  Document,
+  G,
+  Line,
+  Page,
+  Svg,
+  Text,
+  View,
+} from "@react-pdf/renderer";
 import { styles } from "./styles";
 
 export type ParticipantSummary = {
@@ -57,8 +66,7 @@ function NetworkGraph({ headers, matrix }: CommunicationMatrix) {
 
   const edges: [number, number][] = [];
   for (let i = 0; i < n; i++)
-    for (let j = i + 1; j < n; j++)
-      if (matrix[i][j]) edges.push([i, j]);
+    for (let j = i + 1; j < n; j++) if (matrix[i][j]) edges.push([i, j]);
 
   return (
     <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
@@ -77,8 +85,7 @@ function NetworkGraph({ headers, matrix }: CommunicationMatrix) {
       {positions.map((pos, i) => {
         const lx = cx + (r + labelGap) * Math.cos(pos.angle);
         const ly = cy + (r + labelGap) * Math.sin(pos.angle);
-        const anchor =
-          lx < cx - 6 ? "end" : lx > cx + 6 ? "start" : "middle";
+        const anchor = lx < cx - 6 ? "end" : lx > cx + 6 ? "start" : "middle";
         return (
           <G key={`n-${i}`}>
             <Circle cx={pos.x} cy={pos.y} r={nodeRadius} fill="#476C77" />
@@ -114,10 +121,11 @@ export function SessionSummaryReport({
     roleCounts[p.role] = (roleCounts[p.role] ?? 0) + 1;
   }
 
-  console.log("[SessionReport] communicationMatrix received:", communicationMatrix);
-  console.log("[SessionReport] communicationMatrix defined?", !!communicationMatrix);
-  console.log("[SessionReport] headers.length:", communicationMatrix?.headers?.length);
-  console.log("[SessionReport] render condition (headers.length > 1):", (communicationMatrix?.headers?.length ?? 0) > 1);
+  // Debug
+  // console.log("[SessionReport] communicationMatrix received:", communicationMatrix);
+  // console.log("[SessionReport] communicationMatrix defined?", !!communicationMatrix);
+  // console.log("[SessionReport] headers.length:", communicationMatrix?.headers?.length);
+  // console.log("[SessionReport] render condition (headers.length > 1):", (communicationMatrix?.headers?.length ?? 0) > 1);
 
   return (
     <Document>
@@ -226,9 +234,7 @@ export function SessionSummaryReport({
             {communicationMatrix.matrix.map((row, ri) => (
               <View
                 key={ri}
-                style={
-                  ri % 2 === 0 ? styles.matrixRow : styles.matrixRowAlt
-                }
+                style={ri % 2 === 0 ? styles.matrixRow : styles.matrixRowAlt}
               >
                 <View style={styles.matrixRowLabelCell}>
                   <Text style={styles.matrixRowLabelText}>
@@ -239,9 +245,7 @@ export function SessionSummaryReport({
                   <View
                     key={ci}
                     style={
-                      ri === ci
-                        ? styles.matrixCellDiag
-                        : styles.matrixCell
+                      ri === ci ? styles.matrixCellDiag : styles.matrixCell
                     }
                   >
                     <Text
@@ -263,7 +267,7 @@ export function SessionSummaryReport({
         )}
 
         {/* Communication network graph */}
-        {communicationMatrix && communicationMatrix.headers.length > 1 && (
+        {/* {communicationMatrix && communicationMatrix.headers.length > 1 && (
           <View style={styles.graphSection}>
             <Text style={styles.graphTitle}>Communication Network</Text>
             <Text style={styles.graphSubtitle}>
@@ -282,7 +286,7 @@ export function SessionSummaryReport({
               `${pageNumber} / ${totalPages}`
             }
           />
-        </View>
+        </View> */}
       </Page>
 
       {/* ── Facilitator Comments ─────────────────────────────────────────── */}
