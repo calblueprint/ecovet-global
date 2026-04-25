@@ -59,7 +59,6 @@ export const MainDiv = styled.main`
 
 export const SearchBarStyled = styled.div`
   width: 100%;
-  margin-bottom: 1rem;
 `;
 
 export const SearchInput = styled.input`

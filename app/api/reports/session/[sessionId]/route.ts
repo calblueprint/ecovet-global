@@ -4,6 +4,7 @@ import type {
 } from "@/components/pdf/SessionReport";
 import { createClient } from "@supabase/supabase-js";
 import { generateSessionReport } from "@/lib/pdf/generate";
+import { buildSessionDisplayName } from "@/utils/session-details";
 
 // Supabase nested selects infer join cols as arrays
 type NestedProfile = { first_name: string | null; last_name: string | null };
@@ -25,16 +26,18 @@ export async function GET(
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 
-  // Return cached report if it already exists in storage
-  const reportFileName = `sessions/${sessionId}/report.pdf`;
+  // Cache check — return whatever PDF already exists in this session's folder.
+  // Since template names can't change, the filename is stable; we just return it.
+  const folderPath = `sessions/${sessionId}`;
   const { data: existingFiles } = await supabase.storage
     .from("reports")
-    .list(`sessions/${sessionId}`, { search: "report.pdf" });
+    .list(folderPath);
 
   if (existingFiles && existingFiles.length > 0) {
+    const existing = existingFiles[0];
     const { data: urlData } = supabase.storage
       .from("reports")
-      .getPublicUrl(reportFileName);
+      .getPublicUrl(`${folderPath}/${existing.name}`);
     return Response.json({ url: urlData.publicUrl });
   }
 
@@ -44,6 +47,7 @@ export async function GET(
       `
       session_id,
       session_name,
+      created_at,
       template_id,
       template ( template_name, objective, summary )
     `,
@@ -146,6 +150,7 @@ export async function GET(
     { prompt_id: string; prompt_text: string | null }[]
   > = {};
   for (const p of prompts ?? []) {
+    if (!p.role_phase_id) continue;
     const rpId = p.role_phase_id!;
     if (!promptsByRolePhase[rpId]) promptsByRolePhase[rpId] = [];
     promptsByRolePhase[rpId].push(p);
@@ -230,8 +235,9 @@ export async function GET(
     return Response.json({ error: "PDF generation failed" }, { status: 500 });
   }
 
-  // Upload to Supabase Storage
-  const fileName = `sessions/${sessionId}/report.pdf`;
+  // Build friendly filename from template name + session creation date
+  const friendlyName = `${buildSessionDisplayName(template?.template_name, session.created_at)}.pdf`;
+  const fileName = `${folderPath}/${friendlyName}`;
 
   const { error: uploadError } = await supabase.storage
     .from("reports")
@@ -274,6 +280,7 @@ export async function POST(
       `
       session_id,
       session_name,
+      created_at,
       template_id,
       template ( template_name, objective, summary )
     `,
@@ -329,10 +336,8 @@ export async function POST(
         .in("phase_id", phaseIds)
     : { data: [] };
 
-  // Derive all roleIds from role_phases (not from participants)
   const roleIds = [...new Set((rolePhases ?? []).map(rp => rp.role_id))];
 
-  // Role name lookup from role table
   const { data: rolesData } = roleIds.length
     ? await supabase
         .from("role")
@@ -345,7 +350,6 @@ export async function POST(
     roleNameById[r.role_id] = r.role_name ?? "Unknown Role";
   }
 
-  // Prompts for all role-phases
   const rolePhaseIds = (rolePhases ?? []).map(rp => rp.role_phase_id);
 
   const { data: prompts } = rolePhaseIds.length
@@ -355,7 +359,6 @@ export async function POST(
         .in("role_phase_id", rolePhaseIds)
     : { data: [] };
 
-  // All responses for this session
   const { data: responses } = await supabase
     .from("prompt_response")
     .select("user_id, prompt_id, prompt_answer")
@@ -450,7 +453,9 @@ export async function POST(
     return Response.json({ error: "PDF generation failed" }, { status: 500 });
   }
 
-  const fileName = `sessions/${sessionId}/report.pdf`;
+  // Build friendly filename from template name + session creation date
+  const friendlyName = `${buildSessionDisplayName(template?.template_name, session.created_at)}.pdf`;
+  const fileName = `sessions/${sessionId}/${friendlyName}`;
 
   const { error: uploadError } = await supabase.storage
     .from("reports")
