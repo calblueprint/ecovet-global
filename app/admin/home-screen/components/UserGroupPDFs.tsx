@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchSessionsbyUserGroup } from "@/actions/supabase/queries/sessions";
 import { UUID } from "@/types/schema";
+import { buildSessionDisplayName } from "@/utils/session-details";
 import {
   Container,
   FileDate,
@@ -52,18 +53,15 @@ export default function UserGroupPDFs({ userGroup }: { userGroup: UUID }) {
     (async () => {
       const data = (await fetchSessionsbyUserGroup(userGroup)) ?? [];
 
-      const sessions = data.map(s => {
-        const tn = s.template?.template_name ?? "Untitled";
-        const dateStr = s.created_at
-          ? new Date(s.created_at).toLocaleDateString("en-CA")
-          : "";
-        return {
-          id: s.session_id,
-          displayName: `${tn}_${dateStr}`,
-          created_at: s.created_at,
-          is_finished: s.is_finished === true,
-        };
-      });
+      const sessions = data.map(s => ({
+        id: s.session_id,
+        displayName: buildSessionDisplayName(
+          s.template?.template_name,
+          s.created_at,
+        ),
+        created_at: s.created_at,
+        is_finished: s.is_finished === true,
+      }));
 
       setFiles(sessions);
     })();

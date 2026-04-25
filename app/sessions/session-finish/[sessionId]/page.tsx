@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { fetchPDFName } from "@/actions/supabase/queries/sessions";
 import { useProfile } from "@/utils/ProfileProvider";
+import { buildSessionDisplayName } from "@/utils/session-details";
 import { Main } from "../../styles";
 import {
   Button,
@@ -37,16 +38,16 @@ export default function SessionFinish() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfSize, setPdfSize] = useState<number | null>(null);
-  const [templateName, setTemplateName] = useState<string | null>(null);
-  const [sessionCreatedAt, setSessionCreatedAt] = useState<Date | null>(null);
+  const [pdfName, setPDFName] = useState<string | null>(null);
 
   async function fetchOrGenerateReport() {
     if (!sessionId) return;
     const pdfInfo = await fetchPDFName(sessionId);
-    setTemplateName(pdfInfo.template_name);
-    setSessionCreatedAt(
-      pdfInfo.created_at ? new Date(pdfInfo.created_at) : null,
+    const sessions = buildSessionDisplayName(
+      pdfInfo.template_name,
+      pdfInfo.created_at,
     );
+    setPDFName(sessions);
     setIsGenerating(true);
     setPdfUrl(null);
     setPdfSize(null);
@@ -116,7 +117,7 @@ export default function SessionFinish() {
     const objectUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = objectUrl;
-    link.download = `${templateName}_${sessionCreatedAt?.toLocaleDateString("en-CA")}.pdf`;
+    link.download = `${pdfName}.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -149,9 +150,7 @@ export default function SessionFinish() {
             onClick={handleDownload}
             disabled={!pdfUrl || isGenerating}
           >
-            <FileName>
-              {templateName}_{sessionCreatedAt?.toLocaleDateString("en-CA")}.pdf
-            </FileName>
+            <FileName>{pdfName}.pdf</FileName>
             <FileSize>
               {isGenerating
                 ? "Generating..."
