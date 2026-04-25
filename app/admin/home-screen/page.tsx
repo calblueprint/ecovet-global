@@ -1,63 +1,85 @@
 "use client";
 
-import React, { useState } from "react";
-import Participants from "@/app/facilitator/participants/components/Participants";
+import { useCallback, useEffect, useState } from "react";
+import { UUID } from "crypto";
+import { fetchUserGroupById } from "@/actions/supabase/queries/profile";
+import InviteComponent from "@/components/InviteComponent/InviteComponent";
 import NavBar from "@/components/NavBar/NavBar";
-import { useProfile } from "@/utils/ProfileProvider";
-import { ContentWrapper, LayoutWrapper, SideNavContainer } from "../styles";
-import UserGroupDetails from "./components/UserGroupDetails";
-import UserGroups from "./components/UserGroups";
+import { UserGroup } from "@/types/schema";
+import {
+  CenterColumn,
+  ContentWrapper,
+  LayoutWrapper,
+  MainArea,
+  PageHeading,
+  PageShell,
+  RightColumn,
+  RightColumnStack,
+  SideNavContainer,
+} from "../styles";
+import AdminParticipants from "./components/UserGroupMembers";
+import UserGroupPDFs from "./components/UserGroupPDFs";
 import UserGroupSideBar from "./components/UserGroupSideBar";
 
 export default function AdminPage() {
-  const [filterMode, setFilterMode] = useState<
-    "all" | "invites" | "usergroups"
-  >("all");
   const [selectedUserGroupId, setSelectedUserGroupId] = useState<string | null>(
     null,
   );
-  const { profile } = useProfile();
-  const renderComponent = () => {
-    switch (filterMode) {
-      case "all":
-        return (
-          <UserGroups
-            onSelectGroup={(id: string) => {
-              setSelectedUserGroupId(id);
-              setFilterMode("usergroups");
-            }}
-          />
-        );
-      case "invites":
-        if (!profile?.user_group_id)
-          return <div>Retrieving your profile...</div>;
-        return <Participants user_group_id={profile.user_group_id} />;
-      case "usergroups":
-        if (!selectedUserGroupId) return <div>Please select a user group.</div>;
-        return (
-          <UserGroupDetails
-            user_group_id={selectedUserGroupId}
-            onBack={() => {
-              setSelectedUserGroupId(null);
-              setFilterMode("all");
-            }}
-          />
-        );
+  const [userGroup, setUserGroup] = useState<UserGroup | null>(null);
+
+  const loadData = useCallback(async () => {
+    if (!selectedUserGroupId) return;
+    try {
+      const userGroupDetails = await fetchUserGroupById(
+        selectedUserGroupId as UUID,
+      );
+      setUserGroup(userGroupDetails || null);
+    } catch (error) {
+      console.error("Failed to fetch group details:", error);
     }
-  };
+  }, [selectedUserGroupId]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   return (
-    <>
+    <PageShell>
       <NavBar />
+
       <LayoutWrapper>
         <SideNavContainer>
           <UserGroupSideBar
-            filterMode={filterMode}
-            setFilterMode={setFilterMode}
+            selectedUserGroupId={selectedUserGroupId}
+            setSelectedUserGroupId={setSelectedUserGroupId}
           />
         </SideNavContainer>
-        <ContentWrapper>{renderComponent()}</ContentWrapper>
+
+        <ContentWrapper>
+          <PageHeading>{userGroup?.user_group_name}</PageHeading>
+
+          {selectedUserGroupId && userGroup && (
+            <MainArea>
+              <CenterColumn>
+                <UserGroupPDFs userGroup={selectedUserGroupId} />
+              </CenterColumn>
+
+              <RightColumn>
+                <RightColumnStack>
+                  <InviteComponent
+                    user_group_id={selectedUserGroupId}
+                    onInvitesChange={() => {
+                      console.log("Invites changed!");
+                    }}
+                    isAdminDashboard={true}
+                  />
+                  <AdminParticipants user_group_id={selectedUserGroupId} />
+                </RightColumnStack>
+              </RightColumn>
+            </MainArea>
+          )}
+        </ContentWrapper>
       </LayoutWrapper>
-    </>
+    </PageShell>
   );
 }
