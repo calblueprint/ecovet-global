@@ -54,7 +54,7 @@ export default function QuestionBuilder({
     id: UUID,
     field: string,
     v: string | PromptType | StagedOption[] | number,
-  ) => void;
+  ) => UUID | null | void;
   onNextPhase: () => void;
   onSaveAndExit: () => void;
 }) {
@@ -100,9 +100,12 @@ export default function QuestionBuilder({
   }
 
   function insertAfter(index: number) {
-    onChange(rolePhase.role_phase_id, "insert_prompt_at", index + 1);
-    // Focus stays on the question we inserted after; user can re-click to move it.
-    // (Alternatively we could clear focus here.)
+    const newId = onChange(
+      rolePhase.role_phase_id,
+      "insert_prompt_at",
+      index + 1,
+    );
+    if (newId) setFocusedPromptId(newId);
   }
 
   const promptIds = value.promptIndex[rolePhase.role_phase_id] ?? [];

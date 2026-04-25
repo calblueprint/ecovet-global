@@ -45,11 +45,11 @@ export default function TemplateBuilder({
         .map(id => localStore.rolesById[id] as Role)
     : [];
 
-  function insertPromptAt(rolePhaseId: UUID, index: number): void {
-    if (localStore == null) return;
+  function insertPromptAt(rolePhaseId: UUID, index: number): UUID | null {
+    if (localStore == null) return null;
 
+    const newPromptID = crypto.randomUUID() as UUID;
     update(draft => {
-      const newPromptID = crypto.randomUUID() as UUID;
       draft.promptById[newPromptID] = {
         prompt_id: newPromptID,
         role_phase_id: rolePhaseId,
@@ -64,6 +64,7 @@ export default function TemplateBuilder({
       draft.promptIndex[rolePhaseId].splice(index, 0, newPromptID);
       draft.optionsByPromptId[newPromptID] = [];
     });
+    return newPromptID;
   }
 
   function removeRole(role_id: UUID | number): void {
@@ -223,10 +224,10 @@ export default function TemplateBuilder({
   }
 
   // Append at end — just delegates to insertPromptAt
-  function addPrompt(rolePhaseID: UUID): void {
-    if (localStore == null) return;
+  function addPrompt(rolePhaseID: UUID): UUID | null {
+    if (localStore == null) return null;
     const currentLength = localStore.promptIndex[rolePhaseID]?.length ?? 0;
-    insertPromptAt(rolePhaseID, currentLength);
+    return insertPromptAt(rolePhaseID, currentLength);
   }
 
   function removePrompt(rolePhaseID: UUID, promptID: UUID): void {
@@ -255,10 +256,9 @@ export default function TemplateBuilder({
       });
     } else {
       if (field === "add_prompt") {
-        addPrompt(id as UUID);
+        return addPrompt(id as UUID);
       } else if (field === "insert_prompt_at") {
-        // `next` is the index to insert at
-        insertPromptAt(id as UUID, next as number);
+        return insertPromptAt(id as UUID, next as number);
       } else if (field === "remove_prompt") {
         removePrompt(next as UUID, id as UUID);
       } else if (field === "role_description") {

@@ -86,6 +86,7 @@ export async function persistChatMessage(
   message: string,
   senderId: string,
   senderName: string,
+  currentPhase: number | null,
 ) {
   const supabase = await getSupabaseServerClient();
 
@@ -94,6 +95,7 @@ export async function persistChatMessage(
     message: message,
     sender: senderId,
     sender_name: senderName,
+    phase_sent_at: currentPhase,
   });
 
   if (error) {
@@ -173,6 +175,25 @@ export async function addUserToChatRoom(
   }
 
   addChatRoomEntry(roomId, userId, sessionId);
+}
+
+export async function checkRoomExists(userIds: string[], sessionId: string) {
+  const supabase = await getSupabaseServerClient();
+
+  const { data, error } = await supabase.rpc("check_chat_room_exists", {
+    p_user_ids: userIds,
+    p_session_id: sessionId,
+  });
+
+  if (error) {
+    console.error(
+      "Error checking if an exact chat room exists:",
+      error.message,
+    );
+    throw new Error("Failed to check exact room existence.");
+  }
+
+  return data || null;
 }
 
 export async function createChatRoom(

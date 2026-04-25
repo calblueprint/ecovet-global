@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import supabase from "@/actions/supabase/client";
 import {
   checkInviteStatus,
-  signUpInvitedUser,
+  completeInvitedSignUp,
 } from "@/actions/supabase/queries/auth";
 import {
   Button,
@@ -25,15 +25,14 @@ import {
   PasswordDiv,
   PasswordRule,
   PasswordText,
-  SubText,
   VisibilityToggle,
   WelcomeTag,
 } from "../styles";
 
 export default function SignUp() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [emailVerified, setEmailVerified] = useState(false);
+  const [email, setEmail] = useState<string | null>(null);
+  const [verifying, setVerifying] = useState(true);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordTouched, setPasswordTouched] = useState(false);
@@ -41,7 +40,6 @@ export default function SignUp() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [checkingEmail, setCheckingEmail] = useState(false);
 
   const rules = {
     length: password.length >= 12,
@@ -49,67 +47,97 @@ export default function SignUp() {
     number: /[0-9]/.test(password),
     specialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password),
   };
-
   const isPasswordValid =
     rules.length && rules.uppercase && rules.number && rules.specialChar;
   const passwordsMatch = password === confirmPassword;
 
-  // pre-fill email if coming from email
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session?.user?.email) {
-        const { status } = await checkInviteStatus(session.user.email);
-        if (status === "pending") {
-          setEmail(session.user.email);
-          setEmailVerified(true);
+    console.log("[signup] mount");
+    let mounted = true;
+    let hasVerified = false;
+
+    const verifyInvite = async (userEmail: string) => {
+      if (hasVerified) return;
+      hasVerified = true;
+
+      console.log("[signup] verifyInvite called with", userEmail);
+      const { status } = await checkInviteStatus(userEmail);
+      console.log("[signup] invite status:", status);
+      if (!mounted) return;
+
+      if (status !== "pending") {
+        setErrorMessage(
+          "No pending invitation found. If you already signed up, please sign in instead.",
+        );
+        setVerifying(false);
+        return;
+      }
+
+      setEmail(userEmail);
+      setVerifying(false);
+    };
+
+    const processHashTokens = async () => {
+      if (typeof window === "undefined") return;
+      const hash = window.location.hash;
+
+      if (!hash || !hash.includes("access_token")) {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (session?.user?.email && mounted) {
+          verifyInvite(session.user.email);
         }
+        return;
       }
-    });
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user?.email) {
-        checkInviteStatus(user.email).then(({ status }) => {
-          if (status === "pending") {
-            setEmail(user.email!);
-            setEmailVerified(true);
-          }
-        });
+      await supabase.auth.signOut({ scope: "local" });
+
+      const params = new URLSearchParams(hash.substring(1));
+      const access_token = params.get("access_token");
+      const refresh_token = params.get("refresh_token");
+
+      if (!access_token || !refresh_token) return;
+
+      console.log("[signup] found hash tokens, setting session");
+      const { data, error } = await supabase.auth.setSession({
+        access_token,
+        refresh_token,
+      });
+
+      if (error) {
+        console.error("[signup] setSession error:", error);
+        return;
       }
-    });
 
-    return () => subscription.unsubscribe();
+      console.log("[signup] session set, email:", data.session?.user?.email);
+      window.history.replaceState(null, "", window.location.pathname);
+
+      if (data.session?.user?.email && mounted) {
+        verifyInvite(data.session.user.email);
+      }
+    };
+
+    processHashTokens();
+
+    const timeoutId = setTimeout(() => {
+      console.log("[signup] timeout fired");
+      if (mounted && !hasVerified) {
+        setErrorMessage(
+          "This page is only accessible through an invite link. Please check your email or ask your facilitator to resend the invite.",
+        );
+        setVerifying(false);
+      }
+    }, 3000);
+
+    return () => {
+      mounted = false;
+      clearTimeout(timeoutId);
+    };
   }, []);
 
-  const handleCheckEmail = async () => {
-    if (checkingEmail || !email) return;
-    setCheckingEmail(true);
-    setErrorMessage(null);
-
-    try {
-      const { status } = await checkInviteStatus(email);
-
-      if (status === "pending") {
-        setEmailVerified(true);
-      } else if (status === "no_pending_invite") {
-        setErrorMessage(
-          "No pending invitation found for this email. Please check the address or contact your admin.",
-        );
-      } else {
-        setErrorMessage(
-          "There was an error verifying your invitation. Please try again.",
-        );
-      }
-    } catch {
-      setErrorMessage("An unexpected error occurred. Please try again.");
-    } finally {
-      setCheckingEmail(false);
-    }
-  };
-
   const handleSignUp = async () => {
-    if (loading || !email || !emailVerified) return;
+    if (loading || !email) return;
     setLoading(true);
     setErrorMessage(null);
 
@@ -118,100 +146,55 @@ export default function SignUp() {
         setErrorMessage("Passwords do not match.");
         return;
       }
-
       if (!isPasswordValid) {
         setErrorMessage("Password does not meet the required criteria.");
         return;
       }
 
-      const {
-        data: { user: existingUser },
-      } = await supabase.auth.getUser();
+      const result = await completeInvitedSignUp(password);
 
-      if (existingUser) {
-        setErrorMessage(
-          "An account already exists for this email. Please sign in instead.",
-        );
-        return;
-      }
-
-      const result = await signUpInvitedUser(email, password);
-
-      if (!result.success || !result.userId) {
-        setErrorMessage(result.error || "Failed to create account");
-        return;
-      }
-
-      // sign in the user to create a session
-      const { data: signInData, error: signInError } =
-        await supabase.auth.signInWithPassword({
-          email: email,
-          password: password,
-        });
-
-      if (signInError || !signInData.session) {
-        setErrorMessage(
-          "Account created but failed to sign in. Please try signing in manually.",
-        );
+      if (!result.success) {
+        setErrorMessage(result.error || "Failed to complete sign-up");
         return;
       }
 
       router.push("/onboarding");
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        setErrorMessage(error.message);
-      } else {
-        setErrorMessage("An unexpected error occurred. Please try again.");
-      }
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred.",
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  if (!emailVerified) {
+  if (verifying) {
+    return (
+      <Main>
+        <Container>
+          <PasswordText>Verifying your invite...</PasswordText>
+        </Container>
+      </Main>
+    );
+  }
+
+  if (!email) {
     return (
       <Main>
         <Container>
           <IntroText>
             <WelcomeTag>
-              <Heading2>Welcome!</Heading2>
+              <Heading2>Invite required</Heading2>
             </WelcomeTag>
-            <PasswordText>
-              Please enter the email that your facilitator used to invite you.
-            </PasswordText>
           </IntroText>
-          <InputFields>
-            <EmailAddressDiv>
-              <InputWrapper>
-                <InputLabel htmlFor="email">Email address</InputLabel>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={email}
-                  onChange={(e: {
-                    target: { value: SetStateAction<string> };
-                  }) => {
-                    setEmail(e.target.value);
-                    setErrorMessage(null);
-                  }}
-                  onKeyDown={(e: { key: string }) => {
-                    if (e.key === "Enter") handleCheckEmail();
-                  }}
-                />
-              </InputWrapper>
-            </EmailAddressDiv>
-          </InputFields>
-          <Button onClick={handleCheckEmail} disabled={!email || checkingEmail}>
-            {checkingEmail ? "Checking..." : "Continue"}
-          </Button>
           {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
         </Container>
       </Main>
     );
   }
 
-  // only shows if the email is in the invite list
   return (
     <Main>
       <Container>

@@ -1,37 +1,35 @@
-import { FaCircle } from "react-icons/fa6";
-import Image from "next/image";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
-import { Sans } from "@/styles/fonts";
 import { B1, B2, Caption, TextProps, TextStyles } from "@/styles/text";
 
 export const MessageContent = styled(B2)`
   color: ${COLORS.black70};
+  white-space: pre-wrap;
 `;
 
-export const MessageContentBubble = styled.div<{ fromuser: boolean }>`
+export const MessageContentBubble = styled.div<{ $fromUser: boolean }>`
   display: flex;
   padding: 0.4375rem 0.75rem;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
   gap: 0.625rem;
-  border-radius: 0.5rem;
-  background: ${({ fromuser }) =>
-    fromuser ? COLORS.lightEletricBlue : COLORS.oat_medium};
+  border-radius: 0.25rem;
+  background: ${({ $fromUser }) =>
+    $fromUser ? COLORS.lightEletricBlue : COLORS.oat_medium};
 `;
 
-export const TimeMessageContainer = styled.div<{ fromuser: boolean }>`
+export const TimeMessageContainer = styled.div<{ $fromUser: boolean }>`
   display: flex;
   flex-direction: column;
-  align-items: ${({ fromuser }) => (fromuser ? "flex-end" : "flex-start")};
+  align-items: ${({ $fromUser }) => ($fromUser ? "flex-end" : "flex-start")};
   gap: 0.25rem;
 `;
 
-export const PfpMessageContentContainer = styled.div<{ fromuser: boolean }>`
+export const PfpMessageContentContainer = styled.div<{ $fromUser: boolean }>`
   display: flex;
   flex-direction: row;
-  align-items: ${({ fromuser }) => (fromuser ? "flex-end" : "flex-start")};
+  align-items: ${({ $fromUser }) => ($fromUser ? "flex-end" : "flex-start")};
   gap: 0.5rem;
   align-self: stretch;
 `;
@@ -74,32 +72,35 @@ export const NameRoleSeparator = styled.div`
 `;
 
 export const FullMessageContainer = styled.div<{
-  $doubletext: boolean;
-  $fromuser: boolean;
+  $doubleText: boolean;
+  $fromUser: boolean;
 }>`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  align-self: ${({ $fromuser }) => ($fromuser ? "end" : "start")};
-  padding-top: ${({ $doubletext }) => ($doubletext ? "0.4rem" : "0rem")};
+  align-self: ${({ $fromUser }) => ($fromUser ? "end" : "start")};
+  padding-top: ${({ $doubleText }) => ($doubleText ? "0.4rem" : "0rem")};
 `;
 
-export const ProfileColor = styled.div<{ color: string; size?: number }>`
-  width: ${({ size }) => size ?? 1}rem;
-  height: ${({ size }) => size ?? 1}rem;
+export const ProfileColor = styled.div<{ $color: string; $size?: number }>`
+  width: ${({ $size }) => $size ?? 1}rem;
+  height: ${({ $size }) => $size ?? 1}rem;
   aspect-ratio: 1/1;
   border-radius: 0.25rem;
   align-self: start;
-  background: ${({ color }) => color};
+  background: ${({ $color }) => $color};
 `;
 
 export const ChatMessageContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.75rem;
+  gap: 1.25rem;
   align-self: stretch;
   margin: 0 1.25rem;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 `;
 
 export const TimeSeparatorBold = styled(Caption)`
@@ -149,9 +150,15 @@ export const ChatInput = styled.textarea<TextProps>`
 `;
 
 export const ChatSendButton = styled.button`
-  border: none;
+  border-radius: 1rem;
+  width: 3rem;
+  border: 1px solid ${COLORS.oat_dark};
+  background: ${COLORS.oat_medium};
   align-self: flex-end;
   justify-content: flex-end;
+  font-size: 13px;
+  font-weight: 500;
+  font-color: ${COLORS.black40};
 `;
 
 export const ChatContainer = styled.div`
@@ -164,9 +171,8 @@ export const ChatContainer = styled.div`
   justify-content: space-between;
   align-items: flex-start;
   flex: 1 0 0;
-  border-radius: 1rem;
-  border: 1px solid ${COLORS.oat_medium};
   background: ${COLORS.oat_light};
+  min-height: 0;
 `;
 
 export const ChatHeader = styled(B1)`
@@ -180,6 +186,19 @@ export const ContentContainer = styled.div`
   width: 100%;
   height: 100%;
   gap: 1rem;
+  overflow: hidden;
+  min-height: 0;
+  flex: 1;
+`;
+
+export const ChatSelectedBorder = styled.div<{
+  color?: string;
+  selected: boolean;
+}>`
+  padding: ${({ selected }) => (selected ? "1" : "2")}px;
+  border: ${({ selected }) => (selected ? "1" : "0")}px solid
+    ${({ color }) => color ?? COLORS.teal};
+  border-radius: 8px;
 `;
 
 export const ChatSelectionButton = styled.div<{ color?: string }>`
@@ -191,9 +210,13 @@ export const ChatSelectionButton = styled.div<{ color?: string }>`
   justify-content: center;
   align-items: center;
   aspect-ratio: 1/1;
-  border-radius: 0.5rem;
+  border-radius: 8px;
   border: 1px solid ${COLORS.darkElectricBlue};
   background: ${({ color }) => color ?? COLORS.teal};
+`;
+
+export const CreateChatPlus = styled(B1)`
+  color: ${COLORS.darkElectricBlue};
 `;
 
 export const ChatButtonContainer = styled.div`
@@ -247,4 +270,10 @@ export const ClickableUser = styled.div`
 export const ClickableUserText = styled(Caption)`
   color: ${COLORS.darkElectricBlue};
   white-space: nowrap;
+`;
+
+export const CreateChatCancelButton = styled(Caption)`
+  color: ${COLORS.black40};
+  align-self: flex-end;
+  cursor: pointer;
 `;

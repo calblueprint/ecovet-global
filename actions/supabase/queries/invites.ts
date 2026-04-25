@@ -3,7 +3,7 @@
 import type { UUID } from "@/types/schema";
 import supabase from "@/app/api/supabase/createClient";
 import { Invite, Profile, UserType } from "@/types/schema";
-import { signInWithMagicLink } from "./auth";
+import { sendInviteEmail, signInWithMagicLink } from "./auth";
 
 async function getProfileByEmail(
   email: string,
@@ -93,7 +93,7 @@ export async function submitNewInvite(
       message: "Error inserting new invite: " + error.message,
     };
   }
-  await signInWithMagicLink(email);
+  await sendInviteEmail(email);
   return { error: false, message: "Invite sent successfully" };
 }
 
