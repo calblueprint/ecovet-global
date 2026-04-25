@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, KeyboardEvent, useRef, useState } from "react";
 import { submitNewInvite } from "@/actions/supabase/queries/invites";
 import {
   AddInviteFormDiv,
@@ -8,6 +8,7 @@ import {
   ButtonPaddingDiv,
   EmailDiv,
   EmailInput,
+  EmailTextArea,
   ErrorMessage,
   ErrorMessageDiv,
   FacilitatorButton,
@@ -17,8 +18,6 @@ import {
   SubmitButton,
 } from "./styles";
 
-console.log(process.env.NEXT_PUBLIC_SITE_URL);
-
 const isEmailValid = (email: string) => {
   const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
   return emailRegex.test(email);
@@ -27,48 +26,69 @@ const isEmailValid = (email: string) => {
 function InviteComponent({
   user_group_id,
   onInvitesChange,
+  isAdminDashboard,
 }: {
   user_group_id: string;
   onInvitesChange?: () => void;
+  isAdminDashboard?: boolean;
 }) {
-  const [email, setEmail] = useState<string>("");
+  const [emailsText, setEmailsText] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [participantSelected, setParticipantSelected] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setEmail(event.target.value);
+  const handleInputChange = (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setEmailsText(event.target.value);
+    if (errorMessage) setErrorMessage("");
 
-    setErrorMessage(
-      isEmailValid(event.target.value) ? "" : "Invalid email format",
-    );
+    if (event.target instanceof HTMLTextAreaElement) {
+      event.target.style.height = "auto";
+      event.target.style.height = `${event.target.scrollHeight}px`;
+    }
   };
 
   const onSubmitButtonClick = async () => {
     if (isSubmitting) return;
 
-    if (!isEmailValid(email)) {
-      setErrorMessage("Invalid email format");
+    const lines = emailsText.split("\n").filter(line => line.trim() !== "");
+
+    if (lines.length === 0) return;
+
+    const invalidEmails = lines.filter(email => !isEmailValid(email.trim()));
+    if (invalidEmails.length > 0) {
+      setErrorMessage("Please ensure all lines contain valid email addresses.");
       return;
     }
 
     setIsSubmitting(true);
+    setErrorMessage("");
 
     try {
-      const result = await submitNewInvite(
-        email,
-        user_group_id,
-        participantSelected ? "Participant" : "Facilitator",
+      const results = await Promise.all(
+        lines.map(email =>
+          submitNewInvite(
+            email.trim(),
+            user_group_id,
+            participantSelected ? "Participant" : "Facilitator",
+          ),
+        ),
       );
 
-      if (result?.error) {
-        setErrorMessage(result.message);
+      const firstError = results.find(res => res?.error);
+
+      if (firstError) {
+        setErrorMessage(firstError.message);
         if (onInvitesChange) onInvitesChange();
-        setEmail("");
       } else {
-        if (onInvitesChange) onInvitesChange();
-        setEmail("");
+        setEmailsText("");
+        if (textAreaRef.current) {
+          textAreaRef.current.style.height = "auto";
+        }
         setErrorMessage("");
+        if (onInvitesChange) onInvitesChange();
       }
     } catch {
       setErrorMessage("Something went wrong. Please try again.");
@@ -77,8 +97,16 @@ function InviteComponent({
     }
   };
 
-  // Disable submit if any errors exist or any email is empty
-  const hasErrorsOrEmpty = errorMessage.length > 0 || email.trim() === "";
+  const handleKeyDown = (
+    event: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      onSubmitButtonClick();
+    }
+  };
+
+  const hasErrorsOrEmpty = errorMessage.length > 0 || emailsText.trim() === "";
 
   return (
     <AddInviteMain>
@@ -87,16 +115,30 @@ function InviteComponent({
         <ErrorMessageDiv $hasError={errorMessage}>
           <ErrorMessage>{errorMessage}</ErrorMessage>
         </ErrorMessageDiv>
-        <EmailDiv>
-          <EmailInput
-            value={email}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              handleInputChange(e)
-            }
-            placeholder="Email Address"
-            required
-          />
-          <ButtonPaddingDiv>
+
+        <EmailDiv $isAdmin={isAdminDashboard}>
+          {isAdminDashboard ? (
+            <EmailTextArea
+              value={emailsText}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              ref={textAreaRef}
+              placeholder={
+                "email1@berkeley.edu\nemail2@berkeley.edu\nShift+Enter to invite multiple emails..."
+              }
+              required
+            />
+          ) : (
+            <EmailInput
+              value={emailsText}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              placeholder="Email Address"
+              required
+            />
+          )}
+
+          <ButtonPaddingDiv $isAdmin={isAdminDashboard}>
             <InviteTypeButton>
               <ParticipantButton
                 $isOn={participantSelected}
@@ -111,11 +153,17 @@ function InviteComponent({
                 Facilitator
               </FacilitatorButton>
             </InviteTypeButton>
+
             <SubmitButton
+              $isAdmin={isAdminDashboard}
               onClick={onSubmitButtonClick}
               disabled={hasErrorsOrEmpty || isSubmitting}
             >
-              Send Invite
+              {isAdminDashboard
+                ? participantSelected
+                  ? "+ Add participant(s)"
+                  : "+ Add facilitator(s)"
+                : "Send Invite"}
             </SubmitButton>
           </ButtonPaddingDiv>
         </EmailDiv>
@@ -123,4 +171,5 @@ function InviteComponent({
     </AddInviteMain>
   );
 }
+
 export default InviteComponent;

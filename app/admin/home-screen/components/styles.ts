@@ -211,10 +211,36 @@ export const Backdrop = styled.div`
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
-
+  z-index: 1000;
   display: flex;
   justify-content: center;
   align-items: center;
+`;
+
+export const FacilitatorTextArea = styled.textarea`
+  display: block;
+  width: 100%;
+  min-height: 4rem;
+  overflow-y: hidden;
+  padding: 0.75rem;
+  box-sizing: border-box;
+  border-radius: 0.3rem;
+  border: 1px solid ${COLORS.oat_medium};
+  background: ${COLORS.white};
+  color: ${COLORS.black100};
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1.5;
+  outline: none;
+  resize: none;
+
+  &::placeholder {
+    color: ${COLORS.black20};
+    font-size: 0.7rem;
+    font-weight: 500;
+    font-family: ${Sans.style.fontFamily};
+  }
 `;
 
 export const ModalBox = styled.div`
@@ -250,4 +276,153 @@ export const GroupDiv = styled.div`
   display: flex;
   flex-direction: row;
   gap: 0.5rem;
+`;
+
+export const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid ${COLORS.oat_medium};
+  background: ${COLORS.white};
+  width: 100%;
+  height: 100%;
+`;
+
+export const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+export const Title = styled.h2`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 1rem;
+  font-weight: 700;
+  color: ${COLORS.black100};
+  margin: 0;
+`;
+
+export const WarningText = styled.p`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: ${COLORS.tagRed};
+  margin: 0;
+`;
+
+export const SearchWrapper = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+export const SearchIcon = styled.span`
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: ${COLORS.black40};
+  font-size: 0.85rem;
+  pointer-events: none;
+`;
+
+export const SearchInput = styled.input`
+  width: 100%;
+  height: 2.5rem;
+  padding: 0 0.75rem 0 2.25rem;
+  box-sizing: border-box;
+  border-radius: 0.5rem;
+  border: 1px solid ${COLORS.oat_medium};
+  background: ${COLORS.white};
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.85rem;
+  color: ${COLORS.black100};
+  outline: none;
+
+  &::placeholder {
+    color: ${COLORS.black40};
+  }
+`;
+
+export const FileList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 32rem;
+  overflow-y: auto;
+`;
+
+export const FileRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: ${COLORS.oat_light};
+  cursor: pointer;
+`;
+
+export const FileIconWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+`;
+
+export const FileInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+`;
+
+export const FileName = styled.span`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: ${COLORS.black100};
+`;
+
+export const FileDate = styled.span`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: ${COLORS.black40};
+`;
+
+export const TabsWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 0.25rem;
+  border-bottom: 1px solid ${COLORS.oat_medium};
+`;
+
+export const TabButton = styled.button<{ $active: boolean }>`
+  background: transparent;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  color: ${({ $active }) => ($active ? COLORS.black100 : COLORS.black40)};
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: ${COLORS.darkElectricBlue};
+    opacity: ${({ $active }) => ($active ? 1 : 0)};
+    transition: opacity 0.2s ease;
+  }
+
+  &:hover {
+    color: ${COLORS.black100};
+  }
 `;

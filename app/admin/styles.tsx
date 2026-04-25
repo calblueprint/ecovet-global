@@ -5,16 +5,9 @@ import { Sans } from "@/styles/fonts";
 
 export const LayoutWrapper = styled.div`
   display: flex;
-  height: 100dvh;
-  width: 100%;
-`;
-
-export const ContentWrapper = styled.div`
   flex: 1;
-  padding: 2rem;
-  overflow-y: auto;
+  width: 100%;
   min-height: 0;
-  min-width: 53rem;
 `;
 
 export const InviteWrapper = styled.div`
@@ -144,21 +137,24 @@ export const SideNavContainer = styled.div`
   display: flex;
   padding: 1rem;
   width: 14rem;
-  height: 100%;
   align-items: flex-start;
   flex-direction: column;
   background-color: ${COLORS.oat_light};
+  height: 100%;
+  min-height: 0;
   padding-inline: 1.5rem;
+  overflow: hidden;
 `;
 
 export const SideNavTemplatesContainer = styled.div`
   display: flex;
-  align-items: flex-start;
   flex-direction: column;
   gap: 0.5rem;
   width: 100%;
   margin: 1rem 0;
-  height: 90%;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
 `;
 
 export const SideNavButton = styled.button<{ $selected: boolean }>`
@@ -190,8 +186,8 @@ export const SideNavNewTemplateButton = styled.button`
   font-family: ${Sans.style.fontFamily};
   font-size: 12px;
   font-weight: 500;
-  color: ${COLORS.white};
   margin-top: auto;
+  color: ${COLORS.white};
 
   &:hover {
     cursor: pointer;
@@ -199,13 +195,13 @@ export const SideNavNewTemplateButton = styled.button`
 `;
 
 export const StyledLink = styled(Link)`
-  color: #111827; /* or your theme color */
+  color: #111827;
   font-weight: 500;
   text-decoration: none;
   cursor: pointer;
 
   &:hover {
-    color: #3a394777; /* hover state */
+    color: #3a394777;
     text-decoration: none;
   }
 `;
@@ -282,5 +278,84 @@ export const ScrollContainer = styled.div`
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  max-height: 30rem;
+  max-height: 22rem;
+`;
+
+export const DashboardFlexContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  width: 100%;
+  align-items: flex-start;
+`;
+
+export const PageShell = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+`;
+
+export const MainContentColumn = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+
+export const SidebarColumn = styled.div`
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+`;
+
+export const ContentWrapper = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+`;
+
+export const PageHeading = styled.h1`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem 0;
+  color: ${COLORS.black100};
+`;
+
+export const MainArea = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+`;
+
+export const CenterColumn = styled.div`
+  flex: 1 1 60%;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+`;
+
+export const RightColumn = styled.div`
+  flex: 0 0 22rem;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+`;
+
+export const RightColumnStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 `;

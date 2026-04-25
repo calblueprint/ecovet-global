@@ -3,18 +3,22 @@
 import { useCallback, useEffect, useState } from "react";
 import { UUID } from "crypto";
 import { fetchUserGroupById } from "@/actions/supabase/queries/profile";
+import InviteComponent from "@/components/InviteComponent/InviteComponent";
 import NavBar from "@/components/NavBar/NavBar";
 import { UserGroup } from "@/types/schema";
 import {
+  CenterColumn,
   ContentWrapper,
-  Heading3,
-  InviteWrapper,
   LayoutWrapper,
+  MainArea,
+  PageHeading,
+  PageShell,
+  RightColumn,
+  RightColumnStack,
   SideNavContainer,
 } from "../styles";
-import AddUserGroup from "./components/AddUserGroup";
-import InviteComponent from "./components/InviteComponent";
 import AdminParticipants from "./components/UserGroupMembers";
+import UserGroupPDFs from "./components/UserGroupPDFs";
 import UserGroupSideBar from "./components/UserGroupSideBar";
 
 export default function AdminPage() {
@@ -22,11 +26,9 @@ export default function AdminPage() {
     null,
   );
   const [userGroup, setUserGroup] = useState<UserGroup | null>(null);
-  const [isAddGroupOpen, setIsAddGroupOpen] = useState(false);
 
   const loadData = useCallback(async () => {
     if (!selectedUserGroupId) return;
-
     try {
       const userGroupDetails = await fetchUserGroupById(
         selectedUserGroupId as UUID,
@@ -42,7 +44,7 @@ export default function AdminPage() {
   }, [loadData]);
 
   return (
-    <>
+    <PageShell>
       <NavBar />
 
       <LayoutWrapper>
@@ -50,27 +52,34 @@ export default function AdminPage() {
           <UserGroupSideBar
             selectedUserGroupId={selectedUserGroupId}
             setSelectedUserGroupId={setSelectedUserGroupId}
-            onAddClick={() => setIsAddGroupOpen(true)}
           />
         </SideNavContainer>
-        <ContentWrapper>
-          <Heading3>{userGroup?.user_group_name}</Heading3>
-        </ContentWrapper>
 
-        <InviteWrapper>
-          {!selectedUserGroupId ? (
-            <div></div>
-          ) : (
-            <div>
-              <InviteComponent user_group_id={selectedUserGroupId || ""} />
-              <AdminParticipants user_group_id={selectedUserGroupId} />
-            </div>
+        <ContentWrapper>
+          <PageHeading>{userGroup?.user_group_name}</PageHeading>
+
+          {selectedUserGroupId && userGroup && (
+            <MainArea>
+              <CenterColumn>
+                <UserGroupPDFs userGroup={selectedUserGroupId} />
+              </CenterColumn>
+
+              <RightColumn>
+                <RightColumnStack>
+                  <InviteComponent
+                    user_group_id={selectedUserGroupId}
+                    onInvitesChange={() => {
+                      console.log("Invites changed!");
+                    }}
+                    isAdminDashboard={true}
+                  />
+                  <AdminParticipants user_group_id={selectedUserGroupId} />
+                </RightColumnStack>
+              </RightColumn>
+            </MainArea>
           )}
-        </InviteWrapper>
+        </ContentWrapper>
       </LayoutWrapper>
-      {isAddGroupOpen && (
-        <AddUserGroup onClose={() => setIsAddGroupOpen(false)} />
-      )}
-    </>
+    </PageShell>
   );
 }

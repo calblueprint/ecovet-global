@@ -1,7 +1,10 @@
 "use server";
 
 import { createClient } from "@supabase/supabase-js";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  getSupabaseAdminClient,
+  getSupabaseServerClient,
+} from "@/lib/supabase/server";
 import { Invite } from "@/types/schema";
 
 export async function checkInviteStatus(email: string) {
@@ -136,6 +139,52 @@ export async function checkIfUserExists(email: string): Promise<boolean> {
   }
 
   return data !== null && data.length > 0;
+}
+
+export async function signUpInvitedUser(email: string, password: string) {
+  const adminClient = getSupabaseAdminClient();
+  const lowerCaseEmail = email.toLowerCase();
+
+  const { status } = await checkInviteStatus(lowerCaseEmail);
+  if (status !== "pending") {
+    return {
+      success: false,
+      error: "No pending invitation found for this email",
+      userId: null,
+    };
+  }
+
+  const { data, error } = await adminClient.auth.admin.createUser({
+    email: lowerCaseEmail,
+    password: password,
+    email_confirm: true,
+  });
+
+  if (error) {
+    console.error("Error creating user:", error.message);
+    return { success: false, error: error.message, userId: null };
+  }
+
+  if (!data.user) {
+    return { success: false, error: "Failed to create user", userId: null };
+  }
+
+  const userId = data.user.id;
+
+  try {
+    await addInviteInfoToProfile(userId, lowerCaseEmail);
+    await markInviteAccepted(lowerCaseEmail);
+
+    return { success: true, error: null, userId };
+  } catch (err) {
+    console.error("Error signing up invited user:", err);
+    return {
+      success: false,
+      error:
+        err instanceof Error ? err.message : "Failed to sign up invited user",
+      userId: null,
+    };
+  }
 }
 
 /* returns True if there is an unaccepted invite given an email*/

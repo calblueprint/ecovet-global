@@ -12,18 +12,18 @@ import {
   SideNavTemplatesContainer,
 } from "@/app/admin/styles";
 import Plus from "@/assets/images/plus.svg";
+import AddUserGroups from "./AddUserGroup";
 
 export default function UserGroupSideBar({
   selectedUserGroupId,
   setSelectedUserGroupId,
-  onAddClick,
 }: {
   selectedUserGroupId: string | null;
   setSelectedUserGroupId: (id: string) => void;
-  onAddClick: () => void;
 }) {
   const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
   const [search, setSearch] = useState("");
+  const [isAddGroupOpen, setIsAddGroupOpen] = useState(false);
 
   useEffect(() => {
     async function loadUserGroups() {
@@ -61,9 +61,13 @@ export default function UserGroupSideBar({
         </SideNavButton>
       ))}
 
-      <SideNavNewTemplateButton onClick={onAddClick}>
+      <SideNavNewTemplateButton onClick={() => setIsAddGroupOpen(true)}>
         <Image src={Plus} alt="+" width={10} height={10} /> Add Organization
       </SideNavNewTemplateButton>
+
+      {isAddGroupOpen && (
+        <AddUserGroups onClose={() => setIsAddGroupOpen(false)} />
+      )}
     </SideNavTemplatesContainer>
   );
 }

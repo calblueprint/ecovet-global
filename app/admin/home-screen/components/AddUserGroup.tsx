@@ -1,6 +1,6 @@
 "use client";
 
-import { SetStateAction, useState } from "react";
+import { ChangeEvent, KeyboardEvent, SetStateAction, useState } from "react";
 import { submitNewInvite } from "@/actions/supabase/queries/invites";
 import { submitNewUserGroup } from "@/actions/supabase/queries/user-groups";
 import { Heading3, SearchInput2 } from "../../styles";
@@ -9,6 +9,7 @@ import {
   BasicText,
   CancelButton,
   ErrorBanner,
+  FacilitatorTextArea,
   GroupDiv,
   ModalBox,
   RequiredText,
@@ -22,8 +23,9 @@ const isEmailValid = (email: string) => {
 
 export default function AddUserGroups({ onClose }: { onClose: () => void }) {
   const [userGroupInput, setUserGroupInput] = useState("");
-  const [facilitatorEmail, setFacilitatorEmail] = useState("");
+  const [facilitatorEmails, setFacilitatorEmails] = useState("");
   const [facilitatorError, setFacilitatorError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleGroupChange = (event: {
     target: { value: SetStateAction<string> };
@@ -31,49 +33,66 @@ export default function AddUserGroups({ onClose }: { onClose: () => void }) {
     setUserGroupInput(event.target.value);
   };
 
-  const handleFacilitatorChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const value = event.target.value;
-    setFacilitatorEmail(value);
+  const handleFacilitatorChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    setFacilitatorEmails(event.target.value);
+    if (facilitatorError) setFacilitatorError("");
 
-    if (!value.trim()) {
-      setFacilitatorError("");
+    // auto-expand
+    event.target.style.height = "auto";
+    event.target.style.height = `${event.target.scrollHeight}px`;
+  };
+
+  const parseEmails = (text: string) =>
+    text
+      .split("\n")
+      .map(e => e.trim())
+      .filter(e => e !== "");
+
+  const emails = parseEmails(facilitatorEmails);
+  const allEmailsValid = emails.length > 0 && emails.every(isEmailValid);
+
+  const isFormValid = userGroupInput.trim().length > 0 && allEmailsValid;
+
+  const onSubmitButtonClick = async () => {
+    if (!isFormValid || isSubmitting) return;
+
+    const invalidEmails = emails.filter(e => !isEmailValid(e));
+    if (invalidEmails.length > 0) {
+      setFacilitatorError(
+        "Please ensure all lines contain valid email addresses.",
+      );
       return;
     }
 
-    setFacilitatorError(isEmailValid(value) ? "" : "Invalid email format");
-  };
+    setIsSubmitting(true);
+    setFacilitatorError("");
 
-  const isFormValid =
-    userGroupInput.trim().length > 0 &&
-    facilitatorEmail.trim().length > 0 &&
-    isEmailValid(facilitatorEmail);
+    try {
+      const userGroupId = await submitNewUserGroup(userGroupInput);
 
-  const onSubmitButtonClick = async () => {
-    if (!isFormValid) return;
-
-    const userGroupId = await submitNewUserGroup(userGroupInput);
-
-    if (facilitatorEmail.trim()) {
-      if (!isEmailValid(facilitatorEmail)) {
-        setFacilitatorError("Invalid email format");
-        return;
-      }
-
-      const result = await submitNewInvite(
-        facilitatorEmail,
-        userGroupId,
-        "Facilitator",
+      const results = await Promise.all(
+        emails.map(email => submitNewInvite(email, userGroupId, "Facilitator")),
       );
 
-      if (result?.error) {
-        setFacilitatorError(result.message);
+      const firstError = results.find(res => res?.error);
+      if (firstError) {
+        setFacilitatorError(firstError.message);
         return;
       }
-    }
 
-    onClose();
+      onClose();
+    } catch {
+      setFacilitatorError("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      onSubmitButtonClick();
+    }
   };
 
   return (
@@ -93,24 +112,28 @@ export default function AddUserGroups({ onClose }: { onClose: () => void }) {
         />
 
         <BasicText>
-          Add Facilitator <RequiredText>*</RequiredText>
+          Add Facilitator(s) <RequiredText>*</RequiredText>
         </BasicText>
 
-        <GroupDiv>
-          <SearchInput2
-            value={facilitatorEmail}
-            onChange={handleFacilitatorChange}
-            placeholder="Email address..."
-            required
-          />
-        </GroupDiv>
+        <FacilitatorTextArea
+          value={facilitatorEmails}
+          onChange={handleFacilitatorChange}
+          onKeyDown={handleKeyDown}
+          placeholder={
+            "email1@berkeley.edu\nemail2@berkeley.edu\nShift+Enter for a new line"
+          }
+          required
+        />
 
         {facilitatorError && (
           <ErrorBanner $isError={true}>{facilitatorError}</ErrorBanner>
         )}
 
         <GroupDiv>
-          <SubmitButton onClick={onSubmitButtonClick} disabled={!isFormValid}>
+          <SubmitButton
+            onClick={onSubmitButtonClick}
+            disabled={!isFormValid || isSubmitting}
+          >
             Create
           </SubmitButton>
 

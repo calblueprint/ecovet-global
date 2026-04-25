@@ -5,9 +5,8 @@ import { FiCheck, FiEye, FiEyeOff, FiX } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import supabase from "@/actions/supabase/client";
 import {
-  addInviteInfoToProfile,
   checkInviteStatus,
-  markInviteAccepted,
+  signUpInvitedUser,
 } from "@/actions/supabase/queries/auth";
 import {
   Button,
@@ -136,24 +135,27 @@ export default function SignUp() {
         return;
       }
 
-      const { data, error } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-      });
+      const result = await signUpInvitedUser(email, password);
 
-      if (error) {
-        setErrorMessage("Error creating account: " + error.message);
+      if (!result.success || !result.userId) {
+        setErrorMessage(result.error || "Failed to create account");
         return;
       }
 
-      const userId = data.user?.id;
-      if (!userId) {
-        setErrorMessage("Something went wrong. Please try again.");
+      // sign in the user to create a session
+      const { data: signInData, error: signInError } =
+        await supabase.auth.signInWithPassword({
+          email: email,
+          password: password,
+        });
+
+      if (signInError || !signInData.session) {
+        setErrorMessage(
+          "Account created but failed to sign in. Please try signing in manually.",
+        );
         return;
       }
 
-      await addInviteInfoToProfile(userId, email);
-      await markInviteAccepted(email);
       router.push("/onboarding");
     } catch (error: unknown) {
       if (error instanceof Error) {
