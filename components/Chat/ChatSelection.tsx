@@ -1,8 +1,10 @@
 import {
   ChatButtonContainer,
   ChatButtonLabel,
+  ChatSelectedBorder,
   ChatSelectionButton,
   ChatSelectionContainer,
+  CreateChatPlus,
 } from "./styles";
 
 export interface Selection {
@@ -12,17 +14,23 @@ export interface Selection {
 
 export default function ChatSelection({
   chats,
+  currentRoomId,
   changeRoom,
   createRoom,
 }: {
   chats: Selection[];
+  currentRoomId: string | null;
   changeRoom: (roomId: string) => void;
   createRoom: () => void;
 }) {
   return (
     <ChatSelectionContainer>
       <ChatButtonContainer onClick={createRoom}>
-        <ChatSelectionButton color="">+</ChatSelectionButton>
+        <ChatSelectedBorder selected={false}>
+          <ChatSelectionButton color="">
+            <CreateChatPlus>+</CreateChatPlus>
+          </ChatSelectionButton>
+        </ChatSelectedBorder>
         <ChatButtonLabel>New Room</ChatButtonLabel>
       </ChatButtonContainer>
 
@@ -31,7 +39,9 @@ export default function ChatSelection({
           key={chat.roomId}
           onClick={() => changeRoom(chat.roomId)}
         >
-          <ChatSelectionButton />
+          <ChatSelectedBorder selected={chat.roomId === currentRoomId}>
+            <ChatSelectionButton />
+          </ChatSelectedBorder>
           <ChatButtonLabel>{chat.chatName}</ChatButtonLabel>
         </ChatButtonContainer>
       ))}
