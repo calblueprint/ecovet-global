@@ -66,11 +66,15 @@ export const SearchInput = styled.input`
   border-radius: 8px;
   padding: 0.5rem 1rem;
   width: 100%;
-  height: 2.75rem;
+  height: 2.25rem;
   margin-bottom: 1rem;
   font-family: ${Sans.style.fontFamily};
   font-size: 12px;
-  background-color: ${COLORS.oat_light};
+  background-color: ${COLORS.white};
+
+  &:focus {
+    outline: none;
+  }
 `;
 
 export const Heading3 = styled.h3`

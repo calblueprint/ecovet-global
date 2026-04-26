@@ -36,10 +36,16 @@ const DOUBLE_TEXT_MS = 1000 * 60 * 2;
 
 export default function Chat({ sessionId }: { sessionId: UUID }) {
   const { userId, profile } = useProfile();
-  const [chatRooms, setChatRooms] = useState<Selection[]>([]);
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
+  // needed for skipping notifs for the selected room
+  const currentRoomIdRef = useRef<string | null>(currentRoomId);
+
+  const [chatRooms, setChatRooms] = useState<Selection[]>([]);
   const [isCreatingRoom, setIsCreatingRoom] = useState<boolean>(false);
   const [newChatUserIds, setNewChatUserIds] = useState<string[]>([]);
+  const [chatNotifications, setChatNotifications] = useState<Set<string>>(
+    new Set(),
+  );
   const [participantsOptions, setParticipantOptions] = useState<
     ChatParticipant[]
   >([]);
@@ -61,6 +67,10 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
     userId: userId ?? "unknown-user",
     username: profile?.first_name ?? "Unknown User",
   });
+
+  useEffect(() => {
+    currentRoomIdRef.current = currentRoomId;
+  }, [currentRoomId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -105,8 +115,32 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
       )
       .subscribe();
 
+    const notificationsChannel = supabase
+      .channel(`chat_message_notifications_${sessionId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "chat_message",
+        },
+        payload => {
+          const notificationRoomId = payload.new.room_id;
+          if (
+            notificationRoomId &&
+            notificationRoomId !== currentRoomIdRef.current
+          ) {
+            setChatNotifications(notifs =>
+              new Set(notifs).add(notificationRoomId),
+            );
+          }
+        },
+      )
+      .subscribe();
+
     return () => {
       chatRoomChannel.unsubscribe();
+      notificationsChannel.unsubscribe();
     };
   }, []);
 
@@ -205,8 +239,14 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
           <ChatSelection
             chats={chatRooms}
             currentRoomId={currentRoomId}
+            chatNotifications={chatNotifications}
             changeRoom={roomId => {
               setCurrentRoomId(roomId);
+              setChatNotifications(notifs => {
+                notifs = new Set(notifs);
+                notifs.delete(roomId);
+                return notifs;
+              });
             }}
             createRoom={() => {
               setCurrentRoomId(null);
