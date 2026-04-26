@@ -106,6 +106,11 @@ export const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   text-align: left;
+
+  th:not(:first-child),
+  td:not(:first-child) {
+    text-align: center;
+  }
 `;
 
 export const StyledTableHead = styled.thead`
