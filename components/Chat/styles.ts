@@ -46,14 +46,14 @@ export const TimeLabel = styled(Caption)`
   color: ${COLORS.black20};
 `;
 
-export const NameContainer = styled.div`
+export const NameContainer = styled.div<{ $fromUser: boolean }>`
   display: flex;
-  padding: 0 0.5rem;
+  padding-left: ${({ $fromUser }) => (!$fromUser ? "1.5" : "0")}rem;
+  padding-right: ${({ $fromUser }) => ($fromUser ? "1.5" : "0")}rem;
   justify-content: center;
   align-items: center;
-  align-self: end;
+  align-self: ${({ $fromUser }) => ($fromUser ? "end" : "start")};
   gap: 0.25rem;
-  margin: 0 1rem;
   color: ${COLORS.black70};
 `;
 
@@ -240,7 +240,7 @@ export const ChatSelectionContainer = styled.div`
   align-items: flex-start;
   gap: 1rem;
   margin-left: 1.25rem;
-  padding-right: 0.75rem;
+  padding-right: 0.75;
   scrollbar-width: thin;
   padding-bottom: 0.75rem;
 `;

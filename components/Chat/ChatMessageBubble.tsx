@@ -35,7 +35,7 @@ export default function ChatMessage({
   return (
     <FullMessageContainer $doubleText={isDoubleText} $fromUser={fromUser}>
       {showName && (
-        <NameContainer>
+        <NameContainer $fromUser={fromUser}>
           <NameText>{senderName}</NameText>
           {!fromUser && senderRole && (
             <>

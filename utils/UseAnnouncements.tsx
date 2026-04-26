@@ -65,7 +65,7 @@ export function useAnnouncements({
 
   roleAnnouncements = roleAnnouncements.map(message => ({
     ...message,
-    sender_name: `To ${roleName}`,
+    sender_name: `To Role: ${roleName}`,
     sender: "role",
   }));
 
