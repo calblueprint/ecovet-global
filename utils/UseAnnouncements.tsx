@@ -29,34 +29,64 @@ export function useAnnouncements({
   roleId,
   userId,
   username,
+  roleName,
 }: {
   sessionId: string;
   roleId: string;
   userId: string;
   username: string;
-}) {
+  roleName: string;
+}): { announcements: ChatMessage[] } {
   const atEveryoneRoomId = announcementToRoomId({ to: "everyone", sessionId });
   const atRoleRoomId = announcementToRoomId({ to: "role", sessionId, roleId });
   const atUserRoomId = announcementToRoomId({ to: "user", sessionId, userId });
 
-  return {
-    everyoneAnnouncements: useRealtimeChat({
-      roomId: atEveryoneRoomId,
-      userId,
-      username,
-    }),
-    roleAnnouncements: useRealtimeChat({
-      roomId: atRoleRoomId,
-      userId,
-      username,
-    }),
-    userAnnouncements: useRealtimeChat({
-      roomId: atUserRoomId,
-      userId,
-      username,
-    }),
-  };
+  let { chatMessages: everyoneAnnouncements } = useRealtimeChat({
+    roomId: atEveryoneRoomId,
+    userId,
+    username,
+  });
+  let { chatMessages: roleAnnouncements } = useRealtimeChat({
+    roomId: atRoleRoomId,
+    userId,
+    username,
+  });
+  let { chatMessages: userAnnouncements } = useRealtimeChat({
+    roomId: atUserRoomId,
+    userId,
+    username,
+  });
+
+  userAnnouncements = userAnnouncements.map(message => ({
+    ...message,
+    sender_name: "To You",
+    sender: "user",
+  }));
+
+  roleAnnouncements = roleAnnouncements.map(message => ({
+    ...message,
+    sender_name: `To ${roleName}`,
+    sender: "role",
+  }));
+
+  everyoneAnnouncements = everyoneAnnouncements.map(message => ({
+    ...message,
+    sender_name: `To Everyone`,
+    sender: "everyone",
+  }));
+
+  const announcements = [
+    ...userAnnouncements,
+    ...roleAnnouncements,
+    ...everyoneAnnouncements,
+  ].sort(
+    (a, b) =>
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+  );
+
+  return { announcements };
 }
+
 export function sendAnnouncement({
   room,
   userId,
@@ -79,12 +109,17 @@ export function sendAnnouncement({
     sender_name: username,
     phase_sent_at: null,
     created_at: new Date().toISOString(),
+    is_announcement: true,
   };
 
-  channel.send({
-    type: "broadcast",
-    event: EVENT_MESSAGE_TYPE,
-    payload: chatMessage,
-  });
-  persistChatMessage(roomId, chatMessage.message, userId, username, null);
+  channel
+    .send({
+      type: "broadcast",
+      event: EVENT_MESSAGE_TYPE,
+      payload: chatMessage,
+    })
+    .then(() => {
+      channel.unsubscribe();
+    });
+  persistChatMessage(chatMessage);
 }

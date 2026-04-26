@@ -37,7 +37,7 @@ export default function ChatMessage({
       {showName && (
         <NameContainer>
           <NameText>{senderName}</NameText>
-          {!fromUser && (
+          {!fromUser && senderRole && (
             <>
               <NameRoleSeparator />
               <NameText>{senderRole}</NameText>

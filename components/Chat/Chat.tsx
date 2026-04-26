@@ -1,5 +1,4 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import { setRef } from "@mui/material";
 import {
   addUserToChatRoom,
   checkRoomExists,
@@ -14,10 +13,10 @@ import { supabase } from "@/lib/supabase/client";
 import {
   ChatMessage as ChatMessageType,
   ChatParticipant,
-  UserType,
   UUID,
 } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
+import { useAnnouncements } from "@/utils/UseAnnouncements";
 import { useRealtimeChat as useChat } from "@/utils/UseChat";
 import ChatInputBar from "./ChatInputBar";
 import ChatMessage from "./ChatMessageBubble";
@@ -33,8 +32,18 @@ import { TimeSeparator } from "./TimeSeparator";
 
 const ONE_HOUR_MS = 1000 * 60 * 60;
 const DOUBLE_TEXT_MS = 1000 * 60 * 2;
+const announcementRoom = {
+  roomId: "announcements",
+  chatName: "Announcements",
+};
 
-export default function Chat({ sessionId }: { sessionId: UUID }) {
+export default function Chat({
+  sessionId,
+  roleId,
+}: {
+  sessionId: UUID;
+  roleId: string | null;
+}) {
   const { userId, profile } = useProfile();
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
   // needed for skipping notifs for the selected room
@@ -62,11 +71,22 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
     [participantsOptions],
   );
 
+  const { announcements } = useAnnouncements({
+    sessionId: sessionId ?? "unknown session id",
+    userId: userId ?? "unknown user id",
+    username: profile?.first_name ?? "Unknown Users",
+    roleId: roleId ?? "unknown role id",
+    roleName: userRoles.get(userId ?? "") ?? "Role",
+  });
+
   const { chatMessages, sendMessage } = useChat({
     roomId: currentRoomId,
     userId: userId ?? "unknown-user",
     username: profile?.first_name ?? "Unknown User",
   });
+
+  const activeMessageList =
+    currentRoomId === announcementRoom.roomId ? announcements : chatMessages;
 
   useEffect(() => {
     currentRoomIdRef.current = currentRoomId;
@@ -161,22 +181,21 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
     try {
       const rooms = await getUserChatRooms(userId, sessionId);
       const entries = [...rooms.entries()];
-      setChatRooms(
-        entries.map(([roomId, users]) => {
-          const otherUsers = users.filter(user => user.id !== userId);
-          const firstUser =
-            otherUsers.length > 0
-              ? truncateText(
-                  `${otherUsers[0].first_name} ${otherUsers[0].last_name}`,
-                )
-              : "Unknown";
-          let chatName = firstUser;
-          if (otherUsers.length > 1) chatName += ` + ${otherUsers.length - 1}`;
+      const newRooms = entries.map(([roomId, users]) => {
+        const otherUsers = users.filter(user => user.id !== userId);
+        const firstUser =
+          otherUsers.length > 0
+            ? truncateText(
+                `${otherUsers[0].first_name} ${otherUsers[0].last_name}`,
+              )
+            : "Unknown";
+        let chatName = firstUser;
+        if (otherUsers.length > 1) chatName += ` + ${otherUsers.length - 1}`;
 
-          return { roomId, chatName };
-        }),
-      );
+        return { roomId, chatName };
+      });
 
+      setChatRooms([announcementRoom, ...newRooms]);
       return entries;
     } catch {
       console.log("Error loading chat rooms.");
@@ -256,16 +275,16 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
         )}
 
         <ChatMessageContainer>
-          {chatMessages.map((chatMessage, i) => (
+          {activeMessageList.map((chatMessage, i) => (
             <Fragment key={chatMessage.id}>
-              {shouldShowTime(chatMessages, i) && (
+              {shouldShowTime(activeMessageList, i) && (
                 <TimeSeparator date={new Date(chatMessage.created_at)} />
               )}
               <ChatMessage
                 chatMessage={chatMessage}
                 senderRole={userRoles.get(chatMessage.sender ?? "") ?? ""}
-                showName={shouldShowSender(chatMessages, i)}
-                isDoubleText={isDoubleText(chatMessages, i)}
+                showName={shouldShowSender(activeMessageList, i)}
+                isDoubleText={isDoubleText(activeMessageList, i)}
                 fromUser={chatMessage.sender === userId}
               />
             </Fragment>
@@ -282,7 +301,7 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
   );
 }
 
-export function truncateText(text: string, maxLength: number = 8): string {
+export function truncateText(text: string, maxLength: number = 15): string {
   if (!text) return "";
 
   if (text.length <= maxLength) {

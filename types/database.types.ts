@@ -23,6 +23,7 @@ export type Database = {
           room_id: string | null;
           sender: string | null;
           sender_name: string | null;
+          is_announcement: boolean;
         };
         Insert: {
           created_at?: string;
@@ -32,6 +33,7 @@ export type Database = {
           room_id?: string | null;
           sender?: string | null;
           sender_name?: string | null;
+          is_announcement?: boolean;
         };
         Update: {
           created_at?: string;
@@ -41,6 +43,7 @@ export type Database = {
           room_id?: string | null;
           sender?: string | null;
           sender_name?: string | null;
+          is_announcement?: boolean;
         };
         Relationships: [
           {

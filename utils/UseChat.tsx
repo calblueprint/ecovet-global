@@ -93,13 +93,7 @@ export function useRealtimeChat({
 
       setChatMessages(current => [...current, chatMessage]);
       await Promise.all([
-        persistChatMessage(
-          roomId,
-          chatMessage.message,
-          userId,
-          username,
-          chatMessage.phase_sent_at,
-        ),
+        persistChatMessage(chatMessage),
         channel.send({
           type: "broadcast",
           event: EVENT_MESSAGE_TYPE,
@@ -127,6 +121,7 @@ export function useRealtimeChat({
         sender_name: username,
         phase_sent_at: current_phase,
         created_at: new Date().toISOString(),
+        is_announcement: false,
       };
 
       if (!channel || !isConnected) {

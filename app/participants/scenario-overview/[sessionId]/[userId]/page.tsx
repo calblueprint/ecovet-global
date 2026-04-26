@@ -70,42 +70,6 @@ export default function SessionFlowPage() {
   const isFirstPhase = phaseIdx === 0;
   const isOverview = phaseIdx === -1;
 
-  const { everyoneAnnouncements, roleAnnouncements, userAnnouncements } =
-    useAnnouncements({
-      sessionId: sessionIdStr ?? "unknown session id",
-      userId: userId ?? "unknown user id",
-      username: profile?.first_name ?? "Unknown Users",
-      roleId: roleId ?? "unknown role id",
-    });
-
-  useEffect(() => {
-    if (everyoneAnnouncements.chatMessages.length == 0) return;
-
-    const message =
-      everyoneAnnouncements.chatMessages[
-        everyoneAnnouncements.chatMessages.length - 1
-      ].message;
-    alert("New @everyone message: " + message);
-  }, [everyoneAnnouncements.chatMessages]);
-
-  useEffect(() => {
-    if (roleAnnouncements.chatMessages.length == 0) return;
-
-    const message =
-      roleAnnouncements.chatMessages[roleAnnouncements.chatMessages.length - 1]
-        .message;
-    alert("New @role message: " + message);
-  }, [roleAnnouncements.chatMessages]);
-
-  useEffect(() => {
-    if (userAnnouncements.chatMessages.length == 0) return;
-
-    const message =
-      userAnnouncements.chatMessages[userAnnouncements.chatMessages.length - 1]
-        .message;
-    alert("New @user message: " + message);
-  }, [userAnnouncements.chatMessages]);
-
   const loadData = useCallback(async () => {
     if (!userId || !sessionIdStr) return;
     setLoading(true);
@@ -430,7 +394,7 @@ export default function SessionFlowPage() {
         }
       />
 
-      {sessionIdStr && <Chat sessionId={sessionIdStr} />}
+      {sessionIdStr && <Chat sessionId={sessionIdStr} roleId={roleId} />}
     </Main>
   );
 }

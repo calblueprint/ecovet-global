@@ -166,7 +166,7 @@ export const ChatContainer = styled.div`
   width: 19.375rem;
   height: 100%;
   gap: 1rem;
-  padding-top: 0.75rem;
+  padding-top: 1.5rem;
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
@@ -185,7 +185,7 @@ export const ContentContainer = styled.div`
   flex-direction: column;
   width: 100%;
   height: 100%;
-  gap: 1rem;
+  gap: 1.2rem;
   overflow: hidden;
   min-height: 0;
   flex: 1;
@@ -235,9 +235,14 @@ export const ChatButtonLabel = styled(Caption)`
 `;
 export const ChatSelectionContainer = styled.div`
   display: flex;
+  flex-direction: row;
+  overflow: scroll;
   align-items: flex-start;
   gap: 1rem;
   margin-left: 1.25rem;
+  padding-right: 0.75rem;
+  scrollbar-width: thin;
+  padding-bottom: 0.75rem;
 `;
 
 export const SelectUsersContainer = styled.div`
