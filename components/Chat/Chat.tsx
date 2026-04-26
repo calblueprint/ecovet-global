@@ -119,7 +119,6 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
         },
         payload => {
           const notificationRoomId = payload.new.room_id;
-          console.log(notificationRoomId);
           if (notificationRoomId && notificationRoomId !== currentRoomId) {
             setChatNotifications(notifs =>
               new Set(notifs).add(notificationRoomId),
