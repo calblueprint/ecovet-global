@@ -47,14 +47,18 @@ export async function fetchParticipants(userGroupId: string) {
 export async function fetchChatUserOptions(
   userGroupId: string,
   sessionId: string,
-) {
+): Promise<{ id: string; name: string; role: string }[]> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("profile")
     .select(
       `
     *,
-    participant_session!participant_session_user_id_fkey!inner(session_id)
+    participant_session!participant_session_user_id_fkey!inner(
+      session_id,
+      role_id,
+      role(role_name)
+    )
   `,
     )
     .eq("user_group_id", userGroupId)
@@ -70,13 +74,27 @@ export async function fetchChatUserOptions(
   }
 
   return data
-    ? data.map(p => ({
-        id: String(p.id),
-        name: String(p.first_name + " " + p.last_name),
-      }))
+    ? (data
+        .map(p => {
+          const session = Array.isArray(p.participant_session)
+            ? p.participant_session[0]
+            : p.participant_session;
+
+          const role = Array.isArray(session?.role)
+            ? session?.role[0]
+            : session?.role;
+
+          if (!role) return;
+
+          return {
+            id: String(p.id),
+            name: String(p.first_name + " " + p.last_name),
+            role: role?.role_name ? String(role.role_name) : "",
+          };
+        })
+        .filter(user => user) as { id: string; name: string; role: string }[])
     : [];
 }
-
 export async function fetchTemplateId(session_id: string) {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase

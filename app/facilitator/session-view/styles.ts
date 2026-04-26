@@ -169,10 +169,22 @@ export const TableCellBold = styled(TableCell)`
 export const Heading3 = styled.h3`
   font-family: ${Sans.style.fontFamily};
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 500;
   margin-bottom: 0.5rem;
   font-style: normal;
   line-height: normal;
+  letter-spacing: -0.48px;
+`;
+
+export const SilverHeading3 = styled.text`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  font-style: normal;
+  line-height: normal;
+  letter-spacing: -0.48px;
+  color: var(--Black-40, #959492);
 `;
 
 export const Container = styled.div`
@@ -194,10 +206,9 @@ export const LayoutWrapper = styled.div`
 export const ContentWrapper = styled.div`
   flex: 1;
   padding: 2rem;
-  overflow-y: auto;
-  min-height: 0;
   display: flex;
   justify-content: center;
+  overflow-x: hidden;
 `;
 
 export const Button = styled.button<{ disabled?: boolean }>`
