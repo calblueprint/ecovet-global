@@ -145,10 +145,6 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
   }, []);
 
   useEffect(() => {
-    console.log(currentRoomId);
-  }, [currentRoomId]);
-
-  useEffect(() => {
     const checkRoom = async () => {
       if (!userId || newChatUserIds.length === 0) return;
       setCurrentRoomId(
