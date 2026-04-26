@@ -9,10 +9,10 @@ export const TopNavContainer = styled.div`
   height: 3rem;
   align-items: center;
   flex-direction: row;
+  justify-content: space-between;
   background-color: ${COLORS.oat_light};
-  border-bottom: 1px solid ${COLORS.oat_medium};
   height: 3rem;
-  gap: 2rem;
+  width: 100%;
 `;
 
 export const LogoContainer = styled.div`
@@ -77,4 +77,9 @@ export const TopNavButton = styled.button<{ $active?: boolean }>`
 export const ImageLogo = styled(Image)`
   height: auto;
   max-height: 40px;
+`;
+
+export const ProfileContainer = styled.div`
+  display: flex;
+  justify-context: flex-grow;
 `;

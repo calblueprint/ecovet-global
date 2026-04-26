@@ -4,8 +4,11 @@ import styled from "styled-components";
 import COLORS from "@/styles/colors";
 
 export const MainDiv = styled.main`
+  margin-left: auto;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
 `;
 
 export const ProfileContainer = styled.div<{ $open: boolean }>`

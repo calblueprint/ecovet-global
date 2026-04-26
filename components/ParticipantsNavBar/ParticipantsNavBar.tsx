@@ -9,6 +9,7 @@ import {
   ButtonContainer,
   ImageLogo,
   LogoContainer,
+  ProfileContainer,
   TopNavButton,
   TopNavContainer,
 } from "./styles";
@@ -38,7 +39,10 @@ const TopNavBar = () => {
           </TopNavButton>{" "}
         </Link>
       </ButtonContainer>
-      <ProfileBar></ProfileBar>
+
+      <ProfileContainer>
+        <ProfileBar></ProfileBar>
+      </ProfileContainer>
     </TopNavContainer>
   );
 };
