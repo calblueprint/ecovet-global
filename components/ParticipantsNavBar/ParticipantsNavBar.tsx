@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ecovetGlobal from "@/assets/images/ecovet-global-new.svg";
+import ProfileBar from "../ProfileBar/ProfileBar";
 import {
   ButtonContainer,
   ImageLogo,
@@ -37,6 +38,7 @@ const TopNavBar = () => {
           </TopNavButton>{" "}
         </Link>
       </ButtonContainer>
+      <ProfileBar></ProfileBar>
     </TopNavContainer>
   );
 };
