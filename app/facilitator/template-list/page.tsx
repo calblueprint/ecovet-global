@@ -34,8 +34,10 @@ import TemplateSideBar from "./components/TemplateSidebar";
 import {
   AssociatedTags,
   EditIconWrapper,
+  FilterPlusSearch,
   NameColumn,
   RowActions,
+  SearchWrapper,
   TemplateRow,
 } from "./styles";
 
@@ -315,44 +317,47 @@ export default function TemplateListPage() {
           <PageDiv>
             <MainDiv>
               <Heading3>Browse templates</Heading3>
+              <FilterPlusSearch>
+                <SearchBarStyled>
+                  <SearchWrapper>
+                    <SearchInput
+                      value={searchInput}
+                      onChange={e => setSearchInput(e.target.value)}
+                      placeholder="Search templates..."
+                    />
+                  </SearchWrapper>
+                </SearchBarStyled>
 
-              <SearchBarStyled>
-                <SearchInput
-                  value={searchInput}
-                  onChange={e => setSearchInput(e.target.value)}
-                  placeholder="Search templates..."
+                <TagAutocomplete
+                  availableTags={availableTags}
+                  selectedTagIds={new Set(selectedTagIds)}
+                  onSelect={(id: UUID) =>
+                    setSelectedTagIds(prev => {
+                      if (prev === null) return [id];
+                      if (prev.includes(id)) return prev;
+                      return [...prev, id];
+                    })
+                  }
+                  onRemove={tagId =>
+                    setSelectedTagIds(prev =>
+                      prev !== null ? prev.filter(id => id !== tagId) : null,
+                    )
+                  }
+                  onCreate={name =>
+                    setAvailableTags(prev => [
+                      ...prev,
+                      {
+                        name,
+                        color: "tagYellow",
+                        tag_id: "67",
+                        user_group_id: "6767",
+                        number: 67,
+                      },
+                    ])
+                  }
+                  showBorder={true}
                 />
-              </SearchBarStyled>
-
-              <TagAutocomplete
-                availableTags={availableTags}
-                selectedTagIds={new Set(selectedTagIds)}
-                onSelect={(id: UUID) =>
-                  setSelectedTagIds(prev => {
-                    if (prev === null) return [id];
-                    if (prev.includes(id)) return prev;
-                    return [...prev, id];
-                  })
-                }
-                onRemove={tagId =>
-                  setSelectedTagIds(prev =>
-                    prev !== null ? prev.filter(id => id !== tagId) : null,
-                  )
-                }
-                onCreate={name =>
-                  setAvailableTags(prev => [
-                    ...prev,
-                    {
-                      name,
-                      color: "tagYellow",
-                      tag_id: "67",
-                      user_group_id: "6767",
-                      number: 67,
-                    },
-                  ])
-                }
-                showBorder={true}
-              />
+              </FilterPlusSearch>
               <GeneralTitle>
                 <span>
                   Name{" "}

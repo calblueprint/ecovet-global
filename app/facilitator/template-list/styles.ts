@@ -98,6 +98,21 @@ export const EditIconWrapper = styled.div`
   }
 `;
 
+export const FilterPlusSearch = styled.main`
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-direction: row;
+  width: 100%;
+  height: 3rem;
+`;
+
+export const SearchWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  height: 50%;
+`;
+
 export const NameColumn = styled.div`
   display: flex;
   align-items: center;
