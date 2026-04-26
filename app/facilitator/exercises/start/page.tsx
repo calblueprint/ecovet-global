@@ -38,6 +38,7 @@ import {
   ToggleButton,
   ToggleGroup,
 } from "./styles";
+import InfoComponent from "@/components/InfoComponent/InfoComponent";
 
 interface Role {
   id: string;
@@ -264,6 +265,7 @@ export default function Page() {
               <CheckboxLabel htmlFor="force-advance">
                 Force Advance?
               </CheckboxLabel>
+              <InfoComponent infoText={"Force advance keeps all participants on the same phase. Only facilitators can advance all the participants to the next phase"}></InfoComponent>
             </CheckboxRow>
           </ConfigRow>
 
