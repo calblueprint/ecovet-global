@@ -1,7 +1,10 @@
 "use server";
 
 import { createClient } from "@supabase/supabase-js";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  getSupabaseAdminClient,
+  getSupabaseServerClient,
+} from "@/lib/supabase/server";
 import { Invite } from "@/types/schema";
 
 export async function checkInviteStatus(email: string) {
@@ -111,13 +114,26 @@ export async function signInWithMagicLink(email: string) {
   const { error } = await supabase.auth.signInWithOtp({
     email: email,
     options: {
-      shouldCreateUser: true,
+      shouldCreateUser: false,
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/sign-up`,
     },
   });
 
   if (error) {
     console.error("Error sending email:", error.message);
+  }
+}
+
+export async function sendInviteEmail(email: string) {
+  const adminClient = getSupabaseAdminClient();
+
+  const { error } = await adminClient.auth.admin.inviteUserByEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/sign-up`,
+  });
+
+  if (error) {
+    console.error("Error sending invite:", error.message);
+    throw error;
   }
 }
 
@@ -136,6 +152,74 @@ export async function checkIfUserExists(email: string): Promise<boolean> {
   }
 
   return data !== null && data.length > 0;
+}
+
+export async function signUpInvitedUser(email: string, password: string) {
+  const adminClient = getSupabaseAdminClient();
+  const lowerCaseEmail = email.toLowerCase();
+
+  const { status } = await checkInviteStatus(lowerCaseEmail);
+  if (status !== "pending") {
+    return {
+      success: false,
+      error: "No pending invitation found for this email",
+      userId: null,
+    };
+  }
+
+  const { data: listData, error: listError } =
+    await adminClient.auth.admin.listUsers();
+
+  if (listError) {
+    console.error("Error listing users:", listError.message);
+    return { success: false, error: listError.message, userId: null };
+  }
+
+  const existingUser = listData.users.find(
+    u => u.email?.toLowerCase() === lowerCaseEmail,
+  );
+
+  if (!existingUser) {
+    return {
+      success: false,
+      error: "Invited user not found in auth system",
+      userId: null,
+    };
+  }
+
+  const { data, error } = await adminClient.auth.admin.updateUserById(
+    existingUser.id,
+    {
+      password: password,
+      email_confirm: true,
+    },
+  );
+
+  if (error) {
+    console.error("Error updating user:", error.message);
+    return { success: false, error: error.message, userId: null };
+  }
+
+  if (!data.user) {
+    return { success: false, error: "Failed to update user", userId: null };
+  }
+
+  const userId = data.user.id;
+
+  try {
+    await addInviteInfoToProfile(userId, lowerCaseEmail);
+    await markInviteAccepted(lowerCaseEmail);
+
+    return { success: true, error: null, userId };
+  } catch (err) {
+    console.error("Error signing up invited user:", err);
+    return {
+      success: false,
+      error:
+        err instanceof Error ? err.message : "Failed to sign up invited user",
+      userId: null,
+    };
+  }
 }
 
 /* returns True if there is an unaccepted invite given an email*/
@@ -169,5 +253,56 @@ export async function checkInvites(email: string) {
       return "cancelled";
     default:
       return "unknown_status";
+  }
+}
+
+export async function completeInvitedSignUp(password: string) {
+  const supabase = await getSupabaseServerClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user?.email) {
+    return {
+      success: false,
+      error: "Not authenticated. Please use the link from your invite email.",
+      userId: null,
+    };
+  }
+
+  const lowerCaseEmail = user.email.toLowerCase();
+
+  const { status } = await checkInviteStatus(lowerCaseEmail);
+  if (status !== "pending") {
+    return {
+      success: false,
+      error: "No pending invitation found for this account.",
+      userId: null,
+    };
+  }
+
+  const { error: updateError } = await supabase.auth.updateUser({ password });
+  if (updateError) {
+    console.error("Error setting password:", updateError.message);
+    return {
+      success: false,
+      error: updateError.message,
+      userId: null,
+    };
+  }
+
+  try {
+    await addInviteInfoToProfile(user.id, lowerCaseEmail);
+    await markInviteAccepted(lowerCaseEmail);
+    return { success: true, error: null, userId: user.id };
+  } catch (err) {
+    console.error("Error finalizing sign-up:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Failed to finalize sign-up",
+      userId: null,
+    };
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import {
   getMessageHistory,
   persistChatMessage,
@@ -15,27 +15,48 @@ export function useRealtimeChat({
   userId,
   username,
 }: {
-  roomId: string;
+  roomId: string | null;
   userId: string;
   username: string;
 }) {
-  const [loading, startFetching] = useTransition();
+  const [initializingMessages, startFetching] = useTransition();
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [channel, setChannel] = useState<ReturnType<
     typeof supabase.channel
   > | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const messageQueue = useRef<ChatMessage[]>([]);
 
   useEffect(() => {
-    if (roomId.length === 0) return;
+    if (!isConnected || !channel || !roomId || initializingMessages) return;
+
+    const sendQueuedMessages = async () => {
+      for (const message of messageQueue.current) {
+        await sendMessageObject(message);
+      }
+      messageQueue.current = [];
+    };
+
+    sendQueuedMessages();
+  }, [isConnected, channel, roomId, initializingMessages]);
+
+  useEffect(() => {
+    if (channel) {
+      channel.unsubscribe();
+      setChannel(null);
+    }
+    if (!roomId) {
+      setChatMessages([]);
+      setIsConnected(false);
+      return;
+    }
 
     startFetching(async () => {
       try {
-        const messageHistory = await getMessageHistory(roomId, null, 100);
+        const messageHistory = await getMessageHistory(roomId, null, 50);
         setChatMessages(messageHistory);
       } catch (error) {
-        console.error("Error loading message history:", error);
         setChatMessages([]);
       }
     });
@@ -64,23 +85,21 @@ export function useRealtimeChat({
     };
   }, [roomId, username, supabase]);
 
-  const sendMessage = useCallback(
-    async (message: string) => {
-      if (!channel || !isConnected) return;
-
-      const chatMessage: ChatMessage = {
-        id: crypto.randomUUID(),
-        room_id: roomId,
-        message: message,
-        sender: userId,
-        sender_name: username,
-        created_at: new Date().toISOString(),
-      };
+  const sendMessageObject = useCallback(
+    async (chatMessage: ChatMessage) => {
+      if (!channel || !isConnected || !roomId) {
+        return;
+      }
 
       setChatMessages(current => [...current, chatMessage]);
-
       await Promise.all([
-        persistChatMessage(roomId, chatMessage.message, userId, username),
+        persistChatMessage(
+          roomId,
+          chatMessage.message,
+          userId,
+          username,
+          chatMessage.phase_sent_at,
+        ),
         channel.send({
           type: "broadcast",
           event: EVENT_MESSAGE_TYPE,
@@ -88,8 +107,41 @@ export function useRealtimeChat({
         }),
       ]);
     },
-    [channel, isConnected, username],
+    [channel, username, roomId, userId, isConnected],
   );
 
-  return { loading, chatMessages, sendMessage, isConnected };
+  const sendMessage = useCallback(
+    async (
+      message: string,
+      current_phase: number,
+      newRoomId?: string | null,
+    ) => {
+      const messageRoomId = newRoomId ?? roomId;
+      if (!messageRoomId) return;
+
+      const chatMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        room_id: messageRoomId,
+        message: message,
+        sender: userId,
+        sender_name: username,
+        phase_sent_at: current_phase,
+        created_at: new Date().toISOString(),
+      };
+
+      if (!channel || !isConnected) {
+        messageQueue.current.push(chatMessage);
+      } else {
+        sendMessageObject(chatMessage);
+      }
+    },
+    [channel, username, roomId, userId, isConnected],
+  );
+
+  return {
+    loading: initializingMessages,
+    chatMessages,
+    sendMessage,
+    isConnected,
+  };
 }

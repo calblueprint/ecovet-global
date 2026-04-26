@@ -36,7 +36,7 @@ export const autocompletesx = (showBorder: boolean): SxProps<Theme> => ({
   },
 
   "& input::placeholder": {
-    opacity: 0,
+    opacity: "0.2s",
     transition: "opacity 0.2s",
   },
   "&:focus-within input::placeholder": {

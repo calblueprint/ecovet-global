@@ -11,7 +11,7 @@ export const Main = styled.main`
   overflow: hidden;
 
   > *:nth-child(1) {
-    flex: 0.5 0.5 auto;
+    flex: 0.5 0.5 25rem;
   }
 
   > *:nth-child(2) {
@@ -20,7 +20,7 @@ export const Main = styled.main`
   }
 
   > *:nth-child(3) {
-    flex: 0 0 360px;
+    flex: 0 0 23rem;
     border-left: 1px solid #e5e7eb;
   }
 `;

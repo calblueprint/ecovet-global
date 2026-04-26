@@ -12,8 +12,6 @@ export const AddInviteMain = styled.div`
   border-radius: 0.5rem;
   border: 1px solid ${COLORS.oat_medium};
   background: ${COLORS.oat_light};
-  margin-top: 1rem;
-  margin-bottom: 1rem;
 `;
 export const FormHeader = styled.h2`
   color: ${COLORS.black70};
@@ -33,20 +31,29 @@ export const AddInviteFormDiv = styled.div`
   width: 100%;
 `;
 
-export const EmailDiv = styled.div`
-  flex-direction: row;
+export const EmailDiv = styled.div<{ $isAdmin?: boolean }>`
   display: flex;
-  gap: 2rem;
-  justify-content: space-between;
+  height: auto;
   width: 100%;
+  ${({ $isAdmin }) =>
+    $isAdmin
+      ? `
+    flex-direction: column;
+    gap: 1rem;
+  `
+      : `
+    flex-direction: row;
+    gap: 2rem;
+    justify-content: space-between;
+  `}
 `;
 
-export const EmailInput = styled.input`
+export const EmailInput = styled.textarea`
   display: block;
   width: 100%;
-  height: 2.4rem;
+  min-height: 100px;
 
-  padding: 0 0.75rem;
+  padding: 0.75rem;
   box-sizing: border-box;
 
   border-radius: 4px;
@@ -57,10 +64,11 @@ export const EmailInput = styled.input`
   font-family: ${Sans.style.fontFamily};
   font-size: 0.7rem;
   font-weight: 500;
-  line-height: normal;
+  line-height: 1.5;
 
   outline: none;
   appearance: none;
+  resize: vertical;
 
   &::placeholder {
     color: ${COLORS.black20};
@@ -70,25 +78,61 @@ export const EmailInput = styled.input`
   }
 `;
 
-export const SubmitButton = styled.button`
+export const EmailTextArea = styled.textarea`
+  display: block;
+  width: 100%;
+  min-height: 4rem;
+  overflow-y: hidden;
+  padding: 0.75rem;
+  box-sizing: border-box;
+  border-radius: 0.3rem;
+  border: 1px solid ${COLORS.oat_medium};
+  background: ${COLORS.white};
+  color: ${COLORS.black100};
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1.5;
+  outline: none;
+  resize: none;
+
+  &::placeholder {
+    color: ${COLORS.black20};
+    font-size: 0.7rem;
+    font-weight: 500;
+    font-family: ${Sans.style.fontFamily};
+  }
+`;
+
+export const SubmitButton = styled.button<{ $isAdmin?: boolean }>`
   display: flex;
-  padding: 0rem 2rem;
   justify-content: center;
   align-items: center;
-  gap: 0.625rem;
-  align-self: stretch;
   border-radius: 0.25rem;
   border: 1px transparent;
   background: ${COLORS.darkElectricBlue};
   cursor: pointer;
-
   color: ${COLORS.white};
   font-family: ${Sans.style.fontFamily};
   font-size: 0.7rem;
   font-style: normal;
-  font-weight: 700;
-  line-height: normal;
-  white-space: nowrap;
+  font-weight: 500;
+  line-height: normal
+  height: 1rem;
+
+  ${({ $isAdmin }) =>
+    $isAdmin
+      ? `
+    gap: 0.625rem;
+    flex: 1;
+    height: 2rem;
+  `
+      : `
+    padding: 0rem 2rem;
+    gap: 0.625rem;
+    align-self: stretch;
+    white-space: nowrap;
+  `}
 
   &:disabled {
     background: ${COLORS.darkElectricBlue};
@@ -109,10 +153,21 @@ export const ErrorMessage = styled.p`
   font-family: ${Sans.style.fontFamily};
 `;
 
-export const ButtonPaddingDiv = styled.div`
+export const ButtonPaddingDiv = styled.div<{ $isAdmin?: boolean }>`
   display: flex;
   flex-direction: row;
-  gap: 16rem;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  ${({ $isAdmin }) =>
+    $isAdmin
+      ? `
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  `
+      : `
+    gap: 16rem;
+  `}
 `;
 
 export const InviteTypeButton = styled.div`
@@ -121,6 +176,7 @@ export const InviteTypeButton = styled.div`
   padding: 0.25rem;
   align-items: center;
   align-self: stretch;
+  height: 2.2rem;
 
   border-radius: 0.25rem;
   border: 1px solid ${COLORS.oat_medium};

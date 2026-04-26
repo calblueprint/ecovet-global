@@ -1,7 +1,7 @@
 "use client";
 
 import type { Phase, PromptWithResponse, UUID } from "@/types/schema";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -18,7 +18,7 @@ import {
   sessionParticipants,
 } from "@/actions/supabase/queries/sessions";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
-import { SilverText } from "../styles";
+import { Heading3, SilverHeading3, SilverText } from "../styles";
 import {
   AnnouncementsPanel,
   ContentDiv,
@@ -30,12 +30,14 @@ import {
   OptionRow,
   PageLayout,
   ParticipantInformation,
+  PhaseList,
   PromptAnswer,
   PromptCard,
   PromptQuestionNumber,
   PromptQuestionText,
   PromptWrapper,
   RadioCircle,
+  Sidebar,
 } from "./styles";
 
 type PhasePromptData = {
@@ -52,6 +54,7 @@ export default function ParticipantDetailView() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState<string | null>(null);
   const [prompts, setPrompts] = useState<PromptWithResponse[]>([]);
+  const [selectedPhaseId, setSelectedPhaseId] = useState<UUID | null>(null);
   const [phaseIds, setPhaseIds] = useState<UUID[]>([]);
   const [phases, setPhases] = useState<Phase[]>([]);
   const [currentPhaseName, setCurrentPhaseName] = useState<string | null>(null);
@@ -63,6 +66,7 @@ export default function ParticipantDetailView() {
   const [roleId, setRoleId] = useState<UUID | null>(null);
   const [roleName, setRoleName] = useState<string | null>(null);
   const router = useRouter();
+  const userSelectedRef = useRef(false);
 
   async function loadData() {
     if (!sessionId || !userId) return;
@@ -138,6 +142,14 @@ export default function ParticipantDetailView() {
     setRoleId(roleId);
     setPhaseIds(phaseIds);
     setPhasePrompts(allPhasePrompts);
+    if (!userSelectedRef.current) {
+      const currentPhaseId = phases[phaseIndex]?.phase_id;
+      const defaultId =
+        allPhasePrompts.find(p => p.phaseId === currentPhaseId)?.phaseId ??
+        allPhasePrompts[0]?.phaseId ??
+        null;
+      setSelectedPhaseId(defaultId);
+    }
   }
 
   useEffect(() => {
@@ -168,7 +180,22 @@ export default function ParticipantDetailView() {
   return (
     <>
       <TopNavBar />
+
       <PageLayout>
+        <Sidebar>
+          <h3>Phases</h3>
+          {phasePrompts.map(phase => (
+            <PhaseList
+              key={phase.phaseId}
+              onClick={() => {
+                userSelectedRef.current = true;
+                setSelectedPhaseId(phase.phaseId);
+              }}
+            >
+              {phase.phaseName}
+            </PhaseList>
+          ))}
+        </Sidebar>
         <ContentDiv>
           <SilverText
             onClick={() =>
@@ -179,9 +206,9 @@ export default function ParticipantDetailView() {
             {" "}
             ← Back
           </SilverText>
-          <h3>
-            {name}, {roleName} <SilverText>(Responses)</SilverText>
-          </h3>
+          <Heading3>
+            {name}, {roleName} <SilverHeading3>(Responses)</SilverHeading3>
+          </Heading3>
           <ParticipantInformation>
             <b>Participant Information</b>
             <InfoGrid>
@@ -208,33 +235,38 @@ export default function ParticipantDetailView() {
             </InfoGrid>
           </ParticipantInformation>
 
-          {phasePrompts.map((phase, i) => (
-            <PromptCard key={phase.phaseId}>
-              <h3>{phase.phaseName}</h3>
-              {phase.prompts.map((prompt, j) => (
-                <PromptWrapper key={j}>
-                  <PromptQuestionNumber>{j + 1} →</PromptQuestionNumber>
-                  <PromptQuestionText>
-                    Question: {prompt.question}
-                  </PromptQuestionText>{" "}
-                  {prompt.options && prompt.options.length > 0 ? (
-                    <OptionList>
-                      {prompt.options.map(opt => (
-                        <OptionRow key={opt.optionId} $selected={opt.selected}>
-                          <RadioCircle $selected={opt.selected} />
-                          <span>{opt.text}</span>
-                        </OptionRow>
-                      ))}
-                    </OptionList>
-                  ) : (
-                    <PromptAnswer>
-                      {prompt.answer ?? "No response"}
-                    </PromptAnswer>
-                  )}
-                </PromptWrapper>
-              ))}
-            </PromptCard>
-          ))}
+          {phasePrompts
+            .filter(phase => phase.phaseId === selectedPhaseId)
+            .map(phase => (
+              <PromptCard key={phase.phaseId}>
+                <h3>{phase.phaseName}</h3>
+                {phase.prompts.map((prompt, j) => (
+                  <PromptWrapper key={j}>
+                    <PromptQuestionNumber>{j + 1} →</PromptQuestionNumber>
+                    <PromptQuestionText>
+                      Question: {prompt.question}
+                    </PromptQuestionText>{" "}
+                    {prompt.options && prompt.options.length > 0 ? (
+                      <OptionList>
+                        {prompt.options.map(opt => (
+                          <OptionRow
+                            key={opt.optionId}
+                            $selected={opt.selected}
+                          >
+                            <RadioCircle $selected={opt.selected} />
+                            <span>{opt.text}</span>
+                          </OptionRow>
+                        ))}
+                      </OptionList>
+                    ) : (
+                      <PromptAnswer>
+                        {prompt.answer ?? "No response"}
+                      </PromptAnswer>
+                    )}
+                  </PromptWrapper>
+                ))}
+              </PromptCard>
+            ))}
         </ContentDiv>
       </PageLayout>
     </>

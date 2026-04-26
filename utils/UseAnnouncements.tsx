@@ -77,6 +77,7 @@ export function sendAnnouncement({
     message: message,
     sender: userId,
     sender_name: username,
+    phase_sent_at: null,
     created_at: new Date().toISOString(),
   };
 
@@ -85,5 +86,5 @@ export function sendAnnouncement({
     event: EVENT_MESSAGE_TYPE,
     payload: chatMessage,
   });
-  persistChatMessage(roomId, chatMessage.message, userId, username);
+  persistChatMessage(roomId, chatMessage.message, userId, username, null);
 }

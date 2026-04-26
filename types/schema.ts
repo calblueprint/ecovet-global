@@ -66,6 +66,12 @@ export type ParticipantSessionWithProfile = ParticipantSession & {
   } | null;
 };
 
+export type ChatParticipant = {
+  id: string;
+  name: string;
+  role: string;
+};
+
 export type PromptOptionsSelected = {
   optionId: UUID;
   text: string;
