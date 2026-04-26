@@ -97,7 +97,7 @@ export const ChatMessageContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 1.25rem;
+  gap: 0.6rem;
   align-self: stretch;
   margin: 0 1.25rem;
   flex: 1;
