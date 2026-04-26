@@ -197,7 +197,7 @@ export const ChatSelectedBorder = styled.div<{
 }>`
   padding: ${({ $selected, $unread }) => ($unread || $selected ? "1" : "2")}px;
   border: ${({ $selected, $unread }) => ($unread || $selected ? "1" : "0")}px
-    solid ${({ $unread }) => ($unread ? COLORS.tagRed : COLORS.teal)};
+    solid ${({ $selected }) => ($selected ? COLORS.teal : COLORS.tagRed)};
   border-radius: 8px;
 `;
 
