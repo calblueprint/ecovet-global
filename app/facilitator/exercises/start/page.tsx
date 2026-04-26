@@ -255,11 +255,6 @@ export default function Page() {
             </CheckboxRow>
           </ConfigRow>
 
-          <InviteComponent
-            user_group_id={profile.user_group_id}
-            onInvitesChange={() => loadGroupMembers()}
-          />
-
           <ParticipantTable>
             <TableHeader>
               <span>Selected Participants</span>
