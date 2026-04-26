@@ -1,4 +1,6 @@
 import type {
+  ChatLogEntry,
+  CommunicationMatrix,
   PhaseReportData,
   SessionReportData,
 } from "@/components/pdf/SessionReport";
@@ -14,6 +16,148 @@ type NestedTemplate = {
   objective: string | null;
   summary: string | null;
 };
+
+// Builds disambiguated display labels shared by the matrix and chat log.
+function buildUserIdToLabel(
+  participantUserIds: string[],
+  profileByUserId: Record<string, { firstName: string; lastName: string }>,
+): { labels: string[]; userIdToLabel: Record<string, string> } {
+  const firstNames = participantUserIds.map(
+    uid => profileByUserId[uid]?.firstName ?? "?",
+  );
+  const firstNameCount: Record<string, number> = {};
+  for (const f of firstNames) firstNameCount[f] = (firstNameCount[f] ?? 0) + 1;
+
+  const shortLabels = participantUserIds.map(uid => {
+    const { firstName, lastName } = profileByUserId[uid] ?? {
+      firstName: "?",
+      lastName: "",
+    };
+    if (firstNameCount[firstName] <= 1) return firstName;
+    return lastName ? `${firstName} ${lastName[0]}.` : firstName;
+  });
+
+  const labelCount: Record<string, number> = {};
+  for (const l of shortLabels) labelCount[l] = (labelCount[l] ?? 0) + 1;
+
+  const labels = participantUserIds.map((uid, i) => {
+    if (labelCount[shortLabels[i]] <= 1) return shortLabels[i];
+    const { firstName, lastName } = profileByUserId[uid] ?? {
+      firstName: "?",
+      lastName: "",
+    };
+    return lastName ? `${firstName} ${lastName}` : firstName;
+  });
+
+  const userIdToLabel: Record<string, string> = {};
+  participantUserIds.forEach((uid, i) => {
+    userIdToLabel[uid] = labels[i];
+  });
+
+  return { labels, userIdToLabel };
+}
+
+// Returns one CommunicationMatrix per phase, keyed by phase_number as string.
+// matrix[senderIdx][receiverIdx] = true when the sender sent at least one
+// message to that recipient in the corresponding phase.
+function buildPhaseCommunicationMatrices(
+  messages: { room_id: string; sender: string; phase_sent_at: number | null }[],
+  roomMembers: Record<string, string[]>,
+  participantUserIds: string[],
+  profileByUserId: Record<string, { firstName: string; lastName: string }>,
+): Record<string, CommunicationMatrix> {
+  const n = participantUserIds.length;
+  if (n <= 1) return {};
+
+  const { labels: headers } = buildUserIdToLabel(
+    participantUserIds,
+    profileByUserId,
+  );
+
+  const userIdToIndex: Record<string, number> = {};
+  participantUserIds.forEach((uid, i) => {
+    userIdToIndex[uid] = i;
+  });
+
+  const msgsByPhase: Record<string, typeof messages> = {};
+  for (const msg of messages) {
+    const phase =
+      msg.phase_sent_at == null || msg.phase_sent_at <= 0
+        ? 1
+        : msg.phase_sent_at;
+    const key = String(phase);
+    if (!msgsByPhase[key]) msgsByPhase[key] = [];
+    msgsByPhase[key].push(msg);
+  }
+
+  const result: Record<string, CommunicationMatrix> = {};
+  for (const [phaseKey, phaseMsgs] of Object.entries(msgsByPhase)) {
+    const matrix: boolean[][] = Array.from({ length: n }, () =>
+      Array(n).fill(false),
+    );
+    for (const msg of phaseMsgs) {
+      const senderIdx = userIdToIndex[msg.sender];
+      if (senderIdx === undefined) continue;
+      for (const uid of roomMembers[msg.room_id] ?? []) {
+        if (uid === msg.sender) continue;
+        const receiverIdx = userIdToIndex[uid];
+        if (receiverIdx === undefined) continue;
+        matrix[senderIdx][receiverIdx] = true;
+      }
+    }
+    result[phaseKey] = { headers, matrix };
+  }
+
+  return result;
+}
+
+// Returns an ordered chat log per phase, keyed by phase_number as string.
+function buildPhaseChatLogs(
+  messages: {
+    room_id: string;
+    sender: string;
+    phase_sent_at: number | null;
+    created_at: string;
+    message: string | null;
+  }[],
+  roomMembers: Record<string, string[]>,
+  userIdToLabel: Record<string, string>,
+): Record<string, ChatLogEntry[]> {
+  const logsByPhase: Record<string, { ts: number; entry: ChatLogEntry }[]> = {};
+
+  for (const msg of messages) {
+    const phase =
+      msg.phase_sent_at == null || msg.phase_sent_at <= 0
+        ? 1
+        : msg.phase_sent_at;
+    const key = String(phase);
+    if (!logsByPhase[key]) logsByPhase[key] = [];
+
+    const recipientLabels = (roomMembers[msg.room_id] ?? [])
+      .filter(uid => uid !== msg.sender)
+      .map(uid => userIdToLabel[uid] ?? "Unknown");
+
+    logsByPhase[key].push({
+      ts: new Date(msg.created_at).getTime(),
+      entry: {
+        timestamp: new Date(msg.created_at).toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        }),
+        senderLabel: userIdToLabel[msg.sender] ?? "Unknown",
+        message: msg.message ?? "",
+        recipientLabels,
+      },
+    });
+  }
+
+  const result: Record<string, ChatLogEntry[]> = {};
+  for (const [key, items] of Object.entries(logsByPhase)) {
+    result[key] = items.sort((a, b) => a.ts - b.ts).map(item => item.entry);
+  }
+  return result;
+}
 
 export async function GET(
   _req: Request,
@@ -38,7 +182,10 @@ export async function GET(
     const { data: urlData } = supabase.storage
       .from("reports")
       .getPublicUrl(`${folderPath}/${existing.name}`);
-    return Response.json({ url: urlData.publicUrl });
+    const updatedAt =
+      existingFiles[0].updated_at ?? existingFiles[0].created_at;
+    const bust = updatedAt ? new Date(updatedAt).getTime() : Date.now();
+    return Response.json({ url: `${urlData.publicUrl}?t=${bust}` });
   }
 
   const { data: session, error: sessionError } = await supabase
@@ -165,12 +312,59 @@ export async function GET(
 
   // Participant name lookup
   const nameByUserId: Record<string, string> = {};
+  const profileByUserId: Record<
+    string,
+    { firstName: string; lastName: string }
+  > = {};
   for (const p of participants) {
     const profile = p.profile as unknown as NestedProfile | null;
-    nameByUserId[p.user_id] =
-      `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim() ||
-      "Unknown";
+    const firstName = profile?.first_name ?? "";
+    const lastName = profile?.last_name ?? "";
+    nameByUserId[p.user_id] = `${firstName} ${lastName}`.trim() || "Unknown";
+    profileByUserId[p.user_id] = { firstName, lastName };
   }
+
+  // Room membership and per-phase communication matrices
+  const { data: chatRooms } = await supabase
+    .from("chat_room")
+    .select("room_id, user_id")
+    .eq("session_id", sessionId);
+
+  const roomMembers: Record<string, string[]> = {};
+  for (const row of chatRooms ?? []) {
+    if (!roomMembers[row.room_id]) roomMembers[row.room_id] = [];
+    roomMembers[row.room_id].push(row.user_id);
+  }
+
+  const roomIds = Object.keys(roomMembers);
+  const { data: chatMessages } = roomIds.length
+    ? await supabase
+        .from("chat_message")
+        .select("room_id, sender, phase_sent_at, created_at, message")
+        .in("room_id", roomIds)
+    : { data: [] };
+
+  const participantUserIds = participants.map(p => p.user_id);
+  const { userIdToLabel } =
+    participants.length > 1
+      ? buildUserIdToLabel(participantUserIds, profileByUserId)
+      : { userIdToLabel: {} as Record<string, string> };
+
+  const phaseMatrices =
+    participants.length > 1
+      ? buildPhaseCommunicationMatrices(
+          chatMessages ?? [],
+          roomMembers,
+          participantUserIds,
+          profileByUserId,
+        )
+      : {};
+
+  const phaseChatLogs = buildPhaseChatLogs(
+    chatMessages ?? [],
+    roomMembers,
+    userIdToLabel,
+  );
 
   // Assemble phase report data
   // Structure: phase → role → prompt → [participant answers]
@@ -202,6 +396,8 @@ export async function GET(
       phaseNumber: phase.phase_number,
       phaseDescription: phase.phase_description ?? null,
       roles,
+      communicationMatrix: phaseMatrices[String(phase.phase_number)],
+      chatLog: phaseChatLogs[String(phase.phase_number)],
     };
   });
 
@@ -387,12 +583,59 @@ export async function POST(
   }
 
   const nameByUserId: Record<string, string> = {};
+  const profileByUserId: Record<
+    string,
+    { firstName: string; lastName: string }
+  > = {};
   for (const p of participants) {
     const profile = p.profile as unknown as NestedProfile | null;
-    nameByUserId[p.user_id] =
-      `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim() ||
-      "Unknown";
+    const firstName = profile?.first_name ?? "";
+    const lastName = profile?.last_name ?? "";
+    nameByUserId[p.user_id] = `${firstName} ${lastName}`.trim() || "Unknown";
+    profileByUserId[p.user_id] = { firstName, lastName };
   }
+
+  // Room membership and per-phase communication matrices
+  const { data: chatRooms } = await supabase
+    .from("chat_room")
+    .select("room_id, user_id")
+    .eq("session_id", sessionId);
+
+  const roomMembers: Record<string, string[]> = {};
+  for (const row of chatRooms ?? []) {
+    if (!roomMembers[row.room_id]) roomMembers[row.room_id] = [];
+    roomMembers[row.room_id].push(row.user_id);
+  }
+
+  const roomIds = Object.keys(roomMembers);
+  const { data: chatMessages } = roomIds.length
+    ? await supabase
+        .from("chat_message")
+        .select("room_id, sender, phase_sent_at, created_at, message")
+        .in("room_id", roomIds)
+    : { data: [] };
+
+  const participantUserIds = participants.map(p => p.user_id);
+  const { userIdToLabel } =
+    participants.length > 1
+      ? buildUserIdToLabel(participantUserIds, profileByUserId)
+      : { userIdToLabel: {} as Record<string, string> };
+
+  const phaseMatrices =
+    participants.length > 1
+      ? buildPhaseCommunicationMatrices(
+          chatMessages ?? [],
+          roomMembers,
+          participantUserIds,
+          profileByUserId,
+        )
+      : {};
+
+  const phaseChatLogs = buildPhaseChatLogs(
+    chatMessages ?? [],
+    roomMembers,
+    userIdToLabel,
+  );
 
   const phaseData: PhaseReportData[] = (phases ?? []).map(phase => {
     const roles = roleIds.map(roleId => {
@@ -421,6 +664,8 @@ export async function POST(
       phaseNumber: phase.phase_number,
       phaseDescription: phase.phase_description ?? null,
       roles,
+      communicationMatrix: phaseMatrices[String(phase.phase_number)],
+      chatLog: phaseChatLogs[String(phase.phase_number)],
     };
   });
 

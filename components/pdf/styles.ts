@@ -10,7 +10,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
 
-  // ── Cover ────────────────────────────────────────────────────────────────
+  // Cover
   coverPage: {
     fontFamily: "Helvetica",
     fontSize: 11,
@@ -63,7 +63,7 @@ export const styles = StyleSheet.create({
     marginTop: 8,
   },
 
-  // ── Participant summary (page 2) ─────────────────────────────────────────
+  // Participant summary and dep matrix (page 2)
   pageTitle: {
     fontSize: 16,
     fontFamily: "Helvetica-Bold",
@@ -147,10 +147,212 @@ export const styles = StyleSheet.create({
     color: "#6b7280",
     textTransform: "uppercase",
   },
-  statusComplete: { fontSize: 10, color: "#059669" },
-  statusPending: { fontSize: 10, color: "#d97706" },
+  statusComplete: { flex: 1, fontSize: 10, color: "#059669" },
+  statusPending: { flex: 1, fontSize: 10, color: "#d97706" },
 
-  // ── Phase pages (page 3+) ────────────────────────────────────────────────
+  // Communication matrix
+  matrixSection: {
+    marginTop: 28,
+  },
+  matrixTitle: {
+    fontSize: 12,
+    fontFamily: "Helvetica-Bold",
+    color: "#111827",
+    marginBottom: 3,
+  },
+  matrixSubtitle: {
+    fontSize: 9,
+    color: "#6b7280",
+    marginBottom: 8,
+  },
+  // "Message Recipient" merged banner above column headers
+  matrixRecipientBanner: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+  },
+  matrixRecipientBannerSpacer: {
+    width: 16,
+    backgroundColor: "#6b7280",
+  },
+  matrixRecipientLabel: {
+    flex: 1,
+    backgroundColor: "#6b7280",
+    paddingVertical: 4,
+    paddingHorizontal: 3,
+    alignItems: "center",
+  },
+  matrixRecipientText: {
+    fontSize: 6,
+    fontFamily: "Helvetica-Bold",
+    color: "#f3f4f6",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  // "Message Sender" merged column left of row labels
+  matrixSenderCol: {
+    width: 22,
+    paddingHorizontal: 4,
+    backgroundColor: "#6b7280",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRightWidth: 1,
+    borderRightColor: "#e5e7eb",
+  },
+  matrixSenderText: {
+    fontSize: 6,
+    fontFamily: "Helvetica-Bold",
+    color: "#f3f4f6",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    textAlign: "center",
+  },
+  matrixRow: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+  },
+  matrixRowAlt: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+    backgroundColor: "#fafafa",
+  },
+  matrixCornerCell: {
+    flex: 2,
+    paddingVertical: 4,
+    paddingHorizontal: 3,
+    backgroundColor: "#f3f4f6",
+  },
+  matrixHeaderCell: {
+    flex: 1,
+    paddingVertical: 4,
+    paddingHorizontal: 3,
+    backgroundColor: "#f3f4f6",
+    borderBottomColor: "#e5e7eb",
+  },
+  matrixHeaderText: {
+    fontSize: 8,
+    fontFamily: "Helvetica-Bold",
+    color: "#374151",
+    textAlign: "center",
+  },
+  matrixRowLabelCell: {
+    flex: 2,
+    paddingVertical: 4,
+    paddingHorizontal: 3,
+  },
+  matrixRowLabelText: {
+    fontSize: 8,
+    fontFamily: "Helvetica-Bold",
+    color: "#374151",
+  },
+  matrixCell: {
+    flex: 1,
+    paddingVertical: 4,
+    paddingHorizontal: 3,
+  },
+  matrixCellDiag: {
+    flex: 1,
+    paddingVertical: 4,
+    paddingHorizontal: 3,
+    backgroundColor: "#f3f4f6",
+  },
+  matrixTextYes: {
+    fontSize: 9,
+    color: "#059669",
+    fontFamily: "Helvetica-Bold",
+    textAlign: "center",
+  },
+  matrixTextNo: {
+    fontSize: 9,
+    color: "#059669",
+    textAlign: "center",
+  },
+  matrixTextDiag: {
+    fontSize: 9,
+    color: "#9ca3af",
+    textAlign: "center",
+  },
+
+  // Chat Message Log Section
+  chatLogSection: {
+    marginTop: 20,
+  },
+  chatLogTitle: {
+    fontSize: 12,
+    fontFamily: "Helvetica-Bold",
+    color: "#111827",
+    marginBottom: 8,
+  },
+  chatLogHeader: {
+    flexDirection: "row",
+    backgroundColor: "#f3f4f6",
+    paddingVertical: 5,
+    paddingHorizontal: 4,
+    borderRadius: 2,
+    marginBottom: 1,
+  },
+  chatLogHeaderText: {
+    fontSize: 7,
+    fontFamily: "Helvetica-Bold",
+    color: "#6b7280",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  chatLogRow: {
+    flexDirection: "row",
+    paddingVertical: 4,
+    paddingHorizontal: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3f4f6",
+  },
+  chatLogRowAlt: {
+    flexDirection: "row",
+    paddingVertical: 4,
+    paddingHorizontal: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3f4f6",
+    backgroundColor: "#fafafa",
+  },
+  chatLogCell: {
+    fontSize: 8,
+    color: "#374151",
+    lineHeight: 1.4,
+  },
+  chatLogColTime: {
+    width: 36,
+  },
+  chatLogColFrom: {
+    width: 60,
+    paddingRight: 4,
+  },
+  chatLogColMsg: {
+    flex: 1,
+    paddingHorizontal: 4,
+  },
+  chatLogColTo: {
+    width: 60,
+    paddingLeft: 4,
+  },
+
+  // Network graph
+  graphSection: {
+    marginTop: 28,
+  },
+  graphTitle: {
+    fontSize: 12,
+    fontFamily: "Helvetica-Bold",
+    color: "#111827",
+    marginBottom: 3,
+  },
+  graphSubtitle: {
+    fontSize: 9,
+    color: "#6b7280",
+    marginBottom: 6,
+  },
+
+  // Phase pages (page 3+)
   phaseNumber: {
     fontSize: 10,
     fontFamily: "Helvetica-Bold",

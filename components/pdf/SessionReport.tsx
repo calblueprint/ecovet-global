@@ -1,4 +1,13 @@
-import { Document, Page, Text, View } from "@react-pdf/renderer";
+import {
+  Circle,
+  Document,
+  G,
+  Line,
+  Page,
+  Svg,
+  Text,
+  View,
+} from "@react-pdf/renderer";
 import { styles } from "./styles";
 
 export type ParticipantSummary = {
@@ -23,6 +32,20 @@ export type PhaseReportData = {
       responses: PromptResponse[];
     }[];
   }[];
+  communicationMatrix?: CommunicationMatrix;
+  chatLog?: ChatLogEntry[];
+};
+
+export type CommunicationMatrix = {
+  headers: string[];
+  matrix: boolean[][];
+};
+
+export type ChatLogEntry = {
+  timestamp: string;
+  senderLabel: string;
+  message: string;
+  recipientLabels: string[];
 };
 
 export type SessionReportData = {
@@ -35,6 +58,61 @@ export type SessionReportData = {
   facilitatorComments?: string | null;
 };
 
+function NetworkGraph({ headers, matrix }: CommunicationMatrix) {
+  const n = headers.length;
+  const size = 260;
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = n <= 3 ? 65 : n <= 6 ? 80 : n <= 10 ? 92 : 100;
+  const nodeRadius = n <= 6 ? 13 : 10;
+  const labelGap = nodeRadius + 12;
+
+  const positions = headers.map((_, i) => {
+    const angle = (2 * Math.PI * i) / n - Math.PI / 2;
+    return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle), angle };
+  });
+
+  const edges: [number, number][] = [];
+  for (let i = 0; i < n; i++)
+    for (let j = i + 1; j < n; j++) if (matrix[i][j]) edges.push([i, j]);
+
+  return (
+    <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      {edges.map(([i, j], k) => (
+        <Line
+          key={`e-${k}`}
+          x1={positions[i].x}
+          y1={positions[i].y}
+          x2={positions[j].x}
+          y2={positions[j].y}
+          stroke="#476C77"
+          strokeWidth={1.5}
+          strokeOpacity={0.45}
+        />
+      ))}
+      {positions.map((pos, i) => {
+        const lx = cx + (r + labelGap) * Math.cos(pos.angle);
+        const ly = cy + (r + labelGap) * Math.sin(pos.angle);
+        const anchor = lx < cx - 6 ? "end" : lx > cx + 6 ? "start" : "middle";
+        return (
+          <G key={`n-${i}`}>
+            <Circle cx={pos.x} cy={pos.y} r={nodeRadius} fill="#476C77" />
+            <Text
+              x={lx}
+              y={ly + 3}
+              style={{ fontSize: 7 }}
+              fill="#4B4A49"
+              textAnchor={anchor}
+            >
+              {headers[i]}
+            </Text>
+          </G>
+        );
+      })}
+    </Svg>
+  );
+}
+
 export function SessionSummaryReport({
   sessionName,
   templateName,
@@ -44,7 +122,6 @@ export function SessionSummaryReport({
   phases,
   facilitatorComments,
 }: SessionReportData) {
-  // Compute role counts for the stats section
   const roleCounts: Record<string, number> = {};
   for (const p of participants) {
     roleCounts[p.role] = (roleCounts[p.role] ?? 0) + 1;
@@ -134,16 +211,6 @@ export function SessionSummaryReport({
             </Text>
           </View>
         ))}
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>{sessionName}</Text>
-          <Text
-            style={styles.footerText}
-            render={({ pageNumber, totalPages }) =>
-              `${pageNumber} / ${totalPages}`
-            }
-          />
-        </View>
       </Page>
 
       {/* ── Facilitator Comments ─────────────────────────────────────────── */}
@@ -204,6 +271,133 @@ export function SessionSummaryReport({
               ))}
             </View>
           ))}
+
+          {phase.communicationMatrix &&
+            phase.communicationMatrix.headers.length > 1 && (
+              <View style={styles.matrixSection}>
+                <Text style={styles.matrixTitle}>Communication Matrix</Text>
+                <Text style={styles.matrixSubtitle}>
+                  X indicates at least one message was sent during this phase
+                </Text>
+
+                {/* "Message Recipient" merged banner above column headers */}
+                <View style={styles.matrixRecipientBanner}>
+                  <View style={styles.matrixRecipientBannerSpacer} />
+                  <View style={styles.matrixRecipientLabel}>
+                    <Text style={styles.matrixRecipientText}>
+                      Message Recipient
+                    </Text>
+                  </View>
+                </View>
+
+                {/* "Message Sender" merged col + table body */}
+                <View style={{ flexDirection: "row" }}>
+                  <View style={styles.matrixSenderCol}>
+                    <View
+                      style={{
+                        transform: "rotate(-90deg)",
+                        width: 60,
+                      }}
+                    >
+                      <Text style={styles.matrixSenderText}>
+                        Message Sender
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    {/* Column headers */}
+                    <View style={styles.matrixRow}>
+                      <View style={styles.matrixCornerCell} />
+                      {phase.communicationMatrix.headers.map((h, i) => (
+                        <View key={i} style={styles.matrixHeaderCell}>
+                          <Text style={styles.matrixHeaderText}>{h}</Text>
+                        </View>
+                      ))}
+                    </View>
+
+                    {/* Data rows */}
+                    {phase.communicationMatrix.matrix.map((row, ri) => (
+                      <View
+                        key={ri}
+                        style={
+                          ri % 2 === 0 ? styles.matrixRow : styles.matrixRowAlt
+                        }
+                      >
+                        <View style={styles.matrixRowLabelCell}>
+                          <Text style={styles.matrixRowLabelText}>
+                            {phase.communicationMatrix!.headers[ri]}
+                          </Text>
+                        </View>
+                        {row.map((cell, ci) => (
+                          <View
+                            key={ci}
+                            style={
+                              ri === ci
+                                ? styles.matrixCellDiag
+                                : styles.matrixCell
+                            }
+                          >
+                            <Text
+                              style={
+                                ri === ci
+                                  ? styles.matrixTextDiag
+                                  : cell
+                                    ? styles.matrixTextYes
+                                    : styles.matrixTextNo
+                              }
+                            >
+                              {ri === ci ? "—" : cell ? "X" : ""}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              </View>
+            )}
+
+          {phase.chatLog && phase.chatLog.length > 0 && (
+            <View style={styles.chatLogSection}>
+              <Text style={styles.chatLogTitle}>Message Log</Text>
+
+              <View style={styles.chatLogHeader}>
+                <Text style={[styles.chatLogColTime, styles.chatLogHeaderText]}>
+                  Time
+                </Text>
+                <Text style={[styles.chatLogColFrom, styles.chatLogHeaderText]}>
+                  From
+                </Text>
+                <Text style={[styles.chatLogColMsg, styles.chatLogHeaderText]}>
+                  Message
+                </Text>
+                <Text style={[styles.chatLogColTo, styles.chatLogHeaderText]}>
+                  To
+                </Text>
+              </View>
+
+              {phase.chatLog.map((entry, i) => (
+                <View
+                  key={i}
+                  style={i % 2 === 0 ? styles.chatLogRow : styles.chatLogRowAlt}
+                >
+                  <Text style={[styles.chatLogColTime, styles.chatLogCell]}>
+                    {entry.timestamp}
+                  </Text>
+                  <Text style={[styles.chatLogColFrom, styles.chatLogCell]}>
+                    {entry.senderLabel}
+                  </Text>
+                  <Text style={[styles.chatLogColMsg, styles.chatLogCell]}>
+                    {entry.message}
+                  </Text>
+                  <Text style={[styles.chatLogColTo, styles.chatLogCell]}>
+                    {entry.recipientLabels.join(", ")}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
 
           <View style={styles.footer}>
             <Text style={styles.footerText}>
