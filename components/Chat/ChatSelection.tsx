@@ -15,18 +15,20 @@ export interface Selection {
 export default function ChatSelection({
   chats,
   currentRoomId,
+  chatNotifications,
   changeRoom,
   createRoom,
 }: {
   chats: Selection[];
   currentRoomId: string | null;
+  chatNotifications: Set<string>;
   changeRoom: (roomId: string) => void;
   createRoom: () => void;
 }) {
   return (
     <ChatSelectionContainer>
       <ChatButtonContainer onClick={createRoom}>
-        <ChatSelectedBorder selected={false}>
+        <ChatSelectedBorder $selected={false} $unread={false}>
           <ChatSelectionButton color="">
             <CreateChatPlus>+</CreateChatPlus>
           </ChatSelectionButton>
@@ -39,7 +41,10 @@ export default function ChatSelection({
           key={chat.roomId}
           onClick={() => changeRoom(chat.roomId)}
         >
-          <ChatSelectedBorder selected={chat.roomId === currentRoomId}>
+          <ChatSelectedBorder
+            $unread={chatNotifications.has(chat.roomId)}
+            $selected={chat.roomId === currentRoomId}
+          >
             <ChatSelectionButton />
           </ChatSelectedBorder>
           <ChatButtonLabel>{chat.chatName}</ChatButtonLabel>
