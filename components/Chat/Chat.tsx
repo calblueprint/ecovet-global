@@ -329,10 +329,14 @@ const shouldShowSender = (chatMessages: ChatMessageType[], index: number) => {
   if (index === 0) return true;
   if (shouldShowTime(chatMessages, index)) return true;
 
+  // need to check the name for a announcements edge case
   const prevSender = chatMessages[index - 1].sender;
-  const thisSender = chatMessages[index].sender;
+  const prevName = chatMessages[index - 1].sender_name;
 
-  return prevSender !== thisSender;
+  const thisSender = chatMessages[index].sender;
+  const thisName = chatMessages[index].sender_name;
+
+  return prevSender !== thisSender || prevName !== thisName;
 };
 
 const shouldShowTime = (chatMessages: ChatMessageType[], index: number) => {

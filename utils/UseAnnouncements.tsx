@@ -60,19 +60,16 @@ export function useAnnouncements({
   userAnnouncements = userAnnouncements.map(message => ({
     ...message,
     sender_name: "To You",
-    sender: "user",
   }));
 
   roleAnnouncements = roleAnnouncements.map(message => ({
     ...message,
     sender_name: `To Role: ${roleName}`,
-    sender: "role",
   }));
 
   everyoneAnnouncements = everyoneAnnouncements.map(message => ({
     ...message,
     sender_name: `To Everyone`,
-    sender: "everyone",
   }));
 
   const announcements = [

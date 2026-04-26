@@ -17,6 +17,7 @@ import {
   getAllPhaseIds,
   sessionParticipants,
 } from "@/actions/supabase/queries/sessions";
+import Chat from "@/components/Chat/Chat";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import { Heading3, SilverHeading3, SilverText } from "../styles";
 import {
@@ -196,6 +197,7 @@ export default function ParticipantDetailView() {
             </PhaseList>
           ))}
         </Sidebar>
+
         <ContentDiv>
           <SilverText
             onClick={() =>
@@ -206,9 +208,11 @@ export default function ParticipantDetailView() {
             {" "}
             ← Back
           </SilverText>
+
           <Heading3>
             {name}, {roleName} <SilverHeading3>(Responses)</SilverHeading3>
           </Heading3>
+
           <ParticipantInformation>
             <b>Participant Information</b>
             <InfoGrid>
@@ -268,6 +272,8 @@ export default function ParticipantDetailView() {
               </PromptCard>
             ))}
         </ContentDiv>
+
+        {sessionId && <Chat sessionId={sessionId} roleId={""} />}
       </PageLayout>
     </>
   );

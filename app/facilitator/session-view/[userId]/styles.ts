@@ -70,7 +70,7 @@ export const RadioCircle = styled.span<{ $selected: boolean }>`
 export const PromptCard = styled.div`
   display: flex;
   flex-direction: column;
-  width: 60rem;
+  width: 100%;
   margin-right: 4rem;
   gap: 1.5rem;
 `;
@@ -132,7 +132,7 @@ export const AnnouncementsPanel = styled.div`
 
 export const ContentDiv = styled.div`
   display: flex;
-  padding: 2rem 0 2rem 5rem;
+  padding: 2rem 2rem 2rem 5rem;
   flex-direction: column;
   align-items: flex-start;
   gap: 32px;
@@ -184,6 +184,16 @@ export const PageLayout = styled.div`
   width: 100%;
   height: 100vh;
   overflow-y: hidden;
+
+  > *:nth-child(2) {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  > *:nth-child(3) {
+    flex: 0 0 23rem;
+    border-left: 1px solid #e5e7eb;
+  }
 `;
 
 export const Sidebar = styled.aside`
