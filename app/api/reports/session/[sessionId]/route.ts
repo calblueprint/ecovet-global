@@ -1,4 +1,5 @@
 import type {
+  ChatLogEntry,
   CommunicationMatrix,
   PhaseReportData,
   SessionReportData,
@@ -15,19 +16,11 @@ type NestedTemplate = {
   summary: string | null;
 };
 
-function buildCommunicationMatrix(
-  chatRooms: { room_id: string; user_id: string }[],
+// Builds disambiguated display labels shared by the matrix and chat log.
+function buildUserIdToLabel(
   participantUserIds: string[],
   profileByUserId: Record<string, { firstName: string; lastName: string }>,
-): CommunicationMatrix {
-  const n = participantUserIds.length;
-  const userIdToIndex: Record<string, number> = {};
-  participantUserIds.forEach((uid, idx) => {
-    userIdToIndex[uid] = idx;
-  });
-
-  // Build disambiguated labels: "First" normally, "First L." when first names clash,
-  // "First Last" when first + last initial still clashes
+): { labels: string[]; userIdToLabel: Record<string, string> } {
   const firstNames = participantUserIds.map(
     uid => profileByUserId[uid]?.firstName ?? "?",
   );
@@ -40,15 +33,13 @@ function buildCommunicationMatrix(
       lastName: "",
     };
     if (firstNameCount[firstName] <= 1) return firstName;
-    const withInitial = lastName ? `${firstName} ${lastName[0]}.` : firstName;
-    return withInitial;
+    return lastName ? `${firstName} ${lastName[0]}.` : firstName;
   });
 
-  // If short labels are still not unique, fall back to full name for those entries
   const labelCount: Record<string, number> = {};
   for (const l of shortLabels) labelCount[l] = (labelCount[l] ?? 0) + 1;
 
-  const headers = participantUserIds.map((uid, i) => {
+  const labels = participantUserIds.map((uid, i) => {
     if (labelCount[shortLabels[i]] <= 1) return shortLabels[i];
     const { firstName, lastName } = profileByUserId[uid] ?? {
       firstName: "?",
@@ -57,45 +48,114 @@ function buildCommunicationMatrix(
     return lastName ? `${firstName} ${lastName}` : firstName;
   });
 
-  const matrix: boolean[][] = Array.from({ length: n }, () =>
-    Array(n).fill(false),
+  const userIdToLabel: Record<string, string> = {};
+  participantUserIds.forEach((uid, i) => {
+    userIdToLabel[uid] = labels[i];
+  });
+
+  return { labels, userIdToLabel };
+}
+
+// Returns one CommunicationMatrix per phase, keyed by phase_number as string.
+// matrix[senderIdx][receiverIdx] = true when the sender sent at least one
+// message to that recipient in the corresponding phase.
+function buildPhaseCommunicationMatrices(
+  messages: { room_id: string; sender: string; phase_sent_at: number | null }[],
+  roomMembers: Record<string, string[]>,
+  participantUserIds: string[],
+  profileByUserId: Record<string, { firstName: string; lastName: string }>,
+): Record<string, CommunicationMatrix> {
+  const n = participantUserIds.length;
+  if (n <= 1) return {};
+
+  const { labels: headers } = buildUserIdToLabel(
+    participantUserIds,
+    profileByUserId,
   );
 
-  // Debug
-  // console.log("[CommMatrix] participantUserIds:", participantUserIds);
-  // console.log("[CommMatrix] userIdToIndex:", userIdToIndex);
-  // console.log("[CommMatrix] raw chatRooms rows:", chatRooms);
+  const userIdToIndex: Record<string, number> = {};
+  participantUserIds.forEach((uid, i) => {
+    userIdToIndex[uid] = i;
+  });
 
-  // Group rows by room_id, then mark all intra-room participant pairs
-  const roomUsers: Record<string, string[]> = {};
-  for (const row of chatRooms) {
-    if (!(row.room_id in roomUsers)) roomUsers[row.room_id] = [];
-    roomUsers[row.room_id].push(row.user_id);
+  const msgsByPhase: Record<string, typeof messages> = {};
+  for (const msg of messages) {
+    const phase =
+      msg.phase_sent_at == null || msg.phase_sent_at <= 0
+        ? 1
+        : msg.phase_sent_at;
+    const key = String(phase);
+    if (!msgsByPhase[key]) msgsByPhase[key] = [];
+    msgsByPhase[key].push(msg);
   }
 
-  console.log("[CommMatrix] roomUsers (grouped):", roomUsers);
-
-  for (const [roomId, users] of Object.entries(roomUsers)) {
-    const inSession = users.filter(uid => uid in userIdToIndex);
-    console.log(
-      `[CommMatrix] room ${roomId} — all users:`,
-      users,
-      "| in session:",
-      inSession,
+  const result: Record<string, CommunicationMatrix> = {};
+  for (const [phaseKey, phaseMsgs] of Object.entries(msgsByPhase)) {
+    const matrix: boolean[][] = Array.from({ length: n }, () =>
+      Array(n).fill(false),
     );
-    for (let i = 0; i < inSession.length; i++) {
-      for (let j = 0; j < inSession.length; j++) {
-        if (i !== j) {
-          matrix[userIdToIndex[inSession[i]]][userIdToIndex[inSession[j]]] =
-            true;
-        }
+    for (const msg of phaseMsgs) {
+      const senderIdx = userIdToIndex[msg.sender];
+      if (senderIdx === undefined) continue;
+      for (const uid of roomMembers[msg.room_id] ?? []) {
+        if (uid === msg.sender) continue;
+        const receiverIdx = userIdToIndex[uid];
+        if (receiverIdx === undefined) continue;
+        matrix[senderIdx][receiverIdx] = true;
       }
     }
+    result[phaseKey] = { headers, matrix };
   }
 
-  console.log("[CommMatrix] final matrix:", matrix);
-  console.log("[CommMatrix] headers:", headers);
-  return { headers, matrix };
+  return result;
+}
+
+// Returns an ordered chat log per phase, keyed by phase_number as string.
+function buildPhaseChatLogs(
+  messages: {
+    room_id: string;
+    sender: string;
+    phase_sent_at: number | null;
+    created_at: string;
+    message: string | null;
+  }[],
+  roomMembers: Record<string, string[]>,
+  userIdToLabel: Record<string, string>,
+): Record<string, ChatLogEntry[]> {
+  const logsByPhase: Record<string, { ts: number; entry: ChatLogEntry }[]> = {};
+
+  for (const msg of messages) {
+    const phase =
+      msg.phase_sent_at == null || msg.phase_sent_at <= 0
+        ? 1
+        : msg.phase_sent_at;
+    const key = String(phase);
+    if (!logsByPhase[key]) logsByPhase[key] = [];
+
+    const recipientLabels = (roomMembers[msg.room_id] ?? [])
+      .filter(uid => uid !== msg.sender)
+      .map(uid => userIdToLabel[uid] ?? "Unknown");
+
+    logsByPhase[key].push({
+      ts: new Date(msg.created_at).getTime(),
+      entry: {
+        timestamp: new Date(msg.created_at).toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        }),
+        senderLabel: userIdToLabel[msg.sender] ?? "Unknown",
+        message: msg.message ?? "",
+        recipientLabels,
+      },
+    });
+  }
+
+  const result: Record<string, ChatLogEntry[]> = {};
+  for (const [key, items] of Object.entries(logsByPhase)) {
+    result[key] = items.sort((a, b) => a.ts - b.ts).map(item => item.entry);
+  }
+  return result;
 }
 
 export async function GET(
@@ -259,20 +319,47 @@ export async function GET(
     profileByUserId[p.user_id] = { firstName, lastName };
   }
 
-  // Communication matrix from chat_room
+  // Room membership and per-phase communication matrices
   const { data: chatRooms } = await supabase
     .from("chat_room")
     .select("room_id, user_id")
     .eq("session_id", sessionId);
 
-  const communicationMatrix =
+  const roomMembers: Record<string, string[]> = {};
+  for (const row of chatRooms ?? []) {
+    if (!roomMembers[row.room_id]) roomMembers[row.room_id] = [];
+    roomMembers[row.room_id].push(row.user_id);
+  }
+
+  const roomIds = Object.keys(roomMembers);
+  const { data: chatMessages } = roomIds.length
+    ? await supabase
+        .from("chat_message")
+        .select("room_id, sender, phase_sent_at, created_at, message")
+        .in("room_id", roomIds)
+    : { data: [] };
+
+  const participantUserIds = participants.map(p => p.user_id);
+  const { userIdToLabel } =
     participants.length > 1
-      ? buildCommunicationMatrix(
-          chatRooms ?? [],
-          participants.map(p => p.user_id),
+      ? buildUserIdToLabel(participantUserIds, profileByUserId)
+      : { userIdToLabel: {} as Record<string, string> };
+
+  const phaseMatrices =
+    participants.length > 1
+      ? buildPhaseCommunicationMatrices(
+          chatMessages ?? [],
+          roomMembers,
+          participantUserIds,
           profileByUserId,
         )
-      : undefined;
+      : {};
+
+  const phaseChatLogs = buildPhaseChatLogs(
+    chatMessages ?? [],
+    roomMembers,
+    userIdToLabel,
+  );
 
   // Assemble phase report data
   // Structure: phase → role → prompt → [participant answers]
@@ -304,6 +391,8 @@ export async function GET(
       phaseNumber: phase.phase_number,
       phaseDescription: phase.phase_description ?? null,
       roles,
+      communicationMatrix: phaseMatrices[String(phase.phase_number)],
+      chatLog: phaseChatLogs[String(phase.phase_number)],
     };
   });
 
@@ -326,7 +415,6 @@ export async function GET(
       };
     }),
     phases: phaseData,
-    communicationMatrix,
   };
 
   // Generate PDF
@@ -504,20 +592,47 @@ export async function POST(
     profileByUserId[p.user_id] = { firstName, lastName };
   }
 
-  // Communication matrix from chat_room
+  // Room membership and per-phase communication matrices
   const { data: chatRooms } = await supabase
     .from("chat_room")
     .select("room_id, user_id")
     .eq("session_id", sessionId);
 
-  const communicationMatrix =
+  const roomMembers: Record<string, string[]> = {};
+  for (const row of chatRooms ?? []) {
+    if (!roomMembers[row.room_id]) roomMembers[row.room_id] = [];
+    roomMembers[row.room_id].push(row.user_id);
+  }
+
+  const roomIds = Object.keys(roomMembers);
+  const { data: chatMessages } = roomIds.length
+    ? await supabase
+        .from("chat_message")
+        .select("room_id, sender, phase_sent_at, created_at, message")
+        .in("room_id", roomIds)
+    : { data: [] };
+
+  const participantUserIds = participants.map(p => p.user_id);
+  const { userIdToLabel } =
     participants.length > 1
-      ? buildCommunicationMatrix(
-          chatRooms ?? [],
-          participants.map(p => p.user_id),
+      ? buildUserIdToLabel(participantUserIds, profileByUserId)
+      : { userIdToLabel: {} as Record<string, string> };
+
+  const phaseMatrices =
+    participants.length > 1
+      ? buildPhaseCommunicationMatrices(
+          chatMessages ?? [],
+          roomMembers,
+          participantUserIds,
           profileByUserId,
         )
-      : undefined;
+      : {};
+
+  const phaseChatLogs = buildPhaseChatLogs(
+    chatMessages ?? [],
+    roomMembers,
+    userIdToLabel,
+  );
 
   const phaseData: PhaseReportData[] = (phases ?? []).map(phase => {
     const roles = roleIds.map(roleId => {
@@ -546,6 +661,8 @@ export async function POST(
       phaseNumber: phase.phase_number,
       phaseDescription: phase.phase_description ?? null,
       roles,
+      communicationMatrix: phaseMatrices[String(phase.phase_number)],
+      chatLog: phaseChatLogs[String(phase.phase_number)],
     };
   });
 
@@ -568,7 +685,6 @@ export async function POST(
     }),
     phases: phaseData,
     facilitatorComments: comments,
-    communicationMatrix,
   };
 
   let pdfBytes: Uint8Array;

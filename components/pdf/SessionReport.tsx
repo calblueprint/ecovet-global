@@ -32,11 +32,20 @@ export type PhaseReportData = {
       responses: PromptResponse[];
     }[];
   }[];
+  communicationMatrix?: CommunicationMatrix;
+  chatLog?: ChatLogEntry[];
 };
 
 export type CommunicationMatrix = {
   headers: string[];
   matrix: boolean[][];
+};
+
+export type ChatLogEntry = {
+  timestamp: string;
+  senderLabel: string;
+  message: string;
+  recipientLabels: string[];
 };
 
 export type SessionReportData = {
@@ -47,7 +56,6 @@ export type SessionReportData = {
   participants: ParticipantSummary[];
   phases: PhaseReportData[];
   facilitatorComments?: string | null;
-  communicationMatrix?: CommunicationMatrix;
 };
 
 function NetworkGraph({ headers, matrix }: CommunicationMatrix) {
@@ -113,19 +121,11 @@ export function SessionSummaryReport({
   participants,
   phases,
   facilitatorComments,
-  communicationMatrix,
 }: SessionReportData) {
-  // Compute role counts for the stats section
   const roleCounts: Record<string, number> = {};
   for (const p of participants) {
     roleCounts[p.role] = (roleCounts[p.role] ?? 0) + 1;
   }
-
-  // Debug
-  // console.log("[SessionReport] communicationMatrix received:", communicationMatrix);
-  // console.log("[SessionReport] communicationMatrix defined?", !!communicationMatrix);
-  // console.log("[SessionReport] headers.length:", communicationMatrix?.headers?.length);
-  // console.log("[SessionReport] render condition (headers.length > 1):", (communicationMatrix?.headers?.length ?? 0) > 1);
 
   return (
     <Document>
@@ -211,82 +211,6 @@ export function SessionSummaryReport({
             </Text>
           </View>
         ))}
-
-        {/* Communication matrix */}
-        {communicationMatrix && communicationMatrix.headers.length > 1 && (
-          <View style={styles.matrixSection}>
-            <Text style={styles.matrixTitle}>Communication Matrix</Text>
-            <Text style={styles.matrixSubtitle}>
-              Indicates participants who shared a chat room during the session
-            </Text>
-
-            {/* Header row */}
-            <View style={styles.matrixRow}>
-              <View style={styles.matrixCornerCell} />
-              {communicationMatrix.headers.map((h, i) => (
-                <View key={i} style={styles.matrixHeaderCell}>
-                  <Text style={styles.matrixHeaderText}>{h}</Text>
-                </View>
-              ))}
-            </View>
-
-            {/* Data rows */}
-            {communicationMatrix.matrix.map((row, ri) => (
-              <View
-                key={ri}
-                style={ri % 2 === 0 ? styles.matrixRow : styles.matrixRowAlt}
-              >
-                <View style={styles.matrixRowLabelCell}>
-                  <Text style={styles.matrixRowLabelText}>
-                    {communicationMatrix.headers[ri]}
-                  </Text>
-                </View>
-                {row.map((cell, ci) => (
-                  <View
-                    key={ci}
-                    style={
-                      ri === ci ? styles.matrixCellDiag : styles.matrixCell
-                    }
-                  >
-                    <Text
-                      style={
-                        ri === ci
-                          ? styles.matrixTextDiag
-                          : cell
-                            ? styles.matrixTextYes
-                            : styles.matrixTextNo
-                      }
-                    >
-                      {ri === ci ? "—" : cell ? "X" : ""}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Communication network graph */}
-        {/* {communicationMatrix && communicationMatrix.headers.length > 1 && (
-          <View style={styles.graphSection}>
-            <Text style={styles.graphTitle}>Communication Network</Text>
-            <Text style={styles.graphSubtitle}>
-              Each node is a participant; lines connect those who shared a chat
-              room
-            </Text>
-            <NetworkGraph {...communicationMatrix} />
-          </View>
-        )}
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>{sessionName}</Text>
-          <Text
-            style={styles.footerText}
-            render={({ pageNumber, totalPages }) =>
-              `${pageNumber} / ${totalPages}`
-            }
-          />
-        </View> */}
       </Page>
 
       {/* ── Facilitator Comments ─────────────────────────────────────────── */}
@@ -347,6 +271,133 @@ export function SessionSummaryReport({
               ))}
             </View>
           ))}
+
+          {phase.communicationMatrix &&
+            phase.communicationMatrix.headers.length > 1 && (
+              <View style={styles.matrixSection}>
+                <Text style={styles.matrixTitle}>Communication Matrix</Text>
+                <Text style={styles.matrixSubtitle}>
+                  X indicates at least one message was sent during this phase
+                </Text>
+
+                {/* "Message Recipient" merged banner above column headers */}
+                <View style={styles.matrixRecipientBanner}>
+                  <View style={styles.matrixRecipientBannerSpacer} />
+                  <View style={styles.matrixRecipientLabel}>
+                    <Text style={styles.matrixRecipientText}>
+                      Message Recipient
+                    </Text>
+                  </View>
+                </View>
+
+                {/* "Message Sender" merged col + table body */}
+                <View style={{ flexDirection: "row" }}>
+                  <View style={styles.matrixSenderCol}>
+                    <View
+                      style={{
+                        transform: "rotate(-90deg)",
+                        width: 60,
+                      }}
+                    >
+                      <Text style={styles.matrixSenderText}>
+                        Message Sender
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    {/* Column headers */}
+                    <View style={styles.matrixRow}>
+                      <View style={styles.matrixCornerCell} />
+                      {phase.communicationMatrix.headers.map((h, i) => (
+                        <View key={i} style={styles.matrixHeaderCell}>
+                          <Text style={styles.matrixHeaderText}>{h}</Text>
+                        </View>
+                      ))}
+                    </View>
+
+                    {/* Data rows */}
+                    {phase.communicationMatrix.matrix.map((row, ri) => (
+                      <View
+                        key={ri}
+                        style={
+                          ri % 2 === 0 ? styles.matrixRow : styles.matrixRowAlt
+                        }
+                      >
+                        <View style={styles.matrixRowLabelCell}>
+                          <Text style={styles.matrixRowLabelText}>
+                            {phase.communicationMatrix!.headers[ri]}
+                          </Text>
+                        </View>
+                        {row.map((cell, ci) => (
+                          <View
+                            key={ci}
+                            style={
+                              ri === ci
+                                ? styles.matrixCellDiag
+                                : styles.matrixCell
+                            }
+                          >
+                            <Text
+                              style={
+                                ri === ci
+                                  ? styles.matrixTextDiag
+                                  : cell
+                                    ? styles.matrixTextYes
+                                    : styles.matrixTextNo
+                              }
+                            >
+                              {ri === ci ? "—" : cell ? "X" : ""}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              </View>
+            )}
+
+          {phase.chatLog && phase.chatLog.length > 0 && (
+            <View style={styles.chatLogSection}>
+              <Text style={styles.chatLogTitle}>Message Log</Text>
+
+              <View style={styles.chatLogHeader}>
+                <Text style={[styles.chatLogColTime, styles.chatLogHeaderText]}>
+                  Time
+                </Text>
+                <Text style={[styles.chatLogColFrom, styles.chatLogHeaderText]}>
+                  From
+                </Text>
+                <Text style={[styles.chatLogColMsg, styles.chatLogHeaderText]}>
+                  Message
+                </Text>
+                <Text style={[styles.chatLogColTo, styles.chatLogHeaderText]}>
+                  To
+                </Text>
+              </View>
+
+              {phase.chatLog.map((entry, i) => (
+                <View
+                  key={i}
+                  style={i % 2 === 0 ? styles.chatLogRow : styles.chatLogRowAlt}
+                >
+                  <Text style={[styles.chatLogColTime, styles.chatLogCell]}>
+                    {entry.timestamp}
+                  </Text>
+                  <Text style={[styles.chatLogColFrom, styles.chatLogCell]}>
+                    {entry.senderLabel}
+                  </Text>
+                  <Text style={[styles.chatLogColMsg, styles.chatLogCell]}>
+                    {entry.message}
+                  </Text>
+                  <Text style={[styles.chatLogColTo, styles.chatLogCell]}>
+                    {entry.recipientLabels.join(", ")}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
 
           <View style={styles.footer}>
             <Text style={styles.footerText}>
