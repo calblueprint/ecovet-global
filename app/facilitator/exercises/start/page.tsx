@@ -229,7 +229,7 @@ export default function Page() {
             <NameInputField
               value={exerciseName}
               onChange={e => setExerciseName(e.target.value)}
-              placeholder="Exercise Name"
+              placeholder="Add Session Name"
             />
           </ExerciseNameInput>
 
