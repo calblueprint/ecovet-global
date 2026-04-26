@@ -170,24 +170,6 @@ export async function GET(
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 
-  // Cache check — return whatever PDF already exists in this session's folder.
-  // Since template names can't change, the filename is stable; we just return it.
-  const folderPath = `sessions/${sessionId}`;
-  const { data: existingFiles } = await supabase.storage
-    .from("reports")
-    .list(folderPath);
-
-  if (existingFiles && existingFiles.length > 0) {
-    const existing = existingFiles[0];
-    const { data: urlData } = supabase.storage
-      .from("reports")
-      .getPublicUrl(`${folderPath}/${existing.name}`);
-    const updatedAt =
-      existingFiles[0].updated_at ?? existingFiles[0].created_at;
-    const bust = updatedAt ? new Date(updatedAt).getTime() : Date.now();
-    return Response.json({ url: `${urlData.publicUrl}?t=${bust}` });
-  }
-
   const { data: session, error: sessionError } = await supabase
     .from("session")
     .select(
@@ -195,6 +177,7 @@ export async function GET(
       session_id,
       session_name,
       created_at,
+      is_finished,
       template_id,
       template ( template_name, objective, summary )
     `,
@@ -204,6 +187,26 @@ export async function GET(
 
   if (sessionError || !session) {
     return Response.json({ error: "Session not found" }, { status: 404 });
+  }
+
+  // Only use the cached file if the session is finished — in-progress PDFs
+  // are stale the moment new responses arrive, so always regenerate those.
+  const folderPath = `sessions/${sessionId}`;
+  if (session.is_finished) {
+    const { data: existingFiles } = await supabase.storage
+      .from("reports")
+      .list(folderPath);
+
+    if (existingFiles && existingFiles.length > 0) {
+      const existing = existingFiles[0];
+      const { data: urlData } = supabase.storage
+        .from("reports")
+        .getPublicUrl(`${folderPath}/${existing.name}`);
+      const updatedAt =
+        existingFiles[0].updated_at ?? existingFiles[0].created_at;
+      const bust = updatedAt ? new Date(updatedAt).getTime() : Date.now();
+      return Response.json({ url: `${urlData.publicUrl}?t=${bust}` });
+    }
   }
 
   const template = session.template as unknown as NestedTemplate | null;
