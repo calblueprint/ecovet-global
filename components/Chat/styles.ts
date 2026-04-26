@@ -99,11 +99,13 @@ export const ChatMessageContainer = styled.div`
   align-items: flex-start;
   gap: 0.6rem;
   align-self: stretch;
-  margin: 0 1.25rem;
+  padding: 0 1rem;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   overflow-x: clip;
+  scrollbar-width: thin;
+  margin: 0 0.1rem;
 `;
 
 export const TimeSeparatorBold = styled(Caption)`
