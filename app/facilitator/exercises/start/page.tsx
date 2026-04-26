@@ -23,10 +23,12 @@ import {
   ConfigRow,
   DeleteButton,
   DropdownContainer,
+  ExerciseNameInput,
   ExerciseSelectStyles,
   Heading4,
   IconButton,
   LayoutWrapper,
+  NameInputField,
   ParticipantTable,
   PrimaryActionArea,
   SideNavNewTemplateButton,
@@ -56,6 +58,7 @@ export default function Page() {
   const [roles, setRoles] = useState<Role[]>([]);
   const searchParams = useSearchParams();
   const preselectedTemplateId = searchParams.get("templateId");
+  const [exerciseName, setExerciseName] = useState("");
 
   const rowCounter = useRef(0);
   const [participants, setParticipants] = useState([
@@ -133,6 +136,7 @@ export default function Page() {
         profile.user_group_id as UUID,
         isForceAdvance,
         isAsync,
+        exerciseName || undefined,
       )) as UUID;
 
       console.log(sessionId);
@@ -220,6 +224,14 @@ export default function Page() {
       <LayoutWrapper>
         <StartContentWrapper>
           <Heading4>Start Exercise</Heading4>
+
+          <ExerciseNameInput>
+            <NameInputField
+              value={exerciseName}
+              onChange={e => setExerciseName(e.target.value)}
+              placeholder="Exercise Name"
+            />
+          </ExerciseNameInput>
 
           <ConfigRow>
             <DropdownContainer>

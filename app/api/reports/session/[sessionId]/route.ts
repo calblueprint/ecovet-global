@@ -431,8 +431,10 @@ export async function GET(
     return Response.json({ error: "PDF generation failed" }, { status: 500 });
   }
 
-  // Build friendly filename from template name + session creation date
-  const friendlyName = `${buildSessionDisplayName(template?.template_name, session.created_at)}.pdf`;
+  // Build friendly filename: use session_name if set, otherwise template name + date
+  const friendlyName = session.session_name
+    ? `${session.session_name}.pdf`
+    : `${buildSessionDisplayName(template?.template_name, session.created_at)}.pdf`;
   const fileName = `${folderPath}/${friendlyName}`;
 
   const { error: uploadError } = await supabase.storage
@@ -698,8 +700,10 @@ export async function POST(
     return Response.json({ error: "PDF generation failed" }, { status: 500 });
   }
 
-  // Build friendly filename from template name + session creation date
-  const friendlyName = `${buildSessionDisplayName(template?.template_name, session.created_at)}.pdf`;
+  // Build friendly filename: use session_name if set, otherwise template name + date
+  const friendlyName = session.session_name
+    ? `${session.session_name}.pdf`
+    : `${buildSessionDisplayName(template?.template_name, session.created_at)}.pdf`;
   const fileName = `sessions/${sessionId}/${friendlyName}`;
 
   const { error: uploadError } = await supabase.storage

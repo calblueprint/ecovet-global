@@ -43,10 +43,9 @@ export default function SessionFinish() {
   async function fetchOrGenerateReport() {
     if (!sessionId) return;
     const pdfInfo = await fetchPDFName(sessionId);
-    const sessions = buildSessionDisplayName(
-      pdfInfo.template_name,
-      pdfInfo.created_at,
-    );
+    const sessions = pdfInfo.session_name
+      ? pdfInfo.session_name
+      : buildSessionDisplayName(pdfInfo.template_name, pdfInfo.created_at);
     setPDFName(sessions);
     setIsGenerating(true);
     setPdfUrl(null);
