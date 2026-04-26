@@ -64,6 +64,7 @@ export default function SessionFlowPage() {
   );
   const [isForceAdvance, setIsForceAdvance] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [advancing, setAdvancing] = useState(false);
 
   const currentPhase = phases[phaseIdx] ?? null;
   const isLastPhase = phaseIdx === phases.length - 1;
@@ -362,8 +363,14 @@ export default function SessionFlowPage() {
   }
 
   async function handleContinue() {
-    if (isLastPhase) return;
-    setPhaseIdx(i => i + 1);
+    if (isLastPhase || advancing) return;
+    setAdvancing(true);
+    try {
+      await submitAnswers();
+      setPhaseIdx(i => Math.min(i + 1, phases.length - 1)); // hard cap
+    } finally {
+      setAdvancing(false);
+    }
   }
 
   async function handleBack() {
