@@ -85,8 +85,10 @@ export default function Chat({
     username: profile?.first_name ?? "Unknown User",
   });
 
-  const activeMessageList =
-    currentRoomId === announcementRoom.roomId ? announcements : chatMessages;
+  const isAnnoucementSelected = currentRoomId === announcementRoom.roomId;
+  const activeMessageList = isAnnoucementSelected
+    ? announcements
+    : chatMessages;
 
   useEffect(() => {
     currentRoomIdRef.current = currentRoomId;
@@ -293,10 +295,12 @@ export default function Chat({
         </ChatMessageContainer>
       </ContentContainer>
 
-      <ChatInputBar
-        sendMessage={onSendMessage}
-        disabled={currentRoomId === null && newChatUserIds.length === 0}
-      />
+      {!isAnnoucementSelected && (
+        <ChatInputBar
+          sendMessage={onSendMessage}
+          disabled={currentRoomId === null && newChatUserIds.length === 0}
+        />
+      )}
     </ChatContainer>
   );
 }

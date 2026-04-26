@@ -5,6 +5,7 @@ import { B1, B2, Caption, TextProps, TextStyles } from "@/styles/text";
 export const MessageContent = styled(B2)`
   color: ${COLORS.black70};
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 `;
 
 export const MessageContentBubble = styled.div<{ $fromUser: boolean }>`
@@ -78,6 +79,7 @@ export const FullMessageContainer = styled.div<{
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  max-width: 75%;
   align-self: ${({ $fromUser }) => ($fromUser ? "end" : "start")};
   padding-top: ${({ $doubleText }) => ($doubleText ? "0.4rem" : "0rem")};
 `;
@@ -101,6 +103,7 @@ export const ChatMessageContainer = styled.div`
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: clip;
 `;
 
 export const TimeSeparatorBold = styled(Caption)`
