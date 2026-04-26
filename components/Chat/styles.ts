@@ -192,12 +192,12 @@ export const ContentContainer = styled.div`
 `;
 
 export const ChatSelectedBorder = styled.div<{
-  color?: string;
-  selected: boolean;
+  $selected: boolean;
+  $unread: boolean;
 }>`
-  padding: ${({ selected }) => (selected ? "1" : "2")}px;
-  border: ${({ selected }) => (selected ? "1" : "0")}px solid
-    ${({ color }) => color ?? COLORS.teal};
+  padding: ${({ $selected, $unread }) => ($unread || $selected ? "1" : "2")}px;
+  border: ${({ $selected, $unread }) => ($unread || $selected ? "1" : "0")}px
+    solid ${({ $selected }) => ($selected ? COLORS.teal : COLORS.tagRed)};
   border-radius: 8px;
 `;
 
