@@ -42,7 +42,6 @@ export const DropDownContainer = styled.div<{ $open: boolean }>`
   height: 3rem;
   align-items: center;
   flex-direction: column;
-  background-color: ${COLORS.oat_light};
   height: 3rem;
 `;
 
@@ -63,8 +62,9 @@ export const StyledMenuPaper = styled(Paper)`
   align-items: flex-start !important;
 
   border-radius: 0.625rem !important;
-  border: 0.0625 solid ${COLORS.oat_light} !important;
+  border: 1px solid ${COLORS.oat_medium} !important;
   background: ${COLORS.white} !important;
+  box-shadow: none !important;
 `;
 
 export const StyledMenuList = styled(MenuList)`

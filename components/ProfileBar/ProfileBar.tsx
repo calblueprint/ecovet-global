@@ -6,7 +6,7 @@ import { RxExit } from "react-icons/rx";
 import { useRouter } from "next/navigation";
 import {
   ClickAwayListener,
-  Grow,
+  Fade,
   MenuItem,
   MenuList,
   Paper,
@@ -23,7 +23,7 @@ import {
   StyledMenuItem,
   StyledMenuList,
   StyledMenuPaper,
-} from "./style";
+} from "./styles";
 
 type IconProps = {
   name: IconType;
@@ -48,19 +48,27 @@ const ProfileBar = () => {
   const [open, setOpen] = useState(false);
   const anchorRef = React.useRef<HTMLDivElement>(null);
   const options = [
-    <MenuOptionsDiv>
-      <RxExit color={COLORS.white} />
-      <B2>Edit Profile</B2>
-    </MenuOptionsDiv>,
-    <MenuOptionsDiv>
-      <RxExit color={COLORS.white} />
-      <B2>Reset Password</B2>
-    </MenuOptionsDiv>,
-    <MenuOptionsDiv>
-      <RxExit color={COLORS.mediumElectricBlue} />
-      <B2>Logout</B2>
-    </MenuOptionsDiv>,
+    {
+      label: "Edit Profile",
+      iconColor: COLORS.white,
+      route: "../onboarding/edit-profile",
+    },
+    {
+      label: "Reset Password",
+      iconColor: COLORS.white,
+      route: "../auth/reset-password",
+    },
+    {
+      label: "Logout",
+      iconColor: COLORS.mediumElectricBlue,
+      route: "../auth/sign-in",
+    },
   ];
+
+  const handleMenuItemClick = (route: string) => {
+    setOpen(false);
+    router.push(route);
+  };
 
   const handleClose = (event: Event) => {
     if (
@@ -71,18 +79,6 @@ const ProfileBar = () => {
     }
 
     setOpen(false);
-  };
-
-  const handleMenuItemClick = (index: number) => {
-    setOpen(false);
-
-    if (index === 0) {
-      router.push("../onboarding/edit-profile");
-    } else if (index === 1) {
-      router.push("../auth/reset-password");
-    } else if (index === 2) {
-      router.push("../auth/sign-in");
-    }
   };
 
   return (
@@ -110,7 +106,7 @@ const ProfileBar = () => {
         disablePortal
       >
         {({ TransitionProps, placement }) => (
-          <Grow
+          <Fade
             {...TransitionProps}
             style={{
               transformOrigin:
@@ -120,18 +116,21 @@ const ProfileBar = () => {
             <StyledMenuPaper>
               <ClickAwayListener onClickAway={handleClose}>
                 <StyledMenuList id="split-button-menu">
-                  {options.map((option, index) => (
+                  {options.map(option => (
                     <StyledMenuItem
-                      key={index}
-                      onClick={() => handleMenuItemClick(index)}
+                      key={option.label}
+                      onClick={() => handleMenuItemClick(option.route)}
                     >
-                      {option}
+                      <MenuOptionsDiv>
+                        <RxExit color={option.iconColor} />
+                        <B2>{option.label}</B2>
+                      </MenuOptionsDiv>
                     </StyledMenuItem>
                   ))}
                 </StyledMenuList>
               </ClickAwayListener>
             </StyledMenuPaper>
-          </Grow>
+          </Fade>
         )}
       </Popper>
     </MainDiv>
