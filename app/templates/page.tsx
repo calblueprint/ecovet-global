@@ -17,8 +17,11 @@ import {
   LayoutWrapper,
   TemplateMainBox,
   TitleInput,
+  TitleRow,
 } from "@/app/templates/styles";
+import Pencil from "@/assets/images/pencil.svg";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
+import { ImageLogo } from "@/components/styles";
 import WarningModal, {
   WarningAction,
 } from "@/components/WarningModal/WarningModal";
@@ -37,6 +40,7 @@ import {
   ActionRow,
   ActionText,
   BackLink,
+  HeaderButtonDark,
   LoadingMessages,
   RoleItem,
   RolesListContainer,
@@ -366,29 +370,34 @@ export default function TemplateBuilderPage() {
           <SidebarContent>
             <div>
               <BackLink onClick={handleBackToList}>← Catalogue</BackLink>
-              {isRenaming ? (
-                <Title
-                  as="input"
-                  value={templateName as string}
-                  autoFocus
-                  onChange={e => handleTemplateRename(e.target.value)}
-                  onBlur={() => setIsRenaming(false)}
-                  onKeyDown={e => {
-                    if (e.key === "Enter") setIsRenaming(false);
-                  }}
-                />
-              ) : (
-                <Title>{templateName || "Untitled"}</Title>
-              )}
-              <ActionRow>
+              <TitleRow>
+                {isRenaming ? (
+                  <Title
+                    as="input"
+                    value={templateName as string}
+                    autoFocus
+                    onChange={e => handleTemplateRename(e.target.value)}
+                    onBlur={() => setIsRenaming(false)}
+                    onKeyDown={e => {
+                      if (e.key === "Enter") setIsRenaming(false);
+                    }}
+                  />
+                ) : (
+                  <Title>{templateName || "Untitled"}</Title>
+                )}
                 <ActionText onClick={() => setIsRenaming(true)}>
-                  {" "}
-                  # Rename
+                  <ImageLogo
+                    src={Pencil.src}
+                    alt="Pencil"
+                    width={17}
+                    height={17}
+                  />
                 </ActionText>
-                <ActionText onClick={handleStartExercise}>
-                  {" "}
+              </TitleRow>
+              <ActionRow>
+                <HeaderButtonDark onClick={handleStartExercise}>
                   # Start exercise
-                </ActionText>
+                </HeaderButtonDark>
               </ActionRow>
             </div>
 
