@@ -123,7 +123,10 @@ export function TagAutocomplete({
         </li>
       )}
       renderInput={params => (
-        <TextField {...params} placeholder="Search or create tag..." />
+        <TextField
+          {...params}
+          placeholder={value.length === 0 ? "Search or create tag..." : ""}
+        />
       )}
       slotProps={{
         paper: {

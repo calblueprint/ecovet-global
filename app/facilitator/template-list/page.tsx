@@ -35,10 +35,10 @@ import {
 import TemplateSideBar from "./components/TemplateSidebar";
 import {
   AssociatedTags,
+  DateColumn,
   EditIconWrapper,
   FilterPlusSearch,
   NameColumn,
-  RowActions,
   SearchWrapper,
   TemplateRow,
 } from "./styles";
@@ -394,25 +394,38 @@ export default function TemplateListPage() {
 
               {filteredTemplates.map(t => (
                 <TemplateRow key={t.template_id}>
-                  <NameColumn>
+                  <NameColumn
+                    onClick={() =>
+                      router.push(
+                        `/templates?templateId=${t.template_id}&fromTemplateList=true`,
+                      )
+                    }
+                  >
                     <span
                       onClick={() =>
-                        router.replace(
-                          `/facilitator/exercises/start?templateId=${t.template_id}`,
+                        router.push(
+                          `/templates?templateId=${t.template_id}&fromTemplateList=true`,
                         )
                       }
                     >
                       {t.template_name}
                     </span>
                   </NameColumn>
-
-                  <div>
-                    {new Date(t.timestamp).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </div>
+                  <DateColumn
+                    onClick={() =>
+                      router.push(
+                        `/templates?templateId=${t.template_id}&fromTemplateList=true`,
+                      )
+                    }
+                  >
+                    <div>
+                      {new Date(t.timestamp).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </div>
+                  </DateColumn>
 
                   <AssociatedTags>
                     <TagAutocomplete
@@ -444,24 +457,6 @@ export default function TemplateListPage() {
                       }
                     />
                   </AssociatedTags>
-
-                  <RowActions className="row-actions">
-                    <EditIconWrapper
-                      onClick={e => {
-                        e.stopPropagation();
-                        router.push(
-                          `/templates?templateId=${t.template_id}&fromTemplateList=true`,
-                        );
-                      }}
-                    >
-                      <ImageLogo
-                        src={Pencil.src}
-                        alt="Pencil"
-                        width={17}
-                        height={17}
-                      />
-                    </EditIconWrapper>
-                  </RowActions>
                 </TemplateRow>
               ))}
             </MainDiv>
