@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { produce } from "immer";
-import { addNewOption } from "@/actions/supabase/queries/prompt";
+import {
+  addNewOption,
+  replacePromptOptions,
+} from "@/actions/supabase/queries/prompt";
 import {
   createPhases,
   createPrompts,
@@ -20,6 +23,7 @@ import {
   TitleRow,
 } from "@/app/templates/styles";
 import Pencil from "@/assets/images/pencil.svg";
+import Play from "@/assets/images/play.svg";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import { ImageLogo } from "@/components/styles";
 import WarningModal, {
@@ -31,6 +35,7 @@ import {
   Prompt,
   Role,
   RolePhase,
+  StagedOption,
   Template,
   UUID,
 } from "@/types/schema";
@@ -54,7 +59,9 @@ import {
 interface FullTemplateResponse extends Template {
   roles: Role[];
   phases: (EditablePhase & {
-    role_phases: (RolePhase & { prompts: Prompt[] })[];
+    role_phases: (RolePhase & {
+      prompts: (Prompt & { options?: StagedOption[] })[];
+    })[];
   })[];
 }
 
@@ -92,6 +99,15 @@ const createInitialStore = (): LocalStore => {
   };
 };
 
+interface FullTemplateResponse extends Template {
+  roles: Role[];
+  phases: (EditablePhase & {
+    role_phases: (RolePhase & {
+      prompts: (Prompt & { options?: StagedOption[] })[];
+    })[];
+  })[];
+}
+
 function transformToLocalStore(data: FullTemplateResponse): LocalStore {
   const rolesById: Record<number | UUID, Role | Template> = { 1: data };
   const roleIds: (number | UUID)[] = [1];
@@ -101,6 +117,7 @@ function transformToLocalStore(data: FullTemplateResponse): LocalStore {
   const promptById: Record<UUID, Prompt> = {};
   const rolePhaseIndex: Record<UUID, Record<UUID, UUID>> = {};
   const promptIndex: Record<UUID, UUID[]> = {};
+  const optionsByPromptId: Record<UUID, StagedOption[]> = {};
 
   data.roles?.forEach(role => {
     rolesById[role.role_id] = role;
@@ -120,6 +137,7 @@ function transformToLocalStore(data: FullTemplateResponse): LocalStore {
       rp.prompts?.forEach(p => {
         promptById[p.prompt_id] = p;
         promptIndex[rp.role_phase_id].push(p.prompt_id);
+        optionsByPromptId[p.prompt_id] = p.options ?? [];
       });
     });
   });
@@ -134,7 +152,7 @@ function transformToLocalStore(data: FullTemplateResponse): LocalStore {
     rolePhaseIndex,
     promptById,
     promptIndex,
-    optionsByPromptId: {},
+    optionsByPromptId,
   };
 }
 
@@ -239,9 +257,7 @@ export default function TemplateBuilderPage() {
             i + 1,
           );
           const options = saveStore.optionsByPromptId[promptID] ?? [];
-          for (const opt of options) {
-            await addNewOption(promptID, opt.option_text ?? "");
-          }
+          await replacePromptOptions(promptID, options);
         }
       }
     } catch (err) {
@@ -396,7 +412,8 @@ export default function TemplateBuilderPage() {
               </TitleRow>
               <ActionRow>
                 <HeaderButtonDark onClick={handleStartExercise}>
-                  # Start exercise
+                  <ImageLogo src={Play.src} alt="Play" width={12} height={12} />
+                  Start exercise
                 </HeaderButtonDark>
               </ActionRow>
             </div>

@@ -1,4 +1,6 @@
 import { useState } from "react";
+import Check from "@/assets/images/checkmark.svg";
+import { ImageLogo } from "@/components/styles";
 import { EditablePhase, Role, Template, UUID } from "@/types/schema";
 import {
   BigInput,
@@ -55,7 +57,14 @@ export default function TemplateOverviewForm({
           <PhaseTemplateHeader>Scenario Overview</PhaseTemplateHeader>
 
           <HeaderButtonDark onClick={onSaveAndExit}>
-            + Save and exit
+            <ImageLogo
+              src={Check.src}
+              alt="Checkmark"
+              width={12}
+              height={12}
+              padding-right={1}
+            />
+            Save and exit
           </HeaderButtonDark>
         </RoleHeader>
       </RoleHeaderContainer>

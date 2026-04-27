@@ -3,7 +3,7 @@
 import type { Template, UUID } from "@/types/schema";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowDown, ArrowUp, ArrowUpDown, Pencil } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import {
   assignTagToTemplate,
   createTag,
@@ -12,7 +12,9 @@ import {
   removeTagFromTemplate,
 } from "@/actions/supabase/queries/tag";
 import { fetchTemplatesWithTags } from "@/actions/supabase/queries/templates";
+import Pencil from "@/assets/images/pencil.svg";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
+import { ImageLogo } from "@/components/styles";
 import { Tag } from "@/components/Tag/TagCreator";
 import { TagAutocomplete } from "@/components/TagAutoComplete/TagAutoComplete";
 import COLORS from "@/styles/colors";
@@ -452,7 +454,12 @@ export default function TemplateListPage() {
                         );
                       }}
                     >
-                      <Pencil size={16} />
+                      <ImageLogo
+                        src={Pencil.src}
+                        alt="Pencil"
+                        width={17}
+                        height={17}
+                      />
                     </EditIconWrapper>
                   </RowActions>
                 </TemplateRow>
