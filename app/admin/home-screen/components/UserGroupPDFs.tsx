@@ -92,10 +92,10 @@ export default function UserGroupPDFs({ userGroup }: { userGroup: UUID }) {
     <Container>
       <Header>
         <Title>
-          {activeTab === "active" ? "Active" : "Completed"} ({currentCount})
+          {activeTab === "active" ? "Active Sessions" : "Completed Sessions"} (
+          {currentCount})
         </Title>
       </Header>
-      <WarningText>Files will be deleted after 3 days</WarningText>
 
       <TabsWrapper>
         <TabButton

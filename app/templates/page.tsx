@@ -452,7 +452,7 @@ export default function TemplateBuilderPage() {
         onClose={handleBackWarningClose}
         title="Unsaved changes"
         caption="You have unsaved changes. What would you like to do?"
-        cancelLabel="Keep editing"
+        noCancel={true}
         confirmLabel="Leave without saving"
         primaryLabel="Save and leave"
         loading={saving}

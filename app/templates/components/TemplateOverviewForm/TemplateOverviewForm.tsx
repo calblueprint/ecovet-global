@@ -160,17 +160,9 @@ export default function TemplateOverviewForm({
                 <DeleteIconButton
                   type="button"
                   aria-label={`Delete ${role.role_name || `Role ${index + 1}`}`}
-                  onClick={() => {
-                    if (
-                      confirm(
-                        `Delete "${role.role_name || `Role ${index + 1}`}"?`,
-                      )
-                    ) {
-                      onRemoveRole(role.role_id as UUID);
-                    }
-                  }}
+                  onClick={() => onRemoveRole(role.role_id)}
                 >
-                  x
+                  ×
                 </DeleteIconButton>
               </CardTitle>
               <DummyInput
