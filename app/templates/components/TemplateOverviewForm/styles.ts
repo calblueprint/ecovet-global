@@ -1,32 +1,33 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Flex } from "@/styles/containers";
+import { Sans } from "@/styles/fonts";
 import { B2, Caption, H3 } from "@/styles/text";
 
 export const FieldCard = styled.div`
   display: flex;
-  padding: 16px;
+  padding: 1rem;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
-  gap: 16px;
+  gap: 0.7rem;
   align-self: stretch;
 
-  border-radius: 8px;
+  border-radius: 0.4rem;
   border: 1px solid ${COLORS.oat_medium};
   background: ${COLORS.oat_light};
 `;
 
-export const BigInput = styled.input.attrs({
-  type: "text",
-})`
-  display: flex;
+export const BigInput = styled.textarea`
+  width: 100%;
+  box-sizing: border-box;
   padding: 10px 12px;
-  align-items: center;
-  gap: 10px;
-  flex: 1 0 0;
-  align-self: stretch;
-  font-size: 0.75rem;
+  font-size: 13px;
+  font-family: ${Sans.style.fontFamily};
+
+  resize: none;
+  overflow: hidden;
+  min-height: 5rem;
 
   border-radius: 4px;
   border: 1px solid ${COLORS.oat_medium};

@@ -319,6 +319,7 @@ export default function TemplateBuilderPage() {
   };
 
   const handleStartExercise = () => {
+    saveTemplate();
     if (!localStore) return;
     if (!isFromTemplateList) {
       alert("Please save the template before starting.");
@@ -432,8 +433,18 @@ export default function TemplateBuilderPage() {
               value={selectedPhaseId}
               onChange={(val: string | null) => {
                 setSelectedPhaseId(val);
-                if (activeIds.roleId !== 1) {
-                  setActiveIds({ roleId: 1, rolePhaseId: null });
+                if (val && activeIds.roleId !== 1 && localStore) {
+                  const newRolePhaseId =
+                    localStore.rolePhaseIndex[activeIds.roleId]?.[
+                      val as UUID
+                    ] ?? null;
+                  setActiveIds({
+                    roleId: activeIds.roleId,
+                    rolePhaseId: newRolePhaseId,
+                  });
+                }
+                if (!val && activeIds.roleId !== 1) {
+                  setActiveIds({ roleId: activeIds.roleId, rolePhaseId: null });
                 }
               }}
               isClearable
@@ -469,6 +480,7 @@ export default function TemplateBuilderPage() {
             update={updateLocalStore}
             saveTemplate={saveTemplate}
             setSelectedPhaseId={setSelectedPhaseId}
+            saving={saving}
           />
         </TemplateMainBox>
       </LayoutWrapper>

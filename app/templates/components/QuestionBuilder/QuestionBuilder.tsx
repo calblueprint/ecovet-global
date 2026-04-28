@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button, Checkbox, Radio, RadioGroup } from "@mui/material";
 import Check from "@/assets/images/checkmark.svg";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
@@ -10,6 +10,7 @@ import {
   StagedOption,
   UUID,
 } from "@/types/schema";
+import { AutoGrowBigInput } from "../TemplateOverviewForm/AutoGrow";
 import {
   AddNewOptionStyled,
   AddNewOptionTextStyled,
@@ -48,6 +49,7 @@ export default function QuestionBuilder({
   onChange,
   onNextPhase,
   onSaveAndExit,
+  saving,
 }: {
   value: RoleFormInput;
   rolePhaseId: UUID;
@@ -59,9 +61,11 @@ export default function QuestionBuilder({
   ) => UUID | null | void;
   onNextPhase: () => void;
   onSaveAndExit: () => void;
+  saving: boolean;
 }) {
   const rolePhase = value.rolePhases[rolePhaseId];
   const [focusedPromptId, setFocusedPromptId] = useState<UUID | null>(null);
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   function handleTypeChange(promptID: UUID, newType: PromptType) {
     onChange(promptID, "prompt_type", newType);
@@ -107,7 +111,17 @@ export default function QuestionBuilder({
       "insert_prompt_at",
       index + 1,
     );
-    if (newId) setFocusedPromptId(newId);
+    if (newId) focusAndScrollTo(newId);
+  }
+
+  function focusAndScrollTo(promptID: UUID) {
+    setFocusedPromptId(promptID);
+    requestAnimationFrame(() => {
+      cardRefs.current[promptID]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    });
   }
 
   const promptIds = value.promptIndex[rolePhase.role_phase_id] ?? [];
@@ -123,34 +137,41 @@ export default function QuestionBuilder({
 
           <HeaderButtonGroup>
             <HeaderButtonLight
-              onClick={() =>
-                onChange(
+              onClick={() => {
+                const newId = onChange(
                   rolePhase.role_phase_id,
                   "add_prompt",
                   rolePhase.role_phase_id,
-                )
-              }
+                );
+                if (newId) focusAndScrollTo(newId);
+              }}
             >
               + Question
             </HeaderButtonLight>
             <HeaderButtonDark onClick={onNextPhase}>
               Next phase
             </HeaderButtonDark>
-            <HeaderButtonDark onClick={onSaveAndExit}>
-              <ImageLogo
-                src={Check.src}
-                alt="Checkmark"
-                width={12}
-                height={12}
-                padding-right={1}
-              />
-              Save and exit
+            <HeaderButtonDark onClick={onSaveAndExit} disabled={saving}>
+              {saving ? (
+                "Saving..."
+              ) : (
+                <>
+                  <ImageLogo
+                    src={Check.src}
+                    alt="Checkmark"
+                    width={12}
+                    height={12}
+                    padding-right={1}
+                  />
+                  Save and exit
+                </>
+              )}
             </HeaderButtonDark>
           </HeaderButtonGroup>
         </RoleHeader>
 
         <RoleDescriptionTemplate>
-          <RolePhaseDescriptionInput
+          <AutoGrowBigInput
             placeholder="Role Phase description..."
             value={rolePhase.role_phase_description ?? ""}
             onChange={e => onChange(rolePhaseId, "description", e.target.value)}
@@ -161,7 +182,6 @@ export default function QuestionBuilder({
       <PhaseCard
         key={rolePhase.role_phase_id}
         onClick={e => {
-          // Clicking the card background (not a question) clears focus
           if (e.target === e.currentTarget) setFocusedPromptId(null);
         }}
       >
@@ -173,7 +193,12 @@ export default function QuestionBuilder({
           const isLast = j === promptIds.length - 1;
 
           return (
-            <div key={promptID}>
+            <div
+              key={promptID}
+              ref={el => {
+                cardRefs.current[promptID] = el;
+              }}
+            >
               <FieldCard
                 onClick={() => setFocusedPromptId(promptID)}
                 $focused={isFocused}

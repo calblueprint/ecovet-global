@@ -24,6 +24,7 @@ export default function TemplateBuilder({
   update,
   saveTemplate,
   setSelectedPhaseId,
+  saving,
 }: {
   activeIds: ActiveIds;
   setActiveIds: React.Dispatch<React.SetStateAction<ActiveIds>>;
@@ -32,6 +33,7 @@ export default function TemplateBuilder({
   update: (updater: (draft: LocalStore) => void) => void;
   saveTemplate: () => Promise<void>;
   setSelectedPhaseId: React.Dispatch<React.SetStateAction<string | null>>;
+  saving: boolean;
 }) {
   const router = useRouter();
   const TEMPLATE_INDEX = 1;
@@ -337,6 +339,7 @@ export default function TemplateBuilder({
                 onUpdatePhaseDescription={updatePhaseDescription}
                 onUpdateRoleDescription={updateRoleDescription}
                 onSaveAndExit={handleSaveAndExit}
+                saving={saving}
               />
             ) : (
               <QuestionBuilder
@@ -361,6 +364,7 @@ export default function TemplateBuilder({
                 onChange={setActiveUpdate}
                 onNextPhase={handleNextPhase}
                 onSaveAndExit={handleSaveAndExit}
+                saving={saving}
               />
             )}
           </PanelCard>

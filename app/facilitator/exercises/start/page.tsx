@@ -14,7 +14,6 @@ import { fetchTemplatesExercise } from "@/actions/supabase/queries/templates";
 import { fetchUserGroupMembers } from "@/actions/supabase/queries/user-groups";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
-import InviteComponent from "@/components/InviteComponent/InviteComponent";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
   CheckboxInput,
@@ -297,11 +296,6 @@ export default function Page() {
                     customStyles={ExerciseSelectStyles}
                     selectRef={roleRef}
                     onChange={val => updateParticipant(i, "role", val)}
-                    onKeyDown={e => {
-                      if (e.key === "Enter") {
-                        setTimeout(() => addParticipantRow(), 50);
-                      }
-                    }}
                   />
                 </div>
                 <DeleteButton onClick={() => removeParticipantRow(i)}>

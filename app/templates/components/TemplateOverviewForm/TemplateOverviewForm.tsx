@@ -2,6 +2,7 @@ import { useState } from "react";
 import Check from "@/assets/images/checkmark.svg";
 import { ImageLogo } from "@/components/styles";
 import { EditablePhase, Role, Template, UUID } from "@/types/schema";
+import { AutoGrowBigInput } from "./AutoGrow";
 import {
   BigInput,
   CardTitle,
@@ -34,6 +35,7 @@ export default function TemplateOverviewForm({
   onUpdatePhaseDescription,
   onUpdateRoleDescription,
   onSaveAndExit,
+  saving,
 }: {
   value: Template;
   phases: EditablePhase[];
@@ -48,6 +50,7 @@ export default function TemplateOverviewForm({
   onUpdatePhaseDescription: (phase_id: UUID, description: string) => void;
   onUpdateRoleDescription: (role_id: UUID, description: string) => void;
   onSaveAndExit: () => void;
+  saving: boolean;
 }) {
   const [activeTab, setActiveTab] = useState<"phases" | "roles">("phases");
   return (
@@ -56,22 +59,28 @@ export default function TemplateOverviewForm({
         <RoleHeader>
           <PhaseTemplateHeader>Scenario Overview</PhaseTemplateHeader>
 
-          <HeaderButtonDark onClick={onSaveAndExit}>
-            <ImageLogo
-              src={Check.src}
-              alt="Checkmark"
-              width={12}
-              height={12}
-              padding-right={1}
-            />
-            Save and exit
+          <HeaderButtonDark onClick={onSaveAndExit} disabled={saving}>
+            {saving ? (
+              "Saving..."
+            ) : (
+              <>
+                <ImageLogo
+                  src={Check.src}
+                  alt="Checkmark"
+                  width={12}
+                  height={12}
+                  padding-right={1}
+                />
+                Save and exit
+              </>
+            )}
           </HeaderButtonDark>
         </RoleHeader>
       </RoleHeaderContainer>
 
       <FieldCard>
         <FieldLegend>Summary</FieldLegend>
-        <BigInput
+        <AutoGrowBigInput
           name="template_summary"
           placeholder="Summary"
           value={value.summary ?? ""}
@@ -81,7 +90,7 @@ export default function TemplateOverviewForm({
 
       <FieldCard>
         <FieldLegend>Setting</FieldLegend>
-        <BigInput
+        <AutoGrowBigInput
           name="template_setting"
           placeholder="Setting"
           value={value.setting ?? ""}
@@ -91,7 +100,7 @@ export default function TemplateOverviewForm({
 
       <FieldCard>
         <FieldLegend>Current Activity</FieldLegend>
-        <BigInput
+        <AutoGrowBigInput
           name="template_activity"
           placeholder="Current activity"
           value={value.current_activity ?? ""}
@@ -139,7 +148,7 @@ export default function TemplateOverviewForm({
                 placeholder={`Phase ${index + 1}`}
                 onChange={e => onRenamePhase(phase.phase_id, e.target.value)}
               />
-              <DummyInput
+              <AutoGrowBigInput
                 value={phase.phase_description ?? ""}
                 placeholder={`Enter phase description....`}
                 onChange={e =>
@@ -181,7 +190,7 @@ export default function TemplateOverviewForm({
                   onRenameRole(role.role_id as UUID, e.target.value)
                 }
               />
-              <DummyInput
+              <AutoGrowBigInput
                 value={role.role_description ?? ""}
                 placeholder="Role description..."
                 onChange={e =>
