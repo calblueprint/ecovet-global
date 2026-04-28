@@ -88,6 +88,7 @@ export const PromptWrapper = styled.div`
   flex-direction: column;
   gap: 0.75rem;
   padding-left: 2.5rem;
+  padding-bottom: 2rem;
   position: relative;
 `;
 
@@ -184,6 +185,35 @@ export const PageLayout = styled.div`
   width: 100%;
   height: 100vh;
   overflow-y: hidden;
+`;
+
+export const NudgeButton = styled.button<{ async?: boolean }>`
+  display: ${({ async }) => (async ? "flex" : "none")};
+  width: 6rem;
+  padding: 0.5rem 0.75rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.625rem;
+  border-radius: 0.25rem;
+  background-color: ${COLORS.darkElectricBlue};
+  border: none;
+  font-family: ${Sans.style.fontFamily};
+  color: ${COLORS.white};
+  font-size: 0.8rem;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+`;
+
+export const Header = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 60rem;
 `;
 
 export const Sidebar = styled.aside`

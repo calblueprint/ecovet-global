@@ -6,8 +6,12 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import supabase from "@/actions/supabase/client";
-import { getProfileById } from "@/actions/supabase/queries/profile";
 import {
+  fetchEmailByUserId,
+  getProfileById,
+} from "@/actions/supabase/queries/profile";
+import {
+  fetchIsSessionAsync,
   fetchPhases,
   fetchPromptsWithResponses,
   fetchRoleName,
@@ -17,15 +21,19 @@ import {
   getAllPhaseIds,
   sessionParticipants,
 } from "@/actions/supabase/queries/sessions";
+import { sendEmailReminder } from "@/actions/supabase/send-email";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
+import NudgeWarningModal from "@/components/NudgeWarningModal/NudgeWarningModal";
 import { Heading3, SilverHeading3, SilverText } from "../styles";
 import {
   AnnouncementsPanel,
   ContentDiv,
+  Header,
   InfoBox,
   InfoGrid,
   InfoLabel,
   InfoValue,
+  NudgeButton,
   OptionList,
   OptionRow,
   PageLayout,
@@ -52,7 +60,7 @@ export default function ParticipantDetailView() {
   const sessionId = searchParams.get("sessionId") as UUID | null;
 
   const [name, setName] = useState("");
-  const [email, setEmail] = useState<string | null>(null);
+  const [email, setEmail] = useState<string>("");
   const [prompts, setPrompts] = useState<PromptWithResponse[]>([]);
   const [selectedPhaseId, setSelectedPhaseId] = useState<UUID | null>(null);
   const [phaseIds, setPhaseIds] = useState<UUID[]>([]);
@@ -65,8 +73,32 @@ export default function ParticipantDetailView() {
   const [loading, setLoading] = useState(true);
   const [roleId, setRoleId] = useState<UUID | null>(null);
   const [roleName, setRoleName] = useState<string | null>(null);
+  const [isAsync, setIsAsync] = useState<boolean>(false);
+
+  const [openWarning, setOpenWarning] = useState(false);
+  const [sending, setSending] = useState(false);
   const router = useRouter();
   const userSelectedRef = useRef(false);
+
+  const handleNudgeConfirm = async () => {
+    if (!userId || !sessionId) return;
+    try {
+      setSending(true);
+      setOpenWarning(false);
+      await sendEmailReminder(email, sessionId);
+    } catch (err) {
+      console.error("Error sending nudge:", err);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  async function loadIsAsync() {
+    if (!sessionId) return;
+    const is_async = await fetchIsSessionAsync(sessionId);
+    console.log(is_async);
+    setIsAsync(is_async ? is_async : false);
+  }
 
   async function loadData() {
     if (!sessionId || !userId) return;
@@ -76,6 +108,10 @@ export default function ParticipantDetailView() {
     if (!participant) return;
 
     const email = await getProfileById(userId);
+    if (!email.email) {
+      setEmail("no email");
+      return;
+    }
     setEmail(email.email);
 
     setName(
@@ -102,7 +138,7 @@ export default function ParticipantDetailView() {
 
     const roleId = participant.role_id;
     const roleName = await fetchRoleName(roleId);
-    setRoleName(roleName);
+    setRoleName(roleName.role_name);
     const templateIdData = await fetchTemplateId(sessionId);
     const templateId = templateIdData?.template_id;
 
@@ -154,6 +190,7 @@ export default function ParticipantDetailView() {
 
   useEffect(() => {
     loadData();
+    loadIsAsync();
 
     // Live updates when responses change
     const channel = supabase
@@ -180,6 +217,11 @@ export default function ParticipantDetailView() {
   return (
     <>
       <TopNavBar />
+      <NudgeWarningModal
+        open={openWarning}
+        onCancel={() => setOpenWarning(false)}
+        onConfirm={handleNudgeConfirm}
+      />
 
       <PageLayout>
         <Sidebar>
@@ -206,9 +248,18 @@ export default function ParticipantDetailView() {
             {" "}
             ← Back
           </SilverText>
-          <Heading3>
-            {name}, {roleName} <SilverHeading3>(Responses)</SilverHeading3>
-          </Heading3>
+          <Header>
+            <Heading3>
+              {name}, {roleName} <SilverHeading3>(Responses)</SilverHeading3>
+            </Heading3>
+            <NudgeButton
+              async={isAsync}
+              onClick={() => setOpenWarning(true)}
+              disabled={sending}
+            >
+              {sending ? "Sending..." : "Nudge"}
+            </NudgeButton>
+          </Header>
           <ParticipantInformation>
             <b>Participant Information</b>
             <InfoGrid>
