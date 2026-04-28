@@ -33,7 +33,6 @@ export const AddInviteFormDiv = styled.div`
 
 export const EmailDiv = styled.div<{ $isAdmin?: boolean }>`
   display: flex;
-  height: auto;
   width: 100%;
   ${({ $isAdmin }) =>
     $isAdmin
@@ -81,7 +80,7 @@ export const EmailInput = styled.textarea`
 export const EmailTextArea = styled.textarea`
   display: block;
   width: 100%;
-  min-height: 4rem;
+  min-height: 4.2rem;
   overflow-y: hidden;
   padding: 0.75rem;
   box-sizing: border-box;
@@ -107,6 +106,7 @@ export const EmailTextArea = styled.textarea`
 export const SubmitButton = styled.button<{ $isAdmin?: boolean }>`
   display: flex;
   justify-content: center;
+  height: 2rem;
   align-items: center;
   border-radius: 0.25rem;
   border: 1px transparent;
@@ -224,4 +224,41 @@ export const FacilitatorButton = styled.button<{ $isOn: boolean }>`
   font-style: normal;
   font-weight: 500;
   line-height: normal;
+`;
+
+export const FailedInvitesDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 0.5rem 0 0.25rem;
+`;
+
+export const FailedInvitesHeader = styled.span`
+  font-weight: 600;
+  color: ${COLORS.tagRed};
+  font-size: 0.875rem;
+`;
+
+export const FailedInvitesList = styled.ul`
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+`;
+
+export const FailedInviteItem = styled.li`
+  display: flex;
+  flex-direction: row;
+  gap: 0.125rem;
+  font-size: 0.8125rem;
+`;
+
+export const FailedEmail = styled.span`
+  color: ${COLORS.black70};
+`;
+
+export const FailedReason = styled.span`
+  color: ${COLORS.tagRed};
 `;
