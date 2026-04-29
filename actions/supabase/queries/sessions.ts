@@ -2,6 +2,7 @@
 
 import type {
   ParticipantSessionWithProfile,
+  Phase,
   Prompt,
   PromptAnswer,
   PromptOption,
@@ -1001,4 +1002,225 @@ export async function fetchSessionCreatedAt(
   }
 
   return data?.created_at;
+}
+
+// all role phases for one role - mapped by phaseid
+export async function fetchRolePhasesByRoleAndPhases(
+  roleId: UUID,
+  phaseIds: UUID[],
+): Promise<Map<UUID, RolePhase>> {
+  if (phaseIds.length === 0) return new Map();
+
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("role_phase")
+    .select("*")
+    .eq("role_id", roleId)
+    .in("phase_id", phaseIds);
+
+  if (error) {
+    console.error("Error fetching role_phases by role and phases:", error);
+    throw error;
+  }
+
+  return new Map(
+    (data ?? []).map(rp => [rp.phase_id as UUID, rp as RolePhase]),
+  );
+}
+export type ParticipantDetailBundle = {
+  participant: ParticipantSessionWithProfile;
+  email: string;
+  phases: Phase[];
+  isAsync: boolean;
+  rolePhases: Array<[UUID, RolePhase]>;
+  promptsByRolePhase: Array<[UUID, PromptWithResponse[]]>;
+};
+
+export async function fetchParticipantDetailBundle(
+  sessionId: UUID,
+  userId: UUID,
+): Promise<ParticipantDetailBundle | { error: string }> {
+  const supabase = await getSupabaseServerClient();
+
+  const [participantsResult, profileResult, phasesResult, sessionMetaResult] =
+    await Promise.all([
+      supabase
+        .from("participant_session")
+        .select(
+          `
+        user_id,
+        role_id,
+        session_id,
+        phase_index,
+        is_finished,
+        role ( role_name ),
+        profile!fk_participant_profile (
+          first_name,
+          last_name
+        )
+      `,
+        )
+        .eq("session_id", sessionId),
+
+      supabase.from("profile").select("email").eq("id", userId).single(),
+
+      (async () => {
+        const { data: session, error: sessionError } = await supabase
+          .from("session")
+          .select("template_id")
+          .eq("session_id", sessionId)
+          .single();
+        if (sessionError || !session?.template_id) {
+          return { data: [] as Phase[], error: sessionError };
+        }
+        return await supabase
+          .from("phase")
+          .select("*")
+          .eq("template_id", session.template_id)
+          .order("phase_number", { ascending: true });
+      })(),
+
+      supabase
+        .from("session")
+        .select("is_async")
+        .eq("session_id", sessionId)
+        .single(),
+    ]);
+
+  if (participantsResult.error) {
+    console.error("Failed to fetch participants:", participantsResult.error);
+    return { error: "Failed to load participants" };
+  }
+  if (phasesResult.error) {
+    console.error("Failed to fetch phases:", phasesResult.error);
+    return { error: "Failed to load phases" };
+  }
+
+  const participants = (participantsResult.data ??
+    []) as unknown as ParticipantSessionWithProfile[];
+  const participant = participants.find(p => p.user_id === userId);
+  if (!participant?.role_id) {
+    return { error: "Participant not found in session" };
+  }
+
+  const phases = (phasesResult.data ?? []) as Phase[];
+  const phaseIds = phases.map(p => p.phase_id as UUID);
+
+  let rolePhases: RolePhase[] = [];
+  if (phaseIds.length > 0) {
+    const { data: rpData, error: rpError } = await supabase
+      .from("role_phase")
+      .select("*")
+      .eq("role_id", participant.role_id)
+      .in("phase_id", phaseIds);
+    if (rpError) {
+      console.error("Failed to fetch role_phases:", rpError);
+      return { error: "Failed to load role phases" };
+    }
+    rolePhases = (rpData ?? []) as RolePhase[];
+  }
+
+  const rolePhaseIds = rolePhases.map(rp => rp.role_phase_id as UUID);
+  const [promptsResult, responsesResult] = await Promise.all([
+    rolePhaseIds.length > 0
+      ? supabase
+          .from("prompt")
+          .select("*")
+          .in("role_phase_id", rolePhaseIds)
+          .order("prompt_number")
+      : Promise.resolve({ data: [], error: null }),
+    rolePhaseIds.length > 0
+      ? supabase
+          .from("prompt_response")
+          .select("*")
+          .eq("user_id", userId)
+          .eq("session_id", sessionId)
+          .in("role_phase_id", rolePhaseIds)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+
+  if (promptsResult.error) {
+    console.error("Failed to fetch prompts:", promptsResult.error);
+    return { error: "Failed to load prompts" };
+  }
+  if (responsesResult.error) {
+    console.error("Failed to fetch responses:", responsesResult.error);
+    return { error: "Failed to load responses" };
+  }
+
+  const prompts = promptsResult.data ?? [];
+  const responses = responsesResult.data ?? [];
+
+  const promptIds = prompts.map(p => p.prompt_id);
+  let options: Array<{
+    option_id: UUID;
+    prompt_id: UUID;
+    option_text: string;
+  }> = [];
+  if (promptIds.length > 0) {
+    const { data: optData, error: optError } = await supabase
+      .from("prompt_option")
+      .select("option_id, prompt_id, option_text")
+      .in("prompt_id", promptIds);
+    if (optError) {
+      console.error("Failed to fetch options:", optError);
+      return { error: "Failed to load options" };
+    }
+    options = (optData ?? []).filter(
+      o => o.option_text != null,
+    ) as typeof options;
+  }
+
+  const selectedOptionIds = new Set(
+    responses
+      .map(r => r.prompt_option_id)
+      .filter((id): id is UUID => Boolean(id)),
+  );
+
+  const textAnswerByPrompt = new Map<UUID, string>();
+  for (const r of responses) {
+    if (r.prompt_answer) {
+      textAnswerByPrompt.set(r.prompt_id as UUID, r.prompt_answer);
+    }
+  }
+
+  const optionsByPrompt = new Map<
+    UUID,
+    Array<{ optionId: UUID; text: string; selected: boolean }>
+  >();
+  for (const o of options) {
+    const list = optionsByPrompt.get(o.prompt_id) ?? [];
+    list.push({
+      optionId: o.option_id,
+      text: o.option_text,
+      selected: selectedOptionIds.has(o.option_id),
+    });
+    optionsByPrompt.set(o.prompt_id, list);
+  }
+
+  const promptsByRolePhase = new Map<UUID, PromptWithResponse[]>();
+  for (const rolePhaseId of rolePhaseIds) {
+    const phasePrompts = prompts.filter(p => p.role_phase_id === rolePhaseId);
+    const merged: PromptWithResponse[] = phasePrompts.map(p => ({
+      promptId: p.prompt_id as UUID,
+      question: p.prompt_text ?? "Missing Question",
+      answer: textAnswerByPrompt.get(p.prompt_id as UUID) ?? null,
+      options: optionsByPrompt.get(p.prompt_id) ?? null,
+    }));
+    promptsByRolePhase.set(rolePhaseId, merged);
+  }
+
+  const rolePhasesByPhaseId = new Map<UUID, RolePhase>();
+  for (const rp of rolePhases) {
+    rolePhasesByPhaseId.set(rp.phase_id as UUID, rp);
+  }
+
+  return {
+    participant,
+    email: profileResult.data?.email ?? "no email",
+    phases,
+    isAsync: sessionMetaResult.data?.is_async ?? false,
+    rolePhases: Array.from(rolePhasesByPhaseId.entries()),
+    promptsByRolePhase: Array.from(promptsByRolePhase.entries()),
+  };
 }
