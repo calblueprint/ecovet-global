@@ -41,21 +41,21 @@ export function useAnnouncements({
   const atRoleRoomId = announcementToRoomId({ to: "role", sessionId, roleId });
   const atUserRoomId = announcementToRoomId({ to: "user", sessionId, userId });
 
-  let { chatMessages: everyoneAnnouncements, loading: everyoneLoading } =
+  const { chatMessages: everyoneAnnouncements, loading: everyoneLoading } =
     useRealtimeChat({
       sessionId,
       roomId: atEveryoneRoomId,
       userId,
       username,
     });
-  let { chatMessages: roleAnnouncements, loading: roleLoading } =
+  const { chatMessages: roleAnnouncements, loading: roleLoading } =
     useRealtimeChat({
       sessionId,
       roomId: atRoleRoomId,
       userId,
       username,
     });
-  let { chatMessages: userAnnouncements, loading: userLoading } =
+  const { chatMessages: userAnnouncements, loading: userLoading } =
     useRealtimeChat({
       sessionId,
       roomId: atUserRoomId,
@@ -64,26 +64,22 @@ export function useAnnouncements({
     });
 
   const announcements = useMemo(() => {
-    userAnnouncements = userAnnouncements.map(message => ({
+    const user = userAnnouncements.map(message => ({
       ...message,
       sender_name: "To You",
     }));
 
-    roleAnnouncements = roleAnnouncements.map(message => ({
+    const role = roleAnnouncements.map(message => ({
       ...message,
       sender_name: `To Role: ${roleName}`,
     }));
 
-    everyoneAnnouncements = everyoneAnnouncements.map(message => ({
+    const everyone = everyoneAnnouncements.map(message => ({
       ...message,
       sender_name: `To Everyone`,
     }));
 
-    return [
-      ...userAnnouncements,
-      ...roleAnnouncements,
-      ...everyoneAnnouncements,
-    ].sort(
+    return [...user, ...role, ...everyone].sort(
       (a, b) =>
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     );
