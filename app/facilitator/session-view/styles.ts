@@ -176,7 +176,7 @@ export const Heading3 = styled.h3`
   letter-spacing: -0.48px;
 `;
 
-export const SilverHeading3 = styled.text`
+export const SilverHeading3 = styled.p`
   font-family: ${Sans.style.fontFamily};
   font-size: 24px;
   font-weight: 500;

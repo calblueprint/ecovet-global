@@ -29,7 +29,8 @@ export default function ChatMessageBubble({
   fromUser: boolean;
 }) {
   const [showTime, setShowTime] = useState(false);
-  const senderName = fromUser ? "You" : chatMessage.sender_name;
+  const senderName =
+    fromUser && !chatMessage.is_announcement ? "You" : chatMessage.sender_name;
   const { day, time } = getMessageDateLabel(new Date(chatMessage.created_at));
 
   return (
