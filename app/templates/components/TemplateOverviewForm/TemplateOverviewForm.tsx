@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Check from "@/assets/images/checkmark.svg";
+import InfoComponent from "@/components/InfoComponent/InfoComponent";
 import { ImageLogo } from "@/components/styles";
 import { EditablePhase, Role, Template, UUID } from "@/types/schema";
 import { AutoGrowBigInput } from "./AutoGrow";
@@ -79,7 +80,14 @@ export default function TemplateOverviewForm({
       </RoleHeaderContainer>
 
       <FieldCard>
-        <FieldLegend>Summary</FieldLegend>
+        <FieldLegend>
+          Summary
+          <InfoComponent
+            infoText={
+              "Describe a summary of the template. This will be visible to participants when they start the excercise."
+            }
+          ></InfoComponent>
+        </FieldLegend>
         <AutoGrowBigInput
           name="template_summary"
           placeholder="Summary"
@@ -89,7 +97,12 @@ export default function TemplateOverviewForm({
       </FieldCard>
 
       <FieldCard>
-        <FieldLegend>Setting</FieldLegend>
+        <FieldLegend>
+          Setting
+          <InfoComponent
+            infoText={"Describe where and when this template is taking place."}
+          ></InfoComponent>
+        </FieldLegend>
         <AutoGrowBigInput
           name="template_setting"
           placeholder="Setting"
@@ -99,7 +112,14 @@ export default function TemplateOverviewForm({
       </FieldCard>
 
       <FieldCard>
-        <FieldLegend>Current Activity</FieldLegend>
+        <FieldLegend>
+          Current Activity
+          <InfoComponent
+            infoText={
+              "Describe what will happen in this template. This will not be visible to participants during the game."
+            }
+          ></InfoComponent>
+        </FieldLegend>
         <AutoGrowBigInput
           name="template_activity"
           placeholder="Current activity"

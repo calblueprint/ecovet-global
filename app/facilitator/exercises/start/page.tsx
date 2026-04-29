@@ -238,6 +238,11 @@ export default function Page() {
               <ToggleButton $active={!isAsync} onClick={() => setIsAsync(true)}>
                 Asynchronous
               </ToggleButton>
+              <InfoComponent
+                infoText={
+                  "Asynchronous games allow the facilitator to 'Nudge' the participant and remind them to finish the excercise."
+                }
+              ></InfoComponent>
             </ToggleGroup>
             <CheckboxRow>
               <CheckboxInput
