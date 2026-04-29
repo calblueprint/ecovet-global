@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { produce } from "immer";
-import { addNewOption } from "@/actions/supabase/queries/prompt";
+import {
+  addNewOption,
+  replacePromptOptions,
+} from "@/actions/supabase/queries/prompt";
 import {
   createPhases,
   createPrompts,
@@ -17,8 +20,12 @@ import {
   LayoutWrapper,
   TemplateMainBox,
   TitleInput,
+  TitleRow,
 } from "@/app/templates/styles";
+import Pencil from "@/assets/images/pencil.svg";
+import Play from "@/assets/images/play.svg";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
+import { ImageLogo } from "@/components/styles";
 import WarningModal, {
   WarningAction,
 } from "@/components/WarningModal/WarningModal";
@@ -28,6 +35,7 @@ import {
   Prompt,
   Role,
   RolePhase,
+  StagedOption,
   Template,
   UUID,
 } from "@/types/schema";
@@ -37,6 +45,7 @@ import {
   ActionRow,
   ActionText,
   BackLink,
+  HeaderButtonDark,
   LoadingMessages,
   RoleItem,
   RolesListContainer,
@@ -50,7 +59,9 @@ import {
 interface FullTemplateResponse extends Template {
   roles: Role[];
   phases: (EditablePhase & {
-    role_phases: (RolePhase & { prompts: Prompt[] })[];
+    role_phases: (RolePhase & {
+      prompts: (Prompt & { options?: StagedOption[] })[];
+    })[];
   })[];
 }
 
@@ -88,6 +99,15 @@ const createInitialStore = (): LocalStore => {
   };
 };
 
+interface FullTemplateResponse extends Template {
+  roles: Role[];
+  phases: (EditablePhase & {
+    role_phases: (RolePhase & {
+      prompts: (Prompt & { options?: StagedOption[] })[];
+    })[];
+  })[];
+}
+
 function transformToLocalStore(data: FullTemplateResponse): LocalStore {
   const rolesById: Record<number | UUID, Role | Template> = { 1: data };
   const roleIds: (number | UUID)[] = [1];
@@ -97,6 +117,7 @@ function transformToLocalStore(data: FullTemplateResponse): LocalStore {
   const promptById: Record<UUID, Prompt> = {};
   const rolePhaseIndex: Record<UUID, Record<UUID, UUID>> = {};
   const promptIndex: Record<UUID, UUID[]> = {};
+  const optionsByPromptId: Record<UUID, StagedOption[]> = {};
 
   data.roles?.forEach(role => {
     rolesById[role.role_id] = role;
@@ -116,6 +137,7 @@ function transformToLocalStore(data: FullTemplateResponse): LocalStore {
       rp.prompts?.forEach(p => {
         promptById[p.prompt_id] = p;
         promptIndex[rp.role_phase_id].push(p.prompt_id);
+        optionsByPromptId[p.prompt_id] = p.options ?? [];
       });
     });
   });
@@ -130,7 +152,7 @@ function transformToLocalStore(data: FullTemplateResponse): LocalStore {
     rolePhaseIndex,
     promptById,
     promptIndex,
-    optionsByPromptId: {},
+    optionsByPromptId,
   };
 }
 
@@ -235,9 +257,7 @@ export default function TemplateBuilderPage() {
             i + 1,
           );
           const options = saveStore.optionsByPromptId[promptID] ?? [];
-          for (const opt of options) {
-            await addNewOption(promptID, opt.option_text ?? "");
-          }
+          await replacePromptOptions(promptID, options);
         }
       }
     } catch (err) {
@@ -299,6 +319,7 @@ export default function TemplateBuilderPage() {
   };
 
   const handleStartExercise = () => {
+    saveTemplate();
     if (!localStore) return;
     if (!isFromTemplateList) {
       alert("Please save the template before starting.");
@@ -366,29 +387,35 @@ export default function TemplateBuilderPage() {
           <SidebarContent>
             <div>
               <BackLink onClick={handleBackToList}>← Catalogue</BackLink>
-              {isRenaming ? (
-                <Title
-                  as="input"
-                  value={templateName as string}
-                  autoFocus
-                  onChange={e => handleTemplateRename(e.target.value)}
-                  onBlur={() => setIsRenaming(false)}
-                  onKeyDown={e => {
-                    if (e.key === "Enter") setIsRenaming(false);
-                  }}
-                />
-              ) : (
-                <Title>{templateName || "Untitled"}</Title>
-              )}
-              <ActionRow>
+              <TitleRow>
+                {isRenaming ? (
+                  <Title
+                    as="input"
+                    value={templateName as string}
+                    autoFocus
+                    onChange={e => handleTemplateRename(e.target.value)}
+                    onBlur={() => setIsRenaming(false)}
+                    onKeyDown={e => {
+                      if (e.key === "Enter") setIsRenaming(false);
+                    }}
+                  />
+                ) : (
+                  <Title>{templateName || "Untitled"}</Title>
+                )}
                 <ActionText onClick={() => setIsRenaming(true)}>
-                  {" "}
-                  # Rename
+                  <ImageLogo
+                    src={Pencil.src}
+                    alt="Pencil"
+                    width={17}
+                    height={17}
+                  />
                 </ActionText>
-                <ActionText onClick={handleStartExercise}>
-                  {" "}
-                  # Start exercise
-                </ActionText>
+              </TitleRow>
+              <ActionRow>
+                <HeaderButtonDark onClick={handleStartExercise}>
+                  <ImageLogo src={Play.src} alt="Play" width={12} height={12} />
+                  Start exercise
+                </HeaderButtonDark>
               </ActionRow>
             </div>
 
@@ -406,8 +433,18 @@ export default function TemplateBuilderPage() {
               value={selectedPhaseId}
               onChange={(val: string | null) => {
                 setSelectedPhaseId(val);
-                if (activeIds.roleId !== 1) {
-                  setActiveIds({ roleId: 1, rolePhaseId: null });
+                if (val && activeIds.roleId !== 1 && localStore) {
+                  const newRolePhaseId =
+                    localStore.rolePhaseIndex[activeIds.roleId]?.[
+                      val as UUID
+                    ] ?? null;
+                  setActiveIds({
+                    roleId: activeIds.roleId,
+                    rolePhaseId: newRolePhaseId,
+                  });
+                }
+                if (!val && activeIds.roleId !== 1) {
+                  setActiveIds({ roleId: activeIds.roleId, rolePhaseId: null });
                 }
               }}
               isClearable
@@ -443,6 +480,7 @@ export default function TemplateBuilderPage() {
             update={updateLocalStore}
             saveTemplate={saveTemplate}
             setSelectedPhaseId={setSelectedPhaseId}
+            saving={saving}
           />
         </TemplateMainBox>
       </LayoutWrapper>
@@ -452,7 +490,7 @@ export default function TemplateBuilderPage() {
         onClose={handleBackWarningClose}
         title="Unsaved changes"
         caption="You have unsaved changes. What would you like to do?"
-        cancelLabel="Keep editing"
+        noCancel={true}
         confirmLabel="Leave without saving"
         primaryLabel="Save and leave"
         loading={saving}

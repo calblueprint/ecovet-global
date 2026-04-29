@@ -17,12 +17,10 @@ export const Main = styled.main`
 
 export const MainDiv = styled.main`
   display: flex;
-  width: 1096px;
+  width: 70rem;
   padding: 2rem 3rem;
   flex-direction: column;
   align-items: flex-start;
-  gap: 32px;
-  max-width: 1100px;
 `;
 
 export const ButtonDiv = styled.div`
@@ -56,10 +54,10 @@ export const NudgeButton = styled.button<{ async?: boolean }>`
 export const HeadingBox = styled.main`
   display: flex;
   padding: 1rem 1.25rem;
-  height: 50px;
+  height: 100%;
   flex-direction: column;
-  align-items: flex-start;
   gap: 1rem;
+  align-items: flex-start;
   align-self: stretch;
 `;
 
@@ -120,12 +118,11 @@ export const ParticipantTable = styled.div`
 
 export const TableHeader = styled.div`
   display: grid;
-  grid-template-columns: 2fr 2fr 4fr;
-  height: 41px;
+  grid-template-columns: 1.5fr 0.6fr 1.5fr 0.9fr 2.5fr;
+  height: 3rem;
   padding: 0.75rem 1.5rem;
   align-items: center;
   align-self: stretch;
-  border-radius: 8px 8px 0 0;
   border-bottom: 2px solid var(--Oat-Medium, #eee);
   font-size: 14px;
   gap: 16px;
@@ -133,8 +130,8 @@ export const TableHeader = styled.div`
 
 export const TableRow = styled.div`
   display: grid;
-  grid-template-columns: 2fr 2fr 4fr;
-  height: 50px;
+  grid-template-columns: 1.5fr 0.6fr 1.5fr 0.9fr 2.5fr;
+  height: 3rem;
   padding: 0.75rem 1.5rem;
   align-items: center;
   align-self: stretch;
@@ -168,12 +165,20 @@ export const TableCellBold = styled(TableCell)`
 
 export const Heading3 = styled.h3`
   font-family: ${Sans.style.fontFamily};
+  font-color: ${COLORS.black};
   font-size: 24px;
   font-weight: 500;
-  margin-bottom: 0.5rem;
   font-style: normal;
   line-height: normal;
-  letter-spacing: -0.48px;
+`;
+
+export const Heading2 = styled.h2`
+  font-family: ${Sans.style.fontFamily};
+  font-color: ${COLORS.black};
+  font-size: 16px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: normal;
 `;
 
 export const SilverHeading3 = styled.p`

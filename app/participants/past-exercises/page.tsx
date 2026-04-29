@@ -59,11 +59,16 @@ export default function ParticipantPastSessionsPage() {
         (await fetchSessionsbyUserGroup(profile.user_group_id)) ?? [];
 
       const enriched = data.map(s => {
-        const tn = s.template?.template_name ?? "Untitled";
-        const dateStr = s.created_at
-          ? new Date(s.created_at).toLocaleDateString("en-CA")
-          : "";
-        return { ...s, displayName: `${tn}_${dateStr}` };
+        const displayName = s.session_name
+          ? s.session_name
+          : (() => {
+              const tn = s.template?.template_name ?? "Untitled";
+              const dateStr = s.created_at
+                ? new Date(s.created_at).toLocaleDateString("en-CA")
+                : "";
+              return `${tn}_${dateStr}`;
+            })();
+        return { ...s, displayName };
       });
 
       setSessions(enriched);

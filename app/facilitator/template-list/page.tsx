@@ -3,7 +3,7 @@
 import type { Template, UUID } from "@/types/schema";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowDown, ArrowUp, ArrowUpDown, Pencil } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import {
   assignTagToTemplate,
   createTag,
@@ -12,7 +12,9 @@ import {
   removeTagFromTemplate,
 } from "@/actions/supabase/queries/tag";
 import { fetchTemplatesWithTags } from "@/actions/supabase/queries/templates";
+import Pencil from "@/assets/images/pencil.svg";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
+import { ImageLogo } from "@/components/styles";
 import { Tag } from "@/components/Tag/TagCreator";
 import { TagAutocomplete } from "@/components/TagAutoComplete/TagAutoComplete";
 import COLORS from "@/styles/colors";
@@ -33,6 +35,7 @@ import {
 import TemplateSideBar from "./components/TemplateSidebar";
 import {
   AssociatedTags,
+  DateColumn,
   EditIconWrapper,
   FilterPlusSearch,
   NameColumn,
@@ -57,6 +60,7 @@ export default function TemplateListPage() {
   );
   const [searchInput, setSearchInput] = useState("");
   const [templates, setTemplates] = useState<TemplateWithTags[]>([]);
+  const [pdfLoading, setPdfLoading] = useState<UUID | null>(null);
 
   const [sortKey, setSortKey] = useState<"name" | "date">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -271,6 +275,19 @@ export default function TemplateListPage() {
     );
   }
 
+  async function handleViewTemplatePdf(templateId: UUID) {
+    setPdfLoading(templateId);
+    try {
+      const res = await fetch(`/api/reports/template/${templateId}`);
+      const json = await res.json();
+      if (json.url) {
+        window.open(json.url, "_blank", "noopener,noreferrer");
+      }
+    } finally {
+      setPdfLoading(null);
+    }
+  }
+
   // NO LONGER USING, REPLACED WITH handleMultiTagChange()
   async function handleSelectTag(
     template_id: UUID,
@@ -392,25 +409,30 @@ export default function TemplateListPage() {
 
               {filteredTemplates.map(t => (
                 <TemplateRow key={t.template_id}>
-                  <NameColumn>
-                    <span
-                      onClick={() =>
-                        router.replace(
-                          `/facilitator/exercises/start?templateId=${t.template_id}`,
-                        )
-                      }
-                    >
-                      {t.template_name}
-                    </span>
+                  <NameColumn
+                    onClick={() =>
+                      router.push(
+                        `/templates?templateId=${t.template_id}&fromTemplateList=true`,
+                      )
+                    }
+                  >
+                    {t.template_name}
                   </NameColumn>
-
-                  <div>
-                    {new Date(t.timestamp).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </div>
+                  <DateColumn
+                    onClick={() =>
+                      router.push(
+                        `/templates?templateId=${t.template_id}&fromTemplateList=true`,
+                      )
+                    }
+                  >
+                    <div>
+                      {new Date(t.timestamp).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </div>
+                  </DateColumn>
 
                   <AssociatedTags>
                     <TagAutocomplete
@@ -447,12 +469,43 @@ export default function TemplateListPage() {
                     <EditIconWrapper
                       onClick={e => {
                         e.stopPropagation();
-                        router.push(
-                          `/templates?templateId=${t.template_id}&fromTemplateList=true`,
-                        );
+                        handleViewTemplatePdf(t.template_id);
+                      }}
+                      style={{
+                        opacity: pdfLoading === t.template_id ? 0.5 : 1,
+                        pointerEvents:
+                          pdfLoading === t.template_id ? "none" : "auto", // optional: disable click while loading
                       }}
                     >
-                      <Pencil size={16} />
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 10 10"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <g clipPath="url(#clip0)">
+                          <path
+                            d="M2.5 8.33334H7.5"
+                            stroke="currentColor"
+                            strokeWidth="0.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M4.99984 1.66666V6.66666M4.99984 6.66666L6.45817 5.20832M4.99984 6.66666L3.5415 5.20832"
+                            stroke="currentColor"
+                            strokeWidth="0.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </g>
+                        <defs>
+                          <clipPath id="clip0">
+                            <rect width="10" height="10" fill="white" />
+                          </clipPath>
+                        </defs>
+                      </svg>
                     </EditIconWrapper>
                   </RowActions>
                 </TemplateRow>

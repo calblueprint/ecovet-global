@@ -13,8 +13,7 @@ export const OptionList = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 0.4rem;
 `;
 
 export const OptionRow = styled.div<{ $selected: boolean }>`
@@ -72,7 +71,7 @@ export const PromptCard = styled.div`
   flex-direction: column;
   width: 100%;
   margin-right: 4rem;
-  gap: 1.5rem;
+  gap: 0.8rem;
 `;
 
 export const PromptText = styled.p`
@@ -86,8 +85,9 @@ export const PromptText = styled.p`
 export const PromptWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.4rem;
   padding-left: 2.5rem;
+  padding-bottom: 1.1rem;
   position: relative;
 `;
 
@@ -194,6 +194,35 @@ export const PageLayout = styled.div`
     flex: 0 0 23rem;
     border-left: 1px solid #e5e7eb;
   }
+`;
+
+export const NudgeButton = styled.button<{ async?: boolean }>`
+  display: ${({ async }) => (async ? "flex" : "none")};
+  width: 6rem;
+  padding: 0.5rem 0.75rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.625rem;
+  border-radius: 0.25rem;
+  background-color: ${COLORS.darkElectricBlue};
+  border: none;
+  font-family: ${Sans.style.fontFamily};
+  color: ${COLORS.white};
+  font-size: 0.8rem;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+`;
+
+export const Header = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 60rem;
 `;
 
 export const Sidebar = styled.aside`

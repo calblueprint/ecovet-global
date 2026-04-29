@@ -24,6 +24,7 @@ export default function TemplateBuilder({
   update,
   saveTemplate,
   setSelectedPhaseId,
+  saving,
 }: {
   activeIds: ActiveIds;
   setActiveIds: React.Dispatch<React.SetStateAction<ActiveIds>>;
@@ -32,6 +33,7 @@ export default function TemplateBuilder({
   update: (updater: (draft: LocalStore) => void) => void;
   saveTemplate: () => Promise<void>;
   setSelectedPhaseId: React.Dispatch<React.SetStateAction<string | null>>;
+  saving: boolean;
 }) {
   const router = useRouter();
   const TEMPLATE_INDEX = 1;
@@ -70,12 +72,6 @@ export default function TemplateBuilder({
   function removeRole(role_id: UUID | number): void {
     if (localStore == null || typeof role_id == "number") return;
 
-    let nextActive: UUID | number = 1;
-    const idx = localStore.roleIds.indexOf(role_id);
-    if (idx !== -1) {
-      nextActive =
-        localStore.roleIds[idx + 1] ?? localStore.roleIds[idx - 1] ?? 1;
-    }
     update(draft => {
       delete draft.rolesById[role_id];
       const i = draft.roleIds.indexOf(role_id);
@@ -91,8 +87,6 @@ export default function TemplateBuilder({
       }
       delete draft.rolePhaseIndex[role_id];
     });
-
-    setActiveIds({ roleId: nextActive, rolePhaseId: null });
   }
 
   function removePhase(phase_id: UUID | null = null): void {
@@ -345,6 +339,7 @@ export default function TemplateBuilder({
                 onUpdatePhaseDescription={updatePhaseDescription}
                 onUpdateRoleDescription={updateRoleDescription}
                 onSaveAndExit={handleSaveAndExit}
+                saving={saving}
               />
             ) : (
               <QuestionBuilder
@@ -369,6 +364,7 @@ export default function TemplateBuilder({
                 onChange={setActiveUpdate}
                 onNextPhase={handleNextPhase}
                 onSaveAndExit={handleSaveAndExit}
+                saving={saving}
               />
             )}
           </PanelCard>

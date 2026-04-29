@@ -234,9 +234,10 @@ export const ExerciseSelectStyles: StylesConfig<DropdownOption, boolean> = {
     ...base,
     height: "40px",
   }),
-  placeholder: base => ({
+  placeholder: (base, state) => ({
     ...base,
     color: COLORS.black40,
+    display: state.isFocused ? "none" : base.display,
   }),
   indicatorSeparator: () => ({
     display: "none",
@@ -292,4 +293,37 @@ export const CheckboxInput = styled.input`
   height: 16px;
   cursor: pointer;
   accent-color: ${COLORS.black70};
+`;
+
+export const ExerciseNameInput = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  max-width: 25rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+`;
+
+export const NameInputField = styled.input`
+  border: 1px solid ${COLORS.oat_medium};
+  border-radius: 4px;
+  padding: 0 12px;
+  width: 100%;
+  height: 40px;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 14px;
+  background-color: ${COLORS.white};
+
+  &::placeholder {
+    color: ${COLORS.black40};
+  }
+
+  &:hover {
+    border-color: ${COLORS.black40};
+  }
+
+  &:focus {
+    outline: none;
+    border-color: ${COLORS.black40};
+  }
 `;

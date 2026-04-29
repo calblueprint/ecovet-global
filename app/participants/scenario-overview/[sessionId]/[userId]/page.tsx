@@ -23,14 +23,17 @@ import {
   fetchSessionGlobalPhaseIndex,
   fetchTemplateId,
   isSessionForceAdvance,
-  sessionParticipants,
-  sessionParticipantsBulk,
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
 import Chat from "@/components/Chat/Chat";
 import { PromptOption } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import { useAnnouncements } from "@/utils/UseAnnouncements";
+import {
+  readLocalAnswers,
+  updateLocalAnswer,
+  writeLocalAnswersFromDB,
+} from "./answersLocal";
 import NextPhaseButton from "./components/NextPhaseButton";
 import PrevPhaseButton from "./components/PrevPhaseButton";
 import PromptsRightPanel from "./components/PromptsRightPanel";
@@ -52,7 +55,7 @@ export default function SessionFlowPage() {
   // only used for force advance sessions
   const [maxPhaseIndex, setMaxPhaseIndex] = useState(0);
 
-  const [roleId, setRoleId] = useState<string | null>(null);
+  const [roleId, setRoleId] = useState<string>("");
   const [rolePhase, setRolePhase] = useState<RolePhase | null>(null);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [optionsByPromptId, setOptionsByPromptId] = useState<
@@ -144,32 +147,63 @@ export default function SessionFlowPage() {
   }, [currentPhase, roleId]);
 
   useEffect(() => {
-    if (!userId || !sessionIdStr || !rolePhase || prompts.length === 0) return;
+    if (!userId || !sessionIdStr || !rolePhase || prompts.length === 0) {
+      setAnswers([]);
+      setCompletedPrompts(new Set());
+      return;
+    }
 
-    async function loadResponses() {
+    const cached = readLocalAnswers(
+      userId,
+      sessionIdStr,
+      rolePhase.role_phase_id,
+      prompts,
+    );
+
+    console.log(cached);
+
+    if (cached) {
+      setAnswers(cached.answers);
+      setCompletedPrompts(cached.completed);
+
+      return;
+    }
+
+    console.log("using db instead of cache");
+
+    let cancelled = false;
+    (async () => {
       try {
         const responses = await fetchPromptResponses(
-          userId!,
-          sessionIdStr!,
-          rolePhase!.role_phase_id,
+          userId,
+          sessionIdStr,
+          rolePhase.role_phase_id,
         );
-        if (!responses) return;
+        if (cancelled || !responses) return;
 
         const ordered = sortResponsesByPromptOrder(prompts, responses);
         const completed = new Set(
           ordered
             .filter(r => r?.prompt_answer)
-            .map(r => r?.prompt_id as string),
+            .map(r => r!.prompt_id as string),
         );
 
         setAnswers(ordered.map(r => r?.prompt_answer ?? ""));
         setCompletedPrompts(completed);
+        writeLocalAnswersFromDB(
+          userId,
+          sessionIdStr,
+          rolePhase.role_phase_id,
+          responses,
+        );
       } catch (err) {
         console.error("Response load failed:", err);
       }
-    }
+    })();
 
-    loadResponses();
+    return () => {
+      cancelled = true;
+    };
   }, [userId, sessionIdStr, rolePhase, prompts, phaseIdx]);
 
   useEffect(() => {
@@ -227,11 +261,6 @@ export default function SessionFlowPage() {
     };
   }, [userId, sessionIdStr]);
 
-  useEffect(() => {
-    setAnswers(Array(prompts.length).fill(""));
-    setCompletedPrompts(new Set());
-  }, [prompts]);
-
   function sortResponsesByPromptOrder(
     prompts: Prompt[],
     responses: PromptAnswer[],
@@ -244,6 +273,21 @@ export default function SessionFlowPage() {
     const updated = [...answers];
     updated[index] = value;
     setAnswers(updated);
+
+    if (userId && sessionIdStr && rolePhase) {
+      updateLocalAnswer(
+        userId,
+        sessionIdStr,
+        rolePhase.role_phase_id,
+        prompts[index].prompt_id,
+        value,
+      );
+    }
+
+    const promptType = prompts[index].prompt_type;
+    if (promptType !== "text") {
+      handleBlur(index, value);
+    }
   }
 
   function isAnswerEmpty(
@@ -279,6 +323,13 @@ export default function SessionFlowPage() {
         next.delete(promptId);
         return next;
       });
+      updateLocalAnswer(
+        userId,
+        sessionIdStr,
+        rolePhase.role_phase_id,
+        promptId,
+        "",
+      );
       return;
     }
 
@@ -345,56 +396,60 @@ export default function SessionFlowPage() {
         phaseInd={phaseIdx}
         rolePhase={rolePhase}
         onContinue={handleContinue}
-      />
-
-      <PromptsRightPanel
-        prompts={isOverview ? [] : prompts}
-        answers={answers}
-        optionsByPromptId={optionsByPromptId}
-        completedPrompts={completedPrompts}
-        phaseName={phases[phaseIdx]?.phase_name ?? "Unnamed Phase"}
         isOverview={isOverview}
-        onInputAnswer={handleInputAnswer}
-        onBlur={handleBlur}
-        backButton={
-          !isOverview &&
-          roleId &&
-          userId &&
-          sessionIdStr &&
-          currentPhase && (
-            <PrevPhaseButton
-              userId={userId as UUID}
-              roleId={roleId as UUID}
-              sessionId={sessionIdStr}
-              isOnOverview={isOverview}
-              isFirstPhase={isFirstPhase}
-              onClick={handleBack}
-            />
-          )
-        }
-        nextButton={
-          !isOverview &&
-          roleId &&
-          userId &&
-          sessionIdStr &&
-          currentPhase && (
-            <NextPhaseButton
-              userId={userId as UUID}
-              roleId={roleId as UUID}
-              sessionId={sessionIdStr}
-              isForceAdvance={isForceAdvance}
-              forceAdvanceMaxPhaseIndex={maxPhaseIndex}
-              promptsCompleted={completedPrompts.size == prompts.length}
-              isLastPhase={isLastPhase}
-              currentPhaseIndex={phaseIdx}
-              phaseId={currentPhase.phase_id as UUID}
-              onClick={submitAnswers}
-            />
-          )
-        }
+        roleId={roleId}
       />
+      
+      {!isOverview && (
+        <>
+          <PromptsRightPanel
+            prompts={prompts}
+            answers={answers}
+            optionsByPromptId={optionsByPromptId}
+            completedPrompts={completedPrompts}
+            phaseName={phases[phaseIdx]?.phase_name ?? "Unnamed Phase"}
+            isOverview={isOverview}
+            onInputAnswer={handleInputAnswer}
+            onBlur={handleBlur}
+            backButton={
+              roleId &&
+              userId &&
+              sessionIdStr &&
+              currentPhase && (
+                <PrevPhaseButton
+                  userId={userId as UUID}
+                  roleId={roleId as UUID}
+                  sessionId={sessionIdStr}
+                  isOnOverview={isOverview}
+                  isFirstPhase={isFirstPhase}
+                  onClick={handleBack}
+                />
+              )
+            }
+            nextButton={
+              roleId &&
+              userId &&
+              sessionIdStr &&
+              currentPhase && (
+                <NextPhaseButton
+                  userId={userId as UUID}
+                  roleId={roleId as UUID}
+                  sessionId={sessionIdStr}
+                  isForceAdvance={isForceAdvance}
+                  forceAdvanceMaxPhaseIndex={maxPhaseIndex}
+                  promptsCompleted={completedPrompts.size == prompts.length}
+                  isLastPhase={isLastPhase}
+                  currentPhaseIndex={phaseIdx}
+                  phaseId={currentPhase.phase_id as UUID}
+                  onClick={submitAnswers}
+                />
+              )
+            }
+          />
 
-      {sessionIdStr && <Chat sessionId={sessionIdStr} roleId={roleId} />}
+          {sessionIdStr && <Chat sessionId={sessionIdStr} />}
+        </>
+      )}
     </Main>
   );
 }

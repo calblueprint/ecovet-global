@@ -7,6 +7,7 @@ import type {
   PromptOption,
   PromptOptionsSelected,
   PromptWithResponse,
+  Role,
   RolePhase,
   Session,
   SessionWithTemplate,
@@ -134,7 +135,7 @@ export async function fetchPDFName(session_id: string) {
 
   const { data: session, error: e1 } = await supabase
     .from("session")
-    .select("template_id, created_at")
+    .select("template_id, created_at, session_name")
     .eq("session_id", session_id)
     .single();
   if (e1) throw e1;
@@ -153,6 +154,7 @@ export async function fetchPDFName(session_id: string) {
   return {
     template_name: template?.template_name ?? null,
     created_at: session.created_at as string | null,
+    session_name: session.session_name as string | null,
   };
 }
 
@@ -242,6 +244,7 @@ export async function createSession(
   userGroupId: string,
   forceAdvance: boolean = false,
   isAsync: boolean,
+  sessionName?: string,
 ) {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
@@ -253,6 +256,7 @@ export async function createSession(
         force_advance: forceAdvance,
         is_async: isAsync,
         phase_index: forceAdvance ? 0 : null,
+        session_name: sessionName ?? null,
       },
     ])
     .select("session_id")
@@ -908,11 +912,11 @@ export async function fetchRolePhasesBatch(
   return new Map(data?.map(rp => [rp.role_id, rp]) ?? []);
 }
 
-export async function fetchRoleName(roleId: UUID): Promise<string | null> {
+export async function fetchRoleName(roleId: UUID): Promise<Role> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("role")
-    .select("role_name")
+    .select("*")
     .eq("role_id", roleId)
     .single();
 
@@ -921,7 +925,7 @@ export async function fetchRoleName(roleId: UUID): Promise<string | null> {
     throw error;
   }
 
-  return data?.role_name ?? null;
+  return data;
 }
 
 export async function fetchSessionName(

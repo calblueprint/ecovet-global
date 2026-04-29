@@ -13,12 +13,14 @@ import InviteComponent from "@/components/InviteComponent/InviteComponent";
 import WarningModal, {
   WarningAction,
 } from "@/components/WarningModal/WarningModal";
+import { H1, H2 } from "@/styles/text";
 import { useProfile } from "@/utils/ProfileProvider";
 import ParticipantsList from "./components/ParticipantsList";
 import {
   ContentWrapper,
   LayoutWrapper,
   ListControlsWrapper,
+  PageTitle,
   ParticipantsSearchInput,
   ParticipantsSearchWrapper,
   StyledTab,
@@ -117,6 +119,7 @@ export default function ParticipantsPage() {
       <TopNavBar />
       <LayoutWrapper>
         <ContentWrapper>
+          <PageTitle>Participants</PageTitle>
           <InviteComponent
             user_group_id={profile.user_group_id}
             onInvitesChange={() => loadData()}

@@ -18,6 +18,7 @@ import {
   fetchPhases,
   fetchPromptsWithResponses,
   fetchRolePhasesBatch,
+  fetchSessionName,
   fetchTemplateNameBySession,
   finishSession,
   isSessionForceAdvance,
@@ -35,6 +36,7 @@ import {
   ButtonDiv,
   Container,
   ContentWrapper,
+  Heading2,
   Heading3,
   HeadingBox,
   LayoutWrapper,
@@ -88,6 +90,7 @@ export default function FacilitatorSessionView() {
   const currentPhaseObject = phases[currentPhase];
   const [promptData, setPromptData] = useState<ParticipantPromptData>({});
   const [templateName, setTemplateName] = useState<string | null>(null);
+  const [sessionName, setSessionName] = useState<string | null>(null);
 
   const [announcementMessage, setAnnouncementMessage] = useState<string>("");
   const [announcementType, setAnnouncementType] = useState<
@@ -147,6 +150,15 @@ export default function FacilitatorSessionView() {
       }
     }
 
+    async function loadSessionName() {
+      try {
+        const sessionName = await fetchSessionName(sessionId as UUID);
+        setSessionName(sessionName);
+      } catch (err) {
+        console.error("Failed to load phases:", err);
+      }
+    }
+
     async function loadTemplateName() {
       try {
         const name = await fetchTemplateNameBySession(sessionId as UUID);
@@ -163,6 +175,7 @@ export default function FacilitatorSessionView() {
 
     // TODO: check this call from the merge
     loadTemplateName();
+    loadSessionName();
   }, [sessionId, profile]);
 
   useEffect(() => {
@@ -319,7 +332,7 @@ export default function FacilitatorSessionView() {
     } else {
       try {
         await finishSession(sessionId);
-        router.push("/sessions/session-finish/");
+        router.push(`/sessions/session-finish/${sessionId}`);
       } catch (err) {
         console.error("Failed to finish session:", err);
       }
@@ -379,7 +392,8 @@ export default function FacilitatorSessionView() {
         <ContentWrapper>
           <MainDiv>
             <HeadingBox>
-              <Heading3>{templateName}</Heading3>
+              <Heading3>{sessionName}</Heading3>
+              <Heading2>{templateName}</Heading2>
             </HeadingBox>
             {isForceAdvance && (
               <PhaseInformation>
@@ -431,24 +445,22 @@ export default function FacilitatorSessionView() {
                 <ParticipantTable>
                   <TableHeader>
                     <span>Name</span>
+                    <span></span>
                     <span>Role</span>
+                    <span>Phase</span>
                     <span>Progress</span>
                   </TableHeader>
 
                   {participants
                     .filter(p => p.user_id !== profile?.id)
                     .map(p => {
-                      console.log("SessionID:", sessionId);
-                      console.log("participant object:", p);
-                      console.log("first_name:", p.profile?.first_name);
-                      console.log("last_name:", p.profile?.last_name);
-                      console.log("user_id:", p.user_id);
-                      console.log("role_id:", p.role_id);
                       const data = promptData[p.user_id];
                       const percent =
                         data && data.total > 0
                           ? Math.round((data.done / data.total) * 100)
                           : 0;
+                      const participantPhase = phases[p.phase_index ?? 0];
+
                       return (
                         <TableRow
                           key={p.user_id}
@@ -460,23 +472,26 @@ export default function FacilitatorSessionView() {
                           style={{ cursor: "pointer" }}
                         >
                           <TableCellBold>
-                            <ButtonDiv>
-                              {p.profile?.first_name} {p.profile?.last_name}
-                              <NudgeButton
-                                className="nudge-button"
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  e.preventDefault();
-                                  setSelectedUID(p.user_id);
-                                  setOpenWarning(true);
-                                }}
-                                async={isAsync}
-                              >
-                                Nudge
-                              </NudgeButton>
-                            </ButtonDiv>
+                            {p.profile?.first_name} {p.profile?.last_name}
                           </TableCellBold>
+                          <TableCell>
+                            <NudgeButton
+                              className="nudge-button"
+                              onClick={e => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                setSelectedUID(p.user_id);
+                                setOpenWarning(true);
+                              }}
+                              async={isAsync}
+                            >
+                              Nudge
+                            </NudgeButton>
+                          </TableCell>
                           <TableCell>{p.role?.role_name}</TableCell>
+                          <TableCell>
+                            {participantPhase?.phase_name ?? "—"}
+                          </TableCell>
                           <TableCell>
                             {data ? (
                               <Box

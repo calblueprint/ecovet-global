@@ -3,7 +3,13 @@
 import React from "react";
 import Link from "next/link";
 import ecovetGlobal from "@/assets/images/ecovet-global-new.svg";
-import { ImageLogo, LogoContainer, TopNavContainer } from "./styles";
+import ProfileBar from "../ProfileBar/ProfileBar";
+import {
+  ImageLogo,
+  LogoContainer,
+  ProfileContainer,
+  TopNavContainer,
+} from "./styles";
 
 const TopNavBar = () => {
   return (
@@ -13,6 +19,9 @@ const TopNavBar = () => {
           <ImageLogo src={ecovetGlobal} alt="Ecovet Global Logo" />
         </Link>
       </LogoContainer>
+      <ProfileContainer>
+        <ProfileBar></ProfileBar>
+      </ProfileContainer>
     </TopNavContainer>
   );
 };
