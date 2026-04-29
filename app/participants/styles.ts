@@ -3,7 +3,7 @@ import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
 
 export const Button = styled.button`
-  width: 5.7rem;
+  width: 6rem;
   height: 2rem;
   gap: 10rem;
   display: flex;
@@ -19,6 +19,7 @@ export const Button = styled.button`
   line-height: normal;
   color: white;
   cursor: pointer;
+  border-radius: 0.25rem;
   &:hover {
     background-color: ${COLORS.darkElectricBlue};
   }

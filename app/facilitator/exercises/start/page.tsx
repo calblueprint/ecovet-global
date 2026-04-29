@@ -14,7 +14,6 @@ import { fetchTemplatesExercise } from "@/actions/supabase/queries/templates";
 import { fetchUserGroupMembers } from "@/actions/supabase/queries/user-groups";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
-import InviteComponent from "@/components/InviteComponent/InviteComponent";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
   CheckboxInput,
@@ -48,7 +47,7 @@ export default function Page() {
   const { profile } = useProfile();
   const [isAsync, setIsAsync] = useState(false);
   const [availableUsers, setAvailableUsers] = useState<Profile[]>([]);
-  const roleRef = useRef<SelectInstance<DropdownOption> | null>(null);
+  const roleRefs = useRef<(SelectInstance<DropdownOption> | null)[]>([]);
   const participantRefs = useRef<(SelectInstance<DropdownOption> | null)[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
@@ -64,12 +63,6 @@ export default function Page() {
   const [participants, setParticipants] = useState([
     { key: rowCounter.current++, id: "", name: "", email: "", role: "" },
   ]);
-
-  const userOptions = new Map(
-    availableUsers
-      .filter(u => u.id !== profile?.id)
-      .map(u => [u.id, `${u.first_name} ${u.last_name}, ${u.email}`]),
-  );
 
   const roleOptions = new Map(roles.map(r => [r.id, r.name]));
 
@@ -208,16 +201,6 @@ export default function Page() {
     setParticipants(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleEnterToNext =
-    (nextRef: React.RefObject<SelectInstance<DropdownOption> | null>) =>
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Enter") {
-        setTimeout(() => {
-          nextRef.current?.focus();
-        }, 50);
-      }
-    };
-
   return (
     <>
       <TopNavBar />
@@ -273,42 +256,67 @@ export default function Page() {
               <span>Role</span>
             </TableHeader>
 
-            {participants.map((p, i) => (
-              <TableRow key={p.key}>
-                <div>
-                  <InputDropdown
-                    label="Participant"
-                    options={userOptions}
-                    placeholder="Select a member"
-                    customStyles={ExerciseSelectStyles}
-                    selectRef={(el: SelectInstance<DropdownOption> | null) => {
-                      participantRefs.current[i] = el;
-                    }}
-                    onChange={val => updateParticipant(i, "user_id", val)}
-                    onKeyDown={handleEnterToNext(roleRef)}
-                  />
-                </div>
+            {participants.map((p, i) => {
+              const takenIds = new Set(
+                participants
+                  .filter((_, idx) => idx !== i)
+                  .map(other => other.id)
+                  .filter(Boolean),
+              );
 
-                <div>
-                  <InputDropdown
-                    label="Role"
-                    options={roleOptions}
-                    placeholder="Select Role"
-                    customStyles={ExerciseSelectStyles}
-                    selectRef={roleRef}
-                    onChange={val => updateParticipant(i, "role", val)}
-                    onKeyDown={e => {
-                      if (e.key === "Enter") {
-                        setTimeout(() => addParticipantRow(), 50);
-                      }
-                    }}
-                  />
-                </div>
-                <DeleteButton onClick={() => removeParticipantRow(i)}>
-                  ✕
-                </DeleteButton>
-              </TableRow>
-            ))}
+              const rowUserOptions = new Map(
+                availableUsers
+                  .filter(u => u.id !== profile?.id)
+                  .filter(u => !takenIds.has(u.id))
+                  .map(u => [
+                    u.id,
+                    `${u.first_name} ${u.last_name}, ${u.email}`,
+                  ]),
+              );
+              return (
+                <TableRow key={p.key}>
+                  <div>
+                    <InputDropdown
+                      label="Participant"
+                      options={rowUserOptions}
+                      placeholder="Select a member"
+                      customStyles={ExerciseSelectStyles}
+                      selectRef={(
+                        el: SelectInstance<DropdownOption> | null,
+                      ) => {
+                        participantRefs.current[i] = el;
+                      }}
+                      onChange={val => updateParticipant(i, "user_id", val)}
+                      onKeyDown={e => {
+                        if (e.key === "Enter") {
+                          setTimeout(() => {
+                            roleRefs.current[i]?.focus();
+                          }, 50);
+                        }
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <InputDropdown
+                      label="Role"
+                      options={roleOptions}
+                      placeholder="Select Role"
+                      customStyles={ExerciseSelectStyles}
+                      selectRef={(
+                        el: SelectInstance<DropdownOption> | null,
+                      ) => {
+                        roleRefs.current[i] = el;
+                      }}
+                      onChange={val => updateParticipant(i, "role", val)}
+                    />
+                  </div>
+                  <DeleteButton onClick={() => removeParticipantRow(i)}>
+                    ✕
+                  </DeleteButton>
+                </TableRow>
+              );
+            })}
           </ParticipantTable>
 
           <IconButton onClick={addParticipantRow}>

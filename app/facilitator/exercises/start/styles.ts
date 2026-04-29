@@ -234,9 +234,10 @@ export const ExerciseSelectStyles: StylesConfig<DropdownOption, boolean> = {
     ...base,
     height: "40px",
   }),
-  placeholder: base => ({
+  placeholder: (base, state) => ({
     ...base,
     color: COLORS.black40,
+    display: state.isFocused ? "none" : base.display,
   }),
   indicatorSeparator: () => ({
     display: "none",

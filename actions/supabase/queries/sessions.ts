@@ -7,6 +7,7 @@ import type {
   PromptOption,
   PromptOptionsSelected,
   PromptWithResponse,
+  Role,
   RolePhase,
   Session,
   SessionWithTemplate,
@@ -911,11 +912,11 @@ export async function fetchRolePhasesBatch(
   return new Map(data?.map(rp => [rp.role_id, rp]) ?? []);
 }
 
-export async function fetchRoleName(roleId: UUID): Promise<string | null> {
+export async function fetchRoleName(roleId: UUID): Promise<Role> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("role")
-    .select("role_name")
+    .select("*")
     .eq("role_id", roleId)
     .single();
 
@@ -924,7 +925,7 @@ export async function fetchRoleName(roleId: UUID): Promise<string | null> {
     throw error;
   }
 
-  return data?.role_name ?? null;
+  return data;
 }
 
 export async function fetchSessionName(

@@ -49,7 +49,7 @@ export default function NextPhaseButton({
 
       if (isLastPhase) {
         await setIsFinished(userId, roleId, sessionId);
-        router.push("/sessions/session-finish");
+        router.push(`/sessions/session-finish/${sessionId}`);
         return;
       }
 

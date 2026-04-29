@@ -55,7 +55,7 @@ export default function SessionFlowPage() {
   // only used for force advance sessions
   const [maxPhaseIndex, setMaxPhaseIndex] = useState(0);
 
-  const [roleId, setRoleId] = useState<string | null>(null);
+  const [roleId, setRoleId] = useState<string>("");
   const [rolePhase, setRolePhase] = useState<RolePhase | null>(null);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [optionsByPromptId, setOptionsByPromptId] = useState<
@@ -432,56 +432,59 @@ export default function SessionFlowPage() {
         phaseInd={phaseIdx}
         rolePhase={rolePhase}
         onContinue={handleContinue}
-      />
-
-      <PromptsRightPanel
-        prompts={isOverview ? [] : prompts}
-        answers={answers}
-        optionsByPromptId={optionsByPromptId}
-        completedPrompts={completedPrompts}
-        phaseName={phases[phaseIdx]?.phase_name ?? "Unnamed Phase"}
         isOverview={isOverview}
-        onInputAnswer={handleInputAnswer}
-        onBlur={handleBlur}
-        backButton={
-          !isOverview &&
-          roleId &&
-          userId &&
-          sessionIdStr &&
-          currentPhase && (
-            <PrevPhaseButton
-              userId={userId as UUID}
-              roleId={roleId as UUID}
-              sessionId={sessionIdStr}
-              isOnOverview={isOverview}
-              isFirstPhase={isFirstPhase}
-              onClick={handleBack}
-            />
-          )
-        }
-        nextButton={
-          !isOverview &&
-          roleId &&
-          userId &&
-          sessionIdStr &&
-          currentPhase && (
-            <NextPhaseButton
-              userId={userId as UUID}
-              roleId={roleId as UUID}
-              sessionId={sessionIdStr}
-              isForceAdvance={isForceAdvance}
-              forceAdvanceMaxPhaseIndex={maxPhaseIndex}
-              promptsCompleted={completedPrompts.size == prompts.length}
-              isLastPhase={isLastPhase}
-              currentPhaseIndex={phaseIdx}
-              phaseId={currentPhase.phase_id as UUID}
-              onClick={submitAnswers}
-            />
-          )
-        }
+        roleId={roleId}
       />
+      {!isOverview && (
+        <>
+          <PromptsRightPanel
+            prompts={prompts}
+            answers={answers}
+            optionsByPromptId={optionsByPromptId}
+            completedPrompts={completedPrompts}
+            phaseName={phases[phaseIdx]?.phase_name ?? "Unnamed Phase"}
+            isOverview={isOverview}
+            onInputAnswer={handleInputAnswer}
+            onBlur={handleBlur}
+            backButton={
+              roleId &&
+              userId &&
+              sessionIdStr &&
+              currentPhase && (
+                <PrevPhaseButton
+                  userId={userId as UUID}
+                  roleId={roleId as UUID}
+                  sessionId={sessionIdStr}
+                  isOnOverview={isOverview}
+                  isFirstPhase={isFirstPhase}
+                  onClick={handleBack}
+                />
+              )
+            }
+            nextButton={
+              roleId &&
+              userId &&
+              sessionIdStr &&
+              currentPhase && (
+                <NextPhaseButton
+                  userId={userId as UUID}
+                  roleId={roleId as UUID}
+                  sessionId={sessionIdStr}
+                  isForceAdvance={isForceAdvance}
+                  forceAdvanceMaxPhaseIndex={maxPhaseIndex}
+                  promptsCompleted={completedPrompts.size == prompts.length}
+                  isLastPhase={isLastPhase}
+                  currentPhaseIndex={phaseIdx}
+                  phaseId={currentPhase.phase_id as UUID}
+                  onClick={submitAnswers}
+                />
+              )
+            }
+          />
 
-      {sessionIdStr && <Chat sessionId={sessionIdStr} />}
+          {sessionIdStr && <Chat sessionId={sessionIdStr} />}
+        </>
+      )}
     </Main>
   );
 }

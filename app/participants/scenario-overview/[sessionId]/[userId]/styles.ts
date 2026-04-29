@@ -15,17 +15,18 @@ export const Main = styled.main`
   }
 
   > *:nth-child(2) {
-    flex: 1 1 auto;
+    flex: 0.7 1 auto;
     min-width: 0;
+    border-left: 1px solid #e5e7eb;
   }
 
   > *:nth-child(3) {
-    flex: 0 0 23rem;
+    flex: 0 0 18rem;
     border-left: 1px solid #e5e7eb;
   }
 `;
 
-export const ContentDiv = styled.div`
+export const ContentDiv = styled.div<{ $isOverview?: boolean }>`
   flex: 1;
   height: 100vh;
   overflow-y: auto;
@@ -33,6 +34,14 @@ export const ContentDiv = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+
+  ${({ $isOverview }) =>
+    $isOverview &&
+    `
+      max-width: 720px;       
+      margin: 0 auto;          
+      width: 100%;
+    `}
 `;
 
 export const PhaseDescriptionWrapper = styled.div<{ $phase?: boolean }>`
@@ -140,6 +149,7 @@ export const PhaseHeading = styled.h1`
   font-weight: 700;
   line-height: normal;
   color: ${COLORS.black};
+  margin-top: 1.6rem;
 `;
 
 export const PromptCard = styled.div`
