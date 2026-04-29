@@ -4,7 +4,10 @@ import COLORS from "@/styles/colors";
 import { DropdownOption } from "@/types/schema";
 import { AnnouncementRoom } from "@/utils/UseAnnouncements";
 import InputDropdown from "../InputDropdown/InputDropdown";
-import { SelectUsersContainer } from "./styles";
+import {
+  SelectAnnouncementRoomContainer,
+  SelectUsersContainer,
+} from "./styles";
 
 export default function AnnouncementSelector({
   options,
@@ -20,7 +23,7 @@ export default function AnnouncementSelector({
   );
 
   return (
-    <SelectUsersContainer>
+    <SelectAnnouncementRoomContainer>
       <InputDropdown
         label={`Participant user`}
         options={stringifiedOptions}
@@ -33,7 +36,7 @@ export default function AnnouncementSelector({
         }}
         customStyles={dropdownStyles}
       />
-    </SelectUsersContainer>
+    </SelectAnnouncementRoomContainer>
   );
 }
 

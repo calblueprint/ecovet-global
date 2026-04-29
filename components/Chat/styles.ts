@@ -251,6 +251,17 @@ export const ChatSelectionContainer = styled.div`
   padding-bottom: 0.75rem;
 `;
 
+export const SelectAnnouncementRoomContainer = styled.div`
+  display: flex;
+  padding: 0 1.25rem 1.5rem 1.25rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5rem;
+  align-self: stretch;
+
+  border-bottom: 1px solid ${COLORS.oat_medium};
+`;
+
 export const SelectUsersContainer = styled.div`
   display: flex;
   flex-direction: column;
