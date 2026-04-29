@@ -13,6 +13,7 @@ import {
 import { fetchTemplatesExercise } from "@/actions/supabase/queries/templates";
 import { fetchUserGroupMembers } from "@/actions/supabase/queries/user-groups";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
+import InfoComponent from "@/components/InfoComponent/InfoComponent";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
@@ -247,6 +248,11 @@ export default function Page() {
               <CheckboxLabel htmlFor="force-advance">
                 Force Advance?
               </CheckboxLabel>
+              <InfoComponent
+                infoText={
+                  "Force advance keeps all participants on the same phase. Only the facilitator can move participants to the next phase."
+                }
+              ></InfoComponent>
             </CheckboxRow>
           </ConfigRow>
 
