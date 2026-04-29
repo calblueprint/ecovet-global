@@ -347,7 +347,8 @@ export async function getAllPhaseIds(templateId: UUID): Promise<UUID[] | null> {
   const { data, error } = await supabase
     .from("phase")
     .select("phase_id")
-    .eq("template_id", templateId);
+    .eq("template_id", templateId)
+    .order("phase_number", { ascending: true });
 
   if (error) throw error;
 

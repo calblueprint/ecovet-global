@@ -26,6 +26,7 @@ import {
   setSessionGlobalPhaseIndex,
 } from "@/actions/supabase/queries/sessions";
 import { sendEmailReminder } from "@/actions/supabase/send-email";
+import SessionFinish from "@/app/sessions/session-finish/[sessionId]/page";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import TopNavBar from "@/components/NavBar/NavBar";
 import NudgeWarningModal from "@/components/NudgeWarningModal/NudgeWarningModal";
@@ -67,7 +68,7 @@ type ParticipantPromptData = Record<
 
 export default function FacilitatorSessionView() {
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get("sessionId") as UUID | null;
+  const sessionId = searchParams.get("sessionId") as UUID;
   const { userId, profile } = useProfile();
   const router = useRouter();
 
@@ -308,6 +309,15 @@ export default function FacilitatorSessionView() {
       username: profile?.first_name ?? "Unknown User",
       message,
     });
+  }
+
+  async function endGame() {
+    try {
+      await finishSession(sessionId);
+      router.push(`/sessions/session-finish/${sessionId}`);
+    } catch (err) {
+      console.error("Failed to end session:", err);
+    }
   }
 
   async function advancePhase() {
@@ -589,13 +599,7 @@ export default function FacilitatorSessionView() {
               )}
             </Container>
 
-            <Button
-              onClick={() =>
-                router.push(`/sessions/session-finish/${sessionId}`)
-              }
-            >
-              End Game
-            </Button>
+            <Button onClick={() => endGame()}>End Game</Button>
           </MainDiv>
         </ContentWrapper>
       </LayoutWrapper>

@@ -134,7 +134,7 @@ export default function Page() {
 
       console.log(sessionId);
 
-      await assignParticipantToSession(profile.id as UUID, sessionId, null);
+      // await assignParticipantToSession(profile.id as UUID, sessionId, null);
 
       await Promise.all(
         validAssignments.map(p =>
