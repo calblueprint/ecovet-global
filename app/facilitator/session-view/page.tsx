@@ -305,7 +305,7 @@ export default function FacilitatorSessionView() {
     sendAnnouncement({
       room: to,
       userId: userId ?? "unknown user",
-      username: profile?.first_name ?? "Unknown User",
+      label: profile?.first_name ?? "Unknown User",
       message,
     });
   }
@@ -525,62 +525,6 @@ export default function FacilitatorSessionView() {
                     })}
                 </ParticipantTable>
               </div>
-
-              <input
-                placeholder="Type announcement..."
-                value={announcementMessage}
-                onChange={e => setAnnouncementMessage(e.target.value)}
-              />
-
-              <InputDropdown
-                label={`Participant user`}
-                options={new Set(["everyone", "role", "user"])}
-                placeholder="Select type of announcement"
-                onChange={type => {
-                  setAnnouncementType(type as "everyone" | "role" | "user");
-                  if (type == "everyone") {
-                    setAnnouncementRoom({
-                      to: "everyone",
-                      sessionId: sessionId ?? "unknown session",
-                    });
-                  }
-                }}
-              />
-
-              {announcementType != "everyone" && (
-                <InputDropdown
-                  label={`Participant user`}
-                  options={
-                    new Map(
-                      announcementType == "role" ? roleOptions : userOptions,
-                    )
-                  }
-                  placeholder="Select thing to send to"
-                  onChange={id => {
-                    if (announcementType == "role") {
-                      setAnnouncementRoom({
-                        to: "role",
-                        sessionId: sessionId ?? "unknown session",
-                        roleId: id ?? "unknown role",
-                      });
-                    } else if (announcementType == "user") {
-                      setAnnouncementRoom({
-                        to: "user",
-                        sessionId: sessionId ?? "unknown session",
-                        userId: id ?? "unknown user",
-                      });
-                    }
-                  }}
-                />
-              )}
-
-              <button
-                onClick={() =>
-                  sendSessionAnnouncement(announcementRoom, announcementMessage)
-                }
-              >
-                click to send to {}
-              </button>
 
               {allDone && (
                 <h3 style={{ marginTop: "1rem" }}>

@@ -447,7 +447,7 @@ export default function SessionFlowPage() {
             }
           />
 
-          {sessionIdStr && <Chat sessionId={sessionIdStr} />}
+          {sessionIdStr && <Chat sessionId={sessionIdStr} roleId={roleId} />}
         </>
       )}
     </Main>
