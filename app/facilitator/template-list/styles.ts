@@ -5,10 +5,11 @@ import { GeneralList as SharedGeneralList } from "../styles";
 
 export const AssociatedTags = styled.div`
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   width: 100%;
   min-width: 0;
   overflow: visible;
+  height: 100%;
 `;
 
 export const TemplateTag = styled.span`
@@ -118,12 +119,20 @@ export const NameColumn = styled.div`
   align-items: center;
   padding-right: 12px;
   cursor: pointer;
+  height: 100%; /* fill the full row height */
 
   span {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+`;
+
+export const DateColumn = styled.div`
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  height: 100%;
 `;
 
 export const RowActions = styled.div`

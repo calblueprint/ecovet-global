@@ -347,7 +347,10 @@ export async function fetchFullTemplate(template_id: string) {
         *,
         role_phases:role_phase(
           *,
-          prompts:prompt!prompt_role_phase_id_fkey(*) 
+          prompts:prompt!prompt_role_phase_id_fkey(
+            *,
+            options:prompt_option(*)
+          )
         )
       )
     `,

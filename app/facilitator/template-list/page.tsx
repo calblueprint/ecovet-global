@@ -3,7 +3,7 @@
 import type { Template, UUID } from "@/types/schema";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowDown, ArrowUp, ArrowUpDown, Pencil } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import {
   assignTagToTemplate,
   createTag,
@@ -12,7 +12,9 @@ import {
   removeTagFromTemplate,
 } from "@/actions/supabase/queries/tag";
 import { fetchTemplatesWithTags } from "@/actions/supabase/queries/templates";
+import Pencil from "@/assets/images/pencil.svg";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
+import { ImageLogo } from "@/components/styles";
 import { Tag } from "@/components/Tag/TagCreator";
 import { TagAutocomplete } from "@/components/TagAutoComplete/TagAutoComplete";
 import COLORS from "@/styles/colors";
@@ -33,6 +35,7 @@ import {
 import TemplateSideBar from "./components/TemplateSidebar";
 import {
   AssociatedTags,
+  DateColumn,
   EditIconWrapper,
   FilterPlusSearch,
   NameColumn,
@@ -406,25 +409,30 @@ export default function TemplateListPage() {
 
               {filteredTemplates.map(t => (
                 <TemplateRow key={t.template_id}>
-                  <NameColumn>
-                    <span
-                      onClick={() =>
-                        router.replace(
-                          `/facilitator/exercises/start?templateId=${t.template_id}`,
-                        )
-                      }
-                    >
-                      {t.template_name}
-                    </span>
+                  <NameColumn
+                    onClick={() =>
+                      router.push(
+                        `/templates?templateId=${t.template_id}&fromTemplateList=true`,
+                      )
+                    }
+                  >
+                    {t.template_name}
                   </NameColumn>
-
-                  <div>
-                    {new Date(t.timestamp).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </div>
+                  <DateColumn
+                    onClick={() =>
+                      router.push(
+                        `/templates?templateId=${t.template_id}&fromTemplateList=true`,
+                      )
+                    }
+                  >
+                    <div>
+                      {new Date(t.timestamp).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </div>
+                  </DateColumn>
 
                   <AssociatedTags>
                     <TagAutocomplete
