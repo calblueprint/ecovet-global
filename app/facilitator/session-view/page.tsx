@@ -332,7 +332,7 @@ export default function FacilitatorSessionView() {
     } else {
       try {
         await finishSession(sessionId);
-        router.push("/sessions/session-finish/");
+        router.push(`/sessions/session-finish/${sessionId}`);
       } catch (err) {
         console.error("Failed to finish session:", err);
       }

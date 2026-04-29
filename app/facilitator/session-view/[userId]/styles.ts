@@ -13,8 +13,7 @@ export const OptionList = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 0.4rem;
 `;
 
 export const OptionRow = styled.div<{ $selected: boolean }>`
@@ -72,7 +71,7 @@ export const PromptCard = styled.div`
   flex-direction: column;
   width: 60rem;
   margin-right: 4rem;
-  gap: 1.5rem;
+  gap: 0.8rem;
 `;
 
 export const PromptText = styled.p`
@@ -86,9 +85,9 @@ export const PromptText = styled.p`
 export const PromptWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.4rem;
   padding-left: 2.5rem;
-  padding-bottom: 2rem;
+  padding-bottom: 1.1rem;
   position: relative;
 `;
 
