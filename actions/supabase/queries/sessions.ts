@@ -382,7 +382,7 @@ export async function changePhaseForSingleUser(
 
   const { data: currentData, error: fetchError } = await supabase
     .from("participant_session")
-    .select("phase_index")
+    .select("phase_index, session!inner(template_id)")
     .eq("user_id", userId)
     .eq("role_id", roleId)
     .eq("session_id", sessionId)
@@ -403,9 +403,30 @@ export async function changePhaseForSingleUser(
     );
   }
 
+  // upper bound
+  const templateId = (currentData.session as { template_id: string })
+    .template_id;
+  const { count: phaseCount, error: countError } = await supabase
+    .from("phase")
+    .select("*", { count: "exact", head: true })
+    .eq("template_id", templateId);
+
+  if (countError || phaseCount == null) {
+    throw new Error(`Failed to count phases: ${countError?.message}`);
+  }
+
+  const next = currentData.phase_index + phaseChange;
+
+  // check next against the bounds
+  if (next < 0 || next > phaseCount) {
+    throw new Error(
+      `Cannot change phase from ${currentData.phase_index} to ${next} (valid: 0..${phaseCount})`,
+    );
+  }
+
   const { data, error } = await supabase
     .from("participant_session")
-    .update({ phase_index: currentData.phase_index + phaseChange })
+    .update({ phase_index: next })
     .eq("user_id", userId)
     .eq("role_id", roleId)
     .eq("session_id", sessionId)
@@ -491,7 +512,7 @@ export async function fetchPhases(sessionId: string) {
 }
 
 // Can merge with fetchRole so that we dont have to call twice.
-export async function fetchMostRecentPhase(
+export async function fetchParticipantPhaseIndex(
   userId: string,
   sessionId: string,
 ): Promise<number> {
@@ -517,7 +538,7 @@ export async function fetchMostRecentPhase(
     throw new Error(`No phase index`);
   }
 
-  return data.phase_index - 1;
+  return data.phase_index; //remove -1
 }
 
 export async function fetchRolePhases(
