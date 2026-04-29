@@ -33,7 +33,9 @@ export default function Chat({
   roleId: string | null;
 }) {
   const { userId, profile } = useProfile();
-  const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
+  const [currentRoomId, setCurrentRoomId] = useState<string | null>(
+    announcementRoom.roomId,
+  );
   // needed for skipping notifs for the selected room
   const currentRoomIdRef = useRef<string | null>(currentRoomId);
 
@@ -58,7 +60,7 @@ export default function Chat({
     [participantsOptions],
   );
 
-  const { announcements } = useAnnouncements({
+  const { announcements, loading: announcementsLoading } = useAnnouncements({
     sessionId: sessionId ?? "unknown session id",
     userId: userId ?? "unknown user id",
     username: profile?.first_name ?? "Unknown Users",
@@ -66,7 +68,11 @@ export default function Chat({
     roleName: userRoles.get(userId ?? "") ?? "Role",
   });
 
-  const { chatMessages, sendMessage } = useChat({
+  const {
+    loading: chatLoading,
+    chatMessages,
+    sendMessage,
+  } = useChat({
     sessionId,
     roomId: currentRoomId,
     userId: userId ?? "unknown-user",
@@ -74,6 +80,7 @@ export default function Chat({
   });
 
   const isAnnoucementSelected = currentRoomId === announcementRoom.roomId;
+  const loading = isAnnoucementSelected ? announcementsLoading : chatLoading;
   const activeMessageList: ChatMessage[] = isAnnoucementSelected
     ? announcements
     : chatMessages;
@@ -81,6 +88,14 @@ export default function Chat({
   useEffect(() => {
     currentRoomIdRef.current = currentRoomId;
   }, [currentRoomId]);
+
+  useEffect(() => {
+    if (currentRoomId !== announcementRoom.roomId) {
+      setChatNotifications(notifs =>
+        new Set(notifs).add(announcementRoom.roomId),
+      );
+    }
+  }, [announcements]);
 
   useEffect(() => {
     async function loadParticipants() {
@@ -260,7 +275,14 @@ export default function Chat({
           />
         )}
 
-        <ChatMessages chatMessages={activeMessageList} userRoles={userRoles} />
+        {loading ? (
+          "Loading..."
+        ) : (
+          <ChatMessages
+            chatMessages={activeMessageList}
+            userRoles={userRoles}
+          />
+        )}
       </ContentContainer>
 
       {!isAnnoucementSelected && (

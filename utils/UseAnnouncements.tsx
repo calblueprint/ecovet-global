@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { v5 as uuidv5 } from "uuid";
 import { persistChatMessage } from "@/actions/supabase/queries/chat";
 import { supabase } from "@/lib/supabase/client";
@@ -35,55 +36,63 @@ export function useAnnouncements({
   userId: string;
   username: string;
   roleName: string;
-}): { announcements: ChatMessage[] } {
+}): { announcements: ChatMessage[]; loading: boolean } {
   const atEveryoneRoomId = announcementToRoomId({ to: "everyone", sessionId });
   const atRoleRoomId = announcementToRoomId({ to: "role", sessionId, roleId });
   const atUserRoomId = announcementToRoomId({ to: "user", sessionId, userId });
 
-  let { chatMessages: everyoneAnnouncements } = useRealtimeChat({
-    sessionId,
-    roomId: atEveryoneRoomId,
-    userId,
-    username,
-  });
-  let { chatMessages: roleAnnouncements } = useRealtimeChat({
-    sessionId,
-    roomId: atRoleRoomId,
-    userId,
-    username,
-  });
-  let { chatMessages: userAnnouncements } = useRealtimeChat({
-    sessionId,
-    roomId: atUserRoomId,
-    userId,
-    username,
-  });
+  let { chatMessages: everyoneAnnouncements, loading: everyoneLoading } =
+    useRealtimeChat({
+      sessionId,
+      roomId: atEveryoneRoomId,
+      userId,
+      username,
+    });
+  let { chatMessages: roleAnnouncements, loading: roleLoading } =
+    useRealtimeChat({
+      sessionId,
+      roomId: atRoleRoomId,
+      userId,
+      username,
+    });
+  let { chatMessages: userAnnouncements, loading: userLoading } =
+    useRealtimeChat({
+      sessionId,
+      roomId: atUserRoomId,
+      userId,
+      username,
+    });
 
-  userAnnouncements = userAnnouncements.map(message => ({
-    ...message,
-    sender_name: "To You",
-  }));
+  const announcements = useMemo(() => {
+    userAnnouncements = userAnnouncements.map(message => ({
+      ...message,
+      sender_name: "To You",
+    }));
 
-  roleAnnouncements = roleAnnouncements.map(message => ({
-    ...message,
-    sender_name: `To Role: ${roleName}`,
-  }));
+    roleAnnouncements = roleAnnouncements.map(message => ({
+      ...message,
+      sender_name: `To Role: ${roleName}`,
+    }));
 
-  everyoneAnnouncements = everyoneAnnouncements.map(message => ({
-    ...message,
-    sender_name: `To Everyone`,
-  }));
+    everyoneAnnouncements = everyoneAnnouncements.map(message => ({
+      ...message,
+      sender_name: `To Everyone`,
+    }));
 
-  const announcements = [
-    ...userAnnouncements,
-    ...roleAnnouncements,
-    ...everyoneAnnouncements,
-  ].sort(
-    (a, b) =>
-      new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
-  );
+    return [
+      ...userAnnouncements,
+      ...roleAnnouncements,
+      ...everyoneAnnouncements,
+    ].sort(
+      (a, b) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+    );
+  }, [userAnnouncements, roleAnnouncements, everyoneAnnouncements]);
 
-  return { announcements };
+  return {
+    announcements,
+    loading: everyoneLoading || roleLoading || userLoading,
+  };
 }
 
 export function sendAnnouncement({
