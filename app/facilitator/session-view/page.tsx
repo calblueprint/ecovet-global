@@ -18,6 +18,7 @@ import {
   fetchPhases,
   fetchPromptsWithResponses,
   fetchRolePhasesBatch,
+  fetchSessionGlobalPhaseIndex,
   fetchSessionName,
   fetchTemplateNameBySession,
   finishSession,
@@ -87,8 +88,8 @@ export default function FacilitatorSessionView() {
   const [isAsync, setIsAsync] = useState<boolean>(true);
 
   const [isForceAdvance, setIsForceAdvance] = useState(false);
-  const isLastPhase = currentPhase >= phases.length - 1;
-  const currentPhaseObject = phases[currentPhase];
+  const isLastPhase = currentPhase >= phases.length;
+  const arrayPhaseObject = phases[currentPhase - 1]; // 0-index from the currentPhase
   const [promptData, setPromptData] = useState<ParticipantPromptData>({});
   const [templateName, setTemplateName] = useState<string | null>(null);
   const [sessionName, setSessionName] = useState<string | null>(null);
@@ -118,11 +119,18 @@ export default function FacilitatorSessionView() {
       try {
         const psData = await sessionParticipants(sessionId as UUID);
         setParticipants(psData.filter(p => p.user_id !== profile?.id));
-        if (psData && psData.length > 0) {
-          setCurrentPhase(psData[0].phase_index ?? 0);
-        }
       } catch (err) {
         console.error("Failed to load participants:", err);
+      }
+    }
+
+    // only for for advance (getting the global phaseindex)
+    async function loadCurrentPhase() {
+      try {
+        const idx = await fetchSessionGlobalPhaseIndex(sessionId);
+        setCurrentPhase(idx ?? 0);
+      } catch (err) {
+        console.error("Failed to load session phase:", err);
       }
     }
 
@@ -173,8 +181,7 @@ export default function FacilitatorSessionView() {
     loadIsAsync();
     checkIfForceAdvance();
     loadPhases();
-
-    // TODO: check this call from the merge
+    loadCurrentPhase();
     loadTemplateName();
     loadSessionName();
   }, [sessionId, profile]);
@@ -206,8 +213,34 @@ export default function FacilitatorSessionView() {
                 : p,
             ),
           );
+        },
+      )
+      .subscribe();
 
-          setCurrentPhase(phase => Math.max(phase, updated.phase_index ?? 0));
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [sessionId]);
+
+  // listen for force advance phase indexing in session table
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const channel = supabase
+      .channel(`session-${sessionId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "session",
+          filter: `session_id=eq.${sessionId}`,
+        },
+        payload => {
+          const updated = payload.new;
+          if (updated.phase_index != null) {
+            setCurrentPhase(updated.phase_index);
+          }
         },
       )
       .subscribe();
@@ -226,39 +259,35 @@ export default function FacilitatorSessionView() {
     if (!sessionId) return;
     if (participants.length === 0) return;
     if (phases.length === 0) return;
-    if (!currentPhaseObject) return;
+    if (!arrayPhaseObject) return;
 
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
     async function loadCounts() {
-      console.log("loadCounts sessionId:", sessionId);
-      console.log("loadCounts participants:", participants.length);
-      const phaseId = currentPhaseObject?.phase_id;
-      console.log("loadCounts currentPhaseObject:", phaseId);
-      const roleIds = participants
-        .map(p => p.role_id)
-        .filter(Boolean) as UUID[];
-
-      const rolePhaseMap = await fetchRolePhasesBatch(roleIds, phaseId);
-
       const data: ParticipantPromptData = {};
 
       await Promise.all(
         participants.map(async p => {
           try {
-            const phaseIndex = isForceAdvance
-              ? currentPhase
-              : (p.phase_index ?? 0);
+            if (!p.role_id || p.phase_index == null || p.phase_index === 0) {
+              // 0 is scenario overview
+              return;
+            }
+            const arrayIdx = p.phase_index - 1;
+            const phase = phases[arrayIdx];
+            if (!phase) return;
 
-            if (!p.role_id) return;
-
+            const rolePhaseMap = await fetchRolePhasesBatch(
+              [p.role_id],
+              phase.phase_id,
+            );
             const rolePhase = rolePhaseMap.get(p.role_id);
             if (!rolePhase) return;
 
             const prompts = await fetchPromptsWithResponses(
               rolePhase.role_phase_id,
               p.user_id,
-              sessionId as UUID,
+              sessionId,
             );
 
             data[p.user_id] = {
@@ -308,6 +337,7 @@ export default function FacilitatorSessionView() {
       userId: userId ?? "unknown user",
       username: profile?.first_name ?? "Unknown User",
       message,
+      sessionId: sessionId,
     });
   }
 
@@ -415,7 +445,8 @@ export default function FacilitatorSessionView() {
                       <SilverText> Current Phase:</SilverText>{" "}
                       <NormalText>
                         {" "}
-                        {phases[currentPhase]?.phase_name}{" "}
+                        {arrayPhaseObject?.phase_name ??
+                          "Waiting for Phase 1...."}{" "}
                       </NormalText>
                     </StatItem>
                     <StatItem>
@@ -469,7 +500,8 @@ export default function FacilitatorSessionView() {
                         data && data.total > 0
                           ? Math.round((data.done / data.total) * 100)
                           : 0;
-                      const participantPhase = phases[p.phase_index ?? 0];
+                      const arrayIdx = p.phase_index - 1; // moving db index for the 0-indexed array
+                      const participantPhase = phases[arrayIdx ?? 0];
 
                       return (
                         <TableRow
@@ -500,7 +532,7 @@ export default function FacilitatorSessionView() {
                           </TableCell>
                           <TableCell>{p.role?.role_name}</TableCell>
                           <TableCell>
-                            {participantPhase?.phase_name ?? "—"}
+                            {participantPhase?.phase_name ?? "Not Started"}
                           </TableCell>
                           <TableCell>
                             {data ? (

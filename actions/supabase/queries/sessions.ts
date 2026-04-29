@@ -255,7 +255,8 @@ export async function createSession(
         user_group_id: userGroupId,
         force_advance: forceAdvance,
         is_async: isAsync,
-        phase_index: forceAdvance ? 0 : null,
+        phase_index: forceAdvance ? 1 : null,
+        // on force advance, start at phase 1 (so no force advance needed after scenario overview)
         session_name: sessionName ?? null,
       },
     ])

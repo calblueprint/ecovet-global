@@ -119,8 +119,9 @@ export default function ParticipantDetailView() {
     );
 
     const phases = await fetchPhases(sessionId);
-    const phaseIndex = participant.phase_index ?? 0;
-    const currentPhase = phases[phaseIndex];
+    const dbPhaseIndex = participant.phase_index ?? 0;
+    const arrayIdx = dbPhaseIndex - 1; // 0-indexing the supabase index
+    const currentPhase = phases[arrayIdx];
     if (!currentPhase || !participant.role_id) return;
 
     const rolePhaseMap = await fetchRolePhasesBatch(
@@ -168,7 +169,7 @@ export default function ParticipantDetailView() {
     }
 
     setPhases(phases);
-    setCurrentPhaseName(phases[phaseIndex]?.phase_name ?? null);
+    setCurrentPhaseName(phases[arrayIdx]?.phase_name ?? null);
     setPrompts(promptData);
     setDone(
       promptData.filter(p => p.answer || p.options?.some(o => o.selected))
@@ -179,7 +180,7 @@ export default function ParticipantDetailView() {
     setPhaseIds(phaseIds);
     setPhasePrompts(allPhasePrompts);
     if (!userSelectedRef.current) {
-      const currentPhaseId = phases[phaseIndex]?.phase_id;
+      const currentPhaseId = phases[arrayIdx]?.phase_id;
       const defaultId =
         allPhasePrompts.find(p => p.phaseId === currentPhaseId)?.phaseId ??
         allPhasePrompts[0]?.phaseId ??
@@ -229,6 +230,7 @@ export default function ParticipantDetailView() {
           {phasePrompts.map(phase => (
             <PhaseList
               key={phase.phaseId}
+              $selected={phase.phaseId === selectedPhaseId}
               onClick={() => {
                 userSelectedRef.current = true;
                 setSelectedPhaseId(phase.phaseId);

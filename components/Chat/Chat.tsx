@@ -66,6 +66,7 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
     roomId: currentRoomId,
     userId: userId ?? "unknown-user",
     username: profile?.first_name ?? "Unknown User",
+    sessionId: sessionId,
   });
 
   useEffect(() => {

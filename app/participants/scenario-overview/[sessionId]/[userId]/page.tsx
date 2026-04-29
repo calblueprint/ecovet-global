@@ -72,7 +72,6 @@ export default function SessionFlowPage() {
   const arrayIdx = dbPhaseIndex - 1;
   // current phase based on 0-indexing phases array
   const currentPhase = phases[arrayIdx] ?? null;
-
   // use actual phaseIndex from participant_session
   const isLastPhase = dbPhaseIndex === phases.length;
   const isOverview = dbPhaseIndex === 0;
