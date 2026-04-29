@@ -8,7 +8,14 @@ export const LayoutWrapper = styled.div`
   display: flex;
   justify-content: center;
   width: 100%;
-  padding: 2rem;
+  padding: 1rem 10rem 0 10rem;
+`;
+
+export const PageTitle = styled.h1`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: ${COLORS.black100};
+  margin-bottom: 1rem;
 `;
 
 export const ContentWrapper = styled.div`

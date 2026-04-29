@@ -140,7 +140,8 @@ export const HeaderButtonDark = styled.button`
   background: #476c77;
   color: #ffffff;
   border: none;
-  padding: 6px 12px;
+  padding: 0.4rem 0.8rem;
+  gap: 0.25rem;
   border-radius: 4px;
   font-size: 12px;
   font-weight: 600;
@@ -344,9 +345,16 @@ export const McqOptionStyled = styled.div`
 `;
 
 export const DeleteMcqOptionButton = styled.div`
-  padding-right: 20px;
-  padding-left: 30px;
   margin-left: auto;
+  padding: 0 2rem 0 1rem;
+  color: ${COLORS.black40}
+  cursor: pointer;
+
+  &:hover {
+    color: ${COLORS.tagRed};
+  }
+
+  
 `;
 
 export const CheckboxPromptStyled = styled.div`

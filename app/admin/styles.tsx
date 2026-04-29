@@ -255,7 +255,6 @@ export const TopButton = styled.button<{ $active?: boolean }>`
     left: 0;
     height: 3px;
     width: 100%;
-    background: ${COLORS.lightEletricBlue};
     opacity: ${props => (props.$active ? 1 : 0)};
     transition: opacity 0.2s ease;
   }

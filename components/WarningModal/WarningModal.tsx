@@ -18,6 +18,7 @@ export default function WarningModal({
   title = "Are you sure you want to delete this item?",
   caption = "This action cannot be undone.",
   cancelLabel = "Cancel",
+  noCancel = false,
   confirmLabel = "Delete",
   primaryLabel,
   loading = false,
@@ -27,6 +28,7 @@ export default function WarningModal({
   title?: string;
   caption?: string;
   cancelLabel?: string;
+  noCancel?: boolean;
   confirmLabel?: string;
   primaryLabel?: string;
   loading?: boolean;
@@ -42,9 +44,11 @@ export default function WarningModal({
       <WarningTitle id="alert-dialog-title">{title}</WarningTitle>
       <WarningCaption id="alert-dialog-description">{caption}</WarningCaption>
       <ButtonContainer>
-        <CancelButton onClick={() => onClose("cancel")}>
-          {cancelLabel}
-        </CancelButton>
+        {!noCancel && (
+          <CancelButton onClick={() => onClose("cancel")}>
+            {cancelLabel}
+          </CancelButton>
+        )}
         <DeleteButton onClick={() => onClose("confirm")}>
           {confirmLabel}
         </DeleteButton>

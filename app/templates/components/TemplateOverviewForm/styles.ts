@@ -179,7 +179,8 @@ export const HeaderButtonDark = styled.button`
   background: #476c77;
   color: #ffffff;
   border: none;
-  padding: 6px 12px;
+  padding: 0.4rem 0.8rem;
+  gap: 0.25rem;
   border-radius: 4px;
   font-size: 12px;
   font-weight: 600;

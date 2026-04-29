@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Button, Checkbox, Radio, RadioGroup } from "@mui/material";
+import Check from "@/assets/images/checkmark.svg";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
+import { ImageLogo } from "@/components/styles";
 import {
   EditablePhase,
   PromptType,
@@ -132,10 +134,17 @@ export default function QuestionBuilder({
               + Question
             </HeaderButtonLight>
             <HeaderButtonDark onClick={onNextPhase}>
-              + Next phase
+              Next phase
             </HeaderButtonDark>
             <HeaderButtonDark onClick={onSaveAndExit}>
-              + Save and exit
+              <ImageLogo
+                src={Check.src}
+                alt="Checkmark"
+                width={12}
+                height={12}
+                padding-right={1}
+              />
+              Save and exit
             </HeaderButtonDark>
           </HeaderButtonGroup>
         </RoleHeader>
@@ -184,7 +193,7 @@ export default function QuestionBuilder({
                 <QuestionRowStyled>
                   <BigInput
                     name="prompt"
-                    placeholder="Type question..."
+                    placeholder="Question Title"
                     value={prompt.prompt_text ?? ""}
                     onChange={e =>
                       onChange(promptID, "prompt_text", e.target.value)
@@ -224,9 +233,9 @@ export default function QuestionBuilder({
                 {promptType === "multiple_choice" && (
                   <MultipleChoicePromptStyled>
                     <RadioGroup name={`mcq-${promptID}`}>
-                      {options.map(opt => (
-                        <McqOptionStyled key={opt.option_number}>
-                          <Radio value={opt.option_number} />
+                      {options.map((opt, idx) => (
+                        <McqOptionStyled key={opt.option_number ?? idx}>
+                          <Radio value={opt.option_number} disabled />
                           <TextFieldStyled
                             size="small"
                             placeholder="Enter option text"
@@ -239,16 +248,13 @@ export default function QuestionBuilder({
                               )
                             }
                           />
-                          <DeleteMcqOptionButton>
-                            <Button
-                              color="error"
-                              onClick={e => {
-                                e.stopPropagation();
-                                deleteOption(promptID, opt.option_number);
-                              }}
-                            >
-                              Delete
-                            </Button>
+                          <DeleteMcqOptionButton
+                            onClick={e => {
+                              e.stopPropagation();
+                              deleteOption(promptID, opt.option_number);
+                            }}
+                          >
+                            x
                           </DeleteMcqOptionButton>
                         </McqOptionStyled>
                       ))}
@@ -271,9 +277,9 @@ export default function QuestionBuilder({
 
                 {promptType === "checkbox" && (
                   <CheckboxPromptStyled>
-                    {options.map(opt => (
-                      <McqOptionStyled key={opt.option_number}>
-                        <Checkbox />
+                    {options.map((opt, idx) => (
+                      <McqOptionStyled key={opt.option_number ?? idx}>
+                        <Checkbox disabled />
                         <TextFieldStyled
                           size="small"
                           placeholder="Enter option text"
@@ -294,7 +300,7 @@ export default function QuestionBuilder({
                               deleteOption(promptID, opt.option_number);
                             }}
                           >
-                            Delete
+                            x
                           </Button>
                         </DeleteMcqOptionButton>
                       </McqOptionStyled>

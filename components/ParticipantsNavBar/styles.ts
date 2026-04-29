@@ -9,12 +9,15 @@ export const TopNavContainer = styled.div`
   height: 3rem;
   align-items: center;
   flex-direction: row;
+  justify-content: space-between;
   background-color: ${COLORS.oat_light};
   height: 3rem;
+  width: 100%;
 `;
 
 export const LogoContainer = styled.div`
   display: flex;
+  flex: 1;
   align-items: left;
   flex-direction: row;
   background-color: ${COLORS.oat_light};
@@ -26,6 +29,7 @@ export const LogoContainer = styled.div`
 
 export const ButtonContainer = styled.div`
   display: flex;
+  flex: 1;
   flex-direction: row;
   align-items: center;
   justify-content: center;
@@ -38,29 +42,24 @@ export const TopNavButton = styled.button<{ $active?: boolean }>`
   width: auto;
   padding: 0.75rem 1.5rem;
   text-align: center;
-  gap: 0.5em;
+  gap: 0.5rem;
   background-color: ${COLORS.oat_light};
   border: none;
   font-family: ${Sans.style.fontFamily};
   font-size: 12px;
   font-weight: 500;
   position: relative;
+  height: 3rem;
 
   &::after {
-    content: "";
     position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 3px;
     width: 100%;
-    background: ${COLORS.lightEletricBlue};
     opacity: ${props => (props.$active ? 1 : 0)};
     transition: opacity 0.2s ease;
   }
 
   color: ${COLORS.black70};
 
-  gap: 0.75rem;
   ${({ $active }) =>
     $active &&
     `
@@ -75,4 +74,10 @@ export const TopNavButton = styled.button<{ $active?: boolean }>`
 export const ImageLogo = styled(Image)`
   height: auto;
   max-height: 40px;
+`;
+
+export const ProfileContainer = styled.div`
+  display: flex;
+  flex: 1;
+  justify-context: flex-grow;
 `;
