@@ -461,17 +461,6 @@ export default function TemplateListPage() {
                     <EditIconWrapper
                       onClick={e => {
                         e.stopPropagation();
-                        router.push(
-                          `/templates?templateId=${t.template_id}&fromTemplateList=true`,
-                        );
-                      }}
-                    >
-                      <Pencil size={16} />
-                    </EditIconWrapper>
-
-                    <EditIconWrapper
-                      onClick={e => {
-                        e.stopPropagation();
                         handleViewTemplatePdf(t.template_id);
                       }}
                       style={{
