@@ -399,7 +399,7 @@ export default function SessionFlowPage() {
         isOverview={isOverview}
         roleId={roleId}
       />
-      
+
       {!isOverview && (
         <>
           <PromptsRightPanel

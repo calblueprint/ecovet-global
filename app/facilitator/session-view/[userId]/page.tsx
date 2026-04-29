@@ -25,11 +25,11 @@ import {
   getAllPhaseIds,
   sessionParticipants,
 } from "@/actions/supabase/queries/sessions";
-import Announcements from "@/components/Chat/Announcements";
-import { useProfile } from "@/utils/ProfileProvider";
 import { sendEmailReminder } from "@/actions/supabase/send-email";
+import Announcements from "@/components/Chat/Announcements";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import NudgeWarningModal from "@/components/NudgeWarningModal/NudgeWarningModal";
+import { useProfile } from "@/utils/ProfileProvider";
 import { Heading3, SilverHeading3, SilverText } from "../styles";
 import {
   ContentDiv,
