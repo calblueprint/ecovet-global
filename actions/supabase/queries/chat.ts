@@ -83,6 +83,7 @@ export async function getUserChatRooms(userId: string, sessionId: string) {
 
 export async function persistChatMessage(
   roomId: string,
+  sessionId: string,
   message: string,
   senderId: string,
   senderName: string,
@@ -92,6 +93,7 @@ export async function persistChatMessage(
 
   const { error } = await supabase.from("chat_message").insert({
     room_id: roomId,
+    session_id: sessionId,
     message: message,
     sender: senderId,
     sender_name: senderName,

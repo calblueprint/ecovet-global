@@ -14,10 +14,12 @@ export function useRealtimeChat({
   roomId,
   userId,
   username,
+  sessionId,
 }: {
   roomId: string | null;
   userId: string;
   username: string;
+  sessionId: string;
 }) {
   const [initializingMessages, startFetching] = useTransition();
 
@@ -97,6 +99,7 @@ export function useRealtimeChat({
           roomId,
           chatMessage.message,
           userId,
+          sessionId,
           username,
           chatMessage.phase_sent_at,
         ),
@@ -124,6 +127,8 @@ export function useRealtimeChat({
         room_id: messageRoomId,
         message: message,
         sender: userId,
+        session_id: sessionId,
+        is_announcement: false,
         sender_name: username,
         phase_sent_at: current_phase,
         created_at: new Date().toISOString(),

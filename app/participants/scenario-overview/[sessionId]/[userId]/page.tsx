@@ -13,8 +13,9 @@ import { useParams } from "next/navigation";
 import supabase from "@/actions/supabase/client";
 import { fetchOptionsForPrompts } from "@/actions/supabase/queries/prompt";
 import {
+  advancePhaseForSingleUser,
   createPromptAnswer,
-  fetchMostRecentPhase,
+  fetchParticipantPhaseIndex,
   fetchPhases,
   fetchPromptResponses,
   fetchPrompts,
@@ -44,13 +45,11 @@ export default function SessionFlowPage() {
   const { userId: profileUserId, profile } = useProfile();
   const { sessionId, userId: paramUserId } = useParams();
 
-  const userId = (profileUserId ?? paramUserId) as UUID | null;
-  const sessionIdStr = sessionId as UUID | null;
+  const userId = (profileUserId ?? paramUserId) as UUID;
+  const sessionIdStr = sessionId as UUID;
 
   const [templateInfo, setTemplateInfo] = useState<Template | null>(null);
   const [phases, setPhases] = useState<Phase[]>([]);
-
-  const [phaseIdx, setPhaseIdx] = useState(-1);
 
   // only used for force advance sessions
   const [maxPhaseIndex, setMaxPhaseIndex] = useState(0);
@@ -68,10 +67,14 @@ export default function SessionFlowPage() {
   const [isForceAdvance, setIsForceAdvance] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const currentPhase = phases[phaseIdx] ?? null;
-  const isLastPhase = phaseIdx === phases.length - 1;
-  const isFirstPhase = phaseIdx === 0;
-  const isOverview = phaseIdx === -1;
+  const [dbPhaseIndex, setDbPhaseIndex] = useState(0); // 1-indexed in supabase (start at 0 for overview)
+
+  const arrayIdx = dbPhaseIndex - 1;
+  // current phase based on 0-indexing phases array
+  const currentPhase = phases[arrayIdx] ?? null;
+  // use actual phaseIndex from participant_session
+  const isLastPhase = dbPhaseIndex === phases.length;
+  const isOverview = dbPhaseIndex === 0;
 
   const { everyoneAnnouncements, roleAnnouncements, userAnnouncements } =
     useAnnouncements({
@@ -130,11 +133,14 @@ export default function SessionFlowPage() {
 
       let mostRecentPhaseIndex: number;
       try {
-        mostRecentPhaseIndex = await fetchMostRecentPhase(userId, sessionIdStr);
+        mostRecentPhaseIndex = await fetchParticipantPhaseIndex(
+          userId,
+          sessionIdStr,
+        );
       } catch {
         mostRecentPhaseIndex = -1;
       }
-      setPhaseIdx(mostRecentPhaseIndex);
+      setDbPhaseIndex(mostRecentPhaseIndex);
     } catch (err) {
       console.error("Error loading session data:", err);
     } finally {
@@ -240,7 +246,7 @@ export default function SessionFlowPage() {
     return () => {
       cancelled = true;
     };
-  }, [userId, sessionIdStr, rolePhase, prompts, phaseIdx]);
+  }, [userId, sessionIdStr, rolePhase, prompts, dbPhaseIndex]);
 
   useEffect(() => {
     if (!userId || !sessionIdStr) return;
@@ -286,7 +292,7 @@ export default function SessionFlowPage() {
             payload.new.session_id != sessionIdStr
           )
             return;
-          if (newPhaseIndex != null) setPhaseIdx(newPhaseIndex);
+          if (newPhaseIndex != null) setDbPhaseIndex(newPhaseIndex);
         },
       )
       .subscribe();
@@ -412,16 +418,6 @@ export default function SessionFlowPage() {
     );
   }
 
-  async function handleContinue() {
-    if (isLastPhase) return;
-    setPhaseIdx(i => i + 1);
-  }
-
-  async function handleBack() {
-    if (isOverview) return;
-    setPhaseIdx(i => Math.max(i - 1, -1));
-  }
-
   if (loading) return <div>Loading session...</div>;
 
   return (
@@ -429,9 +425,11 @@ export default function SessionFlowPage() {
       <ScenarioLeftPanel
         templateInfo={templateInfo}
         phases={phases}
-        phaseInd={phaseIdx}
+        phaseInd={arrayIdx} // used to get the actual phaseId from phase[]
         rolePhase={rolePhase}
-        onContinue={handleContinue}
+        onContinue={() =>
+          advancePhaseForSingleUser(userId, roleId as UUID, sessionIdStr)
+        }
         isOverview={isOverview}
         roleId={roleId}
       />
@@ -442,7 +440,7 @@ export default function SessionFlowPage() {
             answers={answers}
             optionsByPromptId={optionsByPromptId}
             completedPrompts={completedPrompts}
-            phaseName={phases[phaseIdx]?.phase_name ?? "Unnamed Phase"}
+            phaseName={phases[arrayIdx]?.phase_name ?? "Unnamed Phase"}
             isOverview={isOverview}
             onInputAnswer={handleInputAnswer}
             onBlur={handleBlur}
@@ -456,8 +454,6 @@ export default function SessionFlowPage() {
                   roleId={roleId as UUID}
                   sessionId={sessionIdStr}
                   isOnOverview={isOverview}
-                  isFirstPhase={isFirstPhase}
-                  onClick={handleBack}
                 />
               )
             }
@@ -474,7 +470,7 @@ export default function SessionFlowPage() {
                   forceAdvanceMaxPhaseIndex={maxPhaseIndex}
                   promptsCompleted={completedPrompts.size == prompts.length}
                   isLastPhase={isLastPhase}
-                  currentPhaseIndex={phaseIdx}
+                  currentPhaseIndex={dbPhaseIndex} // using actual phase number
                   phaseId={currentPhase.phase_id as UUID}
                   onClick={submitAnswers}
                 />

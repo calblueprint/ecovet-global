@@ -44,16 +44,19 @@ export function useAnnouncements({
       roomId: atEveryoneRoomId,
       userId,
       username,
+      sessionId,
     }),
     roleAnnouncements: useRealtimeChat({
       roomId: atRoleRoomId,
       userId,
       username,
+      sessionId,
     }),
     userAnnouncements: useRealtimeChat({
       roomId: atUserRoomId,
       userId,
       username,
+      sessionId,
     }),
   };
 }
@@ -62,11 +65,13 @@ export function sendAnnouncement({
   userId,
   username,
   message,
+  sessionId,
 }: {
   room: AnnouncementRoom;
   userId: string;
   username: string;
   message: string;
+  sessionId: string;
 }): void {
   const roomId = announcementToRoomId(room);
   const channel = supabase.channel(roomId);
@@ -75,6 +80,8 @@ export function sendAnnouncement({
     id: crypto.randomUUID(),
     room_id: roomId,
     message: message,
+    session_id: sessionId,
+    is_announcement: true,
     sender: userId,
     sender_name: username,
     phase_sent_at: null,
@@ -86,5 +93,12 @@ export function sendAnnouncement({
     event: EVENT_MESSAGE_TYPE,
     payload: chatMessage,
   });
-  persistChatMessage(roomId, chatMessage.message, userId, username, null);
+  persistChatMessage(
+    roomId,
+    sessionId,
+    chatMessage.message,
+    userId,
+    username,
+    null,
+  );
 }

@@ -8,7 +8,7 @@ import {
 } from "@/actions/supabase/queries/chat";
 import {
   fetchChatUserOptions,
-  fetchMostRecentPhase,
+  fetchParticipantPhaseIndex,
 } from "@/actions/supabase/queries/sessions";
 import { supabase } from "@/lib/supabase/client";
 import {
@@ -66,6 +66,7 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
     roomId: currentRoomId,
     userId: userId ?? "unknown-user",
     username: profile?.first_name ?? "Unknown User",
+    sessionId: sessionId,
   });
 
   useEffect(() => {
@@ -189,7 +190,7 @@ export default function Chat({ sessionId }: { sessionId: UUID }) {
       newRoomId = await createRoom();
     }
     if (!userId) return;
-    const currentPhase = (await fetchMostRecentPhase(userId, sessionId)) + 1;
+    const currentPhase = await fetchParticipantPhaseIndex(userId, sessionId);
 
     await sendMessage(message, currentPhase, newRoomId);
   }
