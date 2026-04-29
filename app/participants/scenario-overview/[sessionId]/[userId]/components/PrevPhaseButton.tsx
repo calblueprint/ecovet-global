@@ -16,7 +16,6 @@ interface PrevButtonProps {
   roleId: UUID;
   sessionId: UUID;
   isOnOverview: boolean;
-  isFirstPhase: boolean;
 }
 
 export default function PrevPhaseButton({
@@ -24,18 +23,13 @@ export default function PrevPhaseButton({
   roleId,
   sessionId,
   isOnOverview,
-  isFirstPhase,
 }: PrevButtonProps) {
   const [isLoading, startTransition] = useTransition();
 
   function handleClick() {
     startTransition(async () => {
-      if (isLoading) return;
-      if (isOnOverview) return;
-
-      if (!isFirstPhase) {
-        await backPhaseForSingleUser(userId, roleId, sessionId);
-      }
+      if (isLoading || isOnOverview) return;
+      await backPhaseForSingleUser(userId, roleId, sessionId);
     });
   }
 

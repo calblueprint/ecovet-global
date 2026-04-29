@@ -75,7 +75,6 @@ export default function SessionFlowPage() {
 
   // use actual phaseIndex from participant_session
   const isLastPhase = dbPhaseIndex === phases.length;
-  const isFirstPhase = dbPhaseIndex === 1;
   const isOverview = dbPhaseIndex === 0;
 
   const { everyoneAnnouncements, roleAnnouncements, userAnnouncements } =
@@ -456,7 +455,6 @@ export default function SessionFlowPage() {
                   roleId={roleId as UUID}
                   sessionId={sessionIdStr}
                   isOnOverview={isOverview}
-                  isFirstPhase={isFirstPhase}
                 />
               )
             }
