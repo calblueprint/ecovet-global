@@ -25,7 +25,14 @@ export default function Announcements({
       sessionId,
     },
   );
-  // const [sessionRoles, setSessionRoles] = useState
+
+  const roleMap: Map<string, string> = useMemo(
+    () =>
+      new Map(
+        participants.map(p => [p.role_id ?? "", p.role?.role_name ?? ""]),
+      ),
+    [participants],
+  );
   const userMap: Map<string, string> = useMemo(
     () =>
       new Map(
@@ -40,23 +47,7 @@ export default function Announcements({
   useEffect(() => {
     const loadAnnouncements = async () => {
       const announcementData = await getSessionAnnouncements(sessionId);
-      setAnnouncements(
-        announcementData.map(announcement => {
-          let senderName = "To Everyone";
-          if (announcement.announcement_room?.to === "role") {
-            const announcementRoleId = announcement.announcement_room.roleId;
-            senderName = `To Role`;
-          } else if (announcement.announcement_room?.to === "user") {
-            const announcementUserId = announcement.announcement_room.userId;
-            senderName = `To ${userMap.get(announcementUserId)}`;
-          }
-
-          return {
-            ...announcement,
-            sender_name: senderName,
-          };
-        }),
-      );
+      setAnnouncements(announcementData);
     };
 
     loadAnnouncements();
@@ -78,15 +69,33 @@ export default function Announcements({
     `To ${p.profile.first_name} ${p.profile.last_name}`,
   ]);
 
+  function roomToLabel(room: AnnouncementRoom | null) {
+    if (!room) return "Unknown Room";
+
+    if (room.to === "role") {
+      const announcementRoleId = room.roleId;
+      return `To ${roleMap.get(announcementRoleId) ?? "Unknown Role"}`;
+    } else if (room.to === "user") {
+      const announcementUserId = room.userId;
+      return `To ${userMap.get(announcementUserId) ?? "Unknown User"}`;
+    }
+
+    return "To Everyone";
+  }
+
   async function onSendMessage(message: string) {
     if (!userId) return;
 
-    sendAnnouncement({
+    const newAnnouncement = sendAnnouncement({
       room: announcementRoom,
       userId,
       message,
-      username: "Facilitator",
+      label: roomToLabel(announcementRoom),
     });
+    setAnnouncements(oldAnnouncements => [
+      ...oldAnnouncements,
+      newAnnouncement,
+    ]);
   }
 
   return (

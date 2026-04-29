@@ -89,14 +89,14 @@ export function useAnnouncements({
 export function sendAnnouncement({
   room,
   userId,
-  username,
+  label,
   message,
 }: {
   room: AnnouncementRoom;
   userId: string;
-  username: string;
+  label: string;
   message: string;
-}): void {
+}): ChatMessage {
   const roomId = announcementToRoomId(room);
   const channel = supabase.channel(roomId);
 
@@ -106,11 +106,10 @@ export function sendAnnouncement({
     session_id: room.sessionId,
     message: message,
     sender: userId,
-    sender_name: username,
+    sender_name: label,
     phase_sent_at: null,
     created_at: new Date().toISOString(),
     is_announcement: true,
-    announcement_room: room,
   };
 
   channel
@@ -123,4 +122,6 @@ export function sendAnnouncement({
       channel.unsubscribe();
     });
   persistChatMessage(chatMessage);
+
+  return chatMessage;
 }

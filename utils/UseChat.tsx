@@ -124,7 +124,6 @@ export function useRealtimeChat({
         phase_sent_at: current_phase,
         created_at: new Date().toISOString(),
         is_announcement: false,
-        announcement_room: null,
       };
 
       if (!channel || !isConnected) {

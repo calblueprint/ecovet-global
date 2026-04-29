@@ -27,7 +27,6 @@ export type Database = {
           sender: string | null;
           sender_name: string | null;
           is_announcement: boolean;
-          announcement_room: AnnouncementRoom | null;
         };
         Insert: {
           created_at?: string;
@@ -39,7 +38,6 @@ export type Database = {
           sender?: string | null;
           sender_name?: string | null;
           is_announcement?: boolean;
-          announcement_room?: AnnouncementRoom | null;
         };
         Update: {
           created_at?: string;
@@ -51,7 +49,6 @@ export type Database = {
           sender?: string | null;
           sender_name?: string | null;
           is_announcement?: boolean;
-          announcement_room?: AnnouncementRoom | null;
         };
         Relationships: [
           {
