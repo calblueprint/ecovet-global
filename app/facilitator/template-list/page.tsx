@@ -39,6 +39,7 @@ import {
   EditIconWrapper,
   FilterPlusSearch,
   NameColumn,
+  RowActions,
   SearchWrapper,
   TemplateRow,
 } from "./styles";
@@ -59,6 +60,7 @@ export default function TemplateListPage() {
   );
   const [searchInput, setSearchInput] = useState("");
   const [templates, setTemplates] = useState<TemplateWithTags[]>([]);
+  const [pdfLoading, setPdfLoading] = useState<UUID | null>(null);
 
   const [sortKey, setSortKey] = useState<"name" | "date">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -273,6 +275,19 @@ export default function TemplateListPage() {
     );
   }
 
+  async function handleViewTemplatePdf(templateId: UUID) {
+    setPdfLoading(templateId);
+    try {
+      const res = await fetch(`/api/reports/template/${templateId}`);
+      const json = await res.json();
+      if (json.url) {
+        window.open(json.url, "_blank", "noopener,noreferrer");
+      }
+    } finally {
+      setPdfLoading(null);
+    }
+  }
+
   // NO LONGER USING, REPLACED WITH handleMultiTagChange()
   async function handleSelectTag(
     template_id: UUID,
@@ -401,15 +416,7 @@ export default function TemplateListPage() {
                       )
                     }
                   >
-                    <span
-                      onClick={() =>
-                        router.push(
-                          `/templates?templateId=${t.template_id}&fromTemplateList=true`,
-                        )
-                      }
-                    >
-                      {t.template_name}
-                    </span>
+                    {t.template_name}
                   </NameColumn>
                   <DateColumn
                     onClick={() =>
@@ -457,6 +464,50 @@ export default function TemplateListPage() {
                       }
                     />
                   </AssociatedTags>
+
+                  <RowActions className="row-actions">
+                    <EditIconWrapper
+                      onClick={e => {
+                        e.stopPropagation();
+                        handleViewTemplatePdf(t.template_id);
+                      }}
+                      style={{
+                        opacity: pdfLoading === t.template_id ? 0.5 : 1,
+                        pointerEvents:
+                          pdfLoading === t.template_id ? "none" : "auto", // optional: disable click while loading
+                      }}
+                    >
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 10 10"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <g clipPath="url(#clip0)">
+                          <path
+                            d="M2.5 8.33334H7.5"
+                            stroke="currentColor"
+                            strokeWidth="0.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M4.99984 1.66666V6.66666M4.99984 6.66666L6.45817 5.20832M4.99984 6.66666L3.5415 5.20832"
+                            stroke="currentColor"
+                            strokeWidth="0.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </g>
+                        <defs>
+                          <clipPath id="clip0">
+                            <rect width="10" height="10" fill="white" />
+                          </clipPath>
+                        </defs>
+                      </svg>
+                    </EditIconWrapper>
+                  </RowActions>
                 </TemplateRow>
               ))}
             </MainDiv>

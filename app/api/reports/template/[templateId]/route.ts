@@ -5,28 +5,21 @@ import type {
 import { createClient } from "@supabase/supabase-js";
 import { generateSessionReport } from "@/lib/pdf/generate";
 
-type NestedTemplate = {
-  template_name: string | null;
-  objective: string | null;
-  summary: string | null;
-};
-
 export async function GET(
   _req: Request,
-  { params }: { params: Promise<{ sessionId: string }> },
+  { params }: { params: Promise<{ templateId: string }> },
 ) {
-  const { sessionId } = await params;
+  const { templateId } = await params;
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 
-  // Return cached template report if it already exists in storage
-  const reportFileName = `sessions/${sessionId}/template.pdf`;
+  const reportFileName = `templates/${templateId}/template.pdf`;
   const { data: existingFiles } = await supabase.storage
     .from("reports")
-    .list(`sessions/${sessionId}`, { search: "template.pdf" });
+    .list(`templates/${templateId}`, { search: "template.pdf" });
 
   if (existingFiles && existingFiles.length > 0) {
     const { data: urlData } = supabase.storage
@@ -35,37 +28,26 @@ export async function GET(
     return Response.json({ url: urlData.publicUrl });
   }
 
-  const { data: session, error: sessionError } = await supabase
-    .from("session")
-    .select(
-      `
-      session_id,
-      session_name,
-      template_id,
-      template ( template_name, objective, summary )
-    `,
-    )
-    .eq("session_id", sessionId)
+  const { data: template, error: templateError } = await supabase
+    .from("template")
+    .select("template_id, template_name, objective, summary")
+    .eq("template_id", templateId)
     .single();
 
-  if (sessionError || !session) {
-    return Response.json({ error: "Session not found" }, { status: 404 });
+  if (templateError || !template) {
+    return Response.json({ error: "Template not found" }, { status: 404 });
   }
 
-  const template = session.template as unknown as NestedTemplate | null;
-
-  // Phases (ordered) — soft fail to empty array
   const { data: phases, error: phasesError } = await supabase
     .from("phase")
     .select("phase_id, phase_name, phase_number, phase_description")
-    .eq("template_id", session.template_id)
+    .eq("template_id", templateId)
     .order("phase_number", { ascending: true });
 
   if (phasesError) {
     console.error("Failed to fetch phases:", phasesError.message);
   }
 
-  // Role-phases: all roles for this template's phases, no participant filter
   const phaseIds = (phases ?? []).map(p => p.phase_id);
 
   const { data: rolePhases } = phaseIds.length
@@ -75,10 +57,8 @@ export async function GET(
         .in("phase_id", phaseIds)
     : { data: [] };
 
-  // Derive roleIds from role_phases
   const roleIds = [...new Set((rolePhases ?? []).map(rp => rp.role_id))];
 
-  // Role name lookup
   const { data: rolesData } = roleIds.length
     ? await supabase
         .from("role")
@@ -91,7 +71,6 @@ export async function GET(
     roleNameById[r.role_id] = r.role_name ?? "Unknown Role";
   }
 
-  // Prompts for all role-phases
   const rolePhaseIds = (rolePhases ?? []).map(rp => rp.role_phase_id);
 
   const { data: prompts } = rolePhaseIds.length
@@ -101,14 +80,12 @@ export async function GET(
         .in("role_phase_id", rolePhaseIds)
     : { data: [] };
 
-  // rolePhaseIndex[roleId][phaseId] = rolePhaseId
   const rolePhaseIndex: Record<string, Record<string, string>> = {};
   for (const rp of rolePhases ?? []) {
     if (!rolePhaseIndex[rp.role_id]) rolePhaseIndex[rp.role_id] = {};
     rolePhaseIndex[rp.role_id][rp.phase_id] = rp.role_phase_id;
   }
 
-  // promptsByRolePhase[rolePhaseId] = prompt[]
   const promptsByRolePhase: Record<
     string,
     { prompt_id: string; prompt_text: string | null }[]
@@ -119,7 +96,6 @@ export async function GET(
     promptsByRolePhase[rpId].push(p);
   }
 
-  // Phase data with no responses — template structure only
   const phaseData: PhaseReportData[] = (phases ?? []).map(phase => {
     const roles = roleIds.map(roleId => {
       const rolePhaseId = rolePhaseIndex[roleId]?.[phase.phase_id];
@@ -145,9 +121,9 @@ export async function GET(
   });
 
   const reportData: SessionReportData = {
-    sessionName: session.session_name ?? "Session",
-    templateName: template?.template_name ?? "",
-    summary: template?.summary ?? null,
+    sessionName: template.template_name ?? "Template",
+    templateName: template.template_name ?? "",
+    summary: template.summary ?? null,
     generatedAt: new Date().toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -157,7 +133,6 @@ export async function GET(
     phases: phaseData,
   };
 
-  // Generate PDF
   let pdfBytes: Uint8Array;
   try {
     pdfBytes = await generateSessionReport(reportData);
