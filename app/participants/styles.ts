@@ -15,7 +15,7 @@ export const Button = styled.button`
   font-family: ${Sans.style.fontFamily};
   font-size: 12px;
   font-style: normal;
-  font-weight: 700;
+  font-weight: 500;
   line-height: normal;
   color: white;
   cursor: pointer;
@@ -24,6 +24,7 @@ export const Button = styled.button`
     background-color: ${COLORS.darkElectricBlue};
   }
   border: 0px ${COLORS.darkElectricBlue};
+  border-radius: 0.3rem;
   opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 `;
