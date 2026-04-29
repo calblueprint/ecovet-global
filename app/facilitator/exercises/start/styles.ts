@@ -278,7 +278,7 @@ export const CheckboxRow = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.5rem;
 `;
 
 export const CheckboxLabel = styled.label`
