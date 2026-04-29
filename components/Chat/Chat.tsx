@@ -10,28 +10,16 @@ import {
   fetchMostRecentPhase,
 } from "@/actions/supabase/queries/sessions";
 import { supabase } from "@/lib/supabase/client";
-import {
-  ChatMessage as ChatMessageType,
-  ChatParticipant,
-  UUID,
-} from "@/types/schema";
+import { ChatMessage, ChatParticipant, UUID } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import { useAnnouncements } from "@/utils/UseAnnouncements";
 import { useRealtimeChat as useChat } from "@/utils/UseChat";
 import ChatInputBar from "./ChatInputBar";
-import ChatMessage from "./ChatMessageBubble";
+import ChatMessages from "./ChatMessages";
 import ChatSelection, { Selection } from "./ChatSelection";
 import CreateChat from "./CreateChat";
-import {
-  ChatContainer,
-  ChatHeader,
-  ChatMessageContainer,
-  ContentContainer,
-} from "./styles";
-import { TimeSeparator } from "./TimeSeparator";
+import { ChatContainer, ChatHeader, ContentContainer } from "./styles";
 
-const ONE_HOUR_MS = 1000 * 60 * 60;
-const DOUBLE_TEXT_MS = 1000 * 60 * 2;
 const announcementRoom = {
   roomId: "announcements",
   chatName: "Announcements",
@@ -58,7 +46,6 @@ export default function Chat({
   const [participantsOptions, setParticipantOptions] = useState<
     ChatParticipant[]
   >([]);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const userRoles = useMemo(
     () =>
@@ -80,23 +67,20 @@ export default function Chat({
   });
 
   const { chatMessages, sendMessage } = useChat({
+    sessionId,
     roomId: currentRoomId,
     userId: userId ?? "unknown-user",
     username: profile?.first_name ?? "Unknown User",
   });
 
   const isAnnoucementSelected = currentRoomId === announcementRoom.roomId;
-  const activeMessageList = isAnnoucementSelected
+  const activeMessageList: ChatMessage[] = isAnnoucementSelected
     ? announcements
     : chatMessages;
 
   useEffect(() => {
     currentRoomIdRef.current = currentRoomId;
   }, [currentRoomId]);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages]);
 
   useEffect(() => {
     async function loadParticipants() {
@@ -276,23 +260,7 @@ export default function Chat({
           />
         )}
 
-        <ChatMessageContainer>
-          {activeMessageList.map((chatMessage, i) => (
-            <Fragment key={chatMessage.id}>
-              {shouldShowTime(activeMessageList, i) && (
-                <TimeSeparator date={new Date(chatMessage.created_at)} />
-              )}
-              <ChatMessage
-                chatMessage={chatMessage}
-                senderRole={userRoles.get(chatMessage.sender ?? "") ?? ""}
-                showName={shouldShowSender(activeMessageList, i)}
-                isDoubleText={isDoubleText(activeMessageList, i)}
-                fromUser={chatMessage.sender === userId}
-              />
-            </Fragment>
-          ))}
-          <div ref={messagesEndRef} />
-        </ChatMessageContainer>
+        <ChatMessages chatMessages={activeMessageList} userRoles={userRoles} />
       </ContentContainer>
 
       {!isAnnoucementSelected && (
@@ -314,36 +282,3 @@ export function truncateText(text: string, maxLength: number = 15): string {
 
   return text.slice(0, maxLength).trim() + "...";
 }
-
-const isDoubleText = (chatMessages: ChatMessageType[], index: number) => {
-  if (index === 0) return false;
-  if (shouldShowSender(chatMessages, index)) return false;
-
-  const prevTime = new Date(chatMessages[index - 1].created_at);
-  const thisTime = new Date(chatMessages[index].created_at);
-
-  return thisTime.getTime() - prevTime.getTime() >= DOUBLE_TEXT_MS;
-};
-
-const shouldShowSender = (chatMessages: ChatMessageType[], index: number) => {
-  if (index === 0) return true;
-  if (shouldShowTime(chatMessages, index)) return true;
-
-  // need to check the name for a announcements edge case
-  const prevSender = chatMessages[index - 1].sender;
-  const prevName = chatMessages[index - 1].sender_name;
-
-  const thisSender = chatMessages[index].sender;
-  const thisName = chatMessages[index].sender_name;
-
-  return prevSender !== thisSender || prevName !== thisName;
-};
-
-const shouldShowTime = (chatMessages: ChatMessageType[], index: number) => {
-  if (index === 0) return true;
-
-  const prevTime = new Date(chatMessages[index - 1].created_at);
-  const thisTime = new Date(chatMessages[index].created_at);
-
-  return thisTime.getTime() - prevTime.getTime() >= ONE_HOUR_MS;
-};

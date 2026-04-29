@@ -1,9 +1,13 @@
 "use client";
 
-import type { Phase, PromptWithResponse, UUID } from "@/types/schema";
+import type {
+  ParticipantSessionWithProfile,
+  Phase,
+  PromptWithResponse,
+  UUID,
+} from "@/types/schema";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import supabase from "@/actions/supabase/client";
 import { getProfileById } from "@/actions/supabase/queries/profile";
@@ -17,11 +21,11 @@ import {
   getAllPhaseIds,
   sessionParticipants,
 } from "@/actions/supabase/queries/sessions";
-import Chat from "@/components/Chat/Chat";
+import Announcements from "@/components/Chat/Announcements";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
+import { useProfile } from "@/utils/ProfileProvider";
 import { Heading3, SilverHeading3, SilverText } from "../styles";
 import {
-  AnnouncementsPanel,
   ContentDiv,
   InfoBox,
   InfoGrid,
@@ -49,12 +53,18 @@ type PhasePromptData = {
 
 export default function ParticipantDetailView() {
   const { userId } = useParams<{ userId: string }>();
+  const { userId: facilitatorUserId } = useProfile();
+
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId") as UUID | null;
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState<string | null>(null);
   const [prompts, setPrompts] = useState<PromptWithResponse[]>([]);
+  const [participants, setParticipants] = useState<
+    ParticipantSessionWithProfile[]
+  >([]);
+
   const [selectedPhaseId, setSelectedPhaseId] = useState<UUID | null>(null);
   const [phaseIds, setPhaseIds] = useState<UUID[]>([]);
   const [phases, setPhases] = useState<Phase[]>([]);
@@ -73,6 +83,8 @@ export default function ParticipantDetailView() {
     if (!sessionId || !userId) return;
 
     const participants = await sessionParticipants(sessionId);
+    setParticipants(participants.filter(p => p.user_id !== facilitatorUserId));
+
     const participant = participants.find(p => p.user_id === userId);
     if (!participant) return;
 
@@ -273,7 +285,13 @@ export default function ParticipantDetailView() {
             ))}
         </ContentDiv>
 
-        {sessionId && <Chat sessionId={sessionId} roleId={""} />}
+        {sessionId && (
+          <Announcements
+            sessionId={sessionId}
+            participants={participants}
+            defaultRoom={{ to: "user", userId, sessionId }}
+          />
+        )}
       </PageLayout>
     </>
   );

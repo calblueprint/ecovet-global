@@ -2,7 +2,6 @@
 
 import { v5 as uuidv5 } from "uuid";
 import { persistChatMessage } from "@/actions/supabase/queries/chat";
-import { sessionParticipants } from "@/actions/supabase/queries/sessions";
 import { supabase } from "@/lib/supabase/client";
 import { ChatMessage } from "@/types/schema";
 import { EVENT_MESSAGE_TYPE, useRealtimeChat } from "./UseChat";
@@ -42,16 +41,19 @@ export function useAnnouncements({
   const atUserRoomId = announcementToRoomId({ to: "user", sessionId, userId });
 
   let { chatMessages: everyoneAnnouncements } = useRealtimeChat({
+    sessionId,
     roomId: atEveryoneRoomId,
     userId,
     username,
   });
   let { chatMessages: roleAnnouncements } = useRealtimeChat({
+    sessionId,
     roomId: atRoleRoomId,
     userId,
     username,
   });
   let { chatMessages: userAnnouncements } = useRealtimeChat({
+    sessionId,
     roomId: atUserRoomId,
     userId,
     username,
@@ -101,12 +103,14 @@ export function sendAnnouncement({
   const chatMessage: ChatMessage = {
     id: crypto.randomUUID(),
     room_id: roomId,
+    session_id: room.sessionId,
     message: message,
     sender: userId,
     sender_name: username,
     phase_sent_at: null,
     created_at: new Date().toISOString(),
     is_announcement: true,
+    announcement_room: room,
   };
 
   channel

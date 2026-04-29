@@ -92,6 +92,28 @@ export async function persistChatMessage(chatMessage: ChatMessage) {
   }
 }
 
+export async function getSessionAnnouncements(
+  sessionId: string,
+  limit: number = 50,
+) {
+  const supabase = await getSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("chat_message")
+    .select("*")
+    .eq("session_id", sessionId)
+    .eq("is_announcement", true)
+    .order("created_at", { ascending: true })
+    .limit(limit);
+
+  if (error) {
+    console.error("Error getting session announcements: ", error.message);
+    throw new Error("Failed to get session announcements");
+  }
+
+  return data as ChatMessage[];
+}
+
 export async function getMessageHistory(
   roomId: string,
   before: Date | null,

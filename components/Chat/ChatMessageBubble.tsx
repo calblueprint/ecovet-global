@@ -15,7 +15,7 @@ import {
 } from "./styles";
 import { getMessageDateLabel } from "./TimeSeparator";
 
-export default function ChatMessage({
+export default function ChatMessageBubble({
   chatMessage,
   senderRole,
   showName,

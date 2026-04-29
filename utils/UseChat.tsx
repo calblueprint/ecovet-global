@@ -11,16 +11,17 @@ import { ChatMessage } from "@/types/schema";
 export const EVENT_MESSAGE_TYPE = "message";
 
 export function useRealtimeChat({
+  sessionId,
   roomId,
   userId,
   username,
 }: {
+  sessionId: string;
   roomId: string | null;
   userId: string;
   username: string;
 }) {
   const [initializingMessages, startFetching] = useTransition();
-
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [channel, setChannel] = useState<ReturnType<
     typeof supabase.channel
@@ -116,12 +117,14 @@ export function useRealtimeChat({
       const chatMessage: ChatMessage = {
         id: crypto.randomUUID(),
         room_id: messageRoomId,
+        session_id: sessionId,
         message: message,
         sender: userId,
         sender_name: username,
         phase_sent_at: current_phase,
         created_at: new Date().toISOString(),
         is_announcement: false,
+        announcement_room: null,
       };
 
       if (!channel || !isConnected) {

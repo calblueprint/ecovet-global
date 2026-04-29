@@ -182,7 +182,7 @@ export const PageLayout = styled.div`
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: 100vh;
+  height: calc(100vh - 3rem);
   overflow-y: hidden;
 
   > *:nth-child(2) {
@@ -199,7 +199,7 @@ export const PageLayout = styled.div`
 export const Sidebar = styled.aside`
   display: flex;
   width: 17rem;
-  height: 100vh;
+  height: calc(100vh - 3rem);
   flex-direction: column;
   align-items: flex-start;
   gap: 1rem;
