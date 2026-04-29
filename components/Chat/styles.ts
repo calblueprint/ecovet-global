@@ -30,7 +30,8 @@ export const TimeMessageContainer = styled.div<{ $fromUser: boolean }>`
 export const PfpMessageContentContainer = styled.div<{ $fromUser: boolean }>`
   display: flex;
   flex-direction: row;
-  align-items: ${({ $fromUser }) => ($fromUser ? "flex-end" : "flex-start")};
+  margin-left: ${({ $fromUser }) => ($fromUser ? "auto" : "0px")};
+  margin-right: ${({ $fromUser }) => (!$fromUser ? "auto" : "0px")};
   gap: 0.5rem;
   align-self: stretch;
 `;

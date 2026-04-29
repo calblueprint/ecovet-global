@@ -29,7 +29,10 @@ export default function Announcements({
   const roleMap: Map<string, string> = useMemo(
     () =>
       new Map(
-        participants.map(p => [p.role_id ?? "", p.role?.role_name ?? ""]),
+        participants.map(p => [
+          p.role_id ?? "",
+          p.role?.role_name ?? "Unknown Role",
+        ]),
       ),
     [participants],
   );
