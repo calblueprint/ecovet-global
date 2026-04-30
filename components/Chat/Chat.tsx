@@ -77,7 +77,6 @@ export default function Chat({
     roomId: currentRoomId,
     userId: userId ?? "unknown-user",
     username: profile?.first_name ?? "Unknown User",
-    sessionId: sessionId,
   });
 
   const isAnnoucementSelected = currentRoomId === announcementRoom.roomId;

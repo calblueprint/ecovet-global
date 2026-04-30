@@ -19,7 +19,6 @@ import {
   setSessionGlobalPhaseIndex,
 } from "@/actions/supabase/queries/sessions";
 import { sendEmailReminder } from "@/actions/supabase/send-email";
-import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import TopNavBar from "@/components/NavBar/NavBar";
 import NudgeWarningModal from "@/components/NudgeWarningModal/NudgeWarningModal";
 import { useProfile } from "@/utils/ProfileProvider";
@@ -225,26 +224,7 @@ export default function FacilitatorSessionView() {
 
   const totalParticipants = participants.length;
 
-  const roleOptions = participants.map((p): [string, string] => [
-    p.role_id ?? "unknown role",
-    p.role?.role_name ?? "unknown role",
-  ]);
-  const userOptions = participants.map((p): [string, string] => [
-    p.user_id,
-    `${p.profile.first_name} ${p.profile.last_name}`,
-  ]);
-
   // ---- Handlers ----
-  function sendSessionAnnouncement(to: AnnouncementRoom, message: string) {
-    sendAnnouncement({
-      room: to,
-      userId: userId ?? "unknown user",
-      label: profile?.first_name ?? "Unknown User",
-      message,
-      sessionId: sessionId,
-    });
-  }
-
   async function endGame() {
     try {
       await finishSession(sessionId);
