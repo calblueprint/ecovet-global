@@ -356,6 +356,8 @@ export async function fetchFullTemplate(template_id: string) {
     `,
     )
     .eq("template_id", template_id)
+    .order("phase_number", { referencedTable: "phases" })
+    .order("prompt_number", { referencedTable: "phases.role_phases.prompts" })
     .single();
 
   if (error) {

@@ -97,14 +97,14 @@ export const FormStack = styled(Flex).attrs({
 
 export const RoleHeader = styled(Flex)`
   justify-content: space-between;
-  align-items: flex-end; /* Aligns the text block and buttons nicely */
+  align-items: flex-end;
 `;
 
 export const RoleHeaderContainer = styled(Flex).attrs({
   $direction: "column",
   $gap: "1rem",
 })`
-  padding-top: 1rem; /* Added padding so it looks good when sticky */
+  padding-top: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid ${COLORS.oat_medium};
 
@@ -152,6 +152,37 @@ export const HeaderButtonDark = styled.button`
   &:hover {
     filter: brightness(1.1);
   }
+
+  &:disabled {
+    background: ${COLORS.black40};
+    &:hover {
+      filter: none;
+    }
+  }
+`;
+export const NextButtons = styled.button`
+  background: transparent;
+  color: ${COLORS.darkElectricBlue};
+  border: none;
+  padding: 0.4rem 0.8rem;
+  gap: 0.25rem;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: filter 0.15s ease;
+  &:hover {
+    background: ${COLORS.oat_medium};
+  }
+
+  &:disabled {
+    color: ${COLORS.black20};
+    &:hover {
+      filter: none;
+    }
+  }
 `;
 
 export const FieldCard = styled.div<{ $focused?: boolean }>`
@@ -194,7 +225,7 @@ export const RemovePhaseButton = styled.button`
   width: 32px;
   height: 32px;
 
-  flex: 0 0 auto; /* don't grow or shrink */
+  flex: 0 0 auto;
   padding: 0;
   background: #fff;
   border: none;
@@ -211,12 +242,11 @@ export const RemoveQuestionButton = styled.button`
   cursor: pointer;
   white-space: nowrap;
 
-  padding: 4px 8px; /* tighter padding */
-  line-height: 1; /* removes default tall line box */
-  font-size: 14px; /* optional: consistent text sizing */
+  padding: 4px 8px;
+  line-height: 1;
+  font-size: 14px;
 `;
 
-/** Legend text */
 export const FieldLegend = styled(B2)`
   color: ${COLORS.black70};
   font-weight: 700;
