@@ -10,12 +10,12 @@ import {
   Tag,
   TemplateUpdatable,
 } from "@/types/schema";
+import { replacePromptOptions } from "./prompt";
 
 export async function createTemplates( // create templates with inputs, but lowk most can be null as well
   templateID: UUID,
   template_name: string | null = null,
   accessible_to_all: boolean | null = null,
-  objective: string | null = null,
   summary: string | null = null,
   setting: string | null = null,
   current_activity: string | null = null,
@@ -30,7 +30,6 @@ export async function createTemplates( // create templates with inputs, but lowk
         template_name: template_name,
         accessible_to_all: accessible_to_all,
         user_group_id: user_group_id,
-        objective: objective,
         summary: summary,
         setting: setting,
         current_activity: current_activity,
@@ -297,9 +296,12 @@ export async function fetchAllTemplates() {
   }
 }
 
-export async function fetchTemplatesWithTags() {
+export async function fetchTemplatesWithTags(user_group_id: UUID) {
   const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase.from("template").select(`
+  const { data, error } = await supabase
+    .from("template")
+    .select(
+      `
       *,
       template_tag (
         tag (
@@ -310,7 +312,9 @@ export async function fetchTemplatesWithTags() {
           user_group_id
         )
       )
-    `);
+    `,
+    )
+    .or(`user_group_id.eq.${user_group_id},accessible_to_all.eq.true`);
 
   if (error) throw error;
 
@@ -366,4 +370,94 @@ export async function fetchFullTemplate(template_id: string) {
   }
 
   return data;
+}
+
+export async function copyTemplate(
+  sourceTemplateId: UUID,
+  newOwnerGroupId: UUID,
+): Promise<UUID | null> {
+  const data = await fetchFullTemplate(sourceTemplateId);
+  if (!data) return null;
+
+  const idMap = new Map<UUID, UUID>();
+  const remap = (oldId: UUID): UUID => {
+    let next = idMap.get(oldId);
+    if (!next) {
+      next = crypto.randomUUID() as UUID;
+      idMap.set(oldId, next);
+    }
+    return next;
+  };
+
+  const newTemplateId = crypto.randomUUID() as UUID;
+
+  data.roles?.forEach(r => remap(r.role_id));
+  data.phases?.forEach(p => {
+    remap(p.phase_id);
+    p.role_phases?.forEach(rp => {
+      remap(rp.role_phase_id);
+      rp.prompts?.forEach(pr => remap(pr.prompt_id));
+    });
+  });
+
+  await createTemplates(
+    newTemplateId,
+    `${data.template_name ?? "Untitled"} (COPY)`,
+    false,
+    data.summary ?? "",
+    data.setting ?? "",
+    data.current_activity ?? "",
+    newOwnerGroupId,
+  );
+
+  for (const role of data.roles ?? []) {
+    await createRoles(
+      remap(role.role_id),
+      newTemplateId,
+      role.role_name,
+      role.role_description,
+    );
+  }
+
+  for (const phase of data.phases ?? []) {
+    await createPhases(
+      remap(phase.phase_id),
+      newTemplateId,
+      phase.phase_name,
+      phase.phase_description,
+      phase.phase_number,
+    );
+  }
+
+  for (const phase of data.phases ?? []) {
+    for (const rp of phase.role_phases ?? []) {
+      await createRolePhases(
+        remap(rp.role_phase_id),
+        remap(phase.phase_id),
+        remap(rp.role_id),
+        rp.role_phase_description,
+      );
+
+      for (let i = 0; i < (rp.prompts ?? []).length; i++) {
+        const prompt = rp.prompts![i];
+        const newPromptId = remap(prompt.prompt_id);
+
+        await createPrompts(
+          newPromptId,
+          remap(rp.role_phase_id),
+          prompt.prompt_text,
+          prompt.prompt_follow_ups,
+          prompt.prompt_type,
+          i + 1,
+        );
+
+        const options = (prompt.options ?? []).map(o => ({
+          ...o,
+        }));
+        await replacePromptOptions(newPromptId, options ? [] : options);
+      }
+    }
+  }
+
+  return newTemplateId;
 }
