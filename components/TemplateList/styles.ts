@@ -1,7 +1,16 @@
+import { Accordion } from "@mui/material";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
-import { GeneralList as SharedGeneralList } from "../styles";
+import { Caption } from "@/styles/text";
+
+export const ContentWrapper = styled.div<{ $admin?: boolean }>`
+  flex: 1;
+  padding: ${p => (p.$admin ? "2rem 10rem 0 10rem" : "2rem")};
+
+  overflow-y: auto;
+  min-height: 0;
+`;
 
 export const AssociatedTags = styled.div`
   display: flex;
@@ -150,17 +159,133 @@ export const RowActions = styled.div`
   transition: opacity 0.2s ease-in-out;
 `;
 
-export const TemplateRow = styled(SharedGeneralList)`
+export const GeneralList = styled.ul`
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 2fr;
+  column-gap: 1rem;
+
+  border-radius: 0.5rem 0.5rem 0 0;
+  border-bottom: 1px solid ${COLORS.oat_medium};
+  padding: 1rem 2rem;
+  list-style-type: none;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 12px;
+  font-weight: 500;
+  color: ${COLORS.black70};
+  min-height: 4rem;
+  align-items: start;
+`;
+
+export const TemplateRow = styled(GeneralList)<{ $disabled?: boolean }>`
   position: relative;
   overflow: hidden;
   transition: background-color 0.15s ease-in-out;
 
   &:hover {
-    background-color: ${COLORS.oat_light};
+    background-color: ${p => (p.$disabled ? "transparent" : COLORS.oat_light)};
   }
 
   &:hover ${RowActions} {
     opacity: 1;
     pointer-events: auto;
   }
+`;
+export const TagsCaption = styled(Caption)`
+  color: ${COLORS.black70};
+`;
+
+export const StyledAccordion = styled(Accordion)`
+  width: 100%;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  border: none;
+  border-radius: 0 !important;
+
+  &:before {
+    display: none;
+  }
+
+  &.Mui-expanded {
+    margin: 0;
+  }
+
+  .MuiAccordionSummary-root {
+    padding: 0 1.5rem;
+    min-height: unset;
+    background-color: transparent;
+  }
+
+  .MuiAccordionSummary-root.Mui-expanded {
+    min-height: unset;
+  }
+
+  .MuiAccordionSummary-content {
+    margin: 0.75rem 0;
+  }
+
+  .MuiAccordionSummary-content.Mui-expanded {
+    margin: 0.75rem 0;
+  }
+
+  .MuiAccordionDetails-root {
+    padding: 0;
+  }
+`;
+
+export const SideNavContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  min-width: 200px;
+  height: 100vh;
+  padding: 1.5rem 1rem;
+  background-color: ${COLORS.oat_light};
+
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  overflow-y: auto;
+  flex-shrink: 0;
+`;
+
+export const SideNavTemplatesContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1.25rem 0;
+`;
+
+export const SideNavButton = styled.button<{ selected: boolean }>`
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  text-align: left;
+  gap: 0.5em;
+  background-color: ${({ selected }) =>
+    selected ? COLORS.oat_dark : COLORS.oat_light};
+
+  color: ${({ selected }) => (selected ? COLORS.black : COLORS.black70)};
+  border-radius: 0.25rem;
+  border: none;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 12px;
+  font-weight: 500;
+  &:hover {
+    background-color: ${COLORS.oat_medium};
+    cursor: pointer;
+  }
+`;
+
+export const SideNavNewTemplateButton = styled.button`
+  width: 9.25rem;
+  padding: 0.75rem 1.5rem;
+  text-align: center;
+  gap: 0.5em;
+  background-color: ${COLORS.darkElectricBlue};
+  border-radius: 0.25rem;
+  border: none;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 12px;
+  font-weight: 500;
+  color: ${COLORS.white};
+  cursor: pointer;
 `;

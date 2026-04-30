@@ -161,11 +161,10 @@ export const SideNavButton = styled.button<{ $selected: boolean }>`
   background: transparent;
   border: none;
   width: 100%;
-  padding: 0.5rem 1.25rem;
+  padding: 0.25rem 0.5rem;
   text-align: left;
   border: none;
-  gap: 0.5em;
-  color: ${({ $selected }) => ($selected ? COLORS.black70 : COLORS.black40)};
+  color: ${({ $selected }) => ($selected ? COLORS.black100 : COLORS.black40)};
   font-family: ${Sans.style.fontFamily};
   font-size: 12px;
   font-weight: 500;
@@ -186,7 +185,6 @@ export const SideNavNewTemplateButton = styled.button`
   font-family: ${Sans.style.fontFamily};
   font-size: 12px;
   font-weight: 500;
-  margin-top: auto;
   color: ${COLORS.white};
 
   &:hover {
@@ -357,4 +355,33 @@ export const RightColumnStack = styled.div`
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+`;
+
+export const SelectGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 60vh;
+  gap: 0.75rem;
+  color: ${COLORS.black20};
+  text-align: center;
+  padding: 2rem;
+`;
+
+export const SelectGroupTitle = styled.h2`
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 0;
+  color: ${COLORS.black40};
+`;
+
+export const SelectGroupHint = styled.p`
+  font-size: 0.95rem;
+  margin: 0;
+  color: ${COLORS.black20};
+  max-width: 360px;
+  line-height: 1.5;
 `;
