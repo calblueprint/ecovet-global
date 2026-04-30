@@ -1,7 +1,13 @@
 "use client";
 
 import type { Profile } from "@/types/schema";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { fetchProfileByUserId } from "@/actions/supabase/queries/profile";
 import supabase from "../actions/supabase/client";
 
@@ -9,6 +15,7 @@ type Context = {
   userId: string | null;
   profile: Profile | null;
   loading: boolean;
+  refetch: () => Promise<void>;
 };
 
 const ProfileContext = createContext<Context | undefined>(undefined);
@@ -18,15 +25,20 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const refetch = useCallback(async () => {
+    setLoading(true);
+    const { data } = await supabase.auth.getUser();
+    const uid = data?.user?.id ?? null;
+    setUserId(uid);
+    if (uid) setProfile(await fetchProfileByUserId(uid));
+    else setProfile(null);
+    setLoading(false);
+  }, []);
+
   useEffect(() => {
     let initialLoad = true;
 
-    supabase.auth.getUser().then(async ({ data }) => {
-      const uid = data?.user?.id ?? null;
-      setUserId(uid);
-      if (uid) setProfile(await fetchProfileByUserId(uid));
-      setLoading(false);
-    });
+    refetch();
 
     const {
       data: { subscription },
@@ -44,10 +56,10 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [refetch]);
 
   return (
-    <ProfileContext.Provider value={{ userId, profile, loading }}>
+    <ProfileContext.Provider value={{ userId, profile, loading, refetch }}>
       {children}
     </ProfileContext.Provider>
   );
