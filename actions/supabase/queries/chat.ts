@@ -81,24 +81,10 @@ export async function getUserChatRooms(userId: string, sessionId: string) {
   return roomsMap;
 }
 
-export async function persistChatMessage(
-  roomId: string,
-  sessionId: string,
-  message: string,
-  senderId: string,
-  senderName: string,
-  currentPhase: number | null,
-) {
+export async function persistChatMessage(chatMessage: ChatMessage) {
   const supabase = await getSupabaseServerClient();
 
-  const { error } = await supabase.from("chat_message").insert({
-    room_id: roomId,
-    session_id: sessionId,
-    message: message,
-    sender: senderId,
-    sender_name: senderName,
-    phase_sent_at: currentPhase,
-  });
+  const { error } = await supabase.from("chat_message").insert(chatMessage);
 
   if (error) {
     console.log("Error saving chat message: ", error.message);
@@ -106,7 +92,28 @@ export async function persistChatMessage(
   }
 }
 
-// TODO: add sucurity so only users in the room can access the message history, maybe just do RLS?
+export async function getSessionAnnouncements(
+  sessionId: string,
+  limit: number = 50,
+) {
+  const supabase = await getSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("chat_message")
+    .select("*")
+    .eq("session_id", sessionId)
+    .eq("is_announcement", true)
+    .order("created_at", { ascending: true })
+    .limit(limit);
+
+  if (error) {
+    console.error("Error getting session announcements: ", error.message);
+    throw new Error("Failed to get session announcements");
+  }
+
+  return data as ChatMessage[];
+}
+
 export async function getMessageHistory(
   roomId: string,
   before: Date | null,
@@ -118,10 +125,7 @@ export async function getMessageHistory(
     .from("chat_message")
     .select("*")
     .eq("room_id", roomId)
-    .lt(
-      before ? "created_at" : "created_at",
-      before ? before.toISOString() : new Date().toISOString(),
-    )
+    .lt("created_at", before ? before.toISOString() : new Date().toISOString())
     .order("created_at", { ascending: true })
     .limit(limit);
 

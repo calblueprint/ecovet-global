@@ -181,7 +181,7 @@ export const Heading2 = styled.h2`
   line-height: normal;
 `;
 
-export const SilverHeading3 = styled.text`
+export const SilverHeading3 = styled.p`
   font-family: ${Sans.style.fontFamily};
   font-size: 24px;
   font-weight: 500;

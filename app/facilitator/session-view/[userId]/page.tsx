@@ -3,20 +3,22 @@
 import type { ParticipantDetailBundle } from "@/actions/supabase/queries/sessions";
 import type {
   ParticipantSessionWithProfile,
-  Phase,
   PromptWithResponse,
-  RolePhase,
   UUID,
 } from "@/types/schema";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import supabase from "@/actions/supabase/client";
-import { fetchParticipantDetailBundle } from "@/actions/supabase/queries/sessions";
+import {
+  fetchParticipantDetailBundle,
+  sessionParticipants,
+} from "@/actions/supabase/queries/sessions";
 import { sendEmailReminder } from "@/actions/supabase/send-email";
+import Announcements from "@/components/Chat/Announcements";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import NudgeWarningModal from "@/components/NudgeWarningModal/NudgeWarningModal";
+import { useProfile } from "@/utils/ProfileProvider";
 import { Heading3, SilverHeading3, SilverText } from "../styles";
 import {
   ContentDiv,
@@ -49,11 +51,16 @@ type PhasePromptData = {
 
 export default function ParticipantDetailView() {
   const { userId } = useParams<{ userId: string }>();
+  const { userId: facilitatorUserId } = useProfile();
+
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId") as UUID | null;
   const router = useRouter();
 
   const [bundle, setBundle] = useState<ParticipantDetailBundle | null>(null);
+  const [participants, setParticipants] = useState<
+    ParticipantSessionWithProfile[]
+  >([]);
   const [phasePrompts, setPhasePrompts] = useState<PhasePromptData[]>([]);
   const [selectedPhaseId, setSelectedPhaseId] = useState<UUID | null>(null);
   const [openWarning, setOpenWarning] = useState(false);
@@ -81,6 +88,12 @@ export default function ParticipantDetailView() {
   useEffect(() => {
     if (!sessionId || !userId) return;
     let cancelled = false;
+
+    sessionParticipants(sessionId).then(participants => {
+      setParticipants(
+        participants.filter(p => p.user_id !== facilitatorUserId),
+      );
+    });
 
     fetchParticipantDetailBundle(sessionId as UUID, userId as UUID).then(
       result => {
@@ -294,6 +307,14 @@ export default function ParticipantDetailView() {
             </PromptCard>
           )}
         </ContentDiv>
+
+        {sessionId && (
+          <Announcements
+            sessionId={sessionId}
+            participants={participants}
+            defaultRoom={{ to: "user", userId, sessionId }}
+          />
+        )}
       </PageLayout>
     </>
   );

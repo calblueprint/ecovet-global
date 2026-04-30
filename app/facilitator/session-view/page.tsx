@@ -19,7 +19,6 @@ import {
   setSessionGlobalPhaseIndex,
 } from "@/actions/supabase/queries/sessions";
 import { sendEmailReminder } from "@/actions/supabase/send-email";
-import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import TopNavBar from "@/components/NavBar/NavBar";
 import NudgeWarningModal from "@/components/NudgeWarningModal/NudgeWarningModal";
 import { useProfile } from "@/utils/ProfileProvider";
@@ -225,26 +224,7 @@ export default function FacilitatorSessionView() {
 
   const totalParticipants = participants.length;
 
-  const roleOptions = participants.map((p): [string, string] => [
-    p.role_id ?? "unknown role",
-    p.role?.role_name ?? "unknown role",
-  ]);
-  const userOptions = participants.map((p): [string, string] => [
-    p.user_id,
-    `${p.profile.first_name} ${p.profile.last_name}`,
-  ]);
-
   // ---- Handlers ----
-  function sendSessionAnnouncement(to: AnnouncementRoom, message: string) {
-    sendAnnouncement({
-      room: to,
-      userId: userId ?? "unknown user",
-      username: profile?.first_name ?? "Unknown User",
-      message,
-      sessionId: sessionId,
-    });
-  }
-
   async function endGame() {
     try {
       await finishSession(sessionId);
@@ -448,62 +428,6 @@ export default function FacilitatorSessionView() {
                   })}
                 </ParticipantTable>
               </div>
-
-              <input
-                placeholder="Type announcement..."
-                value={announcementMessage}
-                onChange={e => setAnnouncementMessage(e.target.value)}
-              />
-
-              <InputDropdown
-                label="Participant user"
-                options={new Set(["everyone", "role", "user"])}
-                placeholder="Select type of announcement"
-                onChange={type => {
-                  setAnnouncementType(type as "everyone" | "role" | "user");
-                  if (type == "everyone") {
-                    setAnnouncementRoom({
-                      to: "everyone",
-                      sessionId: sessionId ?? "unknown session",
-                    });
-                  }
-                }}
-              />
-
-              {announcementType != "everyone" && (
-                <InputDropdown
-                  label="Participant user"
-                  options={
-                    new Map(
-                      announcementType == "role" ? roleOptions : userOptions,
-                    )
-                  }
-                  placeholder="Select thing to send to"
-                  onChange={id => {
-                    if (announcementType == "role") {
-                      setAnnouncementRoom({
-                        to: "role",
-                        sessionId: sessionId ?? "unknown session",
-                        roleId: id ?? "unknown role",
-                      });
-                    } else if (announcementType == "user") {
-                      setAnnouncementRoom({
-                        to: "user",
-                        sessionId: sessionId ?? "unknown session",
-                        userId: id ?? "unknown user",
-                      });
-                    }
-                  }}
-                />
-              )}
-
-              <button
-                onClick={() =>
-                  sendSessionAnnouncement(announcementRoom, announcementMessage)
-                }
-              >
-                Send announcement
-              </button>
 
               {allDone && (
                 <h3 style={{ marginTop: "1rem" }}>

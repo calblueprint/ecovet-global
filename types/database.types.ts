@@ -1,3 +1,5 @@
+import { AnnouncementRoom } from "@/utils/UseAnnouncements";
+
 export type Json =
   | string
   | number

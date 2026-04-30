@@ -69,7 +69,7 @@ export const RadioCircle = styled.span<{ $selected: boolean }>`
 export const PromptCard = styled.div`
   display: flex;
   flex-direction: column;
-  width: 60rem;
+  width: 100%;
   margin-right: 4rem;
   gap: 0.8rem;
 `;
@@ -132,7 +132,7 @@ export const AnnouncementsPanel = styled.div`
 
 export const ContentDiv = styled.div`
   display: flex;
-  padding: 2rem 0 2rem 5rem;
+  padding: 2rem 2rem 2rem 5rem;
   flex-direction: column;
   align-items: flex-start;
   gap: 32px;
@@ -182,8 +182,18 @@ export const PageLayout = styled.div`
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: 100vh;
+  height: calc(100vh - 3rem);
   overflow-y: hidden;
+
+  > *:nth-child(2) {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  > *:nth-child(3) {
+    flex: 0 0 23rem;
+    border-left: 1px solid #e5e7eb;
+  }
 `;
 
 export const NudgeButton = styled.button<{ async?: boolean }>`
@@ -218,7 +228,7 @@ export const Header = styled.div`
 export const Sidebar = styled.aside`
   display: flex;
   width: 17rem;
-  height: 100vh;
+  height: calc(100vh - 3rem);
   flex-direction: column;
   align-items: flex-start;
   gap: 1rem;

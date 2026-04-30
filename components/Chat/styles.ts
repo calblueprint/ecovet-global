@@ -5,6 +5,7 @@ import { B1, B2, Caption, TextProps, TextStyles } from "@/styles/text";
 export const MessageContent = styled(B2)`
   color: ${COLORS.black70};
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 `;
 
 export const MessageContentBubble = styled.div<{ $fromUser: boolean }>`
@@ -29,7 +30,8 @@ export const TimeMessageContainer = styled.div<{ $fromUser: boolean }>`
 export const PfpMessageContentContainer = styled.div<{ $fromUser: boolean }>`
   display: flex;
   flex-direction: row;
-  align-items: ${({ $fromUser }) => ($fromUser ? "flex-end" : "flex-start")};
+  margin-left: ${({ $fromUser }) => ($fromUser ? "auto" : "0px")};
+  margin-right: ${({ $fromUser }) => (!$fromUser ? "auto" : "0px")};
   gap: 0.5rem;
   align-self: stretch;
 `;
@@ -46,14 +48,14 @@ export const TimeLabel = styled(Caption)`
   color: ${COLORS.black20};
 `;
 
-export const NameContainer = styled.div`
+export const NameContainer = styled.div<{ $fromUser: boolean }>`
   display: flex;
-  padding: 0 0.5rem;
+  padding-left: ${({ $fromUser }) => (!$fromUser ? "1.5" : "0")}rem;
+  padding-right: ${({ $fromUser }) => ($fromUser ? "1.5" : "0")}rem;
   justify-content: center;
   align-items: center;
-  align-self: end;
+  align-self: ${({ $fromUser }) => ($fromUser ? "end" : "start")};
   gap: 0.25rem;
-  margin: 0 1rem;
   color: ${COLORS.black70};
 `;
 
@@ -78,6 +80,7 @@ export const FullMessageContainer = styled.div<{
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  max-width: 75%;
   align-self: ${({ $fromUser }) => ($fromUser ? "end" : "start")};
   padding-top: ${({ $doubleText }) => ($doubleText ? "0.4rem" : "0rem")};
 `;
@@ -95,12 +98,15 @@ export const ChatMessageContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 1.25rem;
+  gap: 0.6rem;
   align-self: stretch;
-  margin: 0 1.25rem;
+  padding: 0 1rem;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: clip;
+  scrollbar-width: thin;
+  margin: 0 0.1rem;
 `;
 
 export const TimeSeparatorBold = styled(Caption)`
@@ -166,7 +172,7 @@ export const ChatContainer = styled.div`
   width: 19.375rem;
   height: 100%;
   gap: 1rem;
-  padding-top: 0.75rem;
+  padding-top: 1.5rem;
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
@@ -185,7 +191,7 @@ export const ContentContainer = styled.div`
   flex-direction: column;
   width: 100%;
   height: 100%;
-  gap: 1rem;
+  gap: 1.2rem;
   overflow: hidden;
   min-height: 0;
   flex: 1;
@@ -235,9 +241,25 @@ export const ChatButtonLabel = styled(Caption)`
 `;
 export const ChatSelectionContainer = styled.div`
   display: flex;
+  flex-direction: row;
+  overflow: scroll;
   align-items: flex-start;
   gap: 1rem;
   margin-left: 1.25rem;
+  padding-right: 0.75;
+  scrollbar-width: thin;
+  padding-bottom: 0.75rem;
+`;
+
+export const SelectAnnouncementRoomContainer = styled.div`
+  display: flex;
+  padding: 0 1.25rem 1.5rem 1.25rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5rem;
+  align-self: stretch;
+
+  border-bottom: 1px solid ${COLORS.oat_medium};
 `;
 
 export const SelectUsersContainer = styled.div`

@@ -11,18 +11,17 @@ import { ChatMessage } from "@/types/schema";
 export const EVENT_MESSAGE_TYPE = "message";
 
 export function useRealtimeChat({
+  sessionId,
   roomId,
   userId,
   username,
-  sessionId,
 }: {
+  sessionId: string;
   roomId: string | null;
   userId: string;
   username: string;
-  sessionId: string;
 }) {
   const [initializingMessages, startFetching] = useTransition();
-
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [channel, setChannel] = useState<ReturnType<
     typeof supabase.channel
@@ -48,7 +47,7 @@ export function useRealtimeChat({
       channel.unsubscribe();
       setChannel(null);
     }
-    if (!roomId) {
+    if (!roomId || roomId === "announcements") {
       setChatMessages([]);
       setIsConnected(false);
       return;
@@ -95,14 +94,7 @@ export function useRealtimeChat({
 
       setChatMessages(current => [...current, chatMessage]);
       await Promise.all([
-        persistChatMessage(
-          roomId,
-          chatMessage.message,
-          userId,
-          sessionId,
-          username,
-          chatMessage.phase_sent_at,
-        ),
+        persistChatMessage(chatMessage),
         channel.send({
           type: "broadcast",
           event: EVENT_MESSAGE_TYPE,
@@ -125,13 +117,13 @@ export function useRealtimeChat({
       const chatMessage: ChatMessage = {
         id: crypto.randomUUID(),
         room_id: messageRoomId,
+        session_id: sessionId,
         message: message,
         sender: userId,
-        session_id: sessionId,
-        is_announcement: false,
         sender_name: username,
         phase_sent_at: current_phase,
         created_at: new Date().toISOString(),
+        is_announcement: false,
       };
 
       if (!channel || !isConnected) {
