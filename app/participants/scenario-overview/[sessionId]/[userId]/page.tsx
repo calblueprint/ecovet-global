@@ -10,6 +10,7 @@ import type {
 } from "@/types/schema";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { CircularProgress } from "@mui/material";
 import supabase from "@/actions/supabase/client";
 import { fetchOptionsForPrompts } from "@/actions/supabase/queries/prompt";
 import {
@@ -23,8 +24,6 @@ import {
   fetchSessionGlobalPhaseIndex,
   fetchTemplateId,
   isSessionForceAdvance,
-  sessionParticipants,
-  sessionParticipantsBulk,
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
 import Chat from "@/components/Chat/Chat";
@@ -35,7 +34,7 @@ import NextPhaseButton from "./components/NextPhaseButton";
 import PrevPhaseButton from "./components/PrevPhaseButton";
 import PromptsRightPanel from "./components/PromptsRightPanel";
 import ScenarioLeftPanel from "./components/ScenarioLeftPanel";
-import { Main } from "./styles";
+import { LoadingScreen, Main } from "./styles";
 
 export default function SessionFlowPage() {
   const { userId: profileUserId, profile } = useProfile();
@@ -371,7 +370,10 @@ export default function SessionFlowPage() {
     setPhaseIdx(i => Math.max(i - 1, -1));
   }
 
-  if (loading) return <div>Loading session...</div>;
+  if (loading) return;
+  <LoadingScreen>
+    <CircularProgress color="inherit" aria-label="Loading…" />;
+  </LoadingScreen>;
 
   return (
     <Main>

@@ -3,6 +3,7 @@
 import type { Phase, PromptWithResponse, UUID } from "@/types/schema";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { CircularProgress } from "@mui/material";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import supabase from "@/actions/supabase/client";
@@ -20,12 +21,12 @@ import {
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import { Heading3, SilverHeading3, SilverText } from "../styles";
 import {
-  AnnouncementsPanel,
   ContentDiv,
   InfoBox,
   InfoGrid,
   InfoLabel,
   InfoValue,
+  LoadingScreen,
   OptionList,
   OptionRow,
   PageLayout,
@@ -175,7 +176,12 @@ export default function ParticipantDetailView() {
     };
   }, [sessionId, userId]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading)
+    return (
+      <LoadingScreen>
+        <CircularProgress color="inherit" aria-label="Loading…" />
+      </LoadingScreen>
+    );
 
   return (
     <>

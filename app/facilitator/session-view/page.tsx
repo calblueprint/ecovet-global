@@ -9,6 +9,7 @@ import type {
 } from "@/types/schema";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { CircularProgress } from "@mui/material";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import supabase from "@/actions/supabase/client";
@@ -502,7 +503,18 @@ export default function FacilitatorSessionView() {
                                 />
                               </Box>
                             ) : (
-                              <span>(Loading...)</span>
+                              <span
+                                style={{
+                                  whiteSpace: "nowrap",
+                                  fontSize: "14px",
+                                }}
+                              >
+                                <CircularProgress
+                                  color="inherit"
+                                  size="1rem"
+                                  aria-label="Loading…"
+                                />
+                              </span>
                             )}
                           </TableCell>
                         </TableRow>

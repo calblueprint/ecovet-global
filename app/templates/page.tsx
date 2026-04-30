@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { CircularProgress } from "@mui/material";
 import { produce } from "immer";
 import { addNewOption } from "@/actions/supabase/queries/prompt";
 import {
@@ -32,6 +33,7 @@ import {
   UUID,
 } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
+import { LoadingScreen } from "../facilitator/participants/styles";
 import { SideNavTemplatesContainer } from "../facilitator/template-list/components/styles";
 import {
   ActionRow,
@@ -355,7 +357,10 @@ export default function TemplateBuilderPage() {
     setActiveIds({ roleId: 1, rolePhaseId: null });
   };
 
-  if (loading) return <LoadingMessages>Loading template...</LoadingMessages>;
+  if (loading) return;
+  <LoadingScreen>
+    <CircularProgress color="inherit" aria-label="Loading…" />
+  </LoadingScreen>;
   if (!localStore)
     return <LoadingMessages>Template not found.</LoadingMessages>;
 

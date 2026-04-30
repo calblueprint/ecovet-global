@@ -3,11 +3,9 @@
 import type { PDFSession, Session } from "@/types/schema";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CircularProgress } from "@mui/material";
 import Tabs from "@mui/material/Tabs";
-import {
-  fetchPDFName,
-  fetchSessionsbyUserGroup,
-} from "@/actions/supabase/queries/sessions";
+import { fetchSessionsbyUserGroup } from "@/actions/supabase/queries/sessions";
 import ParticipantNavBar from "@/components/ParticipantsNavBar/ParticipantsNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
@@ -17,7 +15,6 @@ import {
   PageTitle,
   PdfButton,
   SearchBarStyled,
-  SearchIconWrapper,
   SearchInput,
   StyledTab,
   StyledTable,
@@ -178,9 +175,14 @@ export default function ParticipantPastSessionsPage() {
                           }}
                           disabled={pdfLoading === session.session_id}
                         >
-                          {pdfLoading === session.session_id
-                            ? "Loading..."
-                            : "View PDF"}
+                          {pdfLoading === session.session_id ? (
+                            <CircularProgress
+                              color="inherit"
+                              aria-label="Loading…"
+                            />
+                          ) : (
+                            "View PDF"
+                          )}
                         </PdfButton>
                       </StyledTd>
                     )}

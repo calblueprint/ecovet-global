@@ -79,3 +79,11 @@ export const StyledTab = styled(Tab)`
     font-size: 0.75rem;
   }
 `;
+
+export const LoadingScreen = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;

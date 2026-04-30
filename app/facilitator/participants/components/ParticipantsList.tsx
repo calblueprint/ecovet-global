@@ -1,11 +1,13 @@
 import { useState } from "react";
 import Image from "next/image";
+import { CircularProgress } from "@mui/material";
 import Box from "@mui/material/Box";
 import { DeleteButton } from "@/app/participants/styles";
 import cross from "@/assets/images/DeleteTagCross.svg";
 import { Participant } from "@/types/schema";
 import { SortButton } from "../../styles";
 import {
+  LoadingScreen,
   StyledTable,
   StyledTableHead,
   StyledTableRow,
@@ -31,7 +33,9 @@ export default function ParticipantsList({
   return (
     <Box>
       {participants.length === 0 ? (
-        <p>No participants found.</p>
+        <LoadingScreen>
+          <CircularProgress size="2rem" color="inherit" aria-label="Loading…" />
+        </LoadingScreen>
       ) : (
         <StyledTable>
           <StyledTableHead>

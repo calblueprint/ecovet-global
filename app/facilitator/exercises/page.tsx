@@ -3,9 +3,9 @@
 import type { PDFSession, Session } from "@/types/schema";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import CircularProgress from "@mui/material/CircularProgress";
 import Tabs from "@mui/material/Tabs";
 import { fetchSessionsbyUserGroup } from "@/actions/supabase/queries/sessions";
-import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import FacilitatorNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
@@ -13,11 +13,9 @@ import {
   EmptyMessage,
   LayoutWrapper,
   PageTitle,
-  PdfArrow,
   PdfButton,
   PdfLabel,
   SearchBarStyled,
-  SearchIconWrapper,
   SearchInput,
   StartExerciseButton,
   StyledTab,
@@ -182,7 +180,10 @@ export default function FacilitatorExercisesPage() {
                           disabled={pdfLoading === session.session_id}
                         >
                           {pdfLoading === session.session_id ? (
-                            "Loading..."
+                            <CircularProgress
+                              color="inherit"
+                              aria-label="Loading…"
+                            />
                           ) : (
                             <PdfLabel>View PDF</PdfLabel>
                           )}

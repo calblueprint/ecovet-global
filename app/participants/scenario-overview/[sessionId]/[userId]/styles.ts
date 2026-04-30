@@ -25,6 +25,15 @@ export const Main = styled.main`
   }
 `;
 
+export const LoadingScreen = styled.div`
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
 export const ContentDiv = styled.div`
   flex: 1;
   height: 100vh;

@@ -1,6 +1,7 @@
 "use client";
 
 import type { Phase, RolePhase, Template } from "@/types/schema";
+import CircularProgress from "@mui/material/CircularProgress";
 import {
   ContentBody,
   ContentBody40,
@@ -9,6 +10,7 @@ import {
   ContentHeader,
   ContinueButton,
   ContinueButtonDiv,
+  LoadingScreen,
   OverviewHeader,
   PhaseDescriptionWrapper,
   PhaseHeader,
@@ -60,14 +62,24 @@ export default function ScenarioLeftPanel({
       <ContentBubble>
         <ContentHeader>Summary</ContentHeader>
         <ContentBody>
-          {templateInfo ? templateInfo.summary : "Loading..."}
+          {templateInfo ? (
+            templateInfo.summary
+          ) : (
+            <LoadingScreen>
+              <CircularProgress color="inherit" aria-label="Loading…" />
+            </LoadingScreen>
+          )}
         </ContentBody>
       </ContentBubble>
 
       <ContentBubble>
         <ContentHeader>Setting</ContentHeader>
         <ContentBody>
-          {templateInfo ? templateInfo.setting : "Loading..."}
+          {templateInfo ? (
+            templateInfo.setting
+          ) : (
+            <CircularProgress color="inherit" aria-label="Loading…" />
+          )}
         </ContentBody>
       </ContentBubble>
 

@@ -3,6 +3,7 @@
 import type { Template, UUID } from "@/types/schema";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CircularProgress } from "@mui/material";
 import { ArrowDown, ArrowUp, ArrowUpDown, Pencil } from "lucide-react";
 import {
   assignTagToTemplate,
@@ -19,7 +20,6 @@ import COLORS from "@/styles/colors";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
   ContentWrapper,
-  GeneralList,
   GeneralTitle,
   Heading3,
   LayoutWrapper,
@@ -296,7 +296,9 @@ export default function TemplateListPage() {
   }
 
   return loading ? (
-    <MainDiv>Loading profile...</MainDiv>
+    <MainDiv>
+      <CircularProgress color="inherit" aria-label="Loading…" />
+    </MainDiv>
   ) : (
     <>
       <TopNavBar />
