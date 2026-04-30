@@ -30,6 +30,7 @@ import {
   LegendFlex,
   McqOptionStyled,
   MultipleChoicePromptStyled,
+  NextButtons,
   PhaseCard,
   PhaseTemplateHeader,
   PromptTypeDropdownStyled,
@@ -47,7 +48,10 @@ export default function QuestionBuilder({
   rolePhaseId,
   phase,
   onChange,
-  onNextPhase,
+  onNext,
+  onPrev,
+  isFirstStep,
+  isLastStep,
   onSaveAndExit,
   saving,
 }: {
@@ -59,7 +63,10 @@ export default function QuestionBuilder({
     field: string,
     v: string | PromptType | StagedOption[] | number,
   ) => UUID | null | void;
-  onNextPhase: () => void;
+  onNext: () => void;
+  onPrev: () => void;
+  isFirstStep: boolean;
+  isLastStep: boolean;
   onSaveAndExit: () => void;
   saving: boolean;
 }) {
@@ -148,9 +155,40 @@ export default function QuestionBuilder({
             >
               + Question
             </HeaderButtonLight>
-            <HeaderButtonDark onClick={onNextPhase}>
-              Next phase
-            </HeaderButtonDark>
+            <NextButtons onClick={onPrev} disabled={isFirstStep}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="10"
+                height="10"
+                viewBox="0 0 10 10"
+                fill="none"
+              >
+                <path
+                  d="M7 1L3 5L7 9"
+                  stroke={isFirstStep ? "#E0DFDC" : "#476C77"}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Prev
+            </NextButtons>
+            <NextButtons onClick={onNext} disabled={isLastStep}>
+              Next
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="10"
+                height="10"
+                viewBox="0 0 10 10"
+                fill="none"
+              >
+                <path
+                  d="M3 1L7 5L3 9"
+                  stroke={isLastStep ? "#E0DFDC" : "#476C77"}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </NextButtons>
             <HeaderButtonDark onClick={onSaveAndExit} disabled={saving}>
               {saving ? (
                 "Saving..."
@@ -190,7 +228,6 @@ export default function QuestionBuilder({
           const promptType = (prompt.prompt_type ?? "text") as PromptType;
           const options = value.optionsByPromptId[promptID] ?? [];
           const isFocused = focusedPromptId === promptID;
-          const isLast = j === promptIds.length - 1;
 
           return (
             <div
@@ -347,7 +384,7 @@ export default function QuestionBuilder({
                 )}
               </FieldCard>
 
-              {isFocused && !isLast && (
+              {isFocused && (
                 <InsertQuestionRow>
                   <InsertQuestionButton
                     onClick={e => {

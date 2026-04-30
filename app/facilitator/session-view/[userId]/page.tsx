@@ -1,30 +1,18 @@
 "use client";
 
+import type { ParticipantDetailBundle } from "@/actions/supabase/queries/sessions";
 import type {
   ParticipantSessionWithProfile,
   Phase,
   PromptWithResponse,
+  RolePhase,
   UUID,
 } from "@/types/schema";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import LinearProgress from "@mui/material/LinearProgress";
 import supabase from "@/actions/supabase/client";
-import {
-  fetchEmailByUserId,
-  getProfileById,
-} from "@/actions/supabase/queries/profile";
-import {
-  fetchIsSessionAsync,
-  fetchPhases,
-  fetchPromptsWithResponses,
-  fetchRoleName,
-  fetchRolePhases,
-  fetchRolePhasesBatch,
-  fetchTemplateId,
-  getAllPhaseIds,
-  sessionParticipants,
-} from "@/actions/supabase/queries/sessions";
+import { fetchParticipantDetailBundle } from "@/actions/supabase/queries/sessions";
 import { sendEmailReminder } from "@/actions/supabase/send-email";
 import Announcements from "@/components/Chat/Announcements";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
@@ -56,6 +44,7 @@ import {
 type PhasePromptData = {
   phaseId: UUID;
   phaseName: string | null;
+  rolePhaseId: UUID;
   prompts: PromptWithResponse[];
 };
 
@@ -65,149 +54,87 @@ export default function ParticipantDetailView() {
 
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId") as UUID | null;
+  const router = useRouter();
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState<string>("");
-  const [prompts, setPrompts] = useState<PromptWithResponse[]>([]);
-  const [participants, setParticipants] = useState<
-    ParticipantSessionWithProfile[]
-  >([]);
-
-  const [selectedPhaseId, setSelectedPhaseId] = useState<UUID | null>(null);
-  const [phaseIds, setPhaseIds] = useState<UUID[]>([]);
-  const [phases, setPhases] = useState<Phase[]>([]);
-  const [currentPhaseName, setCurrentPhaseName] = useState<string | null>(null);
+  const [bundle, setBundle] = useState<ParticipantDetailBundle | null>(null);
   const [phasePrompts, setPhasePrompts] = useState<PhasePromptData[]>([]);
-  const [done, setDone] = useState(0);
-  const percent =
-    prompts.length > 0 ? Math.round((done / prompts.length) * 100) : 0;
-  const [loading, setLoading] = useState(true);
-  const [roleId, setRoleId] = useState<UUID | null>(null);
-  const [roleName, setRoleName] = useState<string | null>(null);
-  const [isAsync, setIsAsync] = useState<boolean>(false);
-
+  const [selectedPhaseId, setSelectedPhaseId] = useState<UUID | null>(null);
   const [openWarning, setOpenWarning] = useState(false);
   const [sending, setSending] = useState(false);
-  const router = useRouter();
   const userSelectedRef = useRef(false);
 
-  const handleNudgeConfirm = async () => {
-    if (!userId || !sessionId) return;
-    try {
-      setSending(true);
-      setOpenWarning(false);
-      await sendEmailReminder(email, sessionId);
-    } catch (err) {
-      console.error("Error sending nudge:", err);
-    } finally {
-      setSending(false);
-    }
-  };
+  function buildPhasePrompts(b: ParticipantDetailBundle): PhasePromptData[] {
+    const rolePhasesByPhaseId = new Map(b.rolePhases);
+    const promptsByRolePhase = new Map(b.promptsByRolePhase);
 
-  async function loadIsAsync() {
-    if (!sessionId) return;
-    const is_async = await fetchIsSessionAsync(sessionId);
-    console.log(is_async);
-    setIsAsync(is_async ? is_async : false);
-  }
-
-  async function loadData() {
-    if (!sessionId || !userId) return;
-
-    const participants = await sessionParticipants(sessionId);
-    setParticipants(participants.filter(p => p.user_id !== facilitatorUserId));
-
-    const participant = participants.find(p => p.user_id === userId);
-    if (!participant) return;
-
-    const email = await getProfileById(userId);
-    if (!email.email) {
-      setEmail("no email");
-      return;
-    }
-    setEmail(email.email);
-
-    setName(
-      `${participant.profile?.first_name} ${participant.profile?.last_name}`,
-    );
-
-    const phases = await fetchPhases(sessionId);
-    const phaseIndex = participant.phase_index ?? 0;
-    const currentPhase = phases[phaseIndex];
-    if (!currentPhase || !participant.role_id) return;
-
-    const rolePhaseMap = await fetchRolePhasesBatch(
-      [participant.role_id],
-      currentPhase.phase_id,
-    );
-    const rolePhase = rolePhaseMap.get(participant.role_id);
-    if (!rolePhase) return;
-
-    const promptData = await fetchPromptsWithResponses(
-      rolePhase.role_phase_id,
-      userId as UUID,
-      sessionId,
-    );
-
-    const roleId = participant.role_id;
-    const roleName = await fetchRoleName(roleId);
-    setRoleName(roleName.role_name);
-    const templateIdData = await fetchTemplateId(sessionId);
-    const templateId = templateIdData?.template_id;
-
-    if (!templateId) return;
-    const phaseIds = await getAllPhaseIds(templateId);
-
-    if (!phaseIds) return;
-
-    const allPhasePrompts: PhasePromptData[] = [];
-    for (const phaseId of phaseIds) {
-      const rolePhase = await fetchRolePhases(roleId, phaseId);
-      if (!rolePhase) continue;
-
-      const prompts = await fetchPromptsWithResponses(
-        rolePhase.role_phase_id,
-        userId as UUID,
-        sessionId,
-      );
-
-      const phase = phases.find(p => p.phase_id === phaseId);
-
-      allPhasePrompts.push({
-        phaseId,
-        phaseName: phase?.phase_name ?? "Unknown Phase",
-        prompts,
-      });
-    }
-
-    setPhases(phases);
-    setCurrentPhaseName(phases[phaseIndex]?.phase_name ?? null);
-    setPrompts(promptData);
-    setDone(
-      promptData.filter(p => p.answer || p.options?.some(o => o.selected))
-        .length,
-    );
-    setLoading(false);
-    setRoleId(roleId);
-    setPhaseIds(phaseIds);
-    setPhasePrompts(allPhasePrompts);
-    if (!userSelectedRef.current) {
-      const currentPhaseId = phases[phaseIndex]?.phase_id;
-      const defaultId =
-        allPhasePrompts.find(p => p.phaseId === currentPhaseId)?.phaseId ??
-        allPhasePrompts[0]?.phaseId ??
-        null;
-      setSelectedPhaseId(defaultId);
-    }
+    return b.phases.flatMap(phase => {
+      const rp = rolePhasesByPhaseId.get(phase.phase_id as UUID);
+      if (!rp) return [];
+      return [
+        {
+          phaseId: phase.phase_id as UUID,
+          phaseName: phase.phase_name ?? "Unknown Phase",
+          rolePhaseId: rp.role_phase_id as UUID,
+          prompts: promptsByRolePhase.get(rp.role_phase_id as UUID) ?? [],
+        },
+      ];
+    });
   }
 
   useEffect(() => {
-    loadData();
-    loadIsAsync();
+    if (!sessionId || !userId) return;
+    let cancelled = false;
 
-    // Live updates when responses change
+    fetchParticipantDetailBundle(sessionId as UUID, userId as UUID).then(
+      result => {
+        if (cancelled) return;
+        if ("error" in result) {
+          console.error("Failed to load:", result.error);
+          return;
+        }
+
+        setBundle(result);
+        setPhasePrompts(buildPhasePrompts(result));
+
+        if (!userSelectedRef.current) {
+          const dbPhaseIndex = result.participant.phase_index ?? 0;
+          const arrayIdx = dbPhaseIndex - 1;
+          const currentPhaseId =
+            arrayIdx >= 0 ? result.phases[arrayIdx]?.phase_id : null;
+          setSelectedPhaseId(
+            (currentPhaseId as UUID) ??
+              (result.phases[0]?.phase_id as UUID) ??
+              null,
+          );
+        }
+      },
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionId, userId]);
+
+  useEffect(() => {
+    if (!bundle || !sessionId || !userId) return;
+
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const debouncedRefetch = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(async () => {
+        const result = await fetchParticipantDetailBundle(
+          sessionId as UUID,
+          userId as UUID,
+        );
+        if ("error" in result) return;
+        setBundle(result);
+        setPhasePrompts(buildPhasePrompts(result));
+      }, 500);
+      // wait 500 ms before reloading prompts
+    };
+
     const channel = supabase
-      .channel(`participant-detail-${userId}`)
+      .channel(`participant-detail-${userId}-${sessionId}`)
       .on(
         "postgres_changes",
         {
@@ -216,16 +143,54 @@ export default function ParticipantDetailView() {
           table: "prompt_response",
           filter: `session_id=eq.${sessionId}`,
         },
-        () => loadData(),
+        () => debouncedRefetch(),
       )
       .subscribe();
 
     return () => {
+      if (timer) clearTimeout(timer);
       supabase.removeChannel(channel);
     };
-  }, [sessionId, userId]);
+  }, [bundle, sessionId, userId]);
 
-  if (loading) return <div>Loading...</div>;
+  // ---- Derived UI state ----
+  const dbPhaseIndex = bundle?.participant.phase_index ?? 0;
+  const currentPhaseArrayIdx = dbPhaseIndex - 1;
+  const currentPhase =
+    currentPhaseArrayIdx >= 0 ? bundle?.phases[currentPhaseArrayIdx] : null;
+  const currentPhaseName = currentPhase?.phase_name ?? "Not started";
+
+  const name = bundle
+    ? `${bundle.participant.profile?.first_name ?? ""} ${
+        bundle.participant.profile?.last_name ?? ""
+      }`.trim()
+    : "";
+  const roleName = bundle?.participant.role?.role_name ?? "Unknown role";
+
+  const selectedPhase = phasePrompts.find(p => p.phaseId === selectedPhaseId);
+  const totalPrompts = selectedPhase?.prompts.length ?? 0;
+  const donePrompts = selectedPhase
+    ? selectedPhase.prompts.filter(
+        p => p.answer || p.options?.some(o => o.selected),
+      ).length
+    : 0;
+  const percent =
+    totalPrompts > 0 ? Math.round((donePrompts / totalPrompts) * 100) : 0;
+
+  const handleNudgeConfirm = async () => {
+    if (!sessionId || !bundle) return;
+    try {
+      setSending(true);
+      setOpenWarning(false);
+      await sendEmailReminder(bundle.email, sessionId);
+    } catch (err) {
+      console.error("Error sending nudge:", err);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  if (!bundle) return <div>Loading...</div>;
 
   return (
     <>
@@ -242,6 +207,7 @@ export default function ParticipantDetailView() {
           {phasePrompts.map(phase => (
             <PhaseList
               key={phase.phaseId}
+              $selected={phase.phaseId === selectedPhaseId}
               onClick={() => {
                 userSelectedRef.current = true;
                 setSelectedPhaseId(phase.phaseId);
@@ -259,33 +225,36 @@ export default function ParticipantDetailView() {
             }
             style={{ cursor: "pointer" }}
           >
-            {" "}
             ← Back
           </SilverText>
+
           <Header>
             <Heading3>
               {name}, {roleName} <SilverHeading3>(Responses)</SilverHeading3>
             </Heading3>
             <NudgeButton
-              async={isAsync}
+              async={bundle.isAsync}
               onClick={() => setOpenWarning(true)}
               disabled={sending}
             >
               {sending ? "Sending..." : "Nudge"}
             </NudgeButton>
           </Header>
+
           <ParticipantInformation>
             <b>Participant Information</b>
             <InfoGrid>
-              <InfoLabel>Email</InfoLabel> <InfoValue>{email}</InfoValue>
-              <InfoLabel>Role</InfoLabel> <InfoValue>{roleName}</InfoValue>
+              <InfoLabel>Email</InfoLabel>
+              <InfoValue>{bundle.email}</InfoValue>
+              <InfoLabel>Role</InfoLabel>
+              <InfoValue>{roleName}</InfoValue>
               <InfoLabel>Current Phase</InfoLabel>
-              <InfoValue>{currentPhaseName ?? "N/A"}</InfoValue>
-              <InfoLabel>Answered</InfoLabel>{" "}
+              <InfoValue>{currentPhaseName}</InfoValue>
+              <InfoLabel>Answered</InfoLabel>
               <InfoValue>
                 <InfoBox>
                   <span>
-                    {done} / {prompts.length}
+                    {donePrompts} / {totalPrompts}
                   </span>
                   <span style={{ whiteSpace: "nowrap", fontSize: "14px" }}>
                     {percent}% Complete
@@ -300,38 +269,33 @@ export default function ParticipantDetailView() {
             </InfoGrid>
           </ParticipantInformation>
 
-          {phasePrompts
-            .filter(phase => phase.phaseId === selectedPhaseId)
-            .map(phase => (
-              <PromptCard key={phase.phaseId}>
-                <h3>{phase.phaseName}</h3>
-                {phase.prompts.map((prompt, j) => (
-                  <PromptWrapper key={j}>
-                    <PromptQuestionNumber>{j + 1} →</PromptQuestionNumber>
-                    <PromptQuestionText>
-                      Question: {prompt.question}
-                    </PromptQuestionText>{" "}
-                    {prompt.options && prompt.options.length > 0 ? (
-                      <OptionList>
-                        {prompt.options.map(opt => (
-                          <OptionRow
-                            key={opt.optionId}
-                            $selected={opt.selected}
-                          >
-                            <RadioCircle $selected={opt.selected} />
-                            <span>{opt.text}</span>
-                          </OptionRow>
-                        ))}
-                      </OptionList>
-                    ) : (
-                      <PromptAnswer>
-                        {prompt.answer ?? "No response"}
-                      </PromptAnswer>
-                    )}
-                  </PromptWrapper>
-                ))}
-              </PromptCard>
-            ))}
+          {selectedPhase && (
+            <PromptCard key={selectedPhase.phaseId}>
+              <h3>{selectedPhase.phaseName}</h3>
+              {selectedPhase.prompts.map((prompt, j) => (
+                <PromptWrapper key={prompt.promptId ?? j}>
+                  <PromptQuestionNumber>{j + 1} →</PromptQuestionNumber>
+                  <PromptQuestionText>
+                    Question: {prompt.question}
+                  </PromptQuestionText>
+                  {prompt.options && prompt.options.length > 0 ? (
+                    <OptionList>
+                      {prompt.options.map(opt => (
+                        <OptionRow key={opt.optionId} $selected={opt.selected}>
+                          <RadioCircle $selected={opt.selected} />
+                          <span>{opt.text}</span>
+                        </OptionRow>
+                      ))}
+                    </OptionList>
+                  ) : (
+                    <PromptAnswer>
+                      {prompt.answer ?? "No response"}
+                    </PromptAnswer>
+                  )}
+                </PromptWrapper>
+              ))}
+            </PromptCard>
+          )}
         </ContentDiv>
 
         {sessionId && (

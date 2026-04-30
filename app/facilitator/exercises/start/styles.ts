@@ -279,7 +279,7 @@ export const CheckboxRow = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.5rem;
 `;
 
 export const CheckboxLabel = styled.label`
@@ -297,11 +297,12 @@ export const CheckboxInput = styled.input`
 
 export const ExerciseNameInput = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   flex: 1;
   max-width: 25rem;
   margin-top: 1rem;
   margin-bottom: 1rem;
+  gap: 0.2rem;
 `;
 
 export const NameInputField = styled.input`

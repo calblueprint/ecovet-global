@@ -40,7 +40,6 @@ import {
   UUID,
 } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
-import { SideNavTemplatesContainer } from "../facilitator/template-list/components/styles";
 import {
   ActionRow,
   ActionText,
@@ -162,6 +161,7 @@ export default function TemplateBuilderPage() {
   const router = useRouter();
   const templateId = searchParams.get("templateId") as UUID | null;
   const isFromTemplateList = searchParams.get("fromTemplateList") === "true";
+  const isAdmin = searchParams.get("isAdmin") === "true";
 
   const [saving, setSaving] = useState(false);
 
@@ -189,8 +189,7 @@ export default function TemplateBuilderPage() {
       const realtemplateID = await createTemplates(
         saveStore.templateID,
         (saveStore.rolesById[1] as Template).template_name,
-        null,
-        (saveStore.rolesById[1] as Template).objective,
+        isAdmin,
         (saveStore.rolesById[1] as Template).summary,
         (saveStore.rolesById[1] as Template).setting,
         (saveStore.rolesById[1] as Template).current_activity,
