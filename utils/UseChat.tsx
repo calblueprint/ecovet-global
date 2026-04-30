@@ -47,7 +47,7 @@ export function useRealtimeChat({
       channel.unsubscribe();
       setChannel(null);
     }
-    if (!roomId) {
+    if (!roomId || roomId === "announcements") {
       setChatMessages([]);
       setIsConnected(false);
       return;
