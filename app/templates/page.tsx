@@ -39,6 +39,7 @@ import {
   Template,
   UUID,
 } from "@/types/schema";
+import { getHomePath } from "@/utils/HomePage";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
   ActionRow,
@@ -285,7 +286,7 @@ export default function TemplateBuilderPage() {
       }
     }
     setShowBackWarning(false);
-    router.push(`/facilitator/template-list`);
+    router.push(getHomePath(profile));
   };
 
   useEffect(() => {

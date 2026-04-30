@@ -28,6 +28,7 @@ function OnboardingPage() {
   const [role, setRole] = useState("");
   const [save, setSave] = useState(false);
   const [formMessage, setFormMessage] = useState("");
+  const { refetch } = useProfile();
   const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -65,6 +66,7 @@ function OnboardingPage() {
             .update({ num_users: (data.num_users ?? 0) + 1 })
             .eq("user_group_id", profile?.user_group_id);
         }
+        await refetch();
         router.push("/test-page");
       } catch (err) {
         console.error("Error incrementing num_users:", err);
