@@ -110,6 +110,8 @@ export function sendAnnouncement({
     room_id: roomId,
     session_id: room.sessionId,
     message: message,
+    session_id: sessionId,
+    is_announcement: true,
     sender: userId,
     sender_name: label,
     phase_sent_at: null,

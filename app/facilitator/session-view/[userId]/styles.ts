@@ -239,7 +239,7 @@ export const Sidebar = styled.aside`
   font-family: ${Sans.style.fontFamily};
 `;
 
-export const PhaseList = styled.div`
+export const PhaseList = styled.div<{ $selected?: boolean }>`
   display: flex;
   padding: 6px 12px;
   align-items: center;
@@ -247,11 +247,17 @@ export const PhaseList = styled.div`
   align-self: stretch;
   cursor: pointer;
   border-radius: 4px;
-  background-color: transparent;
+  background-color: ${props =>
+    props.$selected ? COLORS.oat_medium : "transparent"};
   font-family: ${Sans.style.fontFamily};
   font-size: 13px;
   font-style: normal;
-  font-weight: 500;
+  font-weight: ${props => (props.$selected ? 600 : 500)};
   color: ${COLORS.black70};
   line-height: 150%;
+
+  &:hover {
+    background-color: ${props =>
+      props.$selected ? COLORS.oat_dark : COLORS.oat_medium};
+  }
 `;

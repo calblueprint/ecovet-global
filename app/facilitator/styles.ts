@@ -22,14 +22,6 @@ export const Main = styled.main`
   background: ${COLORS.white};
 `;
 
-export const ContentWrapper = styled.div`
-  flex: 1;
-  padding: 2rem;
-
-  overflow-y: auto;
-  min-height: 0;
-`;
-
 export const StartContentWrapper = styled.div`
   flex: 1;
   padding: 2rem;
@@ -177,7 +169,6 @@ export const StyledSelect = styled.select`
   outline: none;
   color: ${COLORS.black};
 
-  /* This ensures the arrow shows up across all browsers */
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;

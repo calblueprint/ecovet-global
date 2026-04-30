@@ -33,7 +33,7 @@ export const ButtonContainer = styled.div`
   height: 3rem;
 `;
 
-export const TopNavButton = styled.button<{ $active?: boolean }>`
+export const TopNavButton = styled.button`
   width: auto;
   padding: 0.75rem 1.5rem;
   text-align: center;
@@ -54,7 +54,6 @@ export const TopNavButton = styled.button<{ $active?: boolean }>`
     height: 3px;
     width: 100%;
     background: ${COLORS.lightEletricBlue};
-    opacity: ${props => (props.$active ? 1 : 0)};
     transition: opacity 0.2s ease;
   }
 

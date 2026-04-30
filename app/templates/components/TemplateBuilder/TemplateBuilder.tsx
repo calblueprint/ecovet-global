@@ -288,30 +288,76 @@ export default function TemplateBuilder({
     }
   }
 
-  const rolePhases = Object.entries(
-    localStore?.rolePhaseIndex[activeIds.roleId as UUID] || {},
-  ).map(([_, rolePhaseID]) => rolePhaseID);
+  const rolePhases = localStore
+    ? localStore.phaseIds
+        .map(
+          phaseId =>
+            localStore.rolePhaseIndex[activeIds.roleId as UUID]?.[phaseId],
+        )
+        .filter((id): id is UUID => Boolean(id))
+    : [];
 
-  const handleNextPhase = () => {
+  const traversableRoleIds = (localStore?.roleIds.filter(id => id !== 1) ??
+    []) as UUID[];
+
+  const currentPhaseId = activeIds.rolePhaseId
+    ? localStore?.rolePhasesById[activeIds.rolePhaseId].phase_id
+    : null;
+  const currentPhaseIndex = currentPhaseId
+    ? (localStore?.phaseIds.indexOf(currentPhaseId) ?? -1)
+    : -1;
+  const currentRoleIndex = traversableRoleIds.indexOf(activeIds.roleId as UUID);
+
+  const isFirstStep = currentPhaseIndex === 0 && currentRoleIndex === 0;
+  const isLastStep =
+    currentPhaseIndex === (localStore?.phaseIds.length ?? 0) - 1 &&
+    currentRoleIndex === traversableRoleIds.length - 1;
+
+  const handleNext = () => {
     if (!localStore || !activeIds.rolePhaseId) return;
+    if (currentRoleIndex === -1 || currentPhaseIndex === -1) return;
+    if (isLastStep) return;
 
-    const currentPhaseId =
-      localStore.rolePhasesById[activeIds.rolePhaseId].phase_id;
-    const currentPhaseIndex = localStore.phaseIds.indexOf(currentPhaseId);
-
-    if (
-      currentPhaseIndex !== -1 &&
-      currentPhaseIndex < localStore.phaseIds.length - 1
-    ) {
-      const nextPhaseId = localStore.phaseIds[currentPhaseIndex + 1];
+    if (currentRoleIndex < traversableRoleIds.length - 1) {
+      const nextRoleId = traversableRoleIds[currentRoleIndex + 1];
       const nextRolePhaseId =
-        localStore.rolePhaseIndex[activeIds.roleId as UUID][nextPhaseId];
+        localStore.rolePhaseIndex[nextRoleId][currentPhaseId as UUID];
 
-      setActiveIds({ roleId: activeIds.roleId, rolePhaseId: nextRolePhaseId });
-      setSelectedPhaseId(nextPhaseId);
-    } else {
-      alert("This is the last phase for this role.");
+      setActiveIds({ roleId: nextRoleId, rolePhaseId: nextRolePhaseId });
+      if (!currentPhaseId) return;
+      setSelectedPhaseId(currentPhaseId);
+      return;
     }
+
+    const nextPhaseId = localStore.phaseIds[currentPhaseIndex + 1];
+    const firstRoleId = traversableRoleIds[0];
+    const nextRolePhaseId = localStore.rolePhaseIndex[firstRoleId][nextPhaseId];
+
+    setActiveIds({ roleId: firstRoleId, rolePhaseId: nextRolePhaseId });
+    setSelectedPhaseId(nextPhaseId);
+  };
+
+  const handlePrev = () => {
+    if (!localStore || !activeIds.rolePhaseId) return;
+    if (currentRoleIndex === -1 || currentPhaseIndex === -1) return;
+    if (isFirstStep) return;
+
+    if (currentRoleIndex > 0) {
+      const prevRoleId = traversableRoleIds[currentRoleIndex - 1];
+      const prevRolePhaseId =
+        localStore.rolePhaseIndex[prevRoleId][currentPhaseId as UUID];
+
+      setActiveIds({ roleId: prevRoleId, rolePhaseId: prevRolePhaseId });
+      if (!currentPhaseId) return;
+      setSelectedPhaseId(currentPhaseId);
+      return;
+    }
+    const prevPhaseId = localStore.phaseIds[currentPhaseIndex - 1];
+    const lastRoleId = traversableRoleIds[traversableRoleIds.length - 1];
+    const prevRolePhaseId = localStore.rolePhaseIndex[lastRoleId][prevPhaseId];
+
+    setActiveIds({ roleId: lastRoleId, rolePhaseId: prevRolePhaseId });
+    setSelectedPhaseId(prevPhaseId);
   };
 
   async function handleSaveAndExit() {
@@ -362,7 +408,10 @@ export default function TemplateBuilder({
                   ]
                 }
                 onChange={setActiveUpdate}
-                onNextPhase={handleNextPhase}
+                onNext={handleNext}
+                onPrev={handlePrev}
+                isFirstStep={isFirstStep}
+                isLastStep={isLastStep}
                 onSaveAndExit={handleSaveAndExit}
                 saving={saving}
               />
