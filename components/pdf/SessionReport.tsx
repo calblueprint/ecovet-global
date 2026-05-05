@@ -27,6 +27,7 @@ export type PhaseReportData = {
   phaseDescription: string | null;
   roles: {
     roleName: string;
+    rolePhaseDescription: string | null;
     prompts: {
       question: string;
       responses: PromptResponse[];
@@ -49,10 +50,18 @@ export type ChatLogEntry = {
   recipientLabels: string[];
 };
 
+export type TemplateRole = {
+  roleName: string;
+  roleDescription: string | null;
+};
+
 export type SessionReportData = {
   sessionName: string;
   templateName: string;
   summary: string | null;
+  setting?: string | null;
+  currentActivity?: string | null;
+  templateRoles?: TemplateRole[];
   generatedAt: string;
   participants: ParticipantSummary[];
   phases: PhaseReportData[];
@@ -118,6 +127,9 @@ export function SessionSummaryReport({
   sessionName,
   templateName,
   summary,
+  setting,
+  currentActivity,
+  templateRoles,
   generatedAt,
   participants,
   phases,
@@ -145,6 +157,38 @@ export function SessionSummaryReport({
           </>
         )}
 
+        {setting && (
+          <>
+            <Text style={styles.coverSectionLabel}>Setting</Text>
+            <Text style={styles.coverBodyText}>{setting}</Text>
+          </>
+        )}
+
+        {currentActivity && (
+          <>
+            <Text style={styles.coverSectionLabel}>Current Activity</Text>
+            <Text style={styles.coverBodyText}>{currentActivity}</Text>
+          </>
+        )}
+
+        {templateRoles && templateRoles.length > 0 && (
+          <>
+            <Text style={styles.coverSectionLabel}>Roles</Text>
+            <View style={styles.rolesList}>
+              {templateRoles.map((role, i) => (
+                <View key={i} style={styles.rolesListItem}>
+                  <Text style={styles.rolesListName}>{role.roleName}</Text>
+                  {role.roleDescription && (
+                    <Text style={styles.rolesListDescription}>
+                      {role.roleDescription}
+                    </Text>
+                  )}
+                </View>
+              ))}
+            </View>
+          </>
+        )}
+
         <Text style={styles.coverDate}>Generated {generatedAt}</Text>
 
         <View style={styles.footer}>
@@ -153,66 +197,68 @@ export function SessionSummaryReport({
         </View>
       </Page>
 
-      {/* ── Page 2: Participant Summary ────────────────────────────────────── */}
-      <Page size="A4" style={styles.page}>
-        <Text style={styles.pageTitle}>Participants</Text>
-        <View style={styles.pageTitleDivider} />
+      {/* ── Page 2: Participant Summary (session reports only) ────────────── */}
+      {participants.length > 0 && (
+        <Page size="A4" style={styles.page}>
+          <Text style={styles.pageTitle}>Participants</Text>
+          <View style={styles.pageTitleDivider} />
 
-        {/* Stats */}
-        <View style={styles.statsRow}>
-          <View style={styles.statBox}>
-            <Text style={styles.statNumber}>{participants.length}</Text>
-            <Text style={styles.statLabel}>Total Participants</Text>
+          {/* Stats */}
+          <View style={styles.statsRow}>
+            <View style={styles.statBox}>
+              <Text style={styles.statNumber}>{participants.length}</Text>
+              <Text style={styles.statLabel}>Total Participants</Text>
+            </View>
+            <View style={styles.statBox}>
+              <Text style={styles.statNumber}>
+                {participants.filter(p => p.isFinished).length}
+              </Text>
+              <Text style={styles.statLabel}>Completed</Text>
+            </View>
+            <View style={styles.statBox}>
+              <Text style={styles.statNumber}>
+                {Object.keys(roleCounts).length}
+              </Text>
+              <Text style={styles.statLabel}>Roles</Text>
+            </View>
           </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statNumber}>
-              {participants.filter(p => p.isFinished).length}
-            </Text>
-            <Text style={styles.statLabel}>Completed</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statNumber}>
-              {Object.keys(roleCounts).length}
-            </Text>
-            <Text style={styles.statLabel}>Roles</Text>
-          </View>
-        </View>
 
-        {/* Role breakdown */}
-        <View style={styles.roleCountRow}>
-          {Object.entries(roleCounts).map(([role, count]) => (
-            <View key={role} style={styles.roleCountBadge}>
-              <Text style={styles.roleCountText}>
-                {role}: {count}
+          {/* Role breakdown */}
+          <View style={styles.roleCountRow}>
+            {Object.entries(roleCounts).map(([role, count]) => (
+              <View key={role} style={styles.roleCountBadge}>
+                <Text style={styles.roleCountText}>
+                  {role}: {count}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Participant table */}
+          <View style={styles.tableHeader}>
+            <Text style={[styles.colName, styles.colHeaderText]}>Name</Text>
+            <Text style={[styles.colRole, styles.colHeaderText]}>Role</Text>
+            <Text style={[styles.colStatus, styles.colHeaderText]}>Status</Text>
+          </View>
+
+          {participants.map((p, i) => (
+            <View
+              key={i}
+              style={i % 2 === 0 ? styles.tableRow : styles.tableRowAlt}
+            >
+              <Text style={styles.colName}>{p.name}</Text>
+              <Text style={styles.colRole}>{p.role}</Text>
+              <Text
+                style={
+                  p.isFinished ? styles.statusComplete : styles.statusPending
+                }
+              >
+                {p.isFinished ? "Completed" : "In Progress"}
               </Text>
             </View>
           ))}
-        </View>
-
-        {/* Participant table */}
-        <View style={styles.tableHeader}>
-          <Text style={[styles.colName, styles.colHeaderText]}>Name</Text>
-          <Text style={[styles.colRole, styles.colHeaderText]}>Role</Text>
-          <Text style={[styles.colStatus, styles.colHeaderText]}>Status</Text>
-        </View>
-
-        {participants.map((p, i) => (
-          <View
-            key={i}
-            style={i % 2 === 0 ? styles.tableRow : styles.tableRowAlt}
-          >
-            <Text style={styles.colName}>{p.name}</Text>
-            <Text style={styles.colRole}>{p.role}</Text>
-            <Text
-              style={
-                p.isFinished ? styles.statusComplete : styles.statusPending
-              }
-            >
-              {p.isFinished ? "Completed" : "In Progress"}
-            </Text>
-          </View>
-        ))}
-      </Page>
+        </Page>
+      )}
 
       {/* ── Facilitator Comments ─────────────────────────────────────────── */}
       {facilitatorComments && (
@@ -248,6 +294,12 @@ export function SessionSummaryReport({
           {phase.roles.map((role, ri) => (
             <View key={ri} style={styles.roleBlock}>
               <Text style={styles.roleLabel}>Role: {role.roleName}</Text>
+
+              {role.rolePhaseDescription && (
+                <Text style={styles.rolePhaseDescription}>
+                  {role.rolePhaseDescription}
+                </Text>
+              )}
 
               {role.prompts.map((prompt, qi) => (
                 <View key={qi} style={styles.promptBlock}>

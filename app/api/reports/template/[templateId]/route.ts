@@ -5,6 +5,8 @@ import type {
 import { createClient } from "@supabase/supabase-js";
 import { generateSessionReport } from "@/lib/pdf/generate";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ templateId: string }> },
@@ -17,24 +19,15 @@ export async function GET(
   );
 
   const reportFileName = `templates/${templateId}/template.pdf`;
-  const { data: existingFiles } = await supabase.storage
-    .from("reports")
-    .list(`templates/${templateId}`, { search: "template.pdf" });
-
-  if (existingFiles && existingFiles.length > 0) {
-    const { data: urlData } = supabase.storage
-      .from("reports")
-      .getPublicUrl(reportFileName);
-    return Response.json({ url: urlData.publicUrl });
-  }
 
   const { data: template, error: templateError } = await supabase
     .from("template")
-    .select("template_id, template_name, objective, summary")
+    .select("template_id, template_name, summary, setting, current_activity")
     .eq("template_id", templateId)
     .single();
 
   if (templateError || !template) {
+    console.error("Template fetch error:", templateError?.message);
     return Response.json({ error: "Template not found" }, { status: 404 });
   }
 
@@ -53,23 +46,32 @@ export async function GET(
   const { data: rolePhases } = phaseIds.length
     ? await supabase
         .from("role_phase")
-        .select("role_phase_id, role_id, phase_id")
+        .select("role_phase_id, role_id, phase_id, role_phase_description")
         .in("phase_id", phaseIds)
     : { data: [] };
 
   const roleIds = [...new Set((rolePhases ?? []).map(rp => rp.role_id))];
 
-  const { data: rolesData } = roleIds.length
-    ? await supabase
-        .from("role")
-        .select("role_id, role_name")
-        .in("role_id", roleIds)
-    : { data: [] };
+  const rolePhaseDescById: Record<string, string | null> = {};
+  for (const rp of rolePhases ?? []) {
+    rolePhaseDescById[rp.role_phase_id] = rp.role_phase_description;
+  }
+
+  // Fetch all roles for this template (batched single query for names, descriptions, and cover page list)
+  const { data: rolesData } = await supabase
+    .from("role")
+    .select("role_id, role_name, role_description")
+    .eq("template_id", templateId);
 
   const roleNameById: Record<string, string> = {};
   for (const r of rolesData ?? []) {
     roleNameById[r.role_id] = r.role_name ?? "Unknown Role";
   }
+
+  const templateRoles = (rolesData ?? []).map(r => ({
+    roleName: r.role_name ?? "Unknown Role",
+    roleDescription: r.role_description ?? null,
+  }));
 
   const rolePhaseIds = (rolePhases ?? []).map(rp => rp.role_phase_id);
 
@@ -121,6 +123,9 @@ export async function GET(
 
       return {
         roleName: roleNameById[roleId] ?? "Unknown Role",
+        rolePhaseDescription: rolePhaseId
+          ? (rolePhaseDescById[rolePhaseId] ?? null)
+          : null,
         prompts: phasePrompts.map(prompt => ({
           question: prompt.prompt_text ?? "",
           options: optionsByPromptId[prompt.prompt_id],
@@ -141,6 +146,9 @@ export async function GET(
     sessionName: template.template_name ?? "Template",
     templateName: template.template_name ?? "",
     summary: template.summary ?? null,
+    setting: template.setting ?? null,
+    currentActivity: template.current_activity ?? null,
+    templateRoles,
     generatedAt: new Date().toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -177,5 +185,8 @@ export async function GET(
     .from("reports")
     .getPublicUrl(reportFileName);
 
-  return Response.json({ url: urlData.publicUrl, sizeBytes: pdfBytes.length });
+  return Response.json(
+    { url: `${urlData.publicUrl}?t=${Date.now()}`, sizeBytes: pdfBytes.length },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }

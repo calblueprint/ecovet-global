@@ -63,6 +63,29 @@ export const styles = StyleSheet.create({
     marginTop: 8,
   },
 
+  rolesList: {
+    marginBottom: 16,
+    gap: 8,
+  },
+  rolesListItem: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: "#f9fafb",
+    borderLeftWidth: 3,
+    borderLeftColor: "#476C77",
+  },
+  rolesListName: {
+    fontSize: 11,
+    fontFamily: "Helvetica-Bold",
+    color: "#1f2937",
+    marginBottom: 3,
+  },
+  rolesListDescription: {
+    fontSize: 10,
+    color: "#4b5563",
+    lineHeight: 1.5,
+  },
+
   // Participant summary and dep matrix (page 2)
   pageTitle: {
     fontSize: 16,
@@ -385,6 +408,14 @@ export const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 8,
     borderRadius: 3,
+    marginBottom: 10,
+  },
+
+  rolePhaseDescription: {
+    fontSize: 10,
+    color: "#4b5563",
+    lineHeight: 1.5,
+    paddingHorizontal: 8,
     marginBottom: 10,
   },
 
