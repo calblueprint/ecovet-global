@@ -4,7 +4,11 @@ import type { Invite, Participant, UUID } from "@/types/schema";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Tabs from "@mui/material/Tabs";
 import { resendInvite } from "@/actions/supabase/queries/auth";
-import { deleteInvite, fetchInvites } from "@/actions/supabase/queries/invites";
+import {
+  deleteAuthUserByEmail,
+  deleteInvite,
+  fetchInvites,
+} from "@/actions/supabase/queries/invites";
 import {
   deleteProfile,
   getProfilesByEmails,
@@ -126,6 +130,8 @@ export default function ParticipantsPage() {
       // Always delete invite for both cases
       console.log("deleting invite: ", pendingDelete);
       await deleteInvite(pendingDelete.invite_id as UUID);
+
+      await deleteAuthUserByEmail(pendingDelete.email as UUID);
 
       await loadData();
     }

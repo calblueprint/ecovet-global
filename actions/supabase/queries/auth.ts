@@ -133,19 +133,33 @@ export async function resendInvite(email: string) {
     return { success: false, error: "No pending invite for this email" };
   }
 
-  const { error } = await adminClient.auth.admin.generateLink({
-    type: "invite",
-    email: lowerCaseEmail,
-    options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/sign-up`,
-    },
-  });
-
-  if (error) {
-    console.error("Error resending invite:", error.message);
-    return { success: false, error: error.message };
+  const { data: listData, error: listError } =
+    await adminClient.auth.admin.listUsers();
+  if (listError) {
+    return { success: false, error: listError.message };
   }
 
+  const existingUser = listData.users.find(
+    u => u.email?.toLowerCase() === lowerCaseEmail,
+  );
+
+  if (existingUser) {
+    const { error: deleteError } = await adminClient.auth.admin.deleteUser(
+      existingUser.id,
+    );
+    if (deleteError) {
+      return { success: false, error: deleteError.message };
+    }
+  }
+
+  try {
+    await sendInviteEmail(lowerCaseEmail);
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Failed to send invite",
+    };
+  }
   return { success: true, error: null };
 }
 

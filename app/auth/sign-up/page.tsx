@@ -52,17 +52,27 @@ export default function SignUp() {
   const passwordsMatch = password === confirmPassword;
 
   useEffect(() => {
-    console.log("[signup] mount");
     let mounted = true;
-    let hasVerified = false;
 
-    const verifyInvite = async (userEmail: string) => {
-      if (hasVerified) return;
-      hasVerified = true;
+    const verifyInvite = async () => {
+      // Session is already set via cookies by /auth/confirm
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-      console.log("[signup] verifyInvite called with", userEmail);
+      if (!mounted) return;
+
+      if (!session?.user?.email) {
+        setErrorMessage(
+          "This page is only accessible through an invite link. Please check your email or ask your facilitator to resend the invite.",
+        );
+        setVerifying(false);
+        return;
+      }
+
+      const userEmail = session.user.email;
       const { status } = await checkInviteStatus(userEmail);
-      console.log("[signup] invite status:", status);
+
       if (!mounted) return;
 
       if (status !== "pending") {
@@ -77,62 +87,10 @@ export default function SignUp() {
       setVerifying(false);
     };
 
-    const processHashTokens = async () => {
-      if (typeof window === "undefined") return;
-      const hash = window.location.hash;
-
-      if (!hash || !hash.includes("access_token")) {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        if (session?.user?.email && mounted) {
-          verifyInvite(session.user.email);
-        }
-        return;
-      }
-
-      await supabase.auth.signOut({ scope: "local" });
-
-      const params = new URLSearchParams(hash.substring(1));
-      const access_token = params.get("access_token");
-      const refresh_token = params.get("refresh_token");
-
-      if (!access_token || !refresh_token) return;
-
-      console.log("[signup] found hash tokens, setting session");
-      const { data, error } = await supabase.auth.setSession({
-        access_token,
-        refresh_token,
-      });
-
-      if (error) {
-        console.error("[signup] setSession error:", error);
-        return;
-      }
-
-      console.log("[signup] session set, email:", data.session?.user?.email);
-      window.history.replaceState(null, "", window.location.pathname);
-
-      if (data.session?.user?.email && mounted) {
-        verifyInvite(data.session.user.email);
-      }
-    };
-
-    processHashTokens();
-
-    const timeoutId = setTimeout(() => {
-      console.log("[signup] timeout fired");
-      if (mounted && !hasVerified) {
-        setErrorMessage(
-          "This page is only accessible through an invite link. Please check your email or ask your facilitator to resend the invite.",
-        );
-        setVerifying(false);
-      }
-    }, 3000);
+    verifyInvite();
 
     return () => {
       mounted = false;
-      clearTimeout(timeoutId);
     };
   }, []);
 
