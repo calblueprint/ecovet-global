@@ -5,7 +5,7 @@ export function getHomePath(profile: Profile | null): string {
 
   switch (profile.user_type) {
     case "Admin":
-      return "/admin/dashboard";
+      return "/admin/home-screen";
     case "Participant":
       return "/participants/session-start";
     case "Facilitator":

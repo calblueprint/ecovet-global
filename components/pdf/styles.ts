@@ -460,4 +460,21 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   footerText: { fontSize: 9, color: "#9ca3af" },
+
+  optionsList: {
+    flexDirection: "column",
+    flex: 1,
+    marginLeft: 8,
+  },
+  optionUnselected: {
+    fontSize: 10,
+    color: "#7A7A7A",
+    marginBottom: 2,
+  },
+  optionSelected: {
+    fontSize: 10,
+    fontWeight: "bold",
+    color: "#1F1F1F",
+    marginBottom: 2,
+  },
 });

@@ -124,6 +124,31 @@ export async function signInWithMagicLink(email: string) {
   }
 }
 
+export async function resendInvite(email: string) {
+  const adminClient = getSupabaseAdminClient();
+  const lowerCaseEmail = email.toLowerCase();
+
+  const { status } = await checkInviteStatus(lowerCaseEmail);
+  if (status !== "pending") {
+    return { success: false, error: "No pending invite for this email" };
+  }
+
+  const { error } = await adminClient.auth.admin.generateLink({
+    type: "invite",
+    email: lowerCaseEmail,
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/sign-up`,
+    },
+  });
+
+  if (error) {
+    console.error("Error resending invite:", error.message);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true, error: null };
+}
+
 export async function sendInviteEmail(email: string) {
   const adminClient = getSupabaseAdminClient();
 

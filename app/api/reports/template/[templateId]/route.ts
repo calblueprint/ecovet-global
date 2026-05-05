@@ -80,6 +80,22 @@ export async function GET(
         .in("role_phase_id", rolePhaseIds)
     : { data: [] };
 
+  // Prompt options (for multiple-choice prompts)
+  const promptIds = (prompts ?? []).map(p => p.prompt_id);
+
+  const { data: promptOptions } = promptIds.length
+    ? await supabase
+        .from("prompt_option")
+        .select("option_id, prompt_id, option_text")
+        .in("prompt_id", promptIds)
+    : { data: [] };
+
+  const optionsByPromptId: Record<string, string[]> = {};
+  for (const o of promptOptions ?? []) {
+    if (!optionsByPromptId[o.prompt_id]) optionsByPromptId[o.prompt_id] = [];
+    optionsByPromptId[o.prompt_id].push(o.option_text ?? "");
+  }
+
   const rolePhaseIndex: Record<string, Record<string, string>> = {};
   for (const rp of rolePhases ?? []) {
     if (!rolePhaseIndex[rp.role_id]) rolePhaseIndex[rp.role_id] = {};
@@ -107,6 +123,7 @@ export async function GET(
         roleName: roleNameById[roleId] ?? "Unknown Role",
         prompts: phasePrompts.map(prompt => ({
           question: prompt.prompt_text ?? "",
+          options: optionsByPromptId[prompt.prompt_id],
           responses: [],
         })),
       };
