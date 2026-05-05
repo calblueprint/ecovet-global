@@ -30,6 +30,7 @@ export type PhaseReportData = {
     prompts: {
       question: string;
       responses: PromptResponse[];
+      options?: string[];
     }[];
   }[];
   communicationMatrix?: CommunicationMatrix;
@@ -255,18 +256,45 @@ export function SessionSummaryReport({
                     <Text style={styles.questionText}>{prompt.question}</Text>
                   </View>
 
-                  {prompt.responses.map((res, ri2) => (
-                    <View key={ri2} style={styles.responseRow}>
-                      <Text style={styles.responseName}>
-                        {res.participantName}
-                      </Text>
-                      {res.answer === "(no response)" ? (
-                        <Text style={styles.noResponse}>(no response)</Text>
-                      ) : (
-                        <Text style={styles.responseAnswer}>{res.answer}</Text>
-                      )}
-                    </View>
-                  ))}
+                  {prompt.responses.map((res, ri2) => {
+                    const isMC = prompt.options && prompt.options.length > 0;
+                    const noResponse = res.answer === "(no response)";
+
+                    return (
+                      <View key={ri2} style={styles.responseRow}>
+                        <Text style={styles.responseName}>
+                          {res.participantName}
+                        </Text>
+
+                        {noResponse ? (
+                          <Text style={styles.noResponse}>(no response)</Text>
+                        ) : isMC ? (
+                          <View style={styles.optionsList}>
+                            {prompt.options!.map((opt, oi) => {
+                              const selected = opt === res.answer;
+                              return (
+                                <Text
+                                  key={oi}
+                                  style={
+                                    selected
+                                      ? styles.optionSelected
+                                      : styles.optionUnselected
+                                  }
+                                >
+                                  {selected ? "+ " : "- "}
+                                  {opt}
+                                </Text>
+                              );
+                            })}
+                          </View>
+                        ) : (
+                          <Text style={styles.responseAnswer}>
+                            {res.answer}
+                          </Text>
+                        )}
+                      </View>
+                    );
+                  })}
                 </View>
               ))}
             </View>

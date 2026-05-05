@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
-import Chip from "@mui/material/Chip";
 import TextField from "@mui/material/TextField";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
@@ -99,20 +98,6 @@ export function TagAutocomplete({
         setInputValue("");
       }}
       onBlur={onBlur}
-      renderTags={(tagValue, getTagProps) =>
-        tagValue.map((option, index) => {
-          const { key, ...tagProps } = getTagProps({ index });
-          return (
-            <Chip
-              key={key}
-              label={typeof option === "string" ? option : option.label}
-              {...tagProps}
-              size="small"
-              sx={chipSx}
-            />
-          );
-        })
-      }
       renderOption={(props, option) => (
         <li
           {...props}
@@ -129,6 +114,10 @@ export function TagAutocomplete({
         />
       )}
       slotProps={{
+        chip: {
+          size: "small",
+          sx: chipSx,
+        },
         paper: {
           sx: {
             boxShadow: "none",

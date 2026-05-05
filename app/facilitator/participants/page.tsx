@@ -3,6 +3,7 @@
 import type { Invite, Participant, UUID } from "@/types/schema";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Tabs from "@mui/material/Tabs";
+import { resendInvite } from "@/actions/supabase/queries/auth";
 import { deleteInvite, fetchInvites } from "@/actions/supabase/queries/invites";
 import {
   deleteProfile,
@@ -32,7 +33,24 @@ export default function ParticipantsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [warningModalOpen, setWarningModalOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Participant | null>(null);
+  const [resendingEmail, setResendingEmail] = useState<string | null>(null);
   const { profile } = useProfile();
+
+  const handleResendInvite = async (participant: Participant) => {
+    if (!participant.email) return;
+    setResendingEmail(participant.email);
+    try {
+      const result = await resendInvite(participant.email);
+      if (result.success) {
+        // swap for your toast/snackbar if you have one
+        alert(`Invite resent to ${participant.email}`);
+      } else {
+        alert(`Failed to resend: ${result.error}`);
+      }
+    } finally {
+      setResendingEmail(null);
+    }
+  };
 
   const loadData = useCallback(async () => {
     if (!profile?.user_group_id) return;
@@ -143,10 +161,11 @@ export default function ParticipantsPage() {
             </ParticipantsSearchWrapper>
           </ListControlsWrapper>
 
-          {/* 3. Filtered list component */}
           <ParticipantsList
             participants={filteredParticipants}
             onDeleteRow={handleDeleteRow}
+            onResendInvite={handleResendInvite}
+            resendingEmail={resendingEmail}
           />
         </ContentWrapper>
       </LayoutWrapper>

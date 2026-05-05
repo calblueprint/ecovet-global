@@ -13,7 +13,6 @@ type NestedProfile = { first_name: string | null; last_name: string | null };
 type NestedRole = { role_name: string | null };
 type NestedTemplate = {
   template_name: string | null;
-  objective: string | null;
   summary: string | null;
 };
 
@@ -58,8 +57,6 @@ function buildUserIdToLabel(
 }
 
 // Returns one CommunicationMatrix per phase, keyed by phase_number as string.
-// matrix[senderIdx][receiverIdx] = true when the sender sent at least one
-// message to that recipient in the corresponding phase.
 function buildPhaseCommunicationMatrices(
   messages: { room_id: string; sender: string; phase_sent_at: number | null }[],
   roomMembers: Record<string, string[]>,
@@ -179,11 +176,14 @@ export async function GET(
       created_at,
       is_finished,
       template_id,
-      template ( template_name, objective, summary )
+      template ( template_name, summary )
     `,
     )
     .eq("session_id", sessionId)
     .single();
+
+  console.log(sessionError);
+  console.log(session);
 
   if (sessionError || !session) {
     return Response.json({ error: "Session not found" }, { status: 404 });
@@ -279,10 +279,29 @@ export async function GET(
         .in("role_phase_id", rolePhaseIds)
     : { data: [] };
 
+  // Prompt options (for multiple-choice prompts)
+  const promptIds = (prompts ?? []).map(p => p.prompt_id);
+
+  const { data: promptOptions } = promptIds.length
+    ? await supabase
+        .from("prompt_option")
+        .select("option_id, prompt_id, option_text")
+        .in("prompt_id", promptIds)
+    : { data: [] };
+
+  const optionTextById: Record<string, string> = {};
+  const optionsByPromptId: Record<string, string[]> = {};
+  for (const o of promptOptions ?? []) {
+    const text = o.option_text ?? "";
+    optionTextById[o.option_id] = text;
+    if (!optionsByPromptId[o.prompt_id]) optionsByPromptId[o.prompt_id] = [];
+    optionsByPromptId[o.prompt_id].push(text);
+  }
+
   // All responses for this session
   const { data: responses } = await supabase
     .from("prompt_response")
-    .select("user_id, prompt_id, prompt_answer")
+    .select("user_id, prompt_id, prompt_answer, prompt_option_id")
     .eq("session_id", sessionId);
 
   // Build lookup indexes
@@ -306,11 +325,14 @@ export async function GET(
     promptsByRolePhase[rpId].push(p);
   }
 
-  // responseMap[userId][promptId] = answer
+  // responseMap[userId][promptId] = answer (resolves MC option_id to text)
   const responseMap: Record<string, Record<string, string>> = {};
   for (const r of responses ?? []) {
     if (!responseMap[r.user_id]) responseMap[r.user_id] = {};
-    responseMap[r.user_id][r.prompt_id!] = r.prompt_answer ?? "";
+    const answer = r.prompt_option_id
+      ? (optionTextById[r.prompt_option_id] ?? "")
+      : (r.prompt_answer ?? "");
+    responseMap[r.user_id][r.prompt_id!] = answer;
   }
 
   // Participant name lookup
@@ -385,6 +407,7 @@ export async function GET(
         roleName: roleNameById[roleId] ?? "Unknown Role",
         prompts: phasePrompts.map(prompt => ({
           question: prompt.prompt_text ?? "",
+          options: optionsByPromptId[prompt.prompt_id],
           responses: roleParticipants.map(p => ({
             participantName: nameByUserId[p.user_id],
             answer:
@@ -483,11 +506,13 @@ export async function POST(
       session_name,
       created_at,
       template_id,
-      template ( template_name, objective, summary )
+      template ( template_name, summary )
     `,
     )
     .eq("session_id", sessionId)
     .single();
+  console.log(sessionError);
+  console.log(session);
 
   if (sessionError || !session) {
     return Response.json({ error: "Session not found" }, { status: 404 });
@@ -560,9 +585,28 @@ export async function POST(
         .in("role_phase_id", rolePhaseIds)
     : { data: [] };
 
+  // Prompt options (for multiple-choice prompts)
+  const promptIds = (prompts ?? []).map(p => p.prompt_id);
+
+  const { data: promptOptions } = promptIds.length
+    ? await supabase
+        .from("prompt_option")
+        .select("option_id, prompt_id, option_text")
+        .in("prompt_id", promptIds)
+    : { data: [] };
+
+  const optionTextById: Record<string, string> = {};
+  const optionsByPromptId: Record<string, string[]> = {};
+  for (const o of promptOptions ?? []) {
+    const text = o.option_text ?? "";
+    optionTextById[o.option_id] = text;
+    if (!optionsByPromptId[o.prompt_id]) optionsByPromptId[o.prompt_id] = [];
+    optionsByPromptId[o.prompt_id].push(text);
+  }
+
   const { data: responses } = await supabase
     .from("prompt_response")
-    .select("user_id, prompt_id, prompt_answer")
+    .select("user_id, prompt_id, prompt_answer, prompt_option_id")
     .eq("session_id", sessionId);
 
   const rolePhaseIndex: Record<string, Record<string, string>> = {};
@@ -584,7 +628,10 @@ export async function POST(
   const responseMap: Record<string, Record<string, string>> = {};
   for (const r of responses ?? []) {
     if (!responseMap[r.user_id]) responseMap[r.user_id] = {};
-    responseMap[r.user_id][r.prompt_id!] = r.prompt_answer ?? "";
+    const answer = r.prompt_option_id
+      ? (optionTextById[r.prompt_option_id] ?? "")
+      : (r.prompt_answer ?? "");
+    responseMap[r.user_id][r.prompt_id!] = answer;
   }
 
   const nameByUserId: Record<string, string> = {};
@@ -655,6 +702,7 @@ export async function POST(
         roleName: roleNameById[roleId] ?? "Unknown Role",
         prompts: phasePrompts.map(prompt => ({
           question: prompt.prompt_text ?? "",
+          options: optionsByPromptId[prompt.prompt_id],
           responses: roleParticipants.map(p => ({
             participantName: nameByUserId[p.user_id],
             answer:
