@@ -301,54 +301,98 @@ export function SessionSummaryReport({
                 </Text>
               )}
 
-              {role.prompts.map((prompt, qi) => (
-                <View key={qi} style={styles.promptBlock}>
-                  <View style={styles.questionRow}>
-                    <Text style={styles.questionBadge}>Q{qi + 1}</Text>
-                    <Text style={styles.questionText}>{prompt.question}</Text>
-                  </View>
+              {role.prompts.map((prompt, qi) => {
+                const isMC = prompt.options && prompt.options.length > 0;
+                const hasResponses = prompt.responses.length > 0;
 
-                  {prompt.responses.map((res, ri2) => {
-                    const isMC = prompt.options && prompt.options.length > 0;
-                    const noResponse = res.answer === "(no response)";
+                return (
+                  <View key={qi} style={styles.promptBlock}>
+                    <View style={styles.questionRow}>
+                      <Text style={styles.questionBadge}>Q{qi + 1}</Text>
+                      <Text style={styles.questionText}>{prompt.question}</Text>
+                    </View>
 
-                    return (
-                      <View key={ri2} style={styles.responseRow}>
-                        <Text style={styles.responseName}>
-                          {res.participantName}
-                        </Text>
-
-                        {noResponse ? (
-                          <Text style={styles.noResponse}>(no response)</Text>
-                        ) : isMC ? (
-                          <View style={styles.optionsList}>
-                            {prompt.options!.map((opt, oi) => {
-                              const selected = opt === res.answer;
-                              return (
-                                <Text
-                                  key={oi}
-                                  style={
-                                    selected
-                                      ? styles.optionSelected
-                                      : styles.optionUnselected
-                                  }
-                                >
-                                  {selected ? "+ " : "- "}
-                                  {opt}
-                                </Text>
-                              );
-                            })}
+                    {/* Template preview: show options with no responses */}
+                    {/* Template preview: show options with no responses */}
+                    {!hasResponses && isMC && (
+                      <View style={styles.templateOptionsList}>
+                        {prompt.options!.map((opt, oi) => (
+                          <View key={oi} style={styles.optionRow}>
+                            <View
+                              style={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: 4,
+                                borderWidth: 1,
+                                borderColor: "#959492",
+                                backgroundColor: "transparent",
+                                flexShrink: 0,
+                              }}
+                            />
+                            <Text style={styles.optionUnselected}>{opt}</Text>
                           </View>
-                        ) : (
-                          <Text style={styles.responseAnswer}>
-                            {res.answer}
-                          </Text>
-                        )}
+                        ))}
                       </View>
-                    );
-                  })}
-                </View>
-              ))}
+                    )}
+
+                    {/* Session report: show responses, with selected option highlighted for MC */}
+                    {prompt.responses.map((res, ri2) => {
+                      const noResponse = res.answer === "(no response)";
+                      return (
+                        <View key={ri2} style={styles.responseRow}>
+                          <Text style={styles.responseName}>
+                            {res.participantName}
+                          </Text>
+
+                          {noResponse ? (
+                            <Text style={styles.noResponse}>(no response)</Text>
+                          ) : isMC ? (
+                            <View style={styles.optionsList}>
+                              {prompt.options!.map((opt, oi) => {
+                                const selected = opt === res.answer;
+                                return (
+                                  <View key={oi} style={styles.optionRow}>
+                                    <Svg
+                                      width={10}
+                                      height={10}
+                                      viewBox="0 0 10 10"
+                                      style={styles.optionBullet}
+                                    >
+                                      <Circle
+                                        cx={5}
+                                        cy={5}
+                                        r={3.5}
+                                        stroke={
+                                          selected ? "#0f0f0f" : "#959492"
+                                        }
+                                        strokeWidth={1}
+                                        fill={selected ? "#0f0f0f" : "white"}
+                                      />
+                                    </Svg>
+                                    <Text
+                                      style={
+                                        selected
+                                          ? styles.optionSelected
+                                          : styles.optionUnselected
+                                      }
+                                    >
+                                      {opt}
+                                    </Text>
+                                  </View>
+                                );
+                              })}
+                            </View>
+                          ) : (
+                            <Text style={styles.responseAnswer}>
+                              {res.answer}
+                            </Text>
+                          )}
+                        </View>
+                      );
+                    })}
+                  </View>
+                );
+              })}
             </View>
           ))}
 
