@@ -2,6 +2,7 @@
 
 import type { UUID } from "@/types/schema";
 import supabase from "@/app/api/supabase/createClient";
+import { getSupabaseAdminClient } from "@/lib/supabase/server";
 import { Invite, Profile, UserType } from "@/types/schema";
 import { sendInviteEmail, signInWithMagicLink } from "./auth";
 
@@ -203,6 +204,27 @@ export async function deleteInvite(invite_id: UUID): Promise<void> {
 
   if (error) {
     console.error("Error deleting invite:", error.message);
+  }
+}
+
+export async function deleteAuthUserByEmail(email: string): Promise<void> {
+  const adminClient = getSupabaseAdminClient();
+  const lowerCaseEmail = email.toLowerCase();
+
+  const { data, error: listError } = await adminClient.auth.admin.listUsers();
+  if (listError) {
+    console.error("Error listing users:", listError.message);
+    throw listError;
+  }
+
+  const user = data.users.find(u => u.email?.toLowerCase() === lowerCaseEmail);
+
+  if (!user) return;
+
+  const { error } = await adminClient.auth.admin.deleteUser(user.id);
+  if (error) {
+    console.error("Error deleting auth user:", error.message);
+    throw error;
   }
 }
 
