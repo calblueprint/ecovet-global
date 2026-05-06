@@ -8,13 +8,31 @@ import { createClient } from "@supabase/supabase-js";
 import { generateSessionReport } from "@/lib/pdf/generate";
 import { buildSessionDisplayName } from "@/utils/session-details";
 
+export const dynamic = "force-dynamic";
+
 // Supabase nested selects infer join cols as arrays
 type NestedProfile = { first_name: string | null; last_name: string | null };
 type NestedRole = { role_name: string | null };
 type NestedTemplate = {
   template_name: string | null;
   summary: string | null;
+  setting: string | null;
+  current_activity: string | null;
 };
+
+// Builds a rolePhaseId → description lookup from a fetched role_phase list.
+function buildRolePhaseDescById(
+  rolePhases: {
+    role_phase_id: string;
+    role_phase_description: string | null;
+  }[],
+): Record<string, string | null> {
+  const map: Record<string, string | null> = {};
+  for (const rp of rolePhases) {
+    map[rp.role_phase_id] = rp.role_phase_description;
+  }
+  return map;
+}
 
 // Builds disambiguated display labels shared by the matrix and chat log.
 function buildUserIdToLabel(
@@ -176,7 +194,7 @@ export async function GET(
       created_at,
       is_finished,
       template_id,
-      template ( template_name, summary )
+      template ( template_name, summary, setting, current_activity )
     `,
     )
     .eq("session_id", sessionId)
@@ -205,7 +223,10 @@ export async function GET(
       const updatedAt =
         existingFiles[0].updated_at ?? existingFiles[0].created_at;
       const bust = updatedAt ? new Date(updatedAt).getTime() : Date.now();
-      return Response.json({ url: `${urlData.publicUrl}?t=${bust}` });
+      return Response.json(
+        { url: `${urlData.publicUrl}?t=${bust}` },
+        { headers: { "Cache-Control": "no-store" } },
+      );
     }
   }
 
@@ -249,25 +270,30 @@ export async function GET(
   const { data: rolePhases } = phaseIds.length
     ? await supabase
         .from("role_phase")
-        .select("role_phase_id, role_id, phase_id")
+        .select("role_phase_id, role_id, phase_id, role_phase_description")
         .in("phase_id", phaseIds)
     : { data: [] };
 
   // Derive all roleIds from role_phases (not from participants)
   const roleIds = [...new Set((rolePhases ?? []).map(rp => rp.role_id))];
 
-  // Role name lookup from role table
-  const { data: rolesData } = roleIds.length
-    ? await supabase
-        .from("role")
-        .select("role_id, role_name")
-        .in("role_id", roleIds)
-    : { data: [] };
+  const rolePhaseDescById = buildRolePhaseDescById(rolePhases ?? []);
+
+  // Fetch all roles for this template (batched single query for names, descriptions, and cover page list)
+  const { data: rolesData } = await supabase
+    .from("role")
+    .select("role_id, role_name, role_description")
+    .eq("template_id", session.template_id);
 
   const roleNameById: Record<string, string> = {};
   for (const r of rolesData ?? []) {
     roleNameById[r.role_id] = r.role_name ?? "Unknown Role";
   }
+
+  const templateRoles = (rolesData ?? []).map(r => ({
+    roleName: r.role_name ?? "Unknown Role",
+    roleDescription: r.role_description ?? null,
+  }));
 
   // Prompts for all role-phases
   const rolePhaseIds = (rolePhases ?? []).map(rp => rp.role_phase_id);
@@ -405,6 +431,9 @@ export async function GET(
 
       return {
         roleName: roleNameById[roleId] ?? "Unknown Role",
+        rolePhaseDescription: rolePhaseId
+          ? (rolePhaseDescById[rolePhaseId] ?? null)
+          : null,
         prompts: phasePrompts.map(prompt => ({
           question: prompt.prompt_text ?? "",
           options: optionsByPromptId[prompt.prompt_id],
@@ -432,6 +461,9 @@ export async function GET(
     sessionName: session.session_name ?? "Session",
     templateName: template?.template_name ?? "",
     summary: template?.summary ?? null,
+    setting: template?.setting ?? null,
+    currentActivity: template?.current_activity ?? null,
+    templateRoles,
     generatedAt: new Date().toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -482,7 +514,10 @@ export async function GET(
     .from("reports")
     .getPublicUrl(fileName);
 
-  return Response.json({ url: urlData.publicUrl });
+  return Response.json(
+    { url: `${urlData.publicUrl}?t=${Date.now()}` },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }
 
 export async function POST(
@@ -506,7 +541,7 @@ export async function POST(
       session_name,
       created_at,
       template_id,
-      template ( template_name, summary )
+      template ( template_name, summary, setting, current_activity )
     `,
     )
     .eq("session_id", sessionId)
@@ -558,23 +593,29 @@ export async function POST(
   const { data: rolePhases } = phaseIds.length
     ? await supabase
         .from("role_phase")
-        .select("role_phase_id, role_id, phase_id")
+        .select("role_phase_id, role_id, phase_id, role_phase_description")
         .in("phase_id", phaseIds)
     : { data: [] };
 
   const roleIds = [...new Set((rolePhases ?? []).map(rp => rp.role_id))];
 
-  const { data: rolesData } = roleIds.length
-    ? await supabase
-        .from("role")
-        .select("role_id, role_name")
-        .in("role_id", roleIds)
-    : { data: [] };
+  const rolePhaseDescById = buildRolePhaseDescById(rolePhases ?? []);
+
+  // Fetch all roles for this template (batched single query for names, descriptions, and cover page list)
+  const { data: rolesData } = await supabase
+    .from("role")
+    .select("role_id, role_name, role_description")
+    .eq("template_id", session.template_id);
 
   const roleNameById: Record<string, string> = {};
   for (const r of rolesData ?? []) {
     roleNameById[r.role_id] = r.role_name ?? "Unknown Role";
   }
+
+  const templateRoles = (rolesData ?? []).map(r => ({
+    roleName: r.role_name ?? "Unknown Role",
+    roleDescription: r.role_description ?? null,
+  }));
 
   const rolePhaseIds = (rolePhases ?? []).map(rp => rp.role_phase_id);
 
@@ -700,6 +741,9 @@ export async function POST(
 
       return {
         roleName: roleNameById[roleId] ?? "Unknown Role",
+        rolePhaseDescription: rolePhaseId
+          ? (rolePhaseDescById[rolePhaseId] ?? null)
+          : null,
         prompts: phasePrompts.map(prompt => ({
           question: prompt.prompt_text ?? "",
           options: optionsByPromptId[prompt.prompt_id],
@@ -726,6 +770,9 @@ export async function POST(
     sessionName: session.session_name ?? "Session",
     templateName: template?.template_name ?? "",
     summary: template?.summary ?? null,
+    setting: template?.setting ?? null,
+    currentActivity: template?.current_activity ?? null,
+    templateRoles,
     generatedAt: new Date().toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
