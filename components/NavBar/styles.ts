@@ -1,6 +1,7 @@
 import Image from "next/image";
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
+import { Sans } from "@/styles/fonts";
 
 export const TopNavContainer = styled.div`
   display: flex;
@@ -8,9 +9,43 @@ export const TopNavContainer = styled.div`
   height: 3rem;
   align-items: center;
   flex-direction: row;
+  justify-content: space-between;
   background-color: ${COLORS.oat_light};
   height: 3rem;
-  gap: 2rem;
+  width: 100%;
+`;
+
+export const TopNavButton = styled.button<{ $active?: boolean }>`
+  width: auto;
+  padding: 0.75rem 1.5rem;
+  text-align: center;
+  gap: 0.5rem;
+  background-color: ${COLORS.oat_light};
+  border: none;
+  font-family: ${Sans.style.fontFamily};
+  font-size: 12px;
+  font-weight: 500;
+  position: relative;
+  height: 3rem;
+
+  &::after {
+    position: absolute;
+    width: 100%;
+    opacity: ${props => (props.$active ? 1 : 0)};
+    transition: opacity 0.2s ease;
+  }
+
+  color: ${COLORS.black70};
+
+  ${({ $active }) =>
+    $active &&
+    `
+      border-bottom: 0.175rem solid ${COLORS.teal};
+      color: ${COLORS.black70};
+    `}
+  &:hover {
+    cursor: pointer;
+  }
 `;
 
 export const LogoContainer = styled.div`
@@ -37,4 +72,9 @@ export const ButtonContainer = styled.div`
 export const ImageLogo = styled(Image)`
   height: auto;
   max-height: 40px;
+`;
+
+export const ProfileContainer = styled.div`
+  display: flex;
+  justify-context: flex-grow;
 `;

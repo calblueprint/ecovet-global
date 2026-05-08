@@ -1,8 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import { v5 as uuidv5 } from "uuid";
 import { persistChatMessage } from "@/actions/supabase/queries/chat";
-import { sessionParticipants } from "@/actions/supabase/queries/sessions";
 import { supabase } from "@/lib/supabase/client";
 import { ChatMessage } from "@/types/schema";
 import { EVENT_MESSAGE_TYPE, useRealtimeChat } from "./UseChat";
@@ -29,62 +29,104 @@ export function useAnnouncements({
   roleId,
   userId,
   username,
+  roleName,
 }: {
   sessionId: string;
   roleId: string;
   userId: string;
   username: string;
-}) {
+  roleName: string;
+}): { announcements: ChatMessage[]; loading: boolean } {
   const atEveryoneRoomId = announcementToRoomId({ to: "everyone", sessionId });
   const atRoleRoomId = announcementToRoomId({ to: "role", sessionId, roleId });
   const atUserRoomId = announcementToRoomId({ to: "user", sessionId, userId });
 
-  return {
-    everyoneAnnouncements: useRealtimeChat({
+  const { chatMessages: everyoneAnnouncements, loading: everyoneLoading } =
+    useRealtimeChat({
+      sessionId,
       roomId: atEveryoneRoomId,
       userId,
       username,
-    }),
-    roleAnnouncements: useRealtimeChat({
+    });
+  const { chatMessages: roleAnnouncements, loading: roleLoading } =
+    useRealtimeChat({
+      sessionId,
       roomId: atRoleRoomId,
       userId,
       username,
-    }),
-    userAnnouncements: useRealtimeChat({
+    });
+  const { chatMessages: userAnnouncements, loading: userLoading } =
+    useRealtimeChat({
+      sessionId,
       roomId: atUserRoomId,
       userId,
       username,
-    }),
+    });
+
+  const announcements = useMemo(() => {
+    const user = userAnnouncements.map(message => ({
+      ...message,
+      sender_name: "To You",
+    }));
+
+    const role = roleAnnouncements.map(message => ({
+      ...message,
+      sender_name: `To Role: ${roleName}`,
+    }));
+
+    const everyone = everyoneAnnouncements.map(message => ({
+      ...message,
+      sender_name: `To Everyone`,
+    }));
+
+    return [...user, ...role, ...everyone].sort(
+      (a, b) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+    );
+  }, [userAnnouncements, roleAnnouncements, everyoneAnnouncements]);
+
+  return {
+    announcements,
+    loading: everyoneLoading || roleLoading || userLoading,
   };
 }
+
 export function sendAnnouncement({
   room,
   userId,
-  username,
+  label,
   message,
 }: {
   room: AnnouncementRoom;
   userId: string;
-  username: string;
+  label: string;
   message: string;
-}): void {
+}): ChatMessage {
   const roomId = announcementToRoomId(room);
   const channel = supabase.channel(roomId);
 
   const chatMessage: ChatMessage = {
     id: crypto.randomUUID(),
     room_id: roomId,
+    session_id: room.sessionId,
     message: message,
     sender: userId,
-    sender_name: username,
+    sender_name: label,
     phase_sent_at: null,
     created_at: new Date().toISOString(),
+    is_announcement: true,
   };
 
-  channel.send({
-    type: "broadcast",
-    event: EVENT_MESSAGE_TYPE,
-    payload: chatMessage,
-  });
-  persistChatMessage(roomId, chatMessage.message, userId, username, null);
+  channel
+    .send({
+      type: "broadcast",
+      event: EVENT_MESSAGE_TYPE,
+      payload: chatMessage,
+    })
+    .then(() => {
+      channel.unsubscribe();
+    });
+  persistChatMessage(chatMessage);
+
+  return chatMessage;
 }

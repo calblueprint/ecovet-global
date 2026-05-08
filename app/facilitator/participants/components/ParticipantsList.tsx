@@ -4,6 +4,7 @@ import { CircularProgress } from "@mui/material";
 import Box from "@mui/material/Box";
 import { DeleteButton } from "@/app/participants/styles";
 import cross from "@/assets/images/DeleteTagCross.svg";
+import SendArrow from "@/assets/images/sendArrow.svg";
 import { Participant } from "@/types/schema";
 import { SortButton } from "../../styles";
 import {
@@ -18,9 +19,13 @@ import {
 export default function ParticipantsList({
   participants,
   onDeleteRow,
+  onResendInvite,
+  resendingEmail,
 }: {
   participants: Participant[];
   onDeleteRow: (participant: Participant) => void;
+  onResendInvite: (p: Participant) => void;
+  resendingEmail: string | null;
 }) {
   const [sortAsc, setSortAsc] = useState(true);
 
@@ -38,6 +43,13 @@ export default function ParticipantsList({
         </LoadingScreen>
       ) : (
         <StyledTable>
+          <colgroup>
+            <col style={{ width: "35%" }} />
+            <col style={{ width: "35%" }} />
+            <col style={{ width: "15%" }} />
+            <col style={{ width: "10%" }} />
+            <col style={{ width: "5%" }} />
+          </colgroup>
           <StyledTableHead>
             <tr>
               <StyledTh>
@@ -48,7 +60,6 @@ export default function ParticipantsList({
               </StyledTh>
               <StyledTh>Email</StyledTh>
               <StyledTh>Role</StyledTh>
-              <StyledTh>Last active</StyledTh>
             </tr>
           </StyledTableHead>
           <tbody>
@@ -57,11 +68,40 @@ export default function ParticipantsList({
                 <StyledTd>{p.name ?? "—"}</StyledTd>
                 <StyledTd>{p.email}</StyledTd>
                 <StyledTd>{p.role}</StyledTd>
-                <StyledTd>{p.last_active}</StyledTd>
                 <StyledTd>
-                  <DeleteButton onClick={() => onDeleteRow(p)}>
-                    <Image src={cross} alt="cross" />
-                  </DeleteButton>
+                  {!p.invite_accepted && (
+                    <Tooltip title="Resend email">
+                      <ResendInviteButton
+                        variant="text"
+                        size="small"
+                        startIcon={
+                          <Image
+                            src={SendArrow}
+                            alt="Resend Email"
+                            width={16}
+                            height={16}
+                          />
+                        }
+                        disabled={resendingEmail === p.email}
+                        onClick={() => onResendInvite(p)}
+                        sx={{
+                          textTransform: "none",
+                          fontWeight: 500,
+                          color: "primary.main",
+                          "&:hover": { backgroundColor: "white" },
+                        }}
+                      >
+                        {resendingEmail === p.email ? "Sending…" : ""}
+                      </ResendInviteButton>
+                    </Tooltip>
+                  )}
+                </StyledTd>
+                <StyledTd>
+                  <Tooltip title="Delete Participant">
+                    <DeleteButton onClick={() => onDeleteRow(p)}>
+                      <Image src={cross} alt="cross" />
+                    </DeleteButton>
+                  </Tooltip>
                 </StyledTd>
               </StyledTableRow>
             ))}

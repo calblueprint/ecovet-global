@@ -4,7 +4,12 @@ import type { Invite, Participant, UUID } from "@/types/schema";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { CircularProgress } from "@mui/material";
 import Tabs from "@mui/material/Tabs";
-import { deleteInvite, fetchInvites } from "@/actions/supabase/queries/invites";
+import { resendInvite } from "@/actions/supabase/queries/auth";
+import {
+  deleteAuthUserByEmail,
+  deleteInvite,
+  fetchInvites,
+} from "@/actions/supabase/queries/invites";
 import {
   deleteProfile,
   getProfilesByEmails,
@@ -14,6 +19,7 @@ import InviteComponent from "@/components/InviteComponent/InviteComponent";
 import WarningModal, {
   WarningAction,
 } from "@/components/WarningModal/WarningModal";
+import { H1, H2 } from "@/styles/text";
 import { useProfile } from "@/utils/ProfileProvider";
 import ParticipantsList from "./components/ParticipantsList";
 import {
@@ -32,7 +38,24 @@ export default function ParticipantsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [warningModalOpen, setWarningModalOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Participant | null>(null);
+  const [resendingEmail, setResendingEmail] = useState<string | null>(null);
   const { profile } = useProfile();
+
+  const handleResendInvite = async (participant: Participant) => {
+    if (!participant.email) return;
+    setResendingEmail(participant.email);
+    try {
+      const result = await resendInvite(participant.email);
+      if (result.success) {
+        // swap for your toast/snackbar if you have one
+        alert(`Invite resent to ${participant.email}`);
+      } else {
+        alert(`Failed to resend: ${result.error}`);
+      }
+    } finally {
+      setResendingEmail(null);
+    }
+  };
 
   const loadData = useCallback(async () => {
     if (!profile?.user_group_id) return;
@@ -114,6 +137,8 @@ export default function ParticipantsPage() {
       console.log("deleting invite: ", pendingDelete);
       await deleteInvite(pendingDelete.invite_id as UUID);
 
+      await deleteAuthUserByEmail(pendingDelete.email as UUID);
+
       await loadData();
     }
     setPendingDelete(null);
@@ -124,6 +149,7 @@ export default function ParticipantsPage() {
       <TopNavBar />
       <LayoutWrapper>
         <ContentWrapper>
+          <PageTitle>Participants</PageTitle>
           <InviteComponent
             user_group_id={profile.user_group_id}
             onInvitesChange={() => loadData()}
@@ -147,10 +173,11 @@ export default function ParticipantsPage() {
             </ParticipantsSearchWrapper>
           </ListControlsWrapper>
 
-          {/* 3. Filtered list component */}
           <ParticipantsList
             participants={filteredParticipants}
             onDeleteRow={handleDeleteRow}
+            onResendInvite={handleResendInvite}
+            resendingEmail={resendingEmail}
           />
         </ContentWrapper>
       </LayoutWrapper>

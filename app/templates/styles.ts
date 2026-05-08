@@ -80,24 +80,25 @@ export const ActionRow = styled.div`
   margin-bottom: 1.5rem;
 `;
 
-export const ActionText = styled.span`
-  font-size: 0.75rem;
-  color: ${COLORS.black40};
+export const ActionText = styled.div`
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding-bottom: 0.5rem;
 `;
 
 export const SettingsBlock = styled.button<{ $active: boolean }>`
   width: 100%;
   text-align: left;
-  background-color: ${COLORS.oat_medium};
+  background-color: ${props =>
+    props.$active ? `${COLORS.oat_medium}` : `${COLORS.oat_light}`};
   padding: 0.6rem 1rem;
   border-radius: 0.375rem;
   font-size: 0.875rem;
   font-weight: 600;
   color: ${COLORS.black70};
   margin-bottom: 1rem;
-  border: ${props =>
-    props.$active ? `1px solid ${COLORS.oat_dark}` : "1px solid transparent"};
+  border: 1px solid ${COLORS.oat_dark};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -147,4 +148,29 @@ export const RoleItem = styled.button<{
   &:hover {
     color: ${props => (props.$isDisabled ? COLORS.black20 : COLORS.black)};
   }
+`;
+
+export const HeaderButtonDark = styled.button`
+  background: #476c77;
+  color: #ffffff;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  gap: 0.5rem;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: filter 0.15s ease;
+  &:hover {
+    filter: brightness(1.1);
+  }
+`;
+
+export const TitleRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.8rem;
 `;

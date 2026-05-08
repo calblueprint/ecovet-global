@@ -59,3 +59,34 @@ export async function addNewOption(
 
   return data.option_id as UUID;
 }
+
+export async function replacePromptOptions(
+  prompt_id: string,
+  options: { option_text: string }[],
+) {
+  const { error: deleteError } = await supabase
+    .from("prompt_option")
+    .delete()
+    .eq("prompt_id", prompt_id);
+
+  if (deleteError) {
+    console.error("Error deleting prompt options:", deleteError);
+    throw deleteError;
+  }
+
+  if (options.length === 0) return;
+
+  const rows = options.map(opt => ({
+    prompt_id,
+    option_text: opt.option_text ?? "",
+  }));
+
+  const { error: insertError } = await supabase
+    .from("prompt_option")
+    .insert(rows);
+
+  if (insertError) {
+    console.error("Error inserting prompt options:", insertError);
+    throw insertError;
+  }
+}

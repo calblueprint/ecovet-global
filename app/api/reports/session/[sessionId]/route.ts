@@ -8,14 +8,31 @@ import { createClient } from "@supabase/supabase-js";
 import { generateSessionReport } from "@/lib/pdf/generate";
 import { buildSessionDisplayName } from "@/utils/session-details";
 
+export const dynamic = "force-dynamic";
+
 // Supabase nested selects infer join cols as arrays
 type NestedProfile = { first_name: string | null; last_name: string | null };
 type NestedRole = { role_name: string | null };
 type NestedTemplate = {
   template_name: string | null;
-  objective: string | null;
   summary: string | null;
+  setting: string | null;
+  current_activity: string | null;
 };
+
+// Builds a rolePhaseId → description lookup from a fetched role_phase list.
+function buildRolePhaseDescById(
+  rolePhases: {
+    role_phase_id: string;
+    role_phase_description: string | null;
+  }[],
+): Record<string, string | null> {
+  const map: Record<string, string | null> = {};
+  for (const rp of rolePhases) {
+    map[rp.role_phase_id] = rp.role_phase_description;
+  }
+  return map;
+}
 
 // Builds disambiguated display labels shared by the matrix and chat log.
 function buildUserIdToLabel(
@@ -58,8 +75,6 @@ function buildUserIdToLabel(
 }
 
 // Returns one CommunicationMatrix per phase, keyed by phase_number as string.
-// matrix[senderIdx][receiverIdx] = true when the sender sent at least one
-// message to that recipient in the corresponding phase.
 function buildPhaseCommunicationMatrices(
   messages: { room_id: string; sender: string; phase_sent_at: number | null }[],
   roomMembers: Record<string, string[]>,
@@ -170,24 +185,6 @@ export async function GET(
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 
-  // Cache check — return whatever PDF already exists in this session's folder.
-  // Since template names can't change, the filename is stable; we just return it.
-  const folderPath = `sessions/${sessionId}`;
-  const { data: existingFiles } = await supabase.storage
-    .from("reports")
-    .list(folderPath);
-
-  if (existingFiles && existingFiles.length > 0) {
-    const existing = existingFiles[0];
-    const { data: urlData } = supabase.storage
-      .from("reports")
-      .getPublicUrl(`${folderPath}/${existing.name}`);
-    const updatedAt =
-      existingFiles[0].updated_at ?? existingFiles[0].created_at;
-    const bust = updatedAt ? new Date(updatedAt).getTime() : Date.now();
-    return Response.json({ url: `${urlData.publicUrl}?t=${bust}` });
-  }
-
   const { data: session, error: sessionError } = await supabase
     .from("session")
     .select(
@@ -195,15 +192,42 @@ export async function GET(
       session_id,
       session_name,
       created_at,
+      is_finished,
       template_id,
-      template ( template_name, objective, summary )
+      template ( template_name, summary, setting, current_activity )
     `,
     )
     .eq("session_id", sessionId)
     .single();
 
+  console.log(sessionError);
+  console.log(session);
+
   if (sessionError || !session) {
     return Response.json({ error: "Session not found" }, { status: 404 });
+  }
+
+  // Only use the cached file if the session is finished — in-progress PDFs
+  // are stale the moment new responses arrive, so always regenerate those.
+  const folderPath = `sessions/${sessionId}`;
+  if (session.is_finished) {
+    const { data: existingFiles } = await supabase.storage
+      .from("reports")
+      .list(folderPath);
+
+    if (existingFiles && existingFiles.length > 0) {
+      const existing = existingFiles[0];
+      const { data: urlData } = supabase.storage
+        .from("reports")
+        .getPublicUrl(`${folderPath}/${existing.name}`);
+      const updatedAt =
+        existingFiles[0].updated_at ?? existingFiles[0].created_at;
+      const bust = updatedAt ? new Date(updatedAt).getTime() : Date.now();
+      return Response.json(
+        { url: `${urlData.publicUrl}?t=${bust}` },
+        { headers: { "Cache-Control": "no-store" } },
+      );
+    }
   }
 
   const template = session.template as unknown as NestedTemplate | null;
@@ -246,25 +270,30 @@ export async function GET(
   const { data: rolePhases } = phaseIds.length
     ? await supabase
         .from("role_phase")
-        .select("role_phase_id, role_id, phase_id")
+        .select("role_phase_id, role_id, phase_id, role_phase_description")
         .in("phase_id", phaseIds)
     : { data: [] };
 
   // Derive all roleIds from role_phases (not from participants)
   const roleIds = [...new Set((rolePhases ?? []).map(rp => rp.role_id))];
 
-  // Role name lookup from role table
-  const { data: rolesData } = roleIds.length
-    ? await supabase
-        .from("role")
-        .select("role_id, role_name")
-        .in("role_id", roleIds)
-    : { data: [] };
+  const rolePhaseDescById = buildRolePhaseDescById(rolePhases ?? []);
+
+  // Fetch all roles for this template (batched single query for names, descriptions, and cover page list)
+  const { data: rolesData } = await supabase
+    .from("role")
+    .select("role_id, role_name, role_description")
+    .eq("template_id", session.template_id);
 
   const roleNameById: Record<string, string> = {};
   for (const r of rolesData ?? []) {
     roleNameById[r.role_id] = r.role_name ?? "Unknown Role";
   }
+
+  const templateRoles = (rolesData ?? []).map(r => ({
+    roleName: r.role_name ?? "Unknown Role",
+    roleDescription: r.role_description ?? null,
+  }));
 
   // Prompts for all role-phases
   const rolePhaseIds = (rolePhases ?? []).map(rp => rp.role_phase_id);
@@ -276,10 +305,29 @@ export async function GET(
         .in("role_phase_id", rolePhaseIds)
     : { data: [] };
 
+  // Prompt options (for multiple-choice prompts)
+  const promptIds = (prompts ?? []).map(p => p.prompt_id);
+
+  const { data: promptOptions } = promptIds.length
+    ? await supabase
+        .from("prompt_option")
+        .select("option_id, prompt_id, option_text")
+        .in("prompt_id", promptIds)
+    : { data: [] };
+
+  const optionTextById: Record<string, string> = {};
+  const optionsByPromptId: Record<string, string[]> = {};
+  for (const o of promptOptions ?? []) {
+    const text = o.option_text ?? "";
+    optionTextById[o.option_id] = text;
+    if (!optionsByPromptId[o.prompt_id]) optionsByPromptId[o.prompt_id] = [];
+    optionsByPromptId[o.prompt_id].push(text);
+  }
+
   // All responses for this session
   const { data: responses } = await supabase
     .from("prompt_response")
-    .select("user_id, prompt_id, prompt_answer")
+    .select("user_id, prompt_id, prompt_answer, prompt_option_id")
     .eq("session_id", sessionId);
 
   // Build lookup indexes
@@ -303,11 +351,14 @@ export async function GET(
     promptsByRolePhase[rpId].push(p);
   }
 
-  // responseMap[userId][promptId] = answer
+  // responseMap[userId][promptId] = answer (resolves MC option_id to text)
   const responseMap: Record<string, Record<string, string>> = {};
   for (const r of responses ?? []) {
     if (!responseMap[r.user_id]) responseMap[r.user_id] = {};
-    responseMap[r.user_id][r.prompt_id!] = r.prompt_answer ?? "";
+    const answer = r.prompt_option_id
+      ? (optionTextById[r.prompt_option_id] ?? "")
+      : (r.prompt_answer ?? "");
+    responseMap[r.user_id][r.prompt_id!] = answer;
   }
 
   // Participant name lookup
@@ -380,8 +431,12 @@ export async function GET(
 
       return {
         roleName: roleNameById[roleId] ?? "Unknown Role",
+        rolePhaseDescription: rolePhaseId
+          ? (rolePhaseDescById[rolePhaseId] ?? null)
+          : null,
         prompts: phasePrompts.map(prompt => ({
           question: prompt.prompt_text ?? "",
+          options: optionsByPromptId[prompt.prompt_id],
           responses: roleParticipants.map(p => ({
             participantName: nameByUserId[p.user_id],
             answer:
@@ -406,6 +461,9 @@ export async function GET(
     sessionName: session.session_name ?? "Session",
     templateName: template?.template_name ?? "",
     summary: template?.summary ?? null,
+    setting: template?.setting ?? null,
+    currentActivity: template?.current_activity ?? null,
+    templateRoles,
     generatedAt: new Date().toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -431,8 +489,10 @@ export async function GET(
     return Response.json({ error: "PDF generation failed" }, { status: 500 });
   }
 
-  // Build friendly filename from template name + session creation date
-  const friendlyName = `${buildSessionDisplayName(template?.template_name, session.created_at)}.pdf`;
+  // Build friendly filename: use session_name if set, otherwise template name + date
+  const friendlyName = session.session_name
+    ? `${session.session_name}.pdf`
+    : `${buildSessionDisplayName(template?.template_name, session.created_at)}.pdf`;
   const fileName = `${folderPath}/${friendlyName}`;
 
   const { error: uploadError } = await supabase.storage
@@ -454,7 +514,10 @@ export async function GET(
     .from("reports")
     .getPublicUrl(fileName);
 
-  return Response.json({ url: urlData.publicUrl });
+  return Response.json(
+    { url: `${urlData.publicUrl}?t=${Date.now()}` },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }
 
 export async function POST(
@@ -478,11 +541,13 @@ export async function POST(
       session_name,
       created_at,
       template_id,
-      template ( template_name, objective, summary )
+      template ( template_name, summary, setting, current_activity )
     `,
     )
     .eq("session_id", sessionId)
     .single();
+  console.log(sessionError);
+  console.log(session);
 
   if (sessionError || !session) {
     return Response.json({ error: "Session not found" }, { status: 404 });
@@ -528,23 +593,29 @@ export async function POST(
   const { data: rolePhases } = phaseIds.length
     ? await supabase
         .from("role_phase")
-        .select("role_phase_id, role_id, phase_id")
+        .select("role_phase_id, role_id, phase_id, role_phase_description")
         .in("phase_id", phaseIds)
     : { data: [] };
 
   const roleIds = [...new Set((rolePhases ?? []).map(rp => rp.role_id))];
 
-  const { data: rolesData } = roleIds.length
-    ? await supabase
-        .from("role")
-        .select("role_id, role_name")
-        .in("role_id", roleIds)
-    : { data: [] };
+  const rolePhaseDescById = buildRolePhaseDescById(rolePhases ?? []);
+
+  // Fetch all roles for this template (batched single query for names, descriptions, and cover page list)
+  const { data: rolesData } = await supabase
+    .from("role")
+    .select("role_id, role_name, role_description")
+    .eq("template_id", session.template_id);
 
   const roleNameById: Record<string, string> = {};
   for (const r of rolesData ?? []) {
     roleNameById[r.role_id] = r.role_name ?? "Unknown Role";
   }
+
+  const templateRoles = (rolesData ?? []).map(r => ({
+    roleName: r.role_name ?? "Unknown Role",
+    roleDescription: r.role_description ?? null,
+  }));
 
   const rolePhaseIds = (rolePhases ?? []).map(rp => rp.role_phase_id);
 
@@ -555,9 +626,28 @@ export async function POST(
         .in("role_phase_id", rolePhaseIds)
     : { data: [] };
 
+  // Prompt options (for multiple-choice prompts)
+  const promptIds = (prompts ?? []).map(p => p.prompt_id);
+
+  const { data: promptOptions } = promptIds.length
+    ? await supabase
+        .from("prompt_option")
+        .select("option_id, prompt_id, option_text")
+        .in("prompt_id", promptIds)
+    : { data: [] };
+
+  const optionTextById: Record<string, string> = {};
+  const optionsByPromptId: Record<string, string[]> = {};
+  for (const o of promptOptions ?? []) {
+    const text = o.option_text ?? "";
+    optionTextById[o.option_id] = text;
+    if (!optionsByPromptId[o.prompt_id]) optionsByPromptId[o.prompt_id] = [];
+    optionsByPromptId[o.prompt_id].push(text);
+  }
+
   const { data: responses } = await supabase
     .from("prompt_response")
-    .select("user_id, prompt_id, prompt_answer")
+    .select("user_id, prompt_id, prompt_answer, prompt_option_id")
     .eq("session_id", sessionId);
 
   const rolePhaseIndex: Record<string, Record<string, string>> = {};
@@ -579,7 +669,10 @@ export async function POST(
   const responseMap: Record<string, Record<string, string>> = {};
   for (const r of responses ?? []) {
     if (!responseMap[r.user_id]) responseMap[r.user_id] = {};
-    responseMap[r.user_id][r.prompt_id!] = r.prompt_answer ?? "";
+    const answer = r.prompt_option_id
+      ? (optionTextById[r.prompt_option_id] ?? "")
+      : (r.prompt_answer ?? "");
+    responseMap[r.user_id][r.prompt_id!] = answer;
   }
 
   const nameByUserId: Record<string, string> = {};
@@ -648,8 +741,12 @@ export async function POST(
 
       return {
         roleName: roleNameById[roleId] ?? "Unknown Role",
+        rolePhaseDescription: rolePhaseId
+          ? (rolePhaseDescById[rolePhaseId] ?? null)
+          : null,
         prompts: phasePrompts.map(prompt => ({
           question: prompt.prompt_text ?? "",
+          options: optionsByPromptId[prompt.prompt_id],
           responses: roleParticipants.map(p => ({
             participantName: nameByUserId[p.user_id],
             answer:
@@ -673,6 +770,9 @@ export async function POST(
     sessionName: session.session_name ?? "Session",
     templateName: template?.template_name ?? "",
     summary: template?.summary ?? null,
+    setting: template?.setting ?? null,
+    currentActivity: template?.current_activity ?? null,
+    templateRoles,
     generatedAt: new Date().toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -698,8 +798,10 @@ export async function POST(
     return Response.json({ error: "PDF generation failed" }, { status: 500 });
   }
 
-  // Build friendly filename from template name + session creation date
-  const friendlyName = `${buildSessionDisplayName(template?.template_name, session.created_at)}.pdf`;
+  // Build friendly filename: use session_name if set, otherwise template name + date
+  const friendlyName = session.session_name
+    ? `${session.session_name}.pdf`
+    : `${buildSessionDisplayName(template?.template_name, session.created_at)}.pdf`;
   const fileName = `sessions/${sessionId}/${friendlyName}`;
 
   const { error: uploadError } = await supabase.storage

@@ -3,6 +3,7 @@
 import type { UserGroup } from "@/types/schema";
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { fetchUserGroups } from "@/actions/supabase/queries/user-groups";
 import {
   Heading3,
@@ -13,6 +14,7 @@ import {
 } from "@/app/admin/styles";
 import Plus from "@/assets/images/plus.svg";
 import AddUserGroups from "./AddUserGroup";
+import { Buttons, Groups, Header, HeaderSide } from "./styles";
 
 export default function UserGroupSideBar({
   selectedUserGroupId,
@@ -24,6 +26,7 @@ export default function UserGroupSideBar({
   const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
   const [search, setSearch] = useState("");
   const [isAddGroupOpen, setIsAddGroupOpen] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     async function loadUserGroups() {
@@ -61,12 +64,25 @@ export default function UserGroupSideBar({
         </SideNavButton>
       ))}
 
-      <SideNavNewTemplateButton onClick={() => setIsAddGroupOpen(true)}>
-        <Image src={Plus} alt="+" width={10} height={10} /> Add Organization
-      </SideNavNewTemplateButton>
+      <Buttons>
+        <SideNavNewTemplateButton
+          onClick={() => router.push("/templates?isAdmin=true")}
+        >
+          <Image src={Plus} alt="+" width={10} height={10} /> New Template
+        </SideNavNewTemplateButton>
 
+        <SideNavNewTemplateButton onClick={() => setIsAddGroupOpen(true)}>
+          <Image src={Plus} alt="+" width={10} height={10} /> Add Organization
+        </SideNavNewTemplateButton>
+      </Buttons>
       {isAddGroupOpen && (
-        <AddUserGroups onClose={() => setIsAddGroupOpen(false)} />
+        <AddUserGroups
+          onClose={() => setIsAddGroupOpen(false)}
+          onCreated={newGroup => {
+            setUserGroups(prev => [...prev, newGroup]);
+            setSelectedUserGroupId(newGroup.user_group_id);
+          }}
+        />
       )}
     </SideNavTemplatesContainer>
   );

@@ -57,11 +57,16 @@ export default function FacilitatorExercisesPage() {
         (await fetchSessionsbyUserGroup(profile.user_group_id)) ?? [];
 
       const enriched = data.map(s => {
-        const tn = s.template?.template_name ?? "Untitled";
-        const dateStr = s.created_at
-          ? new Date(s.created_at).toLocaleDateString("en-CA")
-          : "";
-        return { ...s, displayName: `${tn}_${dateStr}` };
+        const displayName = s.session_name
+          ? s.session_name
+          : (() => {
+              const tn = s.template?.template_name ?? "Untitled";
+              const dateStr = s.created_at
+                ? new Date(s.created_at).toLocaleDateString("en-CA")
+                : "";
+              return `${tn}_${dateStr}`;
+            })();
+        return { ...s, displayName };
       });
 
       setSessions(enriched);
@@ -146,13 +151,15 @@ export default function FacilitatorExercisesPage() {
                 <StyledTh>
                   {activeTab === "active" ? "Date Started" : "Date Completed"}
                 </StyledTh>
-                {activeTab === "past" && <StyledTh>Report</StyledTh>}
+                <StyledTh>
+                  {activeTab === "active" ? "In Progress Report" : "Report"}
+                </StyledTh>
               </tr>
             </StyledTableHead>
             <tbody>
               {displayedSessions.length === 0 ? (
                 <tr>
-                  <EmptyMessage colSpan={activeTab === "past" ? 4 : 3}>
+                  <EmptyMessage colSpan={4}>
                     No {activeTab === "active" ? "active" : "past"} sessions
                     found.
                   </EmptyMessage>

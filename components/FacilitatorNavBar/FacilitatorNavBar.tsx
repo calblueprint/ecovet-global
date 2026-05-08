@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ecovetGlobal from "@/assets/images/ecovet-global-new.svg";
+import ProfileBar from "../ProfileBar/ProfileBar";
 import {
   ButtonContainer,
   ImageLogo,
   LogoContainer,
+  ProfileContainer,
   TopNavButton,
   TopNavContainer,
 } from "./styles";
@@ -44,6 +46,9 @@ const TopNavBar = () => {
           </TopNavButton>
         </Link>
       </ButtonContainer>
+      <ProfileContainer>
+        <ProfileBar></ProfileBar>
+      </ProfileContainer>
     </TopNavContainer>
   );
 };

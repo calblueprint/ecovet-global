@@ -34,6 +34,7 @@ export const PrimaryButton = styled.button`
   display: flex;
   padding: 0.5rem 2rem;
   justify-content: center;
+  height: 2rem;
   align-items: center;
   gap: 0.625rem;
   border-radius: 0.25rem;
@@ -57,13 +58,15 @@ export const PrimaryButton = styled.button`
 
 export const ButtonContainer = styled.div`
   display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
   width: 100%;
+  height: 100%;
 `;
 
 export const CancelButton = styled.button`
   display: flex;
+  height: 2rem;
   padding: 0.5rem 2rem;
   justify-content: center;
   align-items: center;
@@ -90,6 +93,7 @@ export const CancelButton = styled.button`
 export const DeleteButton = styled.button`
   display: flex;
   padding: 0.5rem 2rem;
+  height: 2rem;
   justify-content: center;
   align-items: center;
   gap: 0.625rem;

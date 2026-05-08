@@ -15,7 +15,7 @@ import {
 } from "./styles";
 import { getMessageDateLabel } from "./TimeSeparator";
 
-export default function ChatMessage({
+export default function ChatMessageBubble({
   chatMessage,
   senderRole,
   showName,
@@ -29,15 +29,16 @@ export default function ChatMessage({
   fromUser: boolean;
 }) {
   const [showTime, setShowTime] = useState(false);
-  const senderName = fromUser ? "You" : chatMessage.sender_name;
+  const senderName =
+    fromUser && !chatMessage.is_announcement ? "You" : chatMessage.sender_name;
   const { day, time } = getMessageDateLabel(new Date(chatMessage.created_at));
 
   return (
     <FullMessageContainer $doubleText={isDoubleText} $fromUser={fromUser}>
       {showName && (
-        <NameContainer>
+        <NameContainer $fromUser={fromUser}>
           <NameText>{senderName}</NameText>
-          {!fromUser && (
+          {!fromUser && senderRole && (
             <>
               <NameRoleSeparator />
               <NameText>{senderRole}</NameText>

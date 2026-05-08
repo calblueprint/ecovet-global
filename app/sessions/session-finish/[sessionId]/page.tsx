@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { fetchPDFName } from "@/actions/supabase/queries/sessions";
+import { getHomePath } from "@/utils/HomePage";
 import { useProfile } from "@/utils/ProfileProvider";
 import { buildSessionDisplayName } from "@/utils/session-details";
 import { Main } from "../../styles";
@@ -43,10 +44,9 @@ export default function SessionFinish() {
   async function fetchOrGenerateReport() {
     if (!sessionId) return;
     const pdfInfo = await fetchPDFName(sessionId);
-    const sessions = buildSessionDisplayName(
-      pdfInfo.template_name,
-      pdfInfo.created_at,
-    );
+    const sessions = pdfInfo.session_name
+      ? pdfInfo.session_name
+      : buildSessionDisplayName(pdfInfo.template_name, pdfInfo.created_at);
     setPDFName(sessions);
     setIsGenerating(true);
     setPdfUrl(null);
@@ -124,6 +124,8 @@ export default function SessionFinish() {
     URL.revokeObjectURL(objectUrl);
   }
 
+  console.log(profile?.user_type);
+
   return (
     <Main>
       <Container>
@@ -168,7 +170,7 @@ export default function SessionFinish() {
         </Section>
 
         <Link
-          href="/facilitator/template-list"
+          href={getHomePath(profile)}
           style={{ width: "100%", textAlign: "center" }}
         >
           <HomeLink as="span">Return to Homepage</HomeLink>

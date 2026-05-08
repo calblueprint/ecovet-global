@@ -124,6 +124,45 @@ export async function signInWithMagicLink(email: string) {
   }
 }
 
+export async function resendInvite(email: string) {
+  const adminClient = getSupabaseAdminClient();
+  const lowerCaseEmail = email.toLowerCase();
+
+  const { status } = await checkInviteStatus(lowerCaseEmail);
+  if (status !== "pending") {
+    return { success: false, error: "No pending invite for this email" };
+  }
+
+  const { data: listData, error: listError } =
+    await adminClient.auth.admin.listUsers();
+  if (listError) {
+    return { success: false, error: listError.message };
+  }
+
+  const existingUser = listData.users.find(
+    u => u.email?.toLowerCase() === lowerCaseEmail,
+  );
+
+  if (existingUser) {
+    const { error: deleteError } = await adminClient.auth.admin.deleteUser(
+      existingUser.id,
+    );
+    if (deleteError) {
+      return { success: false, error: deleteError.message };
+    }
+  }
+
+  try {
+    await sendInviteEmail(lowerCaseEmail);
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Failed to send invite",
+    };
+  }
+  return { success: true, error: null };
+}
+
 export async function sendInviteEmail(email: string) {
   const adminClient = getSupabaseAdminClient();
 

@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button, Checkbox, Radio, RadioGroup } from "@mui/material";
+import Check from "@/assets/images/checkmark.svg";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
+import { ImageLogo } from "@/components/styles";
 import {
   EditablePhase,
   PromptType,
@@ -8,6 +10,7 @@ import {
   StagedOption,
   UUID,
 } from "@/types/schema";
+import { AutoGrowBigInput } from "../TemplateOverviewForm/AutoGrow";
 import {
   AddNewOptionStyled,
   AddNewOptionTextStyled,
@@ -27,6 +30,7 @@ import {
   LegendFlex,
   McqOptionStyled,
   MultipleChoicePromptStyled,
+  NextButtons,
   PhaseCard,
   PhaseTemplateHeader,
   PromptTypeDropdownStyled,
@@ -44,8 +48,12 @@ export default function QuestionBuilder({
   rolePhaseId,
   phase,
   onChange,
-  onNextPhase,
+  onNext,
+  onPrev,
+  isFirstStep,
+  isLastStep,
   onSaveAndExit,
+  saving,
 }: {
   value: RoleFormInput;
   rolePhaseId: UUID;
@@ -55,11 +63,16 @@ export default function QuestionBuilder({
     field: string,
     v: string | PromptType | StagedOption[] | number,
   ) => UUID | null | void;
-  onNextPhase: () => void;
+  onNext: () => void;
+  onPrev: () => void;
+  isFirstStep: boolean;
+  isLastStep: boolean;
   onSaveAndExit: () => void;
+  saving: boolean;
 }) {
   const rolePhase = value.rolePhases[rolePhaseId];
   const [focusedPromptId, setFocusedPromptId] = useState<UUID | null>(null);
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   function handleTypeChange(promptID: UUID, newType: PromptType) {
     onChange(promptID, "prompt_type", newType);
@@ -105,7 +118,17 @@ export default function QuestionBuilder({
       "insert_prompt_at",
       index + 1,
     );
-    if (newId) setFocusedPromptId(newId);
+    if (newId) focusAndScrollTo(newId);
+  }
+
+  function focusAndScrollTo(promptID: UUID) {
+    setFocusedPromptId(promptID);
+    requestAnimationFrame(() => {
+      cardRefs.current[promptID]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    });
   }
 
   const promptIds = value.promptIndex[rolePhase.role_phase_id] ?? [];
@@ -121,27 +144,72 @@ export default function QuestionBuilder({
 
           <HeaderButtonGroup>
             <HeaderButtonLight
-              onClick={() =>
-                onChange(
+              onClick={() => {
+                const newId = onChange(
                   rolePhase.role_phase_id,
                   "add_prompt",
                   rolePhase.role_phase_id,
-                )
-              }
+                );
+                if (newId) focusAndScrollTo(newId);
+              }}
             >
               + Question
             </HeaderButtonLight>
-            <HeaderButtonDark onClick={onNextPhase}>
-              + Next phase
-            </HeaderButtonDark>
-            <HeaderButtonDark onClick={onSaveAndExit}>
-              + Save and exit
+            <NextButtons onClick={onPrev} disabled={isFirstStep}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="10"
+                height="10"
+                viewBox="0 0 10 10"
+                fill="none"
+              >
+                <path
+                  d="M7 1L3 5L7 9"
+                  stroke={isFirstStep ? "#E0DFDC" : "#476C77"}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Prev
+            </NextButtons>
+            <NextButtons onClick={onNext} disabled={isLastStep}>
+              Next
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="10"
+                height="10"
+                viewBox="0 0 10 10"
+                fill="none"
+              >
+                <path
+                  d="M3 1L7 5L3 9"
+                  stroke={isLastStep ? "#E0DFDC" : "#476C77"}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </NextButtons>
+            <HeaderButtonDark onClick={onSaveAndExit} disabled={saving}>
+              {saving ? (
+                "Saving..."
+              ) : (
+                <>
+                  <ImageLogo
+                    src={Check.src}
+                    alt="Checkmark"
+                    width={12}
+                    height={12}
+                    padding-right={1}
+                  />
+                  Save and exit
+                </>
+              )}
             </HeaderButtonDark>
           </HeaderButtonGroup>
         </RoleHeader>
 
         <RoleDescriptionTemplate>
-          <RolePhaseDescriptionInput
+          <AutoGrowBigInput
             placeholder="Role Phase description..."
             value={rolePhase.role_phase_description ?? ""}
             onChange={e => onChange(rolePhaseId, "description", e.target.value)}
@@ -152,7 +220,6 @@ export default function QuestionBuilder({
       <PhaseCard
         key={rolePhase.role_phase_id}
         onClick={e => {
-          // Clicking the card background (not a question) clears focus
           if (e.target === e.currentTarget) setFocusedPromptId(null);
         }}
       >
@@ -161,10 +228,14 @@ export default function QuestionBuilder({
           const promptType = (prompt.prompt_type ?? "text") as PromptType;
           const options = value.optionsByPromptId[promptID] ?? [];
           const isFocused = focusedPromptId === promptID;
-          const isLast = j === promptIds.length - 1;
 
           return (
-            <div key={promptID}>
+            <div
+              key={promptID}
+              ref={el => {
+                cardRefs.current[promptID] = el;
+              }}
+            >
               <FieldCard
                 onClick={() => setFocusedPromptId(promptID)}
                 $focused={isFocused}
@@ -184,7 +255,7 @@ export default function QuestionBuilder({
                 <QuestionRowStyled>
                   <BigInput
                     name="prompt"
-                    placeholder="Type question..."
+                    placeholder="Question Title"
                     value={prompt.prompt_text ?? ""}
                     onChange={e =>
                       onChange(promptID, "prompt_text", e.target.value)
@@ -224,9 +295,9 @@ export default function QuestionBuilder({
                 {promptType === "multiple_choice" && (
                   <MultipleChoicePromptStyled>
                     <RadioGroup name={`mcq-${promptID}`}>
-                      {options.map(opt => (
-                        <McqOptionStyled key={opt.option_number}>
-                          <Radio value={opt.option_number} />
+                      {options.map((opt, idx) => (
+                        <McqOptionStyled key={opt.option_number ?? idx}>
+                          <Radio value={opt.option_number} disabled />
                           <TextFieldStyled
                             size="small"
                             placeholder="Enter option text"
@@ -239,16 +310,13 @@ export default function QuestionBuilder({
                               )
                             }
                           />
-                          <DeleteMcqOptionButton>
-                            <Button
-                              color="error"
-                              onClick={e => {
-                                e.stopPropagation();
-                                deleteOption(promptID, opt.option_number);
-                              }}
-                            >
-                              Delete
-                            </Button>
+                          <DeleteMcqOptionButton
+                            onClick={e => {
+                              e.stopPropagation();
+                              deleteOption(promptID, opt.option_number);
+                            }}
+                          >
+                            x
                           </DeleteMcqOptionButton>
                         </McqOptionStyled>
                       ))}
@@ -271,9 +339,9 @@ export default function QuestionBuilder({
 
                 {promptType === "checkbox" && (
                   <CheckboxPromptStyled>
-                    {options.map(opt => (
-                      <McqOptionStyled key={opt.option_number}>
-                        <Checkbox />
+                    {options.map((opt, idx) => (
+                      <McqOptionStyled key={opt.option_number ?? idx}>
+                        <Checkbox disabled />
                         <TextFieldStyled
                           size="small"
                           placeholder="Enter option text"
@@ -294,7 +362,7 @@ export default function QuestionBuilder({
                               deleteOption(promptID, opt.option_number);
                             }}
                           >
-                            Delete
+                            x
                           </Button>
                         </DeleteMcqOptionButton>
                       </McqOptionStyled>
@@ -316,7 +384,7 @@ export default function QuestionBuilder({
                 )}
               </FieldCard>
 
-              {isFocused && !isLast && (
+              {isFocused && (
                 <InsertQuestionRow>
                   <InsertQuestionButton
                     onClick={e => {

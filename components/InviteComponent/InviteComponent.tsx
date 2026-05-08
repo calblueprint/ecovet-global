@@ -12,11 +12,22 @@ import {
   ErrorMessage,
   ErrorMessageDiv,
   FacilitatorButton,
+  FailedEmail,
+  FailedInviteItem,
+  FailedInvitesDiv,
+  FailedInvitesHeader,
+  FailedInvitesList,
+  FailedReason,
   FormHeader,
   InviteTypeButton,
   ParticipantButton,
   SubmitButton,
 } from "./styles";
+
+type InviteFailure = {
+  email: string;
+  message: string;
+};
 
 const isEmailValid = (email: string) => {
   const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
@@ -34,6 +45,7 @@ function InviteComponent({
 }) {
   const [emailsText, setEmailsText] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [failedInvites, setFailedInvites] = useState<InviteFailure[]>([]);
   const [participantSelected, setParticipantSelected] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -43,6 +55,7 @@ function InviteComponent({
   ) => {
     setEmailsText(event.target.value);
     if (errorMessage) setErrorMessage("");
+    if (failedInvites.length > 0) setFailedInvites([]);
 
     if (event.target instanceof HTMLTextAreaElement) {
       event.target.style.height = "auto";
@@ -54,7 +67,6 @@ function InviteComponent({
     if (isSubmitting) return;
 
     const lines = emailsText.split("\n").filter(line => line.trim() !== "");
-
     if (lines.length === 0) return;
 
     const invalidEmails = lines.filter(email => !isEmailValid(email.trim()));
@@ -65,31 +77,39 @@ function InviteComponent({
 
     setIsSubmitting(true);
     setErrorMessage("");
+    setFailedInvites([]);
+
+    const failures: InviteFailure[] = [];
+    const succeededEmails: string[] = [];
 
     try {
-      const results = await Promise.all(
-        lines.map(email =>
-          submitNewInvite(
-            email.trim(),
-            user_group_id,
-            participantSelected ? "Participant" : "Facilitator",
-          ),
-        ),
-      );
+      for (const email of lines) {
+        const trimmed = email.trim();
+        const result = await submitNewInvite(
+          trimmed,
+          user_group_id,
+          participantSelected ? "Participant" : "Facilitator",
+        );
 
-      const firstError = results.find(res => res?.error);
+        if (result?.error) {
+          failures.push({ email: trimmed, message: result.message });
+        } else {
+          succeededEmails.push(trimmed);
+        }
+      }
 
-      if (firstError) {
-        setErrorMessage(firstError.message);
-        if (onInvitesChange) onInvitesChange();
+      if (failures.length > 0) {
+        setFailedInvites(failures);
+        // Keep only the failed emails in the textarea so the user can retry
+        setEmailsText(failures.map(f => f.email).join("\n"));
       } else {
         setEmailsText("");
         if (textAreaRef.current) {
           textAreaRef.current.style.height = "auto";
         }
-        setErrorMessage("");
-        if (onInvitesChange) onInvitesChange();
       }
+
+      if (onInvitesChange) onInvitesChange();
     } catch {
       setErrorMessage("Something went wrong. Please try again.");
     } finally {
@@ -111,32 +131,41 @@ function InviteComponent({
   return (
     <AddInviteMain>
       <AddInviteFormDiv>
-        <FormHeader>Invite a Participant</FormHeader>
-        <ErrorMessageDiv $hasError={errorMessage}>
-          <ErrorMessage>{errorMessage}</ErrorMessage>
-        </ErrorMessageDiv>
+        <FormHeader>Invite a Participant or Facilitator</FormHeader>
+        {errorMessage && (
+          <ErrorMessageDiv $hasError={errorMessage}>
+            <ErrorMessage>{errorMessage}</ErrorMessage>
+          </ErrorMessageDiv>
+        )}
+
+        {failedInvites.length > 0 && (
+          <FailedInvitesDiv>
+            <FailedInvitesHeader>
+              {failedInvites.length} invite{failedInvites.length > 1 ? "s" : ""}{" "}
+              failed to send:
+            </FailedInvitesHeader>
+            <FailedInvitesList>
+              {failedInvites.map(failure => (
+                <FailedInviteItem key={failure.email}>
+                  <FailedReason>{failure.message}: </FailedReason>
+                  <FailedEmail>{failure.email}</FailedEmail>
+                </FailedInviteItem>
+              ))}
+            </FailedInvitesList>
+          </FailedInvitesDiv>
+        )}
 
         <EmailDiv $isAdmin={isAdminDashboard}>
-          {isAdminDashboard ? (
-            <EmailTextArea
-              value={emailsText}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              ref={textAreaRef}
-              placeholder={
-                "email1@berkeley.edu\nemail2@berkeley.edu\nShift+Enter to invite multiple emails..."
-              }
-              required
-            />
-          ) : (
-            <EmailInput
-              value={emailsText}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              placeholder="Email Address"
-              required
-            />
-          )}
+          <EmailTextArea
+            value={emailsText}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            ref={textAreaRef}
+            placeholder={
+              "email1@startx.org\nemail2@startx.org\nShift+Enter to invite multiple emails..."
+            }
+            required
+          />
 
           <ButtonPaddingDiv $isAdmin={isAdminDashboard}>
             <InviteTypeButton>
@@ -159,11 +188,7 @@ function InviteComponent({
               onClick={onSubmitButtonClick}
               disabled={hasErrorsOrEmpty || isSubmitting}
             >
-              {isAdminDashboard
-                ? participantSelected
-                  ? "+ Add participant(s)"
-                  : "+ Add facilitator(s)"
-                : "Send Invite"}
+              {isSubmitting ? "Sending..." : "Send Invite"}
             </SubmitButton>
           </ButtonPaddingDiv>
         </EmailDiv>

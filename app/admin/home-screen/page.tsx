@@ -15,6 +15,9 @@ import {
   PageShell,
   RightColumn,
   RightColumnStack,
+  SelectGroup,
+  SelectGroupHint,
+  SelectGroupTitle,
   SideNavContainer,
 } from "../styles";
 import AdminParticipants from "./components/UserGroupMembers";
@@ -58,7 +61,7 @@ export default function AdminPage() {
         <ContentWrapper>
           <PageHeading>{userGroup?.user_group_name}</PageHeading>
 
-          {selectedUserGroupId && userGroup && (
+          {selectedUserGroupId && userGroup ? (
             <MainArea>
               <CenterColumn>
                 <UserGroupPDFs userGroup={selectedUserGroupId} />
@@ -77,6 +80,14 @@ export default function AdminPage() {
                 </RightColumnStack>
               </RightColumn>
             </MainArea>
+          ) : (
+            <SelectGroup>
+              <SelectGroupTitle>No user group selected</SelectGroupTitle>
+              <SelectGroupHint>
+                Choose a group from the sidebar to view its excercises and
+                participants.
+              </SelectGroupHint>
+            </SelectGroup>
           )}
         </ContentWrapper>
       </LayoutWrapper>

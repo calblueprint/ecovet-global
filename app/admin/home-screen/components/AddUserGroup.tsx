@@ -3,6 +3,7 @@
 import { ChangeEvent, KeyboardEvent, SetStateAction, useState } from "react";
 import { submitNewInvite } from "@/actions/supabase/queries/invites";
 import { submitNewUserGroup } from "@/actions/supabase/queries/user-groups";
+import { UserGroup } from "@/types/schema";
 import { Heading3, SearchInput2 } from "../../styles";
 import {
   Backdrop,
@@ -21,7 +22,13 @@ const isEmailValid = (email: string) => {
   return emailRegex.test(email);
 };
 
-export default function AddUserGroups({ onClose }: { onClose: () => void }) {
+export default function AddUserGroups({
+  onClose,
+  onCreated,
+}: {
+  onClose: () => void;
+  onCreated?: (newGroup: UserGroup) => void;
+}) {
   const [userGroupInput, setUserGroupInput] = useState("");
   const [facilitatorEmails, setFacilitatorEmails] = useState("");
   const [facilitatorError, setFacilitatorError] = useState("");
@@ -36,8 +43,6 @@ export default function AddUserGroups({ onClose }: { onClose: () => void }) {
   const handleFacilitatorChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     setFacilitatorEmails(event.target.value);
     if (facilitatorError) setFacilitatorError("");
-
-    // auto-expand
     event.target.style.height = "auto";
     event.target.style.height = `${event.target.scrollHeight}px`;
   };
@@ -80,6 +85,13 @@ export default function AddUserGroups({ onClose }: { onClose: () => void }) {
         return;
       }
 
+      onCreated?.({
+        num_users: 0,
+        user_group_id: userGroupId,
+        user_group_name: userGroupInput,
+        // any other fields your UserGroup type requires
+      });
+
       onClose();
     } catch {
       setFacilitatorError("Something went wrong. Please try again.");
@@ -120,7 +132,7 @@ export default function AddUserGroups({ onClose }: { onClose: () => void }) {
           onChange={handleFacilitatorChange}
           onKeyDown={handleKeyDown}
           placeholder={
-            "email1@berkeley.edu\nemail2@berkeley.edu\nShift+Enter for a new line"
+            "email1@startx.edu\nemail2@startx.edu\nShift+Enter for a new line"
           }
           required
         />

@@ -1,3 +1,5 @@
+import { AnnouncementRoom } from "@/utils/UseAnnouncements";
+
 export type Json =
   | string
   | number
@@ -18,29 +20,35 @@ export type Database = {
         Row: {
           created_at: string;
           id: string;
+          is_announcement: boolean;
           message: string;
           phase_sent_at: number | null;
           room_id: string | null;
           sender: string | null;
           sender_name: string | null;
+          session_id: string;
         };
         Insert: {
           created_at?: string;
           id?: string;
+          is_announcement?: boolean;
           message: string;
           phase_sent_at?: number | null;
           room_id?: string | null;
           sender?: string | null;
           sender_name?: string | null;
+          session_id: string;
         };
         Update: {
           created_at?: string;
           id?: string;
+          is_announcement?: boolean;
           message?: string;
           phase_sent_at?: number | null;
           room_id?: string | null;
           sender?: string | null;
           sender_name?: string | null;
+          session_id?: string;
         };
         Relationships: [
           {
@@ -50,23 +58,27 @@ export type Database = {
             referencedRelation: "profile";
             referencedColumns: ["id"];
           },
+          {
+            foreignKeyName: "chat_message_session_id_fkey";
+            columns: ["session_id"];
+            isOneToOne: false;
+            referencedRelation: "session";
+            referencedColumns: ["session_id"];
+          },
         ];
       };
       chat_room: {
         Row: {
-          is_annoucement: boolean;
           room_id: string;
           session_id: string | null;
           user_id: string;
         };
         Insert: {
-          is_annoucement?: boolean;
           room_id?: string;
           session_id?: string | null;
           user_id?: string;
         };
         Update: {
-          is_annoucement?: boolean;
           room_id?: string;
           session_id?: string | null;
           user_id?: string;
@@ -124,7 +136,7 @@ export type Database = {
         Row: {
           created_at: string | null;
           is_finished: boolean;
-          phase_index: number | null;
+          phase_index: number;
           role_id: string | null;
           session_id: string;
           user_id: string;
@@ -132,7 +144,7 @@ export type Database = {
         Insert: {
           created_at?: string | null;
           is_finished: boolean;
-          phase_index?: number | null;
+          phase_index?: number;
           role_id?: string | null;
           session_id: string;
           user_id?: string;
@@ -140,7 +152,7 @@ export type Database = {
         Update: {
           created_at?: string | null;
           is_finished?: boolean;
-          phase_index?: number | null;
+          phase_index?: number;
           role_id?: string | null;
           session_id?: string;
           user_id?: string;
@@ -443,7 +455,6 @@ export type Database = {
       };
       session: {
         Row: {
-          after_action_report_id: string | null;
           created_at: string | null;
           force_advance: boolean;
           is_async: boolean;
@@ -455,7 +466,6 @@ export type Database = {
           user_group_id: string | null;
         };
         Insert: {
-          after_action_report_id?: string | null;
           created_at?: string | null;
           force_advance?: boolean;
           is_async?: boolean;
@@ -467,7 +477,6 @@ export type Database = {
           user_group_id?: string | null;
         };
         Update: {
-          after_action_report_id?: string | null;
           created_at?: string | null;
           force_advance?: boolean;
           is_async?: boolean;
@@ -631,6 +640,12 @@ export type Database = {
       check_chat_room_exists: {
         Args: { p_session_id: string; p_user_ids: string[] };
         Returns: string;
+      };
+      get_old_storage_objects: {
+        Args: { batch_size?: number; bucket: string; cutoff: string };
+        Returns: {
+          name: string;
+        }[];
       };
     };
     Enums: {

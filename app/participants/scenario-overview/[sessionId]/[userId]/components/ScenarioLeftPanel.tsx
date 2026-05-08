@@ -2,6 +2,9 @@
 
 import type { Phase, RolePhase, Template } from "@/types/schema";
 import CircularProgress from "@mui/material/CircularProgress";
+import type { Phase, RolePhase, Template, UUID } from "@/types/schema";
+import { useEffect, useState } from "react";
+import { fetchRoleName } from "@/actions/supabase/queries/sessions";
 import {
   ContentBody,
   ContentBody40,
@@ -22,6 +25,8 @@ interface ScenarioLeftPanelProps {
   phaseInd: number;
   rolePhase: RolePhase | null;
   onContinue: () => void;
+  isOverview: boolean;
+  roleId: UUID;
 }
 
 export default function ScenarioLeftPanel({
@@ -30,12 +35,31 @@ export default function ScenarioLeftPanel({
   phaseInd,
   rolePhase,
   onContinue,
+  isOverview,
+  roleId,
 }: ScenarioLeftPanelProps) {
-  const isOverview = phaseInd === -1;
   const currentPhase = phases[phaseInd] ?? null;
+  const [roleDescription, setRoleDescription] = useState<string | null>(null);
+  const [roleName, setRoleName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!roleId) return;
+
+    async function loadRoleName() {
+      try {
+        const name = await fetchRoleName(roleId);
+        setRoleDescription(name.role_description);
+        setRoleName(name.role_name);
+      } catch (err) {
+        console.error("Failed to load role name:", err);
+      }
+    }
+
+    loadRoleName();
+  }, [roleId]);
 
   return (
-    <ContentDiv>
+    <ContentDiv $isOverview={isOverview}>
       <PhaseDescriptionWrapper $phase={!isOverview}>
         <ContentBody40>
           {phaseInd + 1} of {phases.length}
@@ -83,10 +107,16 @@ export default function ScenarioLeftPanel({
         </ContentBody>
       </ContentBubble>
 
+      <ContentBubble>
+        <ContentHeader>Your Role</ContentHeader>
+        <ContentBody>{roleName}</ContentBody>
+        <ContentBody>{roleDescription}</ContentBody>
+      </ContentBubble>
+
       {isOverview && (
         <ContinueButtonDiv>
           <ContinueButton onClick={onContinue} disabled={phases.length === 0}>
-            Continue
+            Continue to Phase 1
           </ContinueButton>
         </ContinueButtonDiv>
       )}

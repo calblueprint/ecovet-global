@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { styles } from "@/components/pdf/styles";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
 
@@ -425,4 +426,20 @@ export const TabButton = styled.button<{ $active: boolean }>`
   &:hover {
     color: ${COLORS.black100};
   }
+`;
+
+export const Buttons = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 2rem;
+  margin-top: auto;
+`;
+
+export const Groups = styled.div`
+  gap: 3rem;
+`;
+
+export const HeaderSide = styled.div`
+  gap: 3rem;
 `;
