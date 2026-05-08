@@ -3,9 +3,9 @@
 import type { PDFSession, Session } from "@/types/schema";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import CircularProgress from "@mui/material/CircularProgress";
 import Tabs from "@mui/material/Tabs";
 import { fetchSessionsbyUserGroup } from "@/actions/supabase/queries/sessions";
-import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import FacilitatorNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
@@ -13,11 +13,9 @@ import {
   EmptyMessage,
   LayoutWrapper,
   PageTitle,
-  PdfArrow,
   PdfButton,
   PdfLabel,
   SearchBarStyled,
-  SearchIconWrapper,
   SearchInput,
   StartExerciseButton,
   StyledTab,
@@ -48,6 +46,7 @@ export default function FacilitatorExercisesPage() {
   const [sessions, setSessions] = useState<PDFSession[]>([]);
   const [activeTab, setActiveTab] = useState<ActiveTab>("active");
   const [pdfLoading, setPdfLoading] = useState<string | null>(null);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
   const [searchInput, setSearchInput] = useState("");
 
   useEffect(() => {
@@ -55,23 +54,28 @@ export default function FacilitatorExercisesPage() {
 
     (async () => {
       if (!profile.user_group_id) return;
-      const data =
-        (await fetchSessionsbyUserGroup(profile.user_group_id)) ?? [];
+      setSessionsLoading(true);
+      try {
+        const data =
+          (await fetchSessionsbyUserGroup(profile.user_group_id)) ?? [];
 
-      const enriched = data.map(s => {
-        const displayName = s.session_name
-          ? s.session_name
-          : (() => {
-              const tn = s.template?.template_name ?? "Untitled";
-              const dateStr = s.created_at
-                ? new Date(s.created_at).toLocaleDateString("en-CA")
-                : "";
-              return `${tn}_${dateStr}`;
-            })();
-        return { ...s, displayName };
-      });
+        const enriched = data.map(s => {
+          const displayName = s.session_name
+            ? s.session_name
+            : (() => {
+                const tn = s.template?.template_name ?? "Untitled";
+                const dateStr = s.created_at
+                  ? new Date(s.created_at).toLocaleDateString("en-CA")
+                  : "";
+                return `${tn}_${dateStr}`;
+              })();
+          return { ...s, displayName };
+        });
 
-      setSessions(enriched);
+        setSessions(enriched);
+      } finally {
+        setSessionsLoading(false);
+      }
     })();
   }, [profile?.user_group_id]);
 
@@ -159,7 +163,19 @@ export default function FacilitatorExercisesPage() {
               </tr>
             </StyledTableHead>
             <tbody>
-              {displayedSessions.length === 0 ? (
+              {sessionsLoading ? (
+                <tr>
+                  <StyledTd
+                    colSpan={4}
+                    style={{ textAlign: "center", padding: "2rem" }}
+                  >
+                    <CircularProgress
+                      color="inherit"
+                      aria-label="Loading sessions…"
+                    />
+                  </StyledTd>
+                </tr>
+              ) : displayedSessions.length === 0 ? (
                 <tr>
                   <EmptyMessage colSpan={4}>
                     No {activeTab === "active" ? "active" : "past"} sessions
@@ -179,21 +195,26 @@ export default function FacilitatorExercisesPage() {
                       </SyncBadge>
                     </StyledTd>
                     <StyledTd>{formatDate(session.created_at)}</StyledTd>
-                    <StyledTd>
-                      <PdfButton
-                        onClick={e => {
-                          e.stopPropagation();
-                          handleViewPdf(session.session_id);
-                        }}
-                        disabled={pdfLoading === session.session_id}
-                      >
-                        {pdfLoading === session.session_id ? (
-                          "Loading..."
-                        ) : (
-                          <PdfLabel>View PDF</PdfLabel>
-                        )}
-                      </PdfButton>
-                    </StyledTd>
+                    {activeTab === "past" && (
+                      <StyledTd>
+                        <PdfButton
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleViewPdf(session.session_id);
+                          }}
+                          disabled={pdfLoading === session.session_id}
+                        >
+                          {pdfLoading === session.session_id ? (
+                            <CircularProgress
+                              color="inherit"
+                              aria-label="Loading…"
+                            />
+                          ) : (
+                            <PdfLabel>View PDF</PdfLabel>
+                          )}
+                        </PdfButton>
+                      </StyledTd>
+                    )}
                   </StyledTableRow>
                 ))
               )}

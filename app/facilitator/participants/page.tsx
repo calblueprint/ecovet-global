@@ -2,6 +2,7 @@
 
 import type { Invite, Participant, UUID } from "@/types/schema";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { CircularProgress } from "@mui/material";
 import Tabs from "@mui/material/Tabs";
 import { resendInvite } from "@/actions/supabase/queries/auth";
 import {
@@ -25,6 +26,7 @@ import {
   ContentWrapper,
   LayoutWrapper,
   ListControlsWrapper,
+  LoadingScreen,
   PageTitle,
   ParticipantsSearchInput,
   ParticipantsSearchWrapper,
@@ -110,7 +112,12 @@ export default function ParticipantsPage() {
   };
 
   if (!profile?.user_group_id) {
-    return <div>Loading! Give it a sec...</div>;
+    return (
+      <LoadingScreen>
+        {" "}
+        <CircularProgress color="inherit" aria-label="Loading…" />{" "}
+      </LoadingScreen>
+    );
   }
 
   const handleDeleteRow = (participant: Participant) => {

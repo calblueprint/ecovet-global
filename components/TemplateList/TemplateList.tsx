@@ -3,6 +3,7 @@
 import type { Template, UUID } from "@/types/schema";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CircularProgress } from "@mui/material";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import {
   assignTagToTemplate,
@@ -43,6 +44,7 @@ import {
   DateColumn,
   EditIconWrapper,
   FilterPlusSearch,
+  LoadingScreen,
   NameColumn,
   RowActions,
   SearchWrapper,
@@ -70,6 +72,7 @@ export default function TemplateListPage({
   );
   const [searchInput, setSearchInput] = useState("");
   const [templates, setTemplates] = useState<TemplateWithTags[]>([]);
+  const [templatesLoading, setTemplatesLoading] = useState(true);
   const [pdfLoading, setPdfLoading] = useState<UUID | null>(null);
 
   const [sortKey, setSortKey] = useState<"name" | "date">("date");
@@ -89,12 +92,17 @@ export default function TemplateListPage({
     if (!user_group_id) return;
 
     const load = async () => {
-      const [allTemplates, allTags] = await Promise.all([
-        fetchTemplatesWithTags(user_group_id),
-        getAllTags(user_group_id),
-      ]);
-      setTemplates(allTemplates || []);
-      setAvailableTags(allTags);
+      setTemplatesLoading(true);
+      try {
+        const [allTemplates, allTags] = await Promise.all([
+          fetchTemplatesWithTags(user_group_id),
+          getAllTags(user_group_id),
+        ]);
+        setTemplates(allTemplates || []);
+        setAvailableTags(allTags);
+      } finally {
+        setTemplatesLoading(false);
+      }
     };
 
     load();
@@ -351,7 +359,9 @@ export default function TemplateListPage({
   }
 
   return loading ? (
-    <MainDiv>Loading profile...</MainDiv>
+    <LoadingScreen>
+      <CircularProgress color="inherit" aria-label="Loading…" />
+    </LoadingScreen>
   ) : (
     <>
       {navBar}
@@ -415,37 +425,46 @@ export default function TemplateListPage({
                   showBorder={true}
                 />
               </FilterPlusSearch>
-              <GeneralTitle>
-                <span>
-                  Name{" "}
-                  <SortButton onClick={() => toggleSort("name")}>
-                    {sortKey === "name" ? (
-                      sortOrder === "asc" ? (
-                        <ArrowUp size={16} />
+              {templatesLoading ? (
+                <LoadingScreen>
+                  <CircularProgress
+                    color="inherit"
+                    aria-label="Loading templates…"
+                  />
+                </LoadingScreen>
+              ) : (
+                <GeneralTitle>
+                  <span>
+                    Name{" "}
+                    <SortButton onClick={() => toggleSort("name")}>
+                      {sortKey === "name" ? (
+                        sortOrder === "asc" ? (
+                          <ArrowUp size={16} />
+                        ) : (
+                          <ArrowDown size={16} />
+                        )
                       ) : (
-                        <ArrowDown size={16} />
-                      )
-                    ) : (
-                      <ArrowUpDown size={16} />
-                    )}
-                  </SortButton>
-                </span>
-                <span>
-                  Created{" "}
-                  <SortButton onClick={() => toggleSort("date")}>
-                    {sortKey === "date" ? (
-                      sortOrder === "asc" ? (
-                        <ArrowUp size={16} />
+                        <ArrowUpDown size={16} />
+                      )}
+                    </SortButton>
+                  </span>
+                  <span>
+                    Created{" "}
+                    <SortButton onClick={() => toggleSort("date")}>
+                      {sortKey === "date" ? (
+                        sortOrder === "asc" ? (
+                          <ArrowUp size={16} />
+                        ) : (
+                          <ArrowDown size={16} />
+                        )
                       ) : (
-                        <ArrowDown size={16} />
-                      )
-                    ) : (
-                      <ArrowUpDown size={16} />
-                    )}
-                  </SortButton>
-                </span>
-                <span>Tags</span>
-              </GeneralTitle>
+                        <ArrowUpDown size={16} />
+                      )}
+                    </SortButton>
+                  </span>
+                  <span>Tags</span>
+                </GeneralTitle>
+              )}
 
               {filteredTemplates.map(t => {
                 const isAdmin = isAdminTemplate(t);

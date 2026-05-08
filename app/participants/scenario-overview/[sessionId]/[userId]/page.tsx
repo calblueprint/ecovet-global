@@ -10,6 +10,7 @@ import type {
 } from "@/types/schema";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { CircularProgress } from "@mui/material";
 import supabase from "@/actions/supabase/client";
 import { fetchOptionsForPrompts } from "@/actions/supabase/queries/prompt";
 import {
@@ -39,7 +40,7 @@ import NextPhaseButton from "./components/NextPhaseButton";
 import PrevPhaseButton from "./components/PrevPhaseButton";
 import PromptsRightPanel from "./components/PromptsRightPanel";
 import ScenarioLeftPanel from "./components/ScenarioLeftPanel";
-import { Main } from "./styles";
+import { LoadingScreen, Main } from "./styles";
 
 export default function SessionFlowPage() {
   const { userId: profileUserId, profile } = useProfile();
@@ -57,6 +58,7 @@ export default function SessionFlowPage() {
   const [roleId, setRoleId] = useState<string>("");
   const [rolePhase, setRolePhase] = useState<RolePhase | null>(null);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [promptsLoading, setPromptsLoading] = useState(false);
   const [optionsByPromptId, setOptionsByPromptId] = useState<
     Record<string, PromptOption[]>
   >({});
@@ -120,6 +122,7 @@ export default function SessionFlowPage() {
     if (!currentPhase || !roleId) return;
 
     async function loadPhaseContent() {
+      setPromptsLoading(true);
       try {
         const rp = await fetchRolePhases(
           roleId as UUID,
@@ -146,6 +149,8 @@ export default function SessionFlowPage() {
       } catch (err) {
         console.error("Error loading phase content:", err);
         setPrompts([]);
+      } finally {
+        setPromptsLoading(false);
       }
     }
 
@@ -382,7 +387,12 @@ export default function SessionFlowPage() {
     );
   }
 
-  if (loading) return <div>Loading session...</div>;
+  if (loading || promptsLoading)
+    return (
+      <LoadingScreen>
+        <CircularProgress color="inherit" aria-label="Loading…" />
+      </LoadingScreen>
+    );
 
   return (
     <Main>
@@ -396,6 +406,7 @@ export default function SessionFlowPage() {
         }
         isOverview={isOverview}
         roleId={roleId}
+        isLoading={promptsLoading}
       />
 
       {!isOverview && (
@@ -407,6 +418,7 @@ export default function SessionFlowPage() {
             completedPrompts={completedPrompts}
             phaseName={phases[arrayIdx]?.phase_name ?? "Unnamed Phase"}
             isOverview={isOverview}
+            isLoading={promptsLoading}
             onInputAnswer={handleInputAnswer}
             onBlur={handleBlur}
             backButton={

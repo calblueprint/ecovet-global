@@ -219,12 +219,13 @@ export const ContentWrapper = styled.div`
 export const Button = styled.button<{ disabled?: boolean }>`
   display: flex;
   padding: 0.5rem 2rem;
+  margin-top: 1rem;
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
   border-radius: 4px;
-  background: var(--Dark-Electric-Blue, #476c77);
-  border: var(--Dark-Electric-Blue, #476c77);
+  background: ${COLORS.darkElectricBlue};
+  border: ${COLORS.darkElectricBlue};
   font-family: ${Sans.style.fontFamily};
   font-size: 10px;
   font-style: normal;
@@ -251,7 +252,7 @@ export const SilverText = styled.span`
 `;
 
 export const NormalText = styled.span`
-  color: var(--Black-70, #4b4a49);
+  color: ${COLORS.black70};
   /* Body 1 */
   font-family: ${Sans.style.fontFamily};
   font-size: 14px;

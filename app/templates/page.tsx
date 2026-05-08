@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { CircularProgress } from "@mui/material";
 import { produce } from "immer";
 import {
   addNewOption,
@@ -41,6 +42,7 @@ import {
 } from "@/types/schema";
 import { getHomePath } from "@/utils/HomePage";
 import { useProfile } from "@/utils/ProfileProvider";
+import { LoadingScreen } from "../facilitator/participants/styles";
 import {
   ActionRow,
   ActionText,
@@ -376,7 +378,10 @@ export default function TemplateBuilderPage() {
     setActiveIds({ roleId: 1, rolePhaseId: null });
   };
 
-  if (loading) return <LoadingMessages>Loading template...</LoadingMessages>;
+  if (loading) return;
+  <LoadingScreen>
+    <CircularProgress color="inherit" aria-label="Loading…" />
+  </LoadingScreen>;
   if (!localStore)
     return <LoadingMessages>Template not found.</LoadingMessages>;
 

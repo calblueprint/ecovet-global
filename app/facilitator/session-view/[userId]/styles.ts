@@ -225,6 +225,13 @@ export const Header = styled.div`
   width: 60rem;
 `;
 
+export const LoadingScreen = styled.div`
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
 export const Sidebar = styled.aside`
   display: flex;
   width: 17rem;
