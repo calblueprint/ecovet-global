@@ -12,9 +12,11 @@ import {
   Paper,
   Popper,
 } from "@mui/material";
+import supabase from "@/actions/supabase/client";
 import { IconSvgs, IconType } from "@/lib/icons";
 import COLORS from "@/styles/colors";
 import { B2 } from "@/styles/text";
+import { useProfile } from "@/utils/ProfileProvider";
 import {
   DropdownButton,
   MainDiv,
@@ -45,6 +47,7 @@ export function Icon({ name, color = "currentColor" }: IconProps) {
 
 const ProfileBar = () => {
   const router = useRouter();
+  const { clearProfile } = useProfile();
   const [open, setOpen] = useState(false);
   const anchorRef = React.useRef<HTMLDivElement>(null);
   const options = [
@@ -65,7 +68,11 @@ const ProfileBar = () => {
     },
   ];
 
-  const handleMenuItemClick = (route: string) => {
+  const handleMenuItemClick = (route: string, label: string) => {
+    if (label === "Logout") {
+      handleLogout();
+      return;
+    }
     setOpen(false);
     router.push(route);
   };
@@ -79,6 +86,14 @@ const ProfileBar = () => {
     }
 
     setOpen(false);
+  };
+
+  const handleLogout = async () => {
+    setOpen(false);
+    await supabase.auth.signOut(); // if using supabase auth
+    clearProfile();
+    router.push("/..");
+    router.refresh();
   };
 
   return (
@@ -119,7 +134,9 @@ const ProfileBar = () => {
                   {options.map(option => (
                     <StyledMenuItem
                       key={option.label}
-                      onClick={() => handleMenuItemClick(option.route)}
+                      onClick={() =>
+                        handleMenuItemClick(option.route, option.label)
+                      }
                     >
                       <MenuOptionsDiv>
                         <RxExit color={option.iconColor} />

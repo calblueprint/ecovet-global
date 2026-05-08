@@ -16,6 +16,7 @@ type Context = {
   profile: Profile | null;
   loading: boolean;
   refetch: () => Promise<void>;
+  clearProfile: () => void;
 };
 
 const ProfileContext = createContext<Context | undefined>(undefined);
@@ -58,8 +59,15 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, [refetch]);
 
+  const clearProfile = () => {
+    setProfile(null);
+    setUserId(null);
+  };
+
   return (
-    <ProfileContext.Provider value={{ userId, profile, loading, refetch }}>
+    <ProfileContext.Provider
+      value={{ userId, profile, loading, refetch, clearProfile }}
+    >
       {children}
     </ProfileContext.Provider>
   );
