@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { CircularProgress } from "@mui/material";
 import {
   addUserToChatRoom,
   checkRoomExists,
@@ -18,7 +19,12 @@ import ChatInputBar from "./ChatInputBar";
 import ChatMessages from "./ChatMessages";
 import ChatSelection, { Selection } from "./ChatSelection";
 import CreateChat from "./CreateChat";
-import { ChatContainer, ChatHeader, ContentContainer } from "./styles";
+import {
+  ChatContainer,
+  ChatHeader,
+  ContentContainer,
+  LoadingScreen,
+} from "./styles";
 
 const announcementRoom = {
   roomId: "announcements",
@@ -276,7 +282,9 @@ export default function Chat({
         )}
 
         {loading ? (
-          "Loading..."
+          <LoadingScreen>
+            <CircularProgress color="inherit" aria-label="Loading…" />
+          </LoadingScreen>
         ) : (
           <ChatMessages
             chatMessages={activeMessageList}

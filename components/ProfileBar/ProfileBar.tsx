@@ -64,7 +64,7 @@ const ProfileBar = () => {
     {
       label: "Logout",
       iconColor: COLORS.mediumElectricBlue,
-      route: "/../page.tsx",
+      route: "/..",
     },
   ];
 
@@ -93,6 +93,7 @@ const ProfileBar = () => {
     await supabase.auth.signOut(); // if using supabase auth
     clearProfile();
     router.push("/..");
+    router.refresh();
   };
 
   return (

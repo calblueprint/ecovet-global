@@ -2,6 +2,7 @@
 
 import type { Phase, RolePhase, Template, UUID } from "@/types/schema";
 import { useEffect, useState } from "react";
+import CircularProgress from "@mui/material/CircularProgress";
 import { fetchRoleName } from "@/actions/supabase/queries/sessions";
 import {
   ContentBody,
@@ -15,6 +16,7 @@ import {
   PhaseDescriptionWrapper,
   PhaseHeader,
 } from "../styles";
+import { LoadingScreen } from "./styles";
 
 interface ScenarioLeftPanelProps {
   templateInfo: Template | null;
@@ -24,6 +26,7 @@ interface ScenarioLeftPanelProps {
   onContinue: () => void;
   isOverview: boolean;
   roleId: UUID;
+  isLoading: boolean;
 }
 
 export default function ScenarioLeftPanel({
@@ -34,6 +37,7 @@ export default function ScenarioLeftPanel({
   onContinue,
   isOverview,
   roleId,
+  isLoading = false,
 }: ScenarioLeftPanelProps) {
   const currentPhase = phases[phaseInd] ?? null;
   const [roleDescription, setRoleDescription] = useState<string | null>(null);
@@ -79,26 +83,43 @@ export default function ScenarioLeftPanel({
       </PhaseDescriptionWrapper>
 
       <OverviewHeader $phase={isOverview}>Scenario Overview</OverviewHeader>
+      {isLoading ? (
+        <LoadingScreen>
+          <CircularProgress color="inherit" aria-label="Loading…" />
+        </LoadingScreen>
+      ) : (
+        <>
+          <ContentBubble>
+            <ContentHeader>Summary</ContentHeader>
+            <ContentBody>
+              {templateInfo ? (
+                templateInfo.summary
+              ) : (
+                <LoadingScreen>
+                  <CircularProgress color="inherit" aria-label="Loading…" />
+                </LoadingScreen>
+              )}
+            </ContentBody>
+          </ContentBubble>
 
-      <ContentBubble>
-        <ContentHeader>Summary</ContentHeader>
-        <ContentBody>
-          {templateInfo ? templateInfo.summary : "Loading..."}
-        </ContentBody>
-      </ContentBubble>
+          <ContentBubble>
+            <ContentHeader>Setting</ContentHeader>
+            <ContentBody>
+              {templateInfo ? (
+                templateInfo.setting
+              ) : (
+                <CircularProgress color="inherit" aria-label="Loading…" />
+              )}
+            </ContentBody>
+          </ContentBubble>
 
-      <ContentBubble>
-        <ContentHeader>Setting</ContentHeader>
-        <ContentBody>
-          {templateInfo ? templateInfo.setting : "Loading..."}
-        </ContentBody>
-      </ContentBubble>
-
-      <ContentBubble>
-        <ContentHeader>Your Role</ContentHeader>
-        <ContentBody>{roleName}</ContentBody>
-        <ContentBody>{roleDescription}</ContentBody>
-      </ContentBubble>
+          <ContentBubble>
+            <ContentHeader>Your Role</ContentHeader>
+            <ContentBody>{roleName}</ContentBody>
+            <ContentBody>{roleDescription}</ContentBody>
+          </ContentBubble>
+        </>
+      )}
 
       {isOverview && (
         <ContinueButtonDiv>

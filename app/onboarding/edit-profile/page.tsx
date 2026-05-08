@@ -66,7 +66,7 @@ export default function EditProfilePage() {
     });
 
     if (result.success) {
-      setMessage("Profile Updated!");
+      setMessage("");
     } else {
       setMessage(`Error: ${result.error}`);
     }

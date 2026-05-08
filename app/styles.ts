@@ -262,9 +262,11 @@ export const CarouselWrapper = styled.div`
   }
 `;
 
-export const CarouselImage = styled.img`
+export const CarouselImage = styled.div`
+  position: relative;
   width: 100%;
   height: 100vh;
   object-fit: cover;
   display: block;
+  overflow: hidden;
 `;

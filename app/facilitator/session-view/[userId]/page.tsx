@@ -8,6 +8,8 @@ import type {
 } from "@/types/schema";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { CircularProgress } from "@mui/material";
+import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import supabase from "@/actions/supabase/client";
 import {
@@ -27,6 +29,7 @@ import {
   InfoGrid,
   InfoLabel,
   InfoValue,
+  LoadingScreen,
   NudgeButton,
   OptionList,
   OptionRow,
@@ -200,7 +203,12 @@ export default function ParticipantDetailView() {
     }
   };
 
-  if (!bundle) return <div>Loading...</div>;
+  if (!bundle)
+    return (
+      <LoadingScreen>
+        <CircularProgress color="inherit" aria-label="Loading…" />
+      </LoadingScreen>
+    );
 
   return (
     <>

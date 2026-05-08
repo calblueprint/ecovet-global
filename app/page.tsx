@@ -3,16 +3,19 @@
 import { useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import Carousel from "react-material-ui-carousel";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   checkProfileExists,
+  fetchProfileByUserId,
   fetchSessionById,
 } from "@/actions/supabase/queries/profile";
 import ChildVaccination from "@/app/public/images/ChildVaccination.png";
 import Seal from "@/app/public/images/Seal.png";
 import WildfireResponse from "@/app/public/images/WildfireResponse.png";
 import { useSession } from "@/utils/AuthProvider";
+import { getHomePath } from "@/utils/HomePage";
 import {
   BrandingText,
   CarouselImage,
@@ -70,15 +73,21 @@ export default function SignIn() {
         return;
       }
 
-      const doesNotHaveProfile = await checkProfileExists(data.user.id);
+      const userId = data.user.id;
+      if (!userId) return;
+
+      const profile = await fetchProfileByUserId(userId);
+
+      const hasProfile = profile !== null;
       if (searchParams.get("fromNudge") == "true") {
         const session_id = searchParams.get("sessionId");
         router.push(
           "/participants/scenario-overview/" + session_id + "/" + data.user.id,
         );
       } else {
-        router.push(doesNotHaveProfile ? "/onboarding" : "/test-page");
+        router.push(hasProfile ? getHomePath(profile) : "/onboarding");
       }
+      router.refresh();
     } catch {
       setErrorMessage("An unexpected error occurred. Please try again.");
     } finally {
@@ -108,13 +117,22 @@ export default function SignIn() {
             autoPlay
             interval={5000}
             animation="slide"
-            duration={600}
+            duration={500}
             indicators
             navButtonsAlwaysInvisible
             stopAutoPlayOnHover
           >
             {carouselImages.map((img, i) => (
-              <CarouselImage key={i} src={img.src} alt={img.alt} />
+              <CarouselImage key={i}>
+                <Image
+                  src={img.src}
+                  alt={img.alt}
+                  fill
+                  priority={i === 0}
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  style={{ objectFit: "cover" }}
+                />
+              </CarouselImage>
             ))}
           </Carousel>
         </CarouselWrapper>

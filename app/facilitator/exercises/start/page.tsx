@@ -4,7 +4,7 @@ import type { DropdownOption, Profile, Template, UUID } from "@/types/schema";
 import type { SelectInstance } from "react-select";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Checkbox } from "@mui/material";
+import { Checkbox, CircularProgress } from "@mui/material";
 import {
   assignParticipantToSession,
   createSession,
@@ -28,6 +28,7 @@ import {
   Heading4,
   IconButton,
   LayoutWrapper,
+  LoadingScreen,
   NameInputField,
   ParticipantTable,
   PrimaryActionArea,
@@ -51,6 +52,7 @@ export default function Page() {
   const roleRefs = useRef<(SelectInstance<DropdownOption> | null)[]>([]);
   const participantRefs = useRef<(SelectInstance<DropdownOption> | null)[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
+  const [templatesLoading, setTemplatesLoading] = useState(true);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   const [isForceAdvance, setIsForceAdvance] = useState(false);
   const router = useRouter();
@@ -72,7 +74,9 @@ export default function Page() {
   );
 
   const loadTemplates = useCallback(async () => {
-    if (profile?.user_group_id) {
+    if (!profile?.user_group_id) return;
+    setTemplatesLoading(true);
+    try {
       const data = await fetchTemplatesExercise(profile.user_group_id as UUID);
       setTemplates(data || []);
 
@@ -81,6 +85,8 @@ export default function Page() {
         const rolesData = await fetchRoles(preselectedTemplateId);
         setRoles((rolesData as Role[]) || []);
       }
+    } finally {
+      setTemplatesLoading(false);
     }
   }, [profile?.user_group_id, preselectedTemplateId]);
 
@@ -195,7 +201,11 @@ export default function Page() {
   };
 
   if (!profile?.user_group_id) {
-    return <div>Loading session...</div>;
+    return (
+      <LoadingScreen>
+        <CircularProgress color="inherit" aria-label="Loading…" />
+      </LoadingScreen>
+    );
   }
 
   const removeParticipantRow = (index: number) => {
@@ -219,7 +229,13 @@ export default function Page() {
 
           <ConfigRow>
             <DropdownContainer>
-              {templates.length > 0 && (
+              {templatesLoading ? (
+                <CircularProgress
+                  size={20}
+                  color="inherit"
+                  aria-label="Loading…"
+                />
+              ) : (
                 <InputDropdown
                   label="Select Exercise"
                   options={exerciseOptions}

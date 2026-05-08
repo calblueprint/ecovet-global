@@ -125,3 +125,11 @@ export const TextFieldParticpantsStyled = styled(TextField)`
     color: ${COLORS.black70};
   }
 `;
+
+export const LoadingScreen = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  width: 100%;
+`;
