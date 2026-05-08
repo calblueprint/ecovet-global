@@ -289,3 +289,11 @@ export const SideNavNewTemplateButton = styled.button`
   color: ${COLORS.white};
   cursor: pointer;
 `;
+
+export const LoadingScreen = styled.div`
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;

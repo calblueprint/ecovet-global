@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Image from "next/image";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Tooltip } from "@mui/material";
 import Box from "@mui/material/Box";
 import { DeleteButton } from "@/app/participants/styles";
 import cross from "@/assets/images/DeleteTagCross.svg";
@@ -9,6 +9,7 @@ import { Participant } from "@/types/schema";
 import { SortButton } from "../../styles";
 import {
   LoadingScreen,
+  ResendInviteButton,
   StyledTable,
   StyledTableHead,
   StyledTableRow,

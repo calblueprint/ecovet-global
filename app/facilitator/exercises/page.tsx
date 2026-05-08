@@ -46,6 +46,7 @@ export default function FacilitatorExercisesPage() {
   const [sessions, setSessions] = useState<PDFSession[]>([]);
   const [activeTab, setActiveTab] = useState<ActiveTab>("active");
   const [pdfLoading, setPdfLoading] = useState<string | null>(null);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
   const [searchInput, setSearchInput] = useState("");
 
   useEffect(() => {
@@ -53,23 +54,28 @@ export default function FacilitatorExercisesPage() {
 
     (async () => {
       if (!profile.user_group_id) return;
-      const data =
-        (await fetchSessionsbyUserGroup(profile.user_group_id)) ?? [];
+      setSessionsLoading(true);
+      try {
+        const data =
+          (await fetchSessionsbyUserGroup(profile.user_group_id)) ?? [];
 
-      const enriched = data.map(s => {
-        const displayName = s.session_name
-          ? s.session_name
-          : (() => {
-              const tn = s.template?.template_name ?? "Untitled";
-              const dateStr = s.created_at
-                ? new Date(s.created_at).toLocaleDateString("en-CA")
-                : "";
-              return `${tn}_${dateStr}`;
-            })();
-        return { ...s, displayName };
-      });
+        const enriched = data.map(s => {
+          const displayName = s.session_name
+            ? s.session_name
+            : (() => {
+                const tn = s.template?.template_name ?? "Untitled";
+                const dateStr = s.created_at
+                  ? new Date(s.created_at).toLocaleDateString("en-CA")
+                  : "";
+                return `${tn}_${dateStr}`;
+              })();
+          return { ...s, displayName };
+        });
 
-      setSessions(enriched);
+        setSessions(enriched);
+      } finally {
+        setSessionsLoading(false);
+      }
     })();
   }, [profile?.user_group_id]);
 
@@ -157,7 +163,19 @@ export default function FacilitatorExercisesPage() {
               </tr>
             </StyledTableHead>
             <tbody>
-              {displayedSessions.length === 0 ? (
+              {sessionsLoading ? (
+                <tr>
+                  <StyledTd
+                    colSpan={4}
+                    style={{ textAlign: "center", padding: "2rem" }}
+                  >
+                    <CircularProgress
+                      color="inherit"
+                      aria-label="Loading sessions…"
+                    />
+                  </StyledTd>
+                </tr>
+              ) : displayedSessions.length === 0 ? (
                 <tr>
                   <EmptyMessage colSpan={4}>
                     No {activeTab === "active" ? "active" : "past"} sessions

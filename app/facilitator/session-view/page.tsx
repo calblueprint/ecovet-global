@@ -24,6 +24,7 @@ import TopNavBar from "@/components/NavBar/NavBar";
 import NudgeWarningModal from "@/components/NudgeWarningModal/NudgeWarningModal";
 import { useProfile } from "@/utils/ProfileProvider";
 import { AnnouncementRoom, sendAnnouncement } from "@/utils/UseAnnouncements";
+import { LoadingScreen } from "./[userId]/styles";
 import {
   Button,
   Container,
@@ -288,7 +289,12 @@ export default function FacilitatorSessionView() {
     }
   };
 
-  if (!bundle) return <div>Loading session...</div>;
+  if (!bundle)
+    return (
+      <LoadingScreen>
+        <CircularProgress color="inherit" aria-label="Loading…" />
+      </LoadingScreen>
+    );
 
   return (
     <>
@@ -402,42 +408,42 @@ export default function FacilitatorSessionView() {
                         </TableCell>
                         <TableCell>
                           {data ? (
-                          <Box
-                            sx={{
-                              width: "100%",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "0.5rem",
-                            }}
-                          >
-                            <span
-                              style={{
-                                whiteSpace: "nowrap",
-                                fontSize: "14px",
+                            <Box
+                              sx={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "0.5rem",
                               }}
                             >
-                              {percent}% Complete
-                            </span>
-                            <LinearProgress
-                              variant="determinate"
-                              value={percent}
-                              sx={{ flex: 1 }}
-                            />
-                          </Box>
-                                                      ) : (
                               <span
                                 style={{
                                   whiteSpace: "nowrap",
                                   fontSize: "14px",
                                 }}
                               >
-                                <CircularProgress
-                                  color="inherit"
-                                  size="1rem"
-                                  aria-label="Loading…"
-                                />
+                                {percent}% Complete
                               </span>
-                              )}
+                              <LinearProgress
+                                variant="determinate"
+                                value={percent}
+                                sx={{ flex: 1 }}
+                              />
+                            </Box>
+                          ) : (
+                            <span
+                              style={{
+                                whiteSpace: "nowrap",
+                                fontSize: "14px",
+                              }}
+                            >
+                              <CircularProgress
+                                color="inherit"
+                                size="1rem"
+                                aria-label="Loading…"
+                              />
+                            </span>
+                          )}
                         </TableCell>
                       </TableRow>
                     );

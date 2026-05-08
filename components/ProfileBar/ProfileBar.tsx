@@ -61,7 +61,7 @@ const ProfileBar = () => {
     {
       label: "Logout",
       iconColor: COLORS.mediumElectricBlue,
-      route: "../auth/sign-in",
+      route: "/..",
     },
   ];
 

@@ -95,7 +95,7 @@ export const LoadingScreen = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  `
+`;
 
 export const ResendInviteButton = styled(Button)`
   && {

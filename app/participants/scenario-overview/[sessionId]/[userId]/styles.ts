@@ -15,14 +15,14 @@ export const Main = styled.main`
   }
 
   > *:nth-child(2) {
-    flex: 0.7 1 auto;
+    flex: 0.7 1 30rem;
     min-width: 0;
-    border-left: 1px solid #e5e7eb;
+    border-left: 1px solid ${COLORS.oat_medium};
   }
 
   > *:nth-child(3) {
     flex: 0 0 18rem;
-    border-left: 1px solid #e5e7eb;
+    border-left: 1px solid ${COLORS.oat_medium};
   }
 `;
 
@@ -35,7 +35,7 @@ export const LoadingScreen = styled.div`
   align-items: center;
 `;
 
-export const ContentDiv = styled.div`
+export const ContentDiv = styled.div<{ $isOverview?: boolean }>`
   flex: 1;
   height: 100vh;
   overflow-y: auto;

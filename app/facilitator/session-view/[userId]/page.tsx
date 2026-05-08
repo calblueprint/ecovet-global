@@ -203,10 +203,12 @@ export default function ParticipantDetailView() {
     }
   };
 
-  if (!bundle)     return (
+  if (!bundle)
+    return (
       <LoadingScreen>
         <CircularProgress color="inherit" aria-label="Loading…" />
-      </LoadingScreen>;
+      </LoadingScreen>
+    );
 
   return (
     <>

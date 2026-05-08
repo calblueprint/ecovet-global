@@ -43,7 +43,6 @@ import {
 import { getHomePath } from "@/utils/HomePage";
 import { useProfile } from "@/utils/ProfileProvider";
 import { LoadingScreen } from "../facilitator/participants/styles";
-import { SideNavTemplatesContainer } from "../facilitator/template-list/components/styles";
 import {
   ActionRow,
   ActionText,

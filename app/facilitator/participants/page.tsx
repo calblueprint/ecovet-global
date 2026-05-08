@@ -27,6 +27,7 @@ import {
   LayoutWrapper,
   ListControlsWrapper,
   LoadingScreen,
+  PageTitle,
   ParticipantsSearchInput,
   ParticipantsSearchWrapper,
   StyledTab,

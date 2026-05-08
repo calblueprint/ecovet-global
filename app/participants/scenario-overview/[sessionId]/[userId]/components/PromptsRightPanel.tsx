@@ -2,7 +2,13 @@
 
 import type { Prompt, PromptOption } from "@/types/schema";
 import type { ReactNode } from "react";
-import { Checkbox, FormControlLabel, Radio, RadioGroup } from "@mui/material";
+import {
+  Checkbox,
+  CircularProgress,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+} from "@mui/material";
 import {
   ContentDiv,
   ContinueButtonDiv,
@@ -20,6 +26,7 @@ import {
   CheckboxOptionParticipantStyled,
   CheckboxOptionTextStyled,
   CheckboxParticipantStyled,
+  LoadingScreen,
   McqOptionParticipantStyled,
   McqOptionTextStyled,
   MultipleChoiceParticipantStyled,
@@ -32,6 +39,7 @@ interface PromptsRightPanelProps {
   completedPrompts: Set<string>;
   phaseName: string;
   isOverview: boolean;
+  isLoading: boolean;
   onInputAnswer: (index: number, value: string) => void;
   onBlur: (index: number, value: string) => void;
   nextButton: ReactNode;
@@ -55,6 +63,7 @@ export default function PromptsRightPanel({
   completedPrompts,
   phaseName,
   isOverview,
+  isLoading = false,
   onInputAnswer,
   onBlur,
   backButton,
@@ -178,17 +187,25 @@ export default function PromptsRightPanel({
       </PromptQuestionText>
 
       <PromptCard>
-        {prompts.length === 0 ? (
-          <PromptText>No prompts for this phase.</PromptText>
+        {isLoading ? (
+          <LoadingScreen>
+            <CircularProgress color="inherit" aria-label="Loading…" />
+          </LoadingScreen>
         ) : (
-          prompts.map((prompt, index) => (
-            <PromptWrapper key={prompt.prompt_id}>
-              <PromptQuestionNumber>{index + 1} →</PromptQuestionNumber>
-              <PromptQuestionText>{prompt.prompt_text}</PromptQuestionText>
-              {renderFollowUps(prompt.prompt_follow_ups)}
-              {renderAnswerInput(prompt, index)}
-            </PromptWrapper>
-          ))
+          <>
+            {prompts.length === 0 ? (
+              <PromptText>No prompts for this phase.</PromptText>
+            ) : (
+              prompts.map((prompt, index) => (
+                <PromptWrapper key={prompt.prompt_id}>
+                  <PromptQuestionNumber>{index + 1} →</PromptQuestionNumber>
+                  <PromptQuestionText>{prompt.prompt_text}</PromptQuestionText>
+                  {renderFollowUps(prompt.prompt_follow_ups)}
+                  {renderAnswerInput(prompt, index)}
+                </PromptWrapper>
+              ))
+            )}
+          </>
         )}
       </PromptCard>
 

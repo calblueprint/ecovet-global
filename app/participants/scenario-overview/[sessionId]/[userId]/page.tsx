@@ -58,6 +58,7 @@ export default function SessionFlowPage() {
   const [roleId, setRoleId] = useState<string>("");
   const [rolePhase, setRolePhase] = useState<RolePhase | null>(null);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [promptsLoading, setPromptsLoading] = useState(false);
   const [optionsByPromptId, setOptionsByPromptId] = useState<
     Record<string, PromptOption[]>
   >({});
@@ -121,6 +122,7 @@ export default function SessionFlowPage() {
     if (!currentPhase || !roleId) return;
 
     async function loadPhaseContent() {
+      setPromptsLoading(true);
       try {
         const rp = await fetchRolePhases(
           roleId as UUID,
@@ -147,6 +149,8 @@ export default function SessionFlowPage() {
       } catch (err) {
         console.error("Error loading phase content:", err);
         setPrompts([]);
+      } finally {
+        setPromptsLoading(false);
       }
     }
 
@@ -383,10 +387,12 @@ export default function SessionFlowPage() {
     );
   }
 
-  if (loading) return;
-  <LoadingScreen>
-    <CircularProgress color="inherit" aria-label="Loading…" />;
-  </LoadingScreen>;
+  if (loading || promptsLoading)
+    return (
+      <LoadingScreen>
+        <CircularProgress color="inherit" aria-label="Loading…" />
+      </LoadingScreen>
+    );
 
   return (
     <Main>
@@ -400,6 +406,7 @@ export default function SessionFlowPage() {
         }
         isOverview={isOverview}
         roleId={roleId}
+        isLoading={promptsLoading}
       />
 
       {!isOverview && (
@@ -411,6 +418,7 @@ export default function SessionFlowPage() {
             completedPrompts={completedPrompts}
             phaseName={phases[arrayIdx]?.phase_name ?? "Unnamed Phase"}
             isOverview={isOverview}
+            isLoading={promptsLoading}
             onInputAnswer={handleInputAnswer}
             onBlur={handleBlur}
             backButton={
