@@ -2,6 +2,26 @@ import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
 
+export const PageLayout = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+  flex: 1;
+  min-height: 90vh;
+
+  > *:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  > *:last-child {
+    flex: 0 0 360px;
+    border-left: 1px solid #e5e5e5;
+    min-height: 100vh;
+  }
+`;
+
 export const Main = styled.main`
   display: flex;
   width: 100%;
@@ -17,7 +37,7 @@ export const Main = styled.main`
 
 export const MainDiv = styled.main`
   display: flex;
-  width: 70rem;
+  width: 100%;
   padding: 2rem 3rem;
   flex-direction: column;
   align-items: flex-start;
@@ -206,13 +226,15 @@ export const LayoutWrapper = styled.div`
   display: flex;
   width: 100%;
   flex-direction: column;
+  flex: 1;
+  min-height: 100vh;
 `;
-
 export const ContentWrapper = styled.div`
   flex: 1;
   padding: 2rem;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
   overflow-x: hidden;
 `;
 

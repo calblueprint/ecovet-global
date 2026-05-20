@@ -76,16 +76,16 @@ export const RightPanel = styled.div`
 
 export const FormContainer = styled.div`
   width: 100%;
-  max-width: 340px;
+  max-width: 24rem;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 1rem;
 `;
 
 export const Heading = styled.h2`
   font-family: ${Sans.style.fontFamily};
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 3rem;
+  font-weight: 400;
   color: ${COLORS.black100};
   margin: 0;
 `;
@@ -112,13 +112,13 @@ export const FormFields = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.25rem;
 `;
 
 export const FieldsetInput = styled.fieldset`
   position: relative;
   border: 1px solid ${COLORS.black20};
-  border-radius: 4px;
+  border-radius: 0.25rem;
   padding: 0;
   margin: 0;
   width: 100%;
@@ -172,6 +172,7 @@ export const ToggleButton = styled.button`
 
 export const ForgotPassword = styled.div`
   font-family: ${Sans.style.fontFamily};
+  padding-top: 1rem;
   font-size: 0.6875rem;
   font-weight: 500;
   display: flex;
@@ -210,7 +211,7 @@ export const SignInButton = styled.button`
   background-color: ${COLORS.darkElectricBlue};
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 0.25rem;
   font-family: ${Sans.style.fontFamily};
   font-size: 0.75rem;
   font-weight: 700;

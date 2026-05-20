@@ -65,16 +65,21 @@ export default function SignIn() {
 
       if (error) {
         setErrorMessage("Incorrect email or password. Please try again.");
+        setLoading(false);
         return;
       }
 
       if (!data.user) {
         setErrorMessage("Sign in failed. Please try again.");
+        setLoading(false);
         return;
       }
 
       const userId = data.user.id;
-      if (!userId) return;
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
 
       const profile = await fetchProfileByUserId(userId);
 
@@ -90,7 +95,6 @@ export default function SignIn() {
       router.refresh();
     } catch {
       setErrorMessage("An unexpected error occurred. Please try again.");
-    } finally {
       setLoading(false);
     }
   };
@@ -173,7 +177,6 @@ export default function SignIn() {
               </FieldsetInput>
               <ForgotPassword>
                 <Link href="/auth/reset-password">Forgot password?</Link>
-                <Link href="/auth/sign-up">Sign Up</Link>
               </ForgotPassword>
             </div>
           </FormFields>

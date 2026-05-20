@@ -3,6 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchSessionsbyUserGroup } from "@/actions/supabase/queries/sessions";
+import Pdf from "@/assets/images/pdf.svg";
+import Search from "@/assets/images/search.svg";
+import { ImageLogo } from "@/components/styles";
 import { UUID } from "@/types/schema";
 import { buildSessionDisplayName } from "@/utils/session-details";
 import {
@@ -99,21 +102,23 @@ export default function UserGroupPDFs({ userGroup }: { userGroup: UUID }) {
 
       <TabsWrapper>
         <TabButton
-          $active={activeTab === "active"}
-          onClick={() => setActiveTab("active")}
-        >
-          Active ({activeFiles.length})
-        </TabButton>
-        <TabButton
           $active={activeTab === "completed"}
           onClick={() => setActiveTab("completed")}
         >
           Completed ({pastFiles.length})
         </TabButton>
+        <TabButton
+          $active={activeTab === "active"}
+          onClick={() => setActiveTab("active")}
+        >
+          Active ({activeFiles.length})
+        </TabButton>
       </TabsWrapper>
 
       <SearchWrapper>
-        <SearchIcon>+</SearchIcon>
+        <SearchIcon>
+          <ImageLogo src={Search.src} alt="Search" width={12} height={12} />
+        </SearchIcon>
         <SearchInput
           type="text"
           placeholder="Search file..."
@@ -130,7 +135,9 @@ export default function UserGroupPDFs({ userGroup }: { userGroup: UUID }) {
         ) : (
           filteredFiles.map(file => (
             <FileRow key={file.id} onClick={() => handleRowClick(file)}>
-              <FileIconWrapper>+</FileIconWrapper>
+              <FileIconWrapper>
+                <ImageLogo src={Pdf.src} alt="Pdf" width={12} height={12} />
+              </FileIconWrapper>
               <FileInfo>
                 <FileName>{file.displayName}</FileName>
                 <FileDate>{formatDate(file.created_at)}</FileDate>

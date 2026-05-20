@@ -34,6 +34,7 @@ import {
   OptionList,
   OptionRow,
   PageLayout,
+  ParticipantHeader,
   ParticipantInformation,
   PhaseList,
   PromptAnswer,
@@ -209,6 +210,7 @@ export default function ParticipantDetailView() {
         <CircularProgress color="inherit" aria-label="Loading…" />
       </LoadingScreen>
     );
+  console.log("isAsync:", bundle.isAsync);
 
   return (
     <>
@@ -250,17 +252,23 @@ export default function ParticipantDetailView() {
             <Heading3>
               {name}, {roleName} <SilverHeading3>(Responses)</SilverHeading3>
             </Heading3>
-            <NudgeButton
-              async={bundle.isAsync}
-              onClick={() => setOpenWarning(true)}
-              disabled={sending}
-            >
-              {sending ? "Sending..." : "Nudge"}
-            </NudgeButton>
           </Header>
 
           <ParticipantInformation>
-            <b>Participant Information</b>
+            <ParticipantHeader>
+              <b>Participant Information</b>
+              <NudgeButton
+                className="nudge-button"
+                onClick={e => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setOpenWarning(true);
+                }}
+                async={bundle.isAsync}
+              >
+                Nudge
+              </NudgeButton>
+            </ParticipantHeader>
             <InfoGrid>
               <InfoLabel>Email</InfoLabel>
               <InfoValue>{bundle.email}</InfoValue>

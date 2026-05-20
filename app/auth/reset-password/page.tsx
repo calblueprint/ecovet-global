@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   checkIfUserExists,
   sendPasswordResetEmail,
@@ -18,16 +18,32 @@ import {
   SuccessMessage,
 } from "../styles";
 
+const RESEND_COOLDOWN_SECONDS = 30;
+
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
+
   const isEmailValid = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
+  useEffect(() => {
+    if (cooldown <= 0) return;
+
+    const timer = setInterval(() => {
+      setCooldown(prev => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [cooldown]);
+
   const handleResetPassword = async () => {
+    if (cooldown > 0) return;
+
     try {
       if (!isEmailValid(email)) {
         throw new Error("Please enter a valid email address");
@@ -47,6 +63,7 @@ export default function ResetPassword() {
       setSuccessMessage(
         "If an account with that email exists, a password reset link has been sent.",
       );
+      setCooldown(RESEND_COOLDOWN_SECONDS);
     } catch (error: unknown) {
       if (error instanceof Error) {
         setErrorMessage(error.message);
@@ -61,7 +78,7 @@ export default function ResetPassword() {
       <Main>
         <Container>
           <IntroText>
-            <Heading2> What&apos;s your email?</Heading2>
+            <Heading2> Forgot Password?</Heading2>
             <SignInTag>
               {" "}
               We&apos;ll send you an email to reset your password.
@@ -79,8 +96,11 @@ export default function ResetPassword() {
               name="email"
             />
           </EmailAddressDiv>
-          <Button onClick={handleResetPassword} disabled={!isEmailValid(email)}>
-            Send
+          <Button
+            onClick={handleResetPassword}
+            disabled={!isEmailValid(email) || cooldown > 0}
+          >
+            {cooldown > 0 ? `Resend in ${cooldown}s` : "Send"}
           </Button>
           {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
           {successMessage && <SuccessMessage>{successMessage}</SuccessMessage>}
