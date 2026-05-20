@@ -67,8 +67,8 @@ export default function TemplateListPage({
   const { profile } = useProfile();
   const user_group_id = profile?.user_group_id as UUID;
   const loading = !user_group_id;
-  const [filterMode, setFilterMode] = useState<"all" | "your" | "browse">(
-    "all",
+  const [filterMode, setFilterMode] = useState<"All" | "Your" | "Browse">(
+    "All",
   );
   const [searchInput, setSearchInput] = useState("");
   const [templates, setTemplates] = useState<TemplateWithTags[]>([]);
@@ -111,11 +111,11 @@ export default function TemplateListPage({
   const filteredTemplates = useMemo(() => {
     let updated = [...templates];
 
-    if (filterMode === "all") {
+    if (filterMode === "All") {
       updated = updated.filter(
         t => t.accessible_to_all || t.user_group_id === user_group_id,
       );
-    } else if (filterMode === "your") {
+    } else if (filterMode === "Your") {
       updated = updated.filter(t => t.user_group_id === user_group_id);
     } else {
       updated = updated.filter(t => t.accessible_to_all);
@@ -383,7 +383,7 @@ export default function TemplateListPage({
         <ContentWrapper $admin={!showSidebar}>
           <PageDiv>
             <MainDiv>
-              <Heading3>Browse templates</Heading3>
+              <Heading3>{filterMode} templates</Heading3>
               <FilterPlusSearch>
                 <SearchBarStyled>
                   <SearchWrapper>
