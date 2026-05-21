@@ -94,7 +94,7 @@ export const TabButton = styled.button<{ $active: boolean }>`
   border: none;
   padding: 0.5rem 0;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 500;
   color: ${props => (props.$active ? COLORS.black : COLORS.black40)};
   border-bottom: 3px solid
     ${props => (props.$active ? "#6B8E8F" : "transparent")}; /* Adjust color to match your specific teal/green */
@@ -110,17 +110,18 @@ export const ListCard = styled.div`
   background: ${COLORS.oat_light};
   border: 1px solid ${COLORS.oat_medium};
   border-radius: 0.5rem;
-  padding: 1.25rem;
+  padding: 0.75rem 1.25rem 0.5rem 1.25rem;
   margin-bottom: 1rem;
 `;
 
 export const CardTitle = styled.h4`
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 0.875rem;
   font-weight: 600;
   color: ${COLORS.black};
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.5rem 0;
 `;
 
 export const DummyInput = styled.input.attrs({

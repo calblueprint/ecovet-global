@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Check from "@/assets/images/checkmark.svg";
+import Trash from "@/assets/images/trash.svg";
 import InfoComponent from "@/components/InfoComponent/InfoComponent";
 import { ImageLogo } from "@/components/styles";
 import { EditablePhase, Role, Template, UUID } from "@/types/schema";
@@ -160,12 +161,17 @@ export default function TemplateOverviewForm({
                   aria-label={`Delete ${phase.phase_name || `Phase ${index + 1}`}`}
                   onClick={() => onRemovePhase(phase.phase_id)}
                 >
-                  ×
+                  <ImageLogo
+                    src={Trash.src}
+                    alt="Trash"
+                    width={20}
+                    height={20}
+                  />
                 </DeleteIconButton>
               </CardTitle>
               <DummyInput
                 value={phase.phase_name ?? ""}
-                placeholder={`Phase ${index + 1}`}
+                placeholder={`Enter Phase Name...`}
                 onChange={e => onRenamePhase(phase.phase_id, e.target.value)}
               />
               <AutoGrowBigInput
@@ -200,12 +206,17 @@ export default function TemplateOverviewForm({
                   aria-label={`Delete ${role.role_name || `Role ${index + 1}`}`}
                   onClick={() => onRemoveRole(role.role_id)}
                 >
-                  ×
+                  <ImageLogo
+                    src={Trash.src}
+                    alt="Trash"
+                    width={20}
+                    height={20}
+                  />
                 </DeleteIconButton>
               </CardTitle>
               <DummyInput
                 value={role.role_name ?? ""}
-                placeholder={`Role ${index + 1}`}
+                placeholder={`Enter Role Name...`}
                 onChange={e =>
                   onRenameRole(role.role_id as UUID, e.target.value)
                 }

@@ -12,9 +12,11 @@ import {
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplatesExercise } from "@/actions/supabase/queries/templates";
 import { fetchUserGroupMembers } from "@/actions/supabase/queries/user-groups";
+import Play from "@/assets/images/play.svg";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import InfoComponent from "@/components/InfoComponent/InfoComponent";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
+import { ImageLogo } from "@/components/styles";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
   CheckboxInput,
@@ -217,7 +219,10 @@ export default function Page() {
       <TopNavBar />
       <LayoutWrapper>
         <StartContentWrapper>
-          <Heading4>Start Exercise</Heading4>
+          <Heading4>
+            <ImageLogo src={Play.src} alt="Play" width={12} height={12} />
+            Start Exercise
+          </Heading4>
 
           <ExerciseNameInput>
             <NameInputField

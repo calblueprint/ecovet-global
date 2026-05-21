@@ -401,7 +401,7 @@ export const AddNewOptionStyled = styled.div`
 
 export const AddNewOptionTextStyled = styled.div`
   font-family: ${Sans.style.fontFamily};
-  font-size: 10px;
+  font-size: 13px;
   font-style: normal;
   font-weight: 500;
   line-height: normal;

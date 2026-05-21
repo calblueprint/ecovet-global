@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Button, Checkbox, Radio, RadioGroup } from "@mui/material";
 import Check from "@/assets/images/checkmark.svg";
+import Trash from "@/assets/images/trash.svg";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import { ImageLogo } from "@/components/styles";
 import {
@@ -248,7 +249,12 @@ export default function QuestionBuilder({
                       deletePrompt(promptID);
                     }}
                   >
-                    Delete
+                    <ImageLogo
+                      src={Trash.src}
+                      alt="Trash"
+                      width={20}
+                      height={20}
+                    />
                   </DeleteButton>
                 </LegendFlex>
 
@@ -266,7 +272,7 @@ export default function QuestionBuilder({
                       label=""
                       options={
                         new Map([
-                          ["text", "Text"],
+                          ["text", "Short Answer"],
                           ["multiple_choice", "Multiple Choice"],
                           ["checkbox", "Checkbox"],
                         ])

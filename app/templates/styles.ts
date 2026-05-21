@@ -116,7 +116,7 @@ export const RolesListContainer = styled.div`
   background: ${COLORS.white};
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.25rem;
   margin-top: 1rem;
 `;
 
@@ -134,13 +134,20 @@ export const RoleItem = styled.button<{
   $isDisabled: boolean;
   $active: boolean;
 }>`
-  background: none;
+  background-color: ${({ $active }) =>
+    $active ? COLORS.oat_medium : "transparent"};
   border: none;
+  display: block;
+  width: calc(100% + 2rem); /* extend beyond the container's padding */
+  margin-left: -1rem; /* pull left edge outward by container's padding */
+  margin-right: -1rem; /* pull right edge outward */
+  padding: 0.5rem 0.25rem 0.5rem 1rem;
+  box-sizing: border-box;
   text-align: left;
-  padding: 0;
   font-size: 0.8rem;
   font-weight: ${props => (props.$active ? "700" : "500")};
   cursor: ${props => (props.$isDisabled ? "not-allowed" : "pointer")};
+
   color: ${props =>
     props.$isDisabled
       ? COLORS.black20

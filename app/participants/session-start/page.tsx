@@ -42,7 +42,7 @@ export default function ParticipantWaitingPage() {
       );
 
       const role_name = role_data?.role_name ?? "participant";
-      setStatus(`You were invited as the role: ` + role_name + ".");
+      setStatus(`You were invited as a  ${role_name} in:`);
       setSessionExists(true);
     }
 
@@ -105,7 +105,7 @@ export default function ParticipantWaitingPage() {
             <Link
               href={`/participants/scenario-overview/${sessionId}/${profile?.id}`}
             >
-              <Button>Start Session</Button>
+              <Button>Start Exercise</Button>
             </Link>
           )}
         </Container>

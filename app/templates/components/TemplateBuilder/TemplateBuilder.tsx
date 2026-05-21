@@ -134,7 +134,7 @@ export default function TemplateBuilder({
       draft.phasesById[newPhaseId] = {
         phase_id: newPhaseId,
         template_id: draft.templateID,
-        phase_name: `Phase ${nextNumber}`,
+        phase_name: "",
         phase_description: "",
         phase_number: nextNumber,
       } as EditablePhase;
@@ -168,7 +168,7 @@ export default function TemplateBuilder({
       draft.rolesById[newRoleId] = {
         role_id: newRoleId,
         template_id: draft.templateID,
-        role_name: `Role ${nextNumber}`,
+        role_name: "",
         role_description: "",
       } as Role;
 

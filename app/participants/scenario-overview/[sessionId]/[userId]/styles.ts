@@ -65,7 +65,7 @@ export const OverviewHeader = styled.h2<{ $phase?: boolean }>`
   font-family: ${Sans.style.fontFamily};
   font-size: ${({ $phase }) => ($phase ? "2rem" : "1.5rem")};
   font-style: normal;
-  font-weight: 700;
+  font-weight: 600;
   line-height: normal;
 `;
 
