@@ -1,13 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CircularProgress } from "@mui/material";
 import { produce } from "immer";
-import {
-  addNewOption,
-  replacePromptOptions,
-} from "@/actions/supabase/queries/prompt";
+import { replacePromptOptions } from "@/actions/supabase/queries/prompt";
 import {
   createPhases,
   createPrompts,
@@ -23,8 +21,11 @@ import {
   TitleInput,
   TitleRow,
 } from "@/app/templates/styles";
+import Clock from "@/assets/images/clock.svg";
+import Gear from "@/assets/images/gear.svg";
 import Pencil from "@/assets/images/pencil.svg";
 import Play from "@/assets/images/play.svg";
+import InfoComponent from "@/components/InfoComponent/InfoComponent";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import { ImageLogo } from "@/components/styles";
 import WarningModal, {
@@ -428,6 +429,7 @@ export default function TemplateBuilderPage() {
               $active={activeIds.roleId === 1}
               onClick={handleScenarioSettingsClick}
             >
+              <ImageLogo src={Gear.src} alt="Gear" width={16} height={16} />
               Scenario Settings
             </SettingsBlock>
 
@@ -454,10 +456,20 @@ export default function TemplateBuilderPage() {
               }}
               isClearable
               outlined={false}
+              noOptionsMessage="Add phases in at the bottom of Scenario Overview"
+              prefixIcon={<Image src={Clock} alt="Clock" />}
             />
 
             <RolesListContainer>
-              <RolesTitle>Roles</RolesTitle>
+              <RolesTitle>
+                Roles
+                <InfoComponent
+                  infoText={
+                    "Roles added in the bottom of the Scenario Overview will populate here."
+                  }
+                ></InfoComponent>
+              </RolesTitle>
+
               {availableRoles.map(role => {
                 const isActive = activeIds.roleId === role.role_id;
                 return (

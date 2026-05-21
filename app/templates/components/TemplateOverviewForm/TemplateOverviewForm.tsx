@@ -58,7 +58,7 @@ export default function TemplateOverviewForm({
     <FormStack>
       <RoleHeaderContainer>
         <RoleHeader>
-          <PhaseTemplateHeader>Scenario Overview</PhaseTemplateHeader>
+          <PhaseTemplateHeader>Scenario Settings</PhaseTemplateHeader>
 
           <HeaderButtonDark onClick={onSaveAndExit} disabled={saving}>
             {saving ? (
@@ -90,7 +90,7 @@ export default function TemplateOverviewForm({
         </FieldLegend>
         <AutoGrowBigInput
           name="template_summary"
-          placeholder="Summary"
+          placeholder="Enter Summary..."
           value={value.summary ?? ""}
           onChange={e => onChange(1, "summary", e.target.value)}
         />
@@ -105,7 +105,7 @@ export default function TemplateOverviewForm({
         </FieldLegend>
         <AutoGrowBigInput
           name="template_setting"
-          placeholder="Setting"
+          placeholder="Enter Setting..."
           value={value.setting ?? ""}
           onChange={e => onChange(1, "setting", e.target.value)}
         />
@@ -122,7 +122,7 @@ export default function TemplateOverviewForm({
         </FieldLegend>
         <AutoGrowBigInput
           name="template_activity"
-          placeholder="Current activity"
+          placeholder="Enter Current activity..."
           value={value.current_activity ?? ""}
           onChange={e => onChange(1, "current_activity", e.target.value)}
         />

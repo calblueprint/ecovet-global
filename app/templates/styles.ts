@@ -92,9 +92,9 @@ export const SettingsBlock = styled.button<{ $active: boolean }>`
   text-align: left;
   background-color: ${props =>
     props.$active ? `${COLORS.oat_medium}` : `${COLORS.oat_light}`};
-  padding: 0.6rem 1rem;
+  padding: 0.6rem 0.6rem;
   border-radius: 0.375rem;
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
   color: ${COLORS.black70};
   margin-bottom: 1rem;
@@ -102,6 +102,7 @@ export const SettingsBlock = styled.button<{ $active: boolean }>`
   cursor: pointer;
   display: flex;
   align-items: center;
+  gap: 0.7rem;
 
   &:hover {
     background-color: ${COLORS.oat_medium};
@@ -124,6 +125,9 @@ export const RolesTitle = styled.h3`
   color: ${COLORS.black40};
   margin: 0 0 0.1rem 0;
   font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 export const RoleItem = styled.button<{

@@ -97,14 +97,11 @@ export default function TemplateSideBar({
 
         <StyledAccordion>
           <AccordionSummary
-            expandIcon={"-"}
+            expandIcon={<Image src={Dropdown} alt="^" width={10} height={10} />}
             aria-controls="panel1-content"
             id="panel1-header"
           >
-            <ManageCaption>
-              Manage Tags
-              <Image src={Dropdown} alt="^" width={10} height={10} />
-            </ManageCaption>
+            <ManageCaption>Manage Tags</ManageCaption>
           </AccordionSummary>
           <AccordionDetails sx={{ padding: 0 }}>
             <TagCreator

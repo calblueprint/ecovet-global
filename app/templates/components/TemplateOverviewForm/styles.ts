@@ -27,7 +27,6 @@ export const BigInput = styled.textarea`
 
   resize: none;
   overflow: hidden;
-  min-height: 5rem;
 
   border-radius: 4px;
   border: 1px solid ${COLORS.oat_medium};

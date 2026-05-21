@@ -196,6 +196,7 @@ export const TagsCaption = styled(Caption)`
 
 export const ManageCaption = styled(Caption)`
   color: ${COLORS.black40};
+  font-weight: 400;
 `;
 
 export const StyledAccordion = styled(Accordion)`
