@@ -9,7 +9,6 @@ import type {
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { CircularProgress } from "@mui/material";
-import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import supabase from "@/actions/supabase/client";
 import {
@@ -17,6 +16,7 @@ import {
   sessionParticipants,
 } from "@/actions/supabase/queries/sessions";
 import { sendEmailReminder } from "@/actions/supabase/send-email";
+import AccessError from "@/components/AccessError/AccessError";
 import Announcements from "@/components/Chat/Announcements";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import NudgeWarningModal from "@/components/NudgeWarningModal/NudgeWarningModal";
@@ -55,7 +55,7 @@ type PhasePromptData = {
 
 export default function ParticipantDetailView() {
   const { userId } = useParams<{ userId: string }>();
-  const { userId: facilitatorUserId } = useProfile();
+  const { userId: facilitatorUserId, profile } = useProfile();
 
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId") as UUID | null;
@@ -210,7 +210,12 @@ export default function ParticipantDetailView() {
         <CircularProgress color="inherit" aria-label="Loading…" />
       </LoadingScreen>
     );
-  console.log("isAsync:", bundle.isAsync);
+
+  const facAcesss = profile?.user_type === "Facilitator";
+
+  if (!facAcesss) {
+    return <AccessError />;
+  }
 
   return (
     <>

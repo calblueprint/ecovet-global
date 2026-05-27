@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Tabs } from "@mui/material";
 import { fetchSessionsbyUserGroup } from "@/actions/supabase/queries/sessions";
 import Pdf from "@/assets/images/pdf.svg";
 import Search from "@/assets/images/search.svg";
@@ -20,6 +21,7 @@ import {
   SearchIcon,
   SearchInput,
   SearchWrapper,
+  StyledTab,
   TabButton,
   TabsWrapper,
   Title,
@@ -49,6 +51,13 @@ export default function UserGroupPDFs({ userGroup }: { userGroup: UUID }) {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<ActiveTab>("completed");
+
+  const handleTabChange = (
+    _event: React.SyntheticEvent,
+    newValue: ActiveTab,
+  ) => {
+    setActiveTab(newValue);
+  };
 
   useEffect(() => {
     if (!userGroup) return;
@@ -101,18 +110,14 @@ export default function UserGroupPDFs({ userGroup }: { userGroup: UUID }) {
       </Header>
 
       <TabsWrapper>
-        <TabButton
-          $active={activeTab === "completed"}
-          onClick={() => setActiveTab("completed")}
+        <Tabs
+          value={activeTab}
+          onChange={handleTabChange}
+          aria-label="session status tabs"
         >
-          Completed ({pastFiles.length})
-        </TabButton>
-        <TabButton
-          $active={activeTab === "active"}
-          onClick={() => setActiveTab("active")}
-        >
-          Active ({activeFiles.length})
-        </TabButton>
+          <StyledTab label="Active" value="active" />
+          <StyledTab label="Completed" value="completed" />
+        </Tabs>
       </TabsWrapper>
 
       <SearchWrapper>

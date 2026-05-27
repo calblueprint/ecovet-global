@@ -13,6 +13,7 @@ import {
 import { fetchTemplatesExercise } from "@/actions/supabase/queries/templates";
 import { fetchUserGroupMembers } from "@/actions/supabase/queries/user-groups";
 import Play from "@/assets/images/play.svg";
+import AccessError from "@/components/AccessError/AccessError";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import InfoComponent from "@/components/InfoComponent/InfoComponent";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
@@ -214,15 +215,18 @@ export default function Page() {
     setParticipants(prev => prev.filter((_, i) => i !== index));
   };
 
+  const facAcesss = profile?.user_type === "Facilitator";
+
+  if (!facAcesss) {
+    return <AccessError />;
+  }
+
   return (
     <>
       <TopNavBar />
       <LayoutWrapper>
         <StartContentWrapper>
-          <Heading4>
-            <ImageLogo src={Play.src} alt="Play" width={12} height={12} />
-            Start Exercise
-          </Heading4>
+          <Heading4>Start Exercise</Heading4>
 
           <ExerciseNameInput>
             <NameInputField
@@ -272,7 +276,7 @@ export default function Page() {
                 onChange={e => setIsForceAdvance(e.target.checked)}
               />
               <CheckboxLabel htmlFor="force-advance">
-                Force Advance?
+                Force Advance
               </CheckboxLabel>
               <InfoComponent
                 infoText={
@@ -360,6 +364,7 @@ export default function Page() {
               onClick={handleStartExercise}
               disabled={isStarting || !selectedTemplateId}
             >
+              <ImageLogo src={Play.src} alt="Play" width={12} height={12} />
               {isStarting ? "Starting Session..." : "Start Exercise"}
             </SideNavNewTemplateButton>
           </PrimaryActionArea>

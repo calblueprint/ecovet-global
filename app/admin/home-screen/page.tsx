@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { UUID } from "crypto";
 import { fetchUserGroupById } from "@/actions/supabase/queries/profile";
+import AccessError from "@/components/AccessError/AccessError";
 import InviteComponent from "@/components/InviteComponent/InviteComponent";
 import NavBar from "@/components/NavBar/NavBar";
 import { UserGroup } from "@/types/schema";
+import { useProfile } from "@/utils/ProfileProvider";
 import {
   CenterColumn,
   ContentWrapper,
@@ -25,6 +27,7 @@ import UserGroupPDFs from "./components/UserGroupPDFs";
 import UserGroupSideBar from "./components/UserGroupSideBar";
 
 export default function AdminPage() {
+  const { profile } = useProfile();
   const [selectedUserGroupId, setSelectedUserGroupId] = useState<string | null>(
     null,
   );
@@ -45,6 +48,12 @@ export default function AdminPage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const adminAcesss = profile?.user_type === "Admin";
+
+  if (!adminAcesss) {
+    return <AccessError />;
+  }
 
   return (
     <PageShell>

@@ -20,6 +20,7 @@ import {
   setSessionGlobalPhaseIndex,
 } from "@/actions/supabase/queries/sessions";
 import { sendEmailReminder } from "@/actions/supabase/send-email";
+import AccessError from "@/components/AccessError/AccessError";
 import Announcements from "@/components/Chat/Announcements";
 import TopNavBar from "@/components/NavBar/NavBar";
 import NudgeWarningModal from "@/components/NudgeWarningModal/NudgeWarningModal";
@@ -30,6 +31,7 @@ import {
   Button,
   Container,
   ContentWrapper,
+  Finish,
   Heading2,
   Heading3,
   HeadingBox,
@@ -46,7 +48,6 @@ import {
   SilverText,
   StatItem,
   TableCell,
-  TableCellBold,
   TableHeader,
   TableRow,
 } from "./styles";
@@ -59,7 +60,7 @@ type ParticipantPromptData = Record<
 export default function FacilitatorSessionView() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId") as UUID;
-  const { userId, profile } = useProfile();
+  const { profile } = useProfile();
   const router = useRouter();
 
   const [bundle, setBundle] = useState<FacilitatorSessionBundle | null>(null);
@@ -298,6 +299,12 @@ export default function FacilitatorSessionView() {
       </LoadingScreen>
     );
 
+  const facAcesss = profile?.user_type === "Facilitator";
+
+  if (!facAcesss) {
+    return <AccessError />;
+  }
+
   return (
     <>
       <TopNavBar />
@@ -314,7 +321,6 @@ export default function FacilitatorSessionView() {
                 <Heading3>{bundle.sessionName}</Heading3>
                 <Heading2>{bundle.templateName}</Heading2>
               </HeadingBox>
-
               {isForceAdvance && (
                 <PhaseInformation>
                   <PhaseTitle>Phase Information</PhaseTitle>
@@ -356,8 +362,33 @@ export default function FacilitatorSessionView() {
                     </StatItem>
                   </PhaseStats>
                 </PhaseInformation>
-              )}
-
+              )}{" "}
+              {
+                <PhaseInformation>
+                  <PhaseTitle>Phase Information</PhaseTitle>
+                  <PhaseStats>
+                    <PhaseStatsLeft>
+                      <StatItem>
+                        <SilverText>Phases</SilverText>{" "}
+                        <NormalText>{bundle.phases.length}</NormalText>
+                      </StatItem>
+                      <StatItem>
+                        <SilverText>
+                          Participants Complete{" "}
+                          <NormalText>
+                            {completedCount} / {totalParticipants}
+                          </NormalText>
+                        </SilverText>
+                      </StatItem>
+                      <StatItem>
+                        <SilverText>
+                          Sync Mode <NormalText>Synchronous</NormalText>
+                        </SilverText>
+                      </StatItem>
+                    </PhaseStatsLeft>
+                  </PhaseStats>
+                </PhaseInformation>
+              }
               <Container>
                 <div>
                   <ParticipantTable>
@@ -388,9 +419,9 @@ export default function FacilitatorSessionView() {
                           }
                           style={{ cursor: "pointer" }}
                         >
-                          <TableCellBold>
+                          <TableCell>
                             {p.profile?.first_name} {p.profile?.last_name}
-                          </TableCellBold>
+                          </TableCell>
                           <TableCell>
                             <NudgeButton
                               className="nudge-button"
@@ -453,15 +484,13 @@ export default function FacilitatorSessionView() {
                     })}
                   </ParticipantTable>
                 </div>
-
-                {allDone && (
-                  <h3 style={{ marginTop: "1rem" }}>
-                    All participants are finished
-                  </h3>
-                )}
+                <Finish>
+                  {allDone && (
+                    <Heading2>All participants are finished</Heading2>
+                  )}
+                  <Button onClick={endGame}>End Game</Button>
+                </Finish>
               </Container>
-
-              <Button onClick={endGame}>End Game</Button>
             </MainDiv>
           </ContentWrapper>
 

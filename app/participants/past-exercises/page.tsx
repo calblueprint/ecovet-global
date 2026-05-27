@@ -115,7 +115,7 @@ export default function ParticipantPastSessionsPage() {
 
       <LayoutWrapper>
         <ContentWrapper>
-          <PageTitle>Sessions</PageTitle>
+          <PageTitle>Exercises</PageTitle>
 
           <TabSection>
             <TabControlsWrapper>

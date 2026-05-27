@@ -38,6 +38,7 @@ import {
   SideNavContainer,
   SortButton,
 } from "../../app/facilitator/styles";
+import AccessError from "../AccessError/AccessError";
 import {
   AssociatedTags,
   ContentWrapper,

@@ -8,7 +8,6 @@ export const PageLayout = styled.div`
   align-items: stretch;
   width: 100%;
   flex: 1;
-  min-height: 90vh;
 
   > *:first-child {
     flex: 1;
@@ -18,7 +17,7 @@ export const PageLayout = styled.div`
   > *:last-child {
     flex: 0 0 360px;
     border-left: 1px solid #e5e5e5;
-    min-height: 100vh;
+    height: 93vh;
   }
 `;
 
@@ -73,7 +72,7 @@ export const NudgeButton = styled.button<{ async?: boolean }>`
 
 export const HeadingBox = styled.main`
   display: flex;
-  padding: 1rem 1.25rem;
+  padding-bottom: 1rem;
   height: 100%;
   flex-direction: column;
   gap: 1rem;
@@ -90,8 +89,17 @@ export const PhaseInformation = styled.div`
   gap: 1rem;
   align-self: stretch;
   border-radius: 8px;
-  border: 1px solid var(--Oat-Medium, #eee);
-  background: var(--Oat-Light, #f9f9f9);
+  border: 1px solid ${COLORS.oat_medium};
+  background: ${COLORS.oat_light};
+  margin-bottom: 1rem;
+`;
+
+export const Finish = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+  justify-content: flex-end;
 `;
 
 export const PhaseTitle = styled.h2`
@@ -107,18 +115,22 @@ export const PhaseStats = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 32px;
   display: inline-flex;
   width: 100%;
   justify-content: space-between;
   align-self: stretch;
+  width: 100%;
 `;
 
 export const PhaseStatsLeft = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 32px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 3rem;
+  width: 100%;
 `;
 
 export const StatItem = styled.div`
@@ -178,16 +190,11 @@ export const TableCell = styled.span`
   align-items: center;
 `;
 
-export const TableCellBold = styled(TableCell)`
-  font-weight: 600;
-  color: ${COLORS.black};
-`;
-
 export const Heading3 = styled.h3`
   font-family: ${Sans.style.fontFamily};
   font-color: ${COLORS.black};
   font-size: 24px;
-  font-weight: 500;
+  font-weight: 700;
   font-style: normal;
   line-height: normal;
 `;
@@ -227,7 +234,6 @@ export const LayoutWrapper = styled.div`
   width: 100%;
   flex-direction: column;
   flex: 1;
-  min-height: 100vh;
 `;
 export const ContentWrapper = styled.div`
   flex: 1;
@@ -249,7 +255,7 @@ export const Button = styled.button<{ disabled?: boolean }>`
   background: ${COLORS.darkElectricBlue};
   border: ${COLORS.darkElectricBlue};
   font-family: ${Sans.style.fontFamily};
-  font-size: 10px;
+  font-size: 12px;
   font-style: normal;
   font-weight: 700;
   color: ${COLORS.white};
@@ -265,11 +271,11 @@ export const Button = styled.button<{ disabled?: boolean }>`
 `;
 
 export const SilverText = styled.span`
-  color: var(--Black-40, #959492);
+  color: ${COLORS.black40};
   font-family: ${Sans.style.fontFamily};
-  font-size: 16px;
+  font-size: 0.93rem;
   font-style: normal;
-  font-weight: 500;
+  font-weight: 400;
   line-height: normal;
 `;
 
@@ -277,8 +283,9 @@ export const NormalText = styled.span`
   color: ${COLORS.black70};
   /* Body 1 */
   font-family: ${Sans.style.fontFamily};
-  font-size: 14px;
+  font-size: 0.93rem;
   font-style: normal;
-  font-weight: 500;
+  font-weight: 400;
   line-height: normal;
+  padding-left: 1rem;
 `;

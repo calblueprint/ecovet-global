@@ -387,13 +387,6 @@ export default function SessionFlowPage() {
     );
   }
 
-  if (loading || promptsLoading)
-    return (
-      <LoadingScreen>
-        <CircularProgress color="inherit" aria-label="Loading…" />
-      </LoadingScreen>
-    );
-
   return (
     <Main>
       <ScenarioLeftPanel

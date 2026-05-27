@@ -1,3 +1,5 @@
+import Person from "@/assets/images/person.svg";
+import { ImageLogo } from "../styles";
 import {
   ChatButtonContainer,
   ChatButtonLabel,
@@ -45,7 +47,19 @@ export default function ChatSelection({
             $unread={chatNotifications.has(chat.roomId)}
             $selected={chat.roomId === currentRoomId}
           >
-            <ChatSelectionButton />
+            <ChatSelectionButton>
+              <ImageLogo
+                src={Person.src}
+                alt="Play"
+                width={12}
+                height={12}
+                style={{
+                  width: "2rem",
+                  height: "2rem",
+                  borderRadius: "0.5rem",
+                }}
+              />
+            </ChatSelectionButton>
           </ChatSelectedBorder>
           <ChatButtonLabel>{chat.chatName}</ChatButtonLabel>
         </ChatButtonContainer>

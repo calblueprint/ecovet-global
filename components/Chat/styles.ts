@@ -178,7 +178,7 @@ export const ChatContainer = styled.div`
   align-items: flex-start;
   flex: 1 0 0;
   background: ${COLORS.oat_light};
-  min-height: 0;
+  height: 100%;
 `;
 
 export const ChatHeader = styled(B1)`
@@ -218,7 +218,6 @@ export const ChatSelectionButton = styled.div<{ color?: string }>`
   aspect-ratio: 1/1;
   border-radius: 8px;
   border: 1px solid ${COLORS.darkElectricBlue};
-  background: ${({ color }) => color ?? COLORS.teal};
 `;
 
 export const CreateChatPlus = styled(B1)`
@@ -246,9 +245,10 @@ export const ChatSelectionContainer = styled.div`
   align-items: flex-start;
   gap: 1rem;
   margin-left: 1.25rem;
+
   padding-right: 0.75;
   scrollbar-width: thin;
-  padding-bottom: 0.75rem;
+  padding-bottom: 1rem;
 `;
 
 export const SelectAnnouncementRoomContainer = styled.div`

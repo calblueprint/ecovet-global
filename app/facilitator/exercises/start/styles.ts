@@ -87,6 +87,7 @@ export const SortButton = styled.button`
 `;
 
 export const SideNavNewTemplateButton = styled.button`
+  display: flex;
   width: 9.25rem;
   padding: 0.75rem 1.5rem;
   text-align: center;
@@ -283,14 +284,14 @@ export const CheckboxRow = styled.div`
 `;
 
 export const CheckboxLabel = styled.label`
-  font-size: 14px;
+  font-size: 12px;
   font-family: ${Sans.style.fontFamily};
-  color: ${COLORS.black40};
+  color: ${COLORS.black100};
 `;
 
 export const CheckboxInput = styled.input`
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   cursor: pointer;
   accent-color: ${COLORS.black70};
 `;

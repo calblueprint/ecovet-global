@@ -14,6 +14,7 @@ import {
   deleteProfile,
   getProfilesByEmails,
 } from "@/actions/supabase/queries/profile";
+import AccessError from "@/components/AccessError/AccessError";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import InviteComponent from "@/components/InviteComponent/InviteComponent";
 import WarningModal, {
@@ -31,6 +32,7 @@ import {
   ParticipantsSearchInput,
   ParticipantsSearchWrapper,
   StyledTab,
+  TabControlsWrapper,
 } from "./styles";
 
 export default function ParticipantsPage() {
@@ -145,6 +147,12 @@ export default function ParticipantsPage() {
     setPendingDelete(null);
   };
 
+  const facAcesss = profile?.user_type === "Facilitator";
+
+  if (!facAcesss) {
+    return <AccessError />;
+  }
+
   return (
     <>
       <TopNavBar />
@@ -156,14 +164,16 @@ export default function ParticipantsPage() {
             onInvitesChange={() => loadData()}
           />
           <ListControlsWrapper>
-            <Tabs
-              value={status}
-              onChange={handleTabChange}
-              aria-label="participant status tabs"
-            >
-              <StyledTab label="Accepted" value="Accepted" />
-              <StyledTab label="Pending" value="Pending" />
-            </Tabs>
+            <TabControlsWrapper>
+              <Tabs
+                value={status}
+                onChange={handleTabChange}
+                aria-label="participant status tabs"
+              >
+                <StyledTab label="Accepted" value="Accepted" />
+                <StyledTab label="Pending" value="Pending" />
+              </Tabs>
+            </TabControlsWrapper>
 
             <ParticipantsSearchWrapper>
               <ParticipantsSearchInput

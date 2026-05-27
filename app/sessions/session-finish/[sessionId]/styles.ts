@@ -20,7 +20,7 @@ export const Title = styled.h1`
   font-family: ${Sans.style.fontFamily};
   font-size: 1.75rem;
   font-style: normal;
-  font-weight: 600;
+  font-weight: 400;
   line-height: normal;
   letter-spacing: -0.64px;
   color: ${COLORS.black100};

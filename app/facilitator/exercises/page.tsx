@@ -7,6 +7,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Tabs from "@mui/material/Tabs";
 import { fetchSessionsbyUserGroup } from "@/actions/supabase/queries/sessions";
 import Play from "@/assets/images/play.svg";
+import Error from "@/components/AccessError/AccessError";
+import AccessError from "@/components/AccessError/AccessError";
 import FacilitatorNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import { ImageLogo } from "@/components/styles";
 import { useProfile } from "@/utils/ProfileProvider";
@@ -115,6 +117,12 @@ export default function FacilitatorExercisesPage() {
     } finally {
       setPdfLoading(null);
     }
+  }
+
+  const facAcesss = profile?.user_type === "Facilitator";
+
+  if (!facAcesss) {
+    return <AccessError />;
   }
 
   return (
