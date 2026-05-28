@@ -20,7 +20,6 @@ import InviteComponent from "@/components/InviteComponent/InviteComponent";
 import WarningModal, {
   WarningAction,
 } from "@/components/WarningModal/WarningModal";
-import { H1, H2 } from "@/styles/text";
 import { useProfile } from "@/utils/ProfileProvider";
 import ParticipantsList from "./components/ParticipantsList";
 import {

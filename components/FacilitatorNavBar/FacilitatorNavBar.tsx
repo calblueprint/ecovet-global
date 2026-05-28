@@ -44,9 +44,16 @@ const TopNavBar = () => {
             Participants
           </TopNavButton>{" "}
         </Link>
+        <Link href="/participants/session-start">
+          <TopNavButton
+            $active={pathname.startsWith("/participants/session-start")}
+          >
+            Active Excercise
+          </TopNavButton>
+        </Link>
         <Link href="/facilitator/exercises">
           <TopNavButton $active={pathname.startsWith("/facilitator/exercises")}>
-            Exercises
+            Past Exercises
           </TopNavButton>
         </Link>
       </ButtonContainer>

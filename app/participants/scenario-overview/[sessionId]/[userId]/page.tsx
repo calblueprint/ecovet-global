@@ -388,9 +388,9 @@ export default function SessionFlowPage() {
     );
   }
 
-  const parAcesss = profile?.user_type === "Participant";
+  const Access = profile?.user_type === "Participant" || "Facilitator";
 
-  if (!parAcesss) {
+  if (!Access) {
     return <AccessError />;
   }
 

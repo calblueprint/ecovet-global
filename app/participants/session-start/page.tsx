@@ -10,6 +10,7 @@ import {
 } from "@/actions/supabase/queries/profile";
 import { fetchTemplateNameBySession } from "@/actions/supabase/queries/sessions";
 import AccessError from "@/components/AccessError/AccessError";
+import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import ParticipantsNavBar from "@/components/ParticipantsNavBar/ParticipantsNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
 import { Button, Container, Heading2, Label, Main } from "./styles";
@@ -93,15 +94,17 @@ export default function ParticipantWaitingPage() {
     };
   }, [profile?.id, profile]);
 
-  const parAcesss = profile?.user_type === "Participant";
+  const parAccess = profile?.user_type === "Participant";
+  const facAccess = profile?.user_type === "Facilitator";
 
-  if (!parAcesss) {
+  if (!parAccess && !facAccess) {
     return <AccessError />;
   }
 
   return (
     <div>
-      <ParticipantsNavBar />
+      {parAccess ? <ParticipantsNavBar /> : <TopNavBar />}
+
       <Main>
         <Container>
           <Heading2>{status}</Heading2>
