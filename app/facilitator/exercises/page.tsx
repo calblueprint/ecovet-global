@@ -1,12 +1,15 @@
 "use client";
 
-import type { PDFSession, Session } from "@/types/schema";
+import type { PDFSession } from "@/types/schema";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import CircularProgress from "@mui/material/CircularProgress";
 import Tabs from "@mui/material/Tabs";
 import { fetchSessionsbyUserGroup } from "@/actions/supabase/queries/sessions";
+import Play from "@/assets/images/play.svg";
+import AccessError from "@/components/AccessError/AccessError";
 import FacilitatorNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
+import { ImageLogo } from "@/components/styles";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
   ContentWrapper,
@@ -115,6 +118,12 @@ export default function FacilitatorExercisesPage() {
     }
   }
 
+  const facAccess = profile?.user_type === "Facilitator";
+
+  if (!facAccess) {
+    return <AccessError />;
+  }
+
   return (
     <>
       <FacilitatorNavBar />
@@ -136,6 +145,7 @@ export default function FacilitatorExercisesPage() {
               <StartExerciseButton
                 onClick={() => router.push("/facilitator/exercises/start")}
               >
+                <ImageLogo src={Play.src} alt="Play" width={12} height={12} />
                 Start Exercise
               </StartExerciseButton>
             </TabControlsWrapper>
@@ -195,26 +205,25 @@ export default function FacilitatorExercisesPage() {
                       </SyncBadge>
                     </StyledTd>
                     <StyledTd>{formatDate(session.created_at)}</StyledTd>
-                    {activeTab === "past" && (
-                      <StyledTd>
-                        <PdfButton
-                          onClick={e => {
-                            e.stopPropagation();
-                            handleViewPdf(session.session_id);
-                          }}
-                          disabled={pdfLoading === session.session_id}
-                        >
-                          {pdfLoading === session.session_id ? (
-                            <CircularProgress
-                              color="inherit"
-                              aria-label="Loading…"
-                            />
-                          ) : (
-                            <PdfLabel>View PDF</PdfLabel>
-                          )}
-                        </PdfButton>
-                      </StyledTd>
-                    )}
+                    <StyledTd>
+                      <PdfButton
+                        onClick={e => {
+                          e.stopPropagation();
+                          handleViewPdf(session.session_id);
+                        }}
+                        disabled={pdfLoading === session.session_id}
+                      >
+                        {pdfLoading === session.session_id ? (
+                          "Loading..."
+                        ) : (
+                          <PdfLabel>
+                            {activeTab === "active"
+                              ? "View Progress"
+                              : "View PDF"}
+                          </PdfLabel>
+                        )}
+                      </PdfButton>
+                    </StyledTd>
                   </StyledTableRow>
                 ))
               )}

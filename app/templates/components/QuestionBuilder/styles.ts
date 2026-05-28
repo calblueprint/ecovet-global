@@ -4,7 +4,7 @@ import styled, { css } from "styled-components";
 import COLORS from "@/styles/colors";
 import { Flex } from "@/styles/containers";
 import { Sans } from "@/styles/fonts";
-import { B2, Caption, H3 } from "@/styles/text";
+import { B2, H3 } from "@/styles/text";
 import { DropdownOption } from "@/types/schema";
 
 export const selectStyles: StylesConfig<
@@ -299,7 +299,6 @@ export const BigInput = styled(TextField).attrs({
     }
   }
 `;
-// TODO: placeholder color not working
 
 export const RolePhaseDescriptionInput = styled.input.attrs({ type: "text" })`
   width: 100%;
@@ -377,14 +376,12 @@ export const McqOptionStyled = styled.div`
 export const DeleteMcqOptionButton = styled.div`
   margin-left: auto;
   padding: 0 2rem 0 1rem;
-  color: ${COLORS.black40}
+  color: ${COLORS.black40};
   cursor: pointer;
 
   &:hover {
     color: ${COLORS.tagRed};
   }
-
-  
 `;
 
 export const CheckboxPromptStyled = styled.div`
@@ -394,14 +391,13 @@ export const CheckboxPromptStyled = styled.div`
 export const AddNewOptionStyled = styled.div`
   display: flex;
   align-items: center;
-  justify-contet: space-between;
   gap: 8px;
   align-self: stretch;
 `;
 
 export const AddNewOptionTextStyled = styled.div`
   font-family: ${Sans.style.fontFamily};
-  font-size: 10px;
+  font-size: 13px;
   font-style: normal;
   font-weight: 500;
   line-height: normal;

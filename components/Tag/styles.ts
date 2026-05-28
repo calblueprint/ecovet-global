@@ -15,6 +15,7 @@ export const NewTag = styled.button`
   padding: 12px 24px;
   gap: 10px;
   font-family: ${Sans.style.fontFamily};
+  font-color: ${COLORS.mediumElectricBlue};
   font-size: 12px;
   font-style: normal;
   font-weight: 500;
@@ -59,6 +60,7 @@ export const StyledTagName = styled.div`
   flex-grow: 1;
   font-family: ${Sans.style.fontFamily};
   font-size: 12px;
+  font-color: ${COLORS.mediumElectricBlue};
   font-style: normal;
   font-weight: 500;
   line-height: normal;

@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
-import { B2, Caption, H3 } from "@/styles/text";
+import { Caption } from "@/styles/text";
 
 export const Selectable = styled.div`
   cursor: pointer;

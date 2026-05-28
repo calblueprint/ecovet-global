@@ -1,11 +1,12 @@
 "use client";
 
-import type { PDFSession, Session } from "@/types/schema";
+import type { PDFSession } from "@/types/schema";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CircularProgress } from "@mui/material";
 import Tabs from "@mui/material/Tabs";
 import { fetchSessionsbyUserGroup } from "@/actions/supabase/queries/sessions";
+import AccessError from "@/components/AccessError/AccessError";
 import ParticipantNavBar from "@/components/ParticipantsNavBar/ParticipantsNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
@@ -48,7 +49,6 @@ export default function ParticipantPastSessionsPage() {
 
   useEffect(() => {
     if (!profile?.user_group_id) return;
-    const userGroupId = profile.user_group_id;
 
     (async () => {
       if (!profile.user_group_id) return;
@@ -109,13 +109,19 @@ export default function ParticipantPastSessionsPage() {
     }
   }
 
+  const parAccess = profile?.user_type === "Participant";
+
+  if (!parAccess) {
+    return <AccessError />;
+  }
+
   return (
     <>
       <ParticipantNavBar />
 
       <LayoutWrapper>
         <ContentWrapper>
-          <PageTitle>Sessions</PageTitle>
+          <PageTitle>Exercises</PageTitle>
 
           <TabSection>
             <TabControlsWrapper>

@@ -9,6 +9,8 @@ import {
   fetchSessionById,
 } from "@/actions/supabase/queries/profile";
 import { fetchTemplateNameBySession } from "@/actions/supabase/queries/sessions";
+import AccessError from "@/components/AccessError/AccessError";
+import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import ParticipantsNavBar from "@/components/ParticipantsNavBar/ParticipantsNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
 import { Button, Container, Heading2, Label, Main } from "./styles";
@@ -42,13 +44,12 @@ export default function ParticipantWaitingPage() {
       );
 
       const role_name = role_data?.role_name ?? "participant";
-      setStatus(`You were invited as the role: ` + role_name + ".");
+      setStatus(`You were invited as a ${role_name} in:`);
       setSessionExists(true);
     }
 
     async function initialLoad() {
       if (!profile) return;
-      console.log(profile.id);
       const data = await fetchSessionById(profile.id);
 
       if (data) {
@@ -69,8 +70,6 @@ export default function ParticipantWaitingPage() {
           filter: `user_id=eq.${profile.id}`,
         },
         payload => {
-          console.log(payload);
-
           const newSessionId = payload.new.session_id;
 
           if (!newSessionId) {
@@ -90,11 +89,19 @@ export default function ParticipantWaitingPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [profile?.id, profile]);
+  }, [profile]);
+
+  const parAccess = profile?.user_type === "Participant";
+  const facAccess = profile?.user_type === "Facilitator";
+
+  if (!parAccess && !facAccess) {
+    return <AccessError />;
+  }
 
   return (
     <div>
-      <ParticipantsNavBar />
+      {parAccess ? <ParticipantsNavBar /> : <TopNavBar />}
+
       <Main>
         <Container>
           <Heading2>{status}</Heading2>
@@ -105,7 +112,7 @@ export default function ParticipantWaitingPage() {
             <Link
               href={`/participants/scenario-overview/${sessionId}/${profile?.id}`}
             >
-              <Button>Start Session</Button>
+              <Button>Start Exercise</Button>
             </Link>
           )}
         </Container>

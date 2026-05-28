@@ -1,5 +1,5 @@
+import { Tab } from "@mui/material";
 import styled from "styled-components";
-import { styles } from "@/components/pdf/styles";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
 
@@ -301,7 +301,7 @@ export const Header = styled.div`
 export const Title = styled.h2`
   font-family: ${Sans.style.fontFamily};
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 500;
   color: ${COLORS.black100};
   margin: 0;
 `;
@@ -398,6 +398,10 @@ export const TabsWrapper = styled.div`
   flex-direction: row;
   gap: 0.25rem;
   border-bottom: 1px solid ${COLORS.oat_medium};
+
+  .MuiTabs-indicator {
+    background-color: ${COLORS.darkElectricBlue};
+  }
 `;
 
 export const TabButton = styled.button<{ $active: boolean }>`
@@ -442,4 +446,17 @@ export const Groups = styled.div`
 
 export const HeaderSide = styled.div`
   gap: 3rem;
+`;
+
+export const StyledTab = styled(Tab)`
+  && {
+    text-transform: none;
+    font-weight: 500;
+    font-size: 0.8rem;
+    font-family: ${Sans.style.fontFamily};
+
+    &.Mui-selected {
+      color: ${COLORS.darkElectricBlue};
+    }
+  }
 `;

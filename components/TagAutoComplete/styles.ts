@@ -45,7 +45,7 @@ export const chipSx: SxProps<Theme> = {
   height: "1.25rem",
   backgroundColor: `${COLORS.tagYellow}`,
   border: `0px solid ${COLORS.oat_medium}`,
-  borderRadius: "2rem",
+  borderRadius: "0.25rem",
 
   "& .MuiChip-label": {
     fontFamily: Sans.style.fontFamily,

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ecovetGlobal from "@/assets/images/ecovet-global-new.svg";
+import { getHomePath } from "@/utils/HomePage";
+import { useProfile } from "@/utils/ProfileProvider";
 import ProfileBar from "../ProfileBar/ProfileBar";
 import {
   ButtonContainer,
@@ -15,10 +17,12 @@ import {
 
 const TopNavBar = () => {
   const pathname = usePathname();
+  const { profile } = useProfile();
+  const homepage = getHomePath(profile);
   return (
     <TopNavContainer>
       <LogoContainer>
-        <Link href="/test-page" aria-label="Go to home">
+        <Link href={homepage} aria-label="Go to home">
           <ImageLogo src={ecovetGlobal} alt="Ecovet Global Logo" />
         </Link>
       </LogoContainer>
@@ -40,9 +44,16 @@ const TopNavBar = () => {
             Participants
           </TopNavButton>{" "}
         </Link>
+        <Link href="/participants/session-start">
+          <TopNavButton
+            $active={pathname.startsWith("/participants/session-start")}
+          >
+            Active Excercise
+          </TopNavButton>
+        </Link>
         <Link href="/facilitator/exercises">
           <TopNavButton $active={pathname.startsWith("/facilitator/exercises")}>
-            Exercises
+            Past Exercises
           </TopNavButton>
         </Link>
       </ButtonContainer>

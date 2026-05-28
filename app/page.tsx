@@ -6,11 +6,7 @@ import Carousel from "react-material-ui-carousel";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  checkProfileExists,
-  fetchProfileByUserId,
-  fetchSessionById,
-} from "@/actions/supabase/queries/profile";
+import { fetchProfileByUserId } from "@/actions/supabase/queries/profile";
 import ChildVaccination from "@/app/public/images/ChildVaccination.png";
 import Seal from "@/app/public/images/Seal.png";
 import WildfireResponse from "@/app/public/images/WildfireResponse.png";
@@ -65,16 +61,21 @@ export default function SignIn() {
 
       if (error) {
         setErrorMessage("Incorrect email or password. Please try again.");
+        setLoading(false);
         return;
       }
 
       if (!data.user) {
         setErrorMessage("Sign in failed. Please try again.");
+        setLoading(false);
         return;
       }
 
       const userId = data.user.id;
-      if (!userId) return;
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
 
       const profile = await fetchProfileByUserId(userId);
 
@@ -90,7 +91,6 @@ export default function SignIn() {
       router.refresh();
     } catch {
       setErrorMessage("An unexpected error occurred. Please try again.");
-    } finally {
       setLoading(false);
     }
   };
@@ -173,7 +173,6 @@ export default function SignIn() {
               </FieldsetInput>
               <ForgotPassword>
                 <Link href="/auth/reset-password">Forgot password?</Link>
-                <Link href="/auth/sign-up">Sign Up</Link>
               </ForgotPassword>
             </div>
           </FormFields>

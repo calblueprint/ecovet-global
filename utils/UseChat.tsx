@@ -84,7 +84,7 @@ export function useRealtimeChat({
     return () => {
       supabase.removeChannel(newChannel);
     };
-  }, [roomId, username, supabase]);
+  }, [roomId, username, channel]);
 
   const sendMessageObject = useCallback(
     async (chatMessage: ChatMessage) => {
@@ -102,7 +102,7 @@ export function useRealtimeChat({
         }),
       ]);
     },
-    [channel, username, roomId, userId, isConnected],
+    [channel, roomId, isConnected],
   );
 
   const sendMessage = useCallback(
@@ -132,7 +132,15 @@ export function useRealtimeChat({
         sendMessageObject(chatMessage);
       }
     },
-    [channel, username, roomId, userId, isConnected],
+    [
+      channel,
+      username,
+      roomId,
+      userId,
+      isConnected,
+      sendMessageObject,
+      sessionId,
+    ],
   );
 
   return {

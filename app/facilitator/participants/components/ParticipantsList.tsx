@@ -2,6 +2,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { CircularProgress, Tooltip } from "@mui/material";
 import Box from "@mui/material/Box";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { DeleteButton } from "@/app/participants/styles";
 import cross from "@/assets/images/DeleteTagCross.svg";
 import SendArrow from "@/assets/images/sendArrow.svg";
@@ -17,6 +18,9 @@ import {
   StyledTh,
 } from "../styles";
 
+type SortKey = "name" | "email" | "role";
+type SortOrder = "asc" | "desc";
+
 export default function ParticipantsList({
   participants,
   onDeleteRow,
@@ -28,13 +32,48 @@ export default function ParticipantsList({
   onResendInvite: (p: Participant) => void;
   resendingEmail: string | null;
 }) {
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortOrder("asc");
+    }
+  };
 
   const sorted = [...participants].sort((a, b) => {
-    const nameA = a.name ?? "";
-    const nameB = b.name ?? "";
-    return sortAsc ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+    let aVal = "";
+    let bVal = "";
+
+    if (sortKey === "name") {
+      aVal = a.name?.toLowerCase() ?? "";
+      bVal = b.name?.toLowerCase() ?? "";
+    } else if (sortKey === "email") {
+      aVal = a.email?.toLowerCase() ?? "";
+      bVal = b.email?.toLowerCase() ?? "";
+    } else if (sortKey === "role") {
+      aVal = a.role?.toLowerCase() ?? "";
+      bVal = b.role?.toLowerCase() ?? "";
+    }
+
+    if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
+    if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
+    return 0;
   });
+
+  const renderSortIcon = (key: SortKey) =>
+    sortKey === key ? (
+      sortOrder === "asc" ? (
+        <ArrowUp size={16} />
+      ) : (
+        <ArrowDown size={16} />
+      )
+    ) : (
+      <ArrowUpDown size={16} />
+    );
 
   return (
     <Box>
@@ -55,12 +94,22 @@ export default function ParticipantsList({
             <tr>
               <StyledTh>
                 Name{" "}
-                <SortButton onClick={() => setSortAsc(!sortAsc)}>
-                  {sortAsc ? "↓" : "↑"}
+                <SortButton onClick={() => toggleSort("name")}>
+                  {renderSortIcon("name")}
                 </SortButton>
               </StyledTh>
-              <StyledTh>Email</StyledTh>
-              <StyledTh>Role</StyledTh>
+              <StyledTh>
+                Email{" "}
+                <SortButton onClick={() => toggleSort("email")}>
+                  {renderSortIcon("email")}
+                </SortButton>
+              </StyledTh>
+              <StyledTh>
+                Role{" "}
+                <SortButton onClick={() => toggleSort("role")}>
+                  {renderSortIcon("role")}
+                </SortButton>
+              </StyledTh>
             </tr>
           </StyledTableHead>
           <tbody>

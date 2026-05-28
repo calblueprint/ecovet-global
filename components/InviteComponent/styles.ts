@@ -22,6 +22,15 @@ export const FormHeader = styled.h2`
   font-family: ${Sans.style.fontFamily};
 `;
 
+export const FormSub = styled.h2`
+  color: ${COLORS.black40};
+  font-size: 0.65rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  font-family: ${Sans.style.fontFamily};
+`;
+
 export const AddInviteFormDiv = styled.div`
   display: flex;
   flex-direction: column;

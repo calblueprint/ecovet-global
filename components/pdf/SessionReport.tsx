@@ -1,13 +1,4 @@
-import {
-  Circle,
-  Document,
-  G,
-  Line,
-  Page,
-  Svg,
-  Text,
-  View,
-} from "@react-pdf/renderer";
+import { Circle, Document, Page, Svg, Text, View } from "@react-pdf/renderer";
 import { styles } from "./styles";
 
 export type ParticipantSummary = {
@@ -67,61 +58,6 @@ export type SessionReportData = {
   phases: PhaseReportData[];
   facilitatorComments?: string | null;
 };
-
-function NetworkGraph({ headers, matrix }: CommunicationMatrix) {
-  const n = headers.length;
-  const size = 260;
-  const cx = size / 2;
-  const cy = size / 2;
-  const r = n <= 3 ? 65 : n <= 6 ? 80 : n <= 10 ? 92 : 100;
-  const nodeRadius = n <= 6 ? 13 : 10;
-  const labelGap = nodeRadius + 12;
-
-  const positions = headers.map((_, i) => {
-    const angle = (2 * Math.PI * i) / n - Math.PI / 2;
-    return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle), angle };
-  });
-
-  const edges: [number, number][] = [];
-  for (let i = 0; i < n; i++)
-    for (let j = i + 1; j < n; j++) if (matrix[i][j]) edges.push([i, j]);
-
-  return (
-    <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      {edges.map(([i, j], k) => (
-        <Line
-          key={`e-${k}`}
-          x1={positions[i].x}
-          y1={positions[i].y}
-          x2={positions[j].x}
-          y2={positions[j].y}
-          stroke="#476C77"
-          strokeWidth={1.5}
-          strokeOpacity={0.45}
-        />
-      ))}
-      {positions.map((pos, i) => {
-        const lx = cx + (r + labelGap) * Math.cos(pos.angle);
-        const ly = cy + (r + labelGap) * Math.sin(pos.angle);
-        const anchor = lx < cx - 6 ? "end" : lx > cx + 6 ? "start" : "middle";
-        return (
-          <G key={`n-${i}`}>
-            <Circle cx={pos.x} cy={pos.y} r={nodeRadius} fill="#476C77" />
-            <Text
-              x={lx}
-              y={ly + 3}
-              style={{ fontSize: 7 }}
-              fill="#4B4A49"
-              textAnchor={anchor}
-            >
-              {headers[i]}
-            </Text>
-          </G>
-        );
-      })}
-    </Svg>
-  );
-}
 
 export function SessionSummaryReport({
   sessionName,

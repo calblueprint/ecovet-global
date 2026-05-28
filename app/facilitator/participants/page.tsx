@@ -14,12 +14,12 @@ import {
   deleteProfile,
   getProfilesByEmails,
 } from "@/actions/supabase/queries/profile";
+import AccessError from "@/components/AccessError/AccessError";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import InviteComponent from "@/components/InviteComponent/InviteComponent";
 import WarningModal, {
   WarningAction,
 } from "@/components/WarningModal/WarningModal";
-import { H1, H2 } from "@/styles/text";
 import { useProfile } from "@/utils/ProfileProvider";
 import ParticipantsList from "./components/ParticipantsList";
 import {
@@ -31,6 +31,7 @@ import {
   ParticipantsSearchInput,
   ParticipantsSearchWrapper,
   StyledTab,
+  TabControlsWrapper,
 } from "./styles";
 
 export default function ParticipantsPage() {
@@ -48,7 +49,6 @@ export default function ParticipantsPage() {
     try {
       const result = await resendInvite(participant.email);
       if (result.success) {
-        // swap for your toast/snackbar if you have one
         alert(`Invite resent to ${participant.email}`);
       } else {
         alert(`Failed to resend: ${result.error}`);
@@ -130,12 +130,10 @@ export default function ParticipantsPage() {
     if (action === "confirm" && pendingDelete) {
       // Only delete profile is invite accepted and there is one
       if (pendingDelete.invite_accepted && pendingDelete.id) {
-        console.log("deleting profile: ", pendingDelete);
         await deleteProfile(pendingDelete.id as UUID);
       }
 
       // Always delete invite for both cases
-      console.log("deleting invite: ", pendingDelete);
       await deleteInvite(pendingDelete.invite_id as UUID);
 
       await deleteAuthUserByEmail(pendingDelete.email as UUID);
@@ -144,6 +142,12 @@ export default function ParticipantsPage() {
     }
     setPendingDelete(null);
   };
+
+  const facAccess = profile?.user_type === "Facilitator";
+
+  if (!facAccess) {
+    return <AccessError />;
+  }
 
   return (
     <>
@@ -156,14 +160,16 @@ export default function ParticipantsPage() {
             onInvitesChange={() => loadData()}
           />
           <ListControlsWrapper>
-            <Tabs
-              value={status}
-              onChange={handleTabChange}
-              aria-label="participant status tabs"
-            >
-              <StyledTab label="Accepted" value="Accepted" />
-              <StyledTab label="Pending" value="Pending" />
-            </Tabs>
+            <TabControlsWrapper>
+              <Tabs
+                value={status}
+                onChange={handleTabChange}
+                aria-label="participant status tabs"
+              >
+                <StyledTab label="Accepted" value="Accepted" />
+                <StyledTab label="Pending" value="Pending" />
+              </Tabs>
+            </TabControlsWrapper>
 
             <ParticipantsSearchWrapper>
               <ParticipantsSearchInput

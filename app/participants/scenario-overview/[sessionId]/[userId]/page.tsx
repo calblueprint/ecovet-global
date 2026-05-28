@@ -10,7 +10,6 @@ import type {
 } from "@/types/schema";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { CircularProgress } from "@mui/material";
 import supabase from "@/actions/supabase/client";
 import { fetchOptionsForPrompts } from "@/actions/supabase/queries/prompt";
 import {
@@ -27,10 +26,10 @@ import {
   isSessionForceAdvance,
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
+import AccessError from "@/components/AccessError/AccessError";
 import Chat from "@/components/Chat/Chat";
 import { PromptOption } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
-import { useAnnouncements } from "@/utils/UseAnnouncements";
 import {
   readLocalAnswers,
   updateLocalAnswer,
@@ -40,7 +39,7 @@ import NextPhaseButton from "./components/NextPhaseButton";
 import PrevPhaseButton from "./components/PrevPhaseButton";
 import PromptsRightPanel from "./components/PromptsRightPanel";
 import ScenarioLeftPanel from "./components/ScenarioLeftPanel";
-import { LoadingScreen, Main } from "./styles";
+import { Main } from "./styles";
 
 export default function SessionFlowPage() {
   const { userId: profileUserId, profile } = useProfile();
@@ -67,7 +66,6 @@ export default function SessionFlowPage() {
     new Set(),
   );
   const [isForceAdvance, setIsForceAdvance] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   const [dbPhaseIndex, setDbPhaseIndex] = useState(0); // 1-indexed in supabase (start at 0 for overview)
 
@@ -80,7 +78,6 @@ export default function SessionFlowPage() {
 
   const loadData = useCallback(async () => {
     if (!userId || !sessionIdStr) return;
-    setLoading(true);
     try {
       const templateId = await fetchTemplateId(sessionIdStr);
       const template = await fetchTemplate(
@@ -109,8 +106,6 @@ export default function SessionFlowPage() {
       setDbPhaseIndex(mostRecentPhaseIndex);
     } catch (err) {
       console.error("Error loading session data:", err);
-    } finally {
-      setLoading(false);
     }
   }, [userId, sessionIdStr]);
 
@@ -171,16 +166,12 @@ export default function SessionFlowPage() {
       prompts,
     );
 
-    console.log(cached);
-
     if (cached) {
       setAnswers(cached.answers);
       setCompletedPrompts(cached.completed);
 
       return;
     }
-
-    console.log("using db instead of cache");
 
     let cancelled = false;
     (async () => {
@@ -318,15 +309,11 @@ export default function SessionFlowPage() {
   }
 
   async function handleBlur(index: number, rawAnswer: string) {
-    console.log("raw", rawAnswer);
-
     if (!userId || !sessionIdStr || !currentPhase || !rolePhase?.role_phase_id)
       return;
 
     const promptType = prompts[index].prompt_type;
     const promptId = prompts[index].prompt_id;
-
-    console.log("raw", rawAnswer);
 
     if (isAnswerEmpty(rawAnswer, promptType)) {
       setCompletedPrompts(prev => {
@@ -357,7 +344,6 @@ export default function SessionFlowPage() {
   }
 
   async function submitAnswers() {
-    console.log("tyring to submut");
     if (!userId || !sessionIdStr || !currentPhase || !rolePhase) return;
 
     const promises = answers
@@ -387,12 +373,11 @@ export default function SessionFlowPage() {
     );
   }
 
-  if (loading || promptsLoading)
-    return (
-      <LoadingScreen>
-        <CircularProgress color="inherit" aria-label="Loading…" />
-      </LoadingScreen>
-    );
+  const Access = profile?.user_type === "Participant" || "Facilitator";
+
+  if (!Access) {
+    return <AccessError />;
+  }
 
   return (
     <Main>

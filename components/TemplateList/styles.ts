@@ -194,6 +194,11 @@ export const TagsCaption = styled(Caption)`
   color: ${COLORS.black70};
 `;
 
+export const ManageCaption = styled(Caption)`
+  color: ${COLORS.black40};
+  font-weight: 400;
+`;
+
 export const StyledAccordion = styled(Accordion)`
   width: 100%;
   box-shadow: none !important;
@@ -261,16 +266,15 @@ export const SideNavButton = styled.button<{ selected: boolean }>`
   text-align: left;
   gap: 0.5em;
   background-color: ${({ selected }) =>
-    selected ? COLORS.oat_dark : COLORS.oat_light};
+    selected ? COLORS.lightEletricBlue : COLORS.oat_light};
 
-  color: ${({ selected }) => (selected ? COLORS.black : COLORS.black70)};
   border-radius: 0.25rem;
   border: none;
   font-family: ${Sans.style.fontFamily};
   font-size: 12px;
   font-weight: 500;
   &:hover {
-    background-color: ${COLORS.oat_medium};
+    background-color: ${COLORS.lightEletricBlue};
     cursor: pointer;
   }
 `;
@@ -288,6 +292,11 @@ export const SideNavNewTemplateButton = styled.button`
   font-weight: 500;
   color: ${COLORS.white};
   cursor: pointer;
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
 `;
 
 export const LoadingScreen = styled.div`

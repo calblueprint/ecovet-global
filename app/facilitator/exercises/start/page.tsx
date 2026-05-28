@@ -4,7 +4,7 @@ import type { DropdownOption, Profile, Template, UUID } from "@/types/schema";
 import type { SelectInstance } from "react-select";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Checkbox, CircularProgress } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import {
   assignParticipantToSession,
   createSession,
@@ -12,9 +12,12 @@ import {
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplatesExercise } from "@/actions/supabase/queries/templates";
 import { fetchUserGroupMembers } from "@/actions/supabase/queries/user-groups";
+import Play from "@/assets/images/play.svg";
+import AccessError from "@/components/AccessError/AccessError";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import InfoComponent from "@/components/InfoComponent/InfoComponent";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
+import { ImageLogo } from "@/components/styles";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
   CheckboxInput,
@@ -130,7 +133,6 @@ export default function Page() {
       if (validAssignments.length === 0) {
         throw new Error("Please assign at least one participant with a role.");
       }
-      console.log(isAsync);
       const sessionId = (await createSession(
         selectedTemplateId as UUID,
         profile.user_group_id as UUID,
@@ -138,8 +140,6 @@ export default function Page() {
         isAsync,
         exerciseName || undefined,
       )) as UUID;
-
-      console.log(sessionId);
 
       // await assignParticipantToSession(profile.id as UUID, sessionId, null);
 
@@ -212,6 +212,12 @@ export default function Page() {
     setParticipants(prev => prev.filter((_, i) => i !== index));
   };
 
+  const facAccess = profile?.user_type === "Facilitator";
+
+  if (!facAccess) {
+    return <AccessError />;
+  }
+
   return (
     <>
       <TopNavBar />
@@ -256,7 +262,7 @@ export default function Page() {
               </ToggleButton>
               <InfoComponent
                 infoText={
-                  "Asynchronous games allow the facilitator to 'Nudge' the participant and remind them to finish the excercise."
+                  "Asynchronous games allow the facilitator to 'Nudge' the participant and remind them to finish the exercise."
                 }
               ></InfoComponent>
             </ToggleGroup>
@@ -267,7 +273,7 @@ export default function Page() {
                 onChange={e => setIsForceAdvance(e.target.checked)}
               />
               <CheckboxLabel htmlFor="force-advance">
-                Force Advance?
+                Force Advance
               </CheckboxLabel>
               <InfoComponent
                 infoText={
@@ -355,6 +361,7 @@ export default function Page() {
               onClick={handleStartExercise}
               disabled={isStarting || !selectedTemplateId}
             >
+              <ImageLogo src={Play.src} alt="Play" width={12} height={12} />
               {isStarting ? "Starting Session..." : "Start Exercise"}
             </SideNavNewTemplateButton>
           </PrimaryActionArea>

@@ -20,15 +20,17 @@ import {
   setSessionGlobalPhaseIndex,
 } from "@/actions/supabase/queries/sessions";
 import { sendEmailReminder } from "@/actions/supabase/send-email";
+import AccessError from "@/components/AccessError/AccessError";
+import Announcements from "@/components/Chat/Announcements";
 import TopNavBar from "@/components/NavBar/NavBar";
 import NudgeWarningModal from "@/components/NudgeWarningModal/NudgeWarningModal";
 import { useProfile } from "@/utils/ProfileProvider";
-import { AnnouncementRoom, sendAnnouncement } from "@/utils/UseAnnouncements";
 import { LoadingScreen } from "./[userId]/styles";
 import {
   Button,
   Container,
   ContentWrapper,
+  Finish,
   Heading2,
   Heading3,
   HeadingBox,
@@ -36,6 +38,7 @@ import {
   MainDiv,
   NormalText,
   NudgeButton,
+  PageLayout,
   ParticipantTable,
   PhaseInformation,
   PhaseStats,
@@ -44,7 +47,6 @@ import {
   SilverText,
   StatItem,
   TableCell,
-  TableCellBold,
   TableHeader,
   TableRow,
 } from "./styles";
@@ -57,7 +59,7 @@ type ParticipantPromptData = Record<
 export default function FacilitatorSessionView() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId") as UUID;
-  const { userId, profile } = useProfile();
+  const { profile } = useProfile();
   const router = useRouter();
 
   const [bundle, setBundle] = useState<FacilitatorSessionBundle | null>(null);
@@ -69,17 +71,7 @@ export default function FacilitatorSessionView() {
   const [isAdvancing, setIsAdvancing] = useState(false);
 
   const [openWarning, setOpenWarning] = useState(false);
-  const [sending, setSending] = useState(false);
   const [selectedUID, setSelectedUID] = useState<string>("");
-
-  const [announcementMessage, setAnnouncementMessage] = useState<string>("");
-  const [announcementType, setAnnouncementType] = useState<
-    "everyone" | "role" | "user" | null
-  >("everyone");
-  const [announcementRoom, setAnnouncementRoom] = useState<AnnouncementRoom>({
-    to: "everyone",
-    sessionId: sessionId ?? "unknown session",
-  });
 
   function applyBundle(b: FacilitatorSessionBundle) {
     setBundle(b);
@@ -266,18 +258,16 @@ export default function FacilitatorSessionView() {
   }
 
   const isEmailValid = (email: string) => {
-    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
   const handleConfirm = async () => {
     if (!selectedUID || !sessionId) return;
     try {
-      setSending(true);
       const data = await fetchEmailByUserId(selectedUID);
       const em = data?.email as string;
       if (!isEmailValid(em)) {
-        console.log("No valid email entered.");
         return;
       }
       setOpenWarning(false);
@@ -285,7 +275,6 @@ export default function FacilitatorSessionView() {
     } catch (error) {
       console.error("Error sending nudge:", error);
     } finally {
-      setSending(false);
     }
   };
 
@@ -296,6 +285,12 @@ export default function FacilitatorSessionView() {
       </LoadingScreen>
     );
 
+  const facAccess = profile?.user_type === "Facilitator";
+
+  if (!facAccess) {
+    return <AccessError />;
+  }
+
   return (
     <>
       <TopNavBar />
@@ -305,162 +300,190 @@ export default function FacilitatorSessionView() {
         onConfirm={handleConfirm}
       />
       <LayoutWrapper>
-        <ContentWrapper>
-          <MainDiv>
-            <HeadingBox>
-              <Heading3>{bundle.sessionName}</Heading3>
-              <Heading2>{bundle.templateName}</Heading2>
-            </HeadingBox>
-
-            {isForceAdvance && (
-              <PhaseInformation>
-                <PhaseTitle>Phase Information</PhaseTitle>
-                <PhaseStats>
-                  <PhaseStatsLeft>
-                    <StatItem>
-                      <SilverText>Current Phase:</SilverText>{" "}
-                      <NormalText>
-                        {arrayPhaseObject?.phase_name ??
-                          "Waiting for Phase 1..."}
-                      </NormalText>
-                    </StatItem>
-                    <StatItem>
-                      <SilverText>
-                        Participants Complete{" "}
+        <PageLayout>
+          <ContentWrapper>
+            <MainDiv>
+              <HeadingBox>
+                <Heading3>{bundle.sessionName}</Heading3>
+                <Heading2>{bundle.templateName}</Heading2>
+              </HeadingBox>
+              {isForceAdvance && (
+                <PhaseInformation>
+                  <PhaseTitle>Phase Information</PhaseTitle>
+                  <PhaseStats>
+                    <PhaseStatsLeft>
+                      <StatItem>
+                        <SilverText>Current Phase:</SilverText>{" "}
                         <NormalText>
-                          {completedCount} / {totalParticipants}
+                          {arrayPhaseObject?.phase_name ??
+                            "Waiting for Phase 1..."}
                         </NormalText>
-                      </SilverText>
+                      </StatItem>
+                      <StatItem>
+                        <SilverText>
+                          Participants Complete{" "}
+                          <NormalText>
+                            {completedCount} / {totalParticipants}
+                          </NormalText>
+                        </SilverText>
+                      </StatItem>
+                    </PhaseStatsLeft>
+
+                    <StatItem
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                      }}
+                    >
+                      <Button onClick={advancePhase} disabled={isAdvancing}>
+                        {isLastPhase
+                          ? isAdvancing
+                            ? "Finishing..."
+                            : "Finish Session"
+                          : isAdvancing
+                            ? "Advancing..."
+                            : "Force to Next Phase"}
+                      </Button>
                     </StatItem>
-                  </PhaseStatsLeft>
+                  </PhaseStats>
+                </PhaseInformation>
+              )}{" "}
+              {
+                <PhaseInformation>
+                  <PhaseTitle>Phase Information</PhaseTitle>
+                  <PhaseStats>
+                    <PhaseStatsLeft>
+                      <StatItem>
+                        <SilverText>Phases</SilverText>{" "}
+                        <NormalText>{bundle.phases.length}</NormalText>
+                      </StatItem>
+                      <StatItem>
+                        <SilverText>
+                          Participants Complete{" "}
+                          <NormalText>
+                            {completedCount} / {totalParticipants}
+                          </NormalText>
+                        </SilverText>
+                      </StatItem>
+                      <StatItem>
+                        <SilverText>
+                          Sync Mode <NormalText>Synchronous</NormalText>
+                        </SilverText>
+                      </StatItem>
+                    </PhaseStatsLeft>
+                  </PhaseStats>
+                </PhaseInformation>
+              }
+              <Container>
+                <div>
+                  <ParticipantTable>
+                    <TableHeader>
+                      <span>Name</span>
+                      <span></span>
+                      <span>Role</span>
+                      <span>Phase</span>
+                      <span>Progress</span>
+                    </TableHeader>
 
-                  <StatItem
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                    }}
-                  >
-                    <Button onClick={advancePhase} disabled={isAdvancing}>
-                      {isLastPhase
-                        ? isAdvancing
-                          ? "Finishing..."
-                          : "Finish Session"
-                        : isAdvancing
-                          ? "Advancing..."
-                          : "Force to Next Phase"}
-                    </Button>
-                  </StatItem>
-                </PhaseStats>
-              </PhaseInformation>
-            )}
+                    {participants.map(p => {
+                      const data = promptData[p.user_id];
+                      const percent =
+                        data && data.total > 0
+                          ? Math.round((data.done / data.total) * 100)
+                          : 0;
+                      const arrayIdx = p.phase_index - 1;
+                      const participantPhase = phases[arrayIdx];
 
-            <Container>
-              <div>
-                <ParticipantTable>
-                  <TableHeader>
-                    <span>Name</span>
-                    <span></span>
-                    <span>Role</span>
-                    <span>Phase</span>
-                    <span>Progress</span>
-                  </TableHeader>
-
-                  {participants.map(p => {
-                    const data = promptData[p.user_id];
-                    const percent =
-                      data && data.total > 0
-                        ? Math.round((data.done / data.total) * 100)
-                        : 0;
-                    const arrayIdx = p.phase_index - 1;
-                    const participantPhase = phases[arrayIdx];
-
-                    return (
-                      <TableRow
-                        key={p.user_id}
-                        onClick={() =>
-                          router.push(
-                            `/facilitator/session-view/${p.user_id}?sessionId=${sessionId}`,
-                          )
-                        }
-                        style={{ cursor: "pointer" }}
-                      >
-                        <TableCellBold>
-                          {p.profile?.first_name} {p.profile?.last_name}
-                        </TableCellBold>
-                        <TableCell>
-                          <NudgeButton
-                            className="nudge-button"
-                            onClick={e => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                              setSelectedUID(p.user_id);
-                              setOpenWarning(true);
-                            }}
-                            async={isAsync}
-                          >
-                            Nudge
-                          </NudgeButton>
-                        </TableCell>
-                        <TableCell>{p.role?.role_name}</TableCell>
-                        <TableCell>
-                          {participantPhase?.phase_name ?? "Not Started"}
-                        </TableCell>
-                        <TableCell>
-                          {data ? (
-                            <Box
-                              sx={{
-                                width: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "0.5rem",
+                      return (
+                        <TableRow
+                          key={p.user_id}
+                          onClick={() =>
+                            router.push(
+                              `/facilitator/session-view/${p.user_id}?sessionId=${sessionId}`,
+                            )
+                          }
+                          style={{ cursor: "pointer" }}
+                        >
+                          <TableCell>
+                            {p.profile?.first_name} {p.profile?.last_name}
+                          </TableCell>
+                          <TableCell>
+                            <NudgeButton
+                              className="nudge-button"
+                              onClick={e => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                setSelectedUID(p.user_id);
+                                setOpenWarning(true);
                               }}
+                              async={isAsync}
                             >
+                              Nudge
+                            </NudgeButton>
+                          </TableCell>
+                          <TableCell>{p.role?.role_name}</TableCell>
+                          <TableCell>
+                            {participantPhase?.phase_name ?? "Not Started"}
+                          </TableCell>
+                          <TableCell>
+                            {data ? (
+                              <Box
+                                sx={{
+                                  width: "100%",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "0.5rem",
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    whiteSpace: "nowrap",
+                                    fontSize: "14px",
+                                  }}
+                                >
+                                  {percent}% Complete
+                                </span>
+                                <LinearProgress
+                                  variant="determinate"
+                                  value={percent}
+                                  sx={{ flex: 1 }}
+                                />
+                              </Box>
+                            ) : (
                               <span
                                 style={{
                                   whiteSpace: "nowrap",
                                   fontSize: "14px",
                                 }}
                               >
-                                {percent}% Complete
+                                <CircularProgress
+                                  color="inherit"
+                                  size="1rem"
+                                  aria-label="Loading…"
+                                />
                               </span>
-                              <LinearProgress
-                                variant="determinate"
-                                value={percent}
-                                sx={{ flex: 1 }}
-                              />
-                            </Box>
-                          ) : (
-                            <span
-                              style={{
-                                whiteSpace: "nowrap",
-                                fontSize: "14px",
-                              }}
-                            >
-                              <CircularProgress
-                                color="inherit"
-                                size="1rem"
-                                aria-label="Loading…"
-                              />
-                            </span>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </ParticipantTable>
-              </div>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </ParticipantTable>
+                </div>
+                <Finish>
+                  {allDone && (
+                    <Heading2>All participants are finished</Heading2>
+                  )}
+                  <Button onClick={endGame}>End Game</Button>
+                </Finish>
+              </Container>
+            </MainDiv>
+          </ContentWrapper>
 
-              {allDone && (
-                <h3 style={{ marginTop: "1rem" }}>
-                  All participants are finished
-                </h3>
-              )}
-            </Container>
-
-            <Button onClick={endGame}>End Game</Button>
-          </MainDiv>
-        </ContentWrapper>
+          {sessionId && (
+            <Announcements sessionId={sessionId} participants={participants} />
+          )}
+        </PageLayout>
       </LayoutWrapper>
     </>
   );

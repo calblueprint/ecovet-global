@@ -16,18 +16,14 @@ import {
   copyTemplate,
   fetchTemplatesWithTags,
 } from "@/actions/supabase/queries/templates";
-import Pencil from "@/assets/images/pencil.svg";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
-import { ImageLogo } from "@/components/styles";
 import { Tag } from "@/components/Tag/TagCreator";
 import { TagAutocomplete } from "@/components/TagAutoComplete/TagAutoComplete";
 import WarningModal, {
   WarningAction,
 } from "@/components/WarningModal/WarningModal";
-import COLORS from "@/styles/colors";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
-  GeneralList,
   GeneralTitle,
   Heading3,
   LayoutWrapper,
@@ -67,8 +63,8 @@ export default function TemplateListPage({
   const { profile } = useProfile();
   const user_group_id = profile?.user_group_id as UUID;
   const loading = !user_group_id;
-  const [filterMode, setFilterMode] = useState<"all" | "your" | "browse">(
-    "all",
+  const [filterMode, setFilterMode] = useState<"All" | "Your" | "Browse">(
+    "All",
   );
   const [searchInput, setSearchInput] = useState("");
   const [templates, setTemplates] = useState<TemplateWithTags[]>([]);
@@ -79,9 +75,6 @@ export default function TemplateListPage({
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const [selectedTagIds, setSelectedTagIds] = useState<UUID[] | null>([]);
-  const [openTagDropdownFor, setOpenTagDropdownFor] = useState<UUID | null>(
-    null,
-  );
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [tagVersion, setTagVersion] = useState(0);
 
@@ -111,11 +104,11 @@ export default function TemplateListPage({
   const filteredTemplates = useMemo(() => {
     let updated = [...templates];
 
-    if (filterMode === "all") {
+    if (filterMode === "All") {
       updated = updated.filter(
         t => t.accessible_to_all || t.user_group_id === user_group_id,
       );
-    } else if (filterMode === "your") {
+    } else if (filterMode === "Your") {
       updated = updated.filter(t => t.user_group_id === user_group_id);
     } else {
       updated = updated.filter(t => t.accessible_to_all);
@@ -230,18 +223,6 @@ export default function TemplateListPage({
     return true;
   }
 
-  async function addNewTag(template_id: UUID) {
-    if (openTagDropdownFor === template_id) {
-      setOpenTagDropdownFor(null);
-      return;
-    }
-
-    const allTags = await getAllTags(user_group_id);
-
-    setAvailableTags(allTags);
-    setOpenTagDropdownFor(template_id);
-  }
-
   async function handleCreateAndAssign(template_id: UUID, name: string) {
     const newTagId = await createTag({
       name,
@@ -272,22 +253,6 @@ export default function TemplateListPage({
       await handleMultiTagChange(template_id, nextIds);
       setTagVersion(v => v + 1);
     }
-  }
-
-  async function handleClearAllTags(template_id: UUID) {
-    const currentTemplate = templates.find(t => t.template_id === template_id);
-    if (!currentTemplate) return;
-
-    const deletePromises = currentTemplate.associated_tags.map(tag =>
-      removeTagFromTemplate(template_id, tag.tag_id),
-    );
-    await Promise.all(deletePromises);
-
-    setTemplates(prev =>
-      prev.map(t =>
-        t.template_id === template_id ? { ...t, associated_tags: [] } : t,
-      ),
-    );
   }
 
   async function handleMultiTagChange(
@@ -334,30 +299,6 @@ export default function TemplateListPage({
     }
   }
 
-  // NO LONGER USING, REPLACED WITH handleMultiTagChange()
-  async function handleSelectTag(
-    template_id: UUID,
-    tag_id: UUID,
-    passedTag?: Tag,
-  ) {
-    const success = await assignTagToTemplate(template_id, tag_id);
-    if (!success) return;
-
-    const tag = passedTag || availableTags.find(t => t.tag_id === tag_id);
-
-    if (!tag) return;
-
-    setTemplates(prev =>
-      prev.map(t =>
-        t.template_id === template_id
-          ? { ...t, associated_tags: [...t.associated_tags, tag] }
-          : t,
-      ),
-    );
-
-    setOpenTagDropdownFor(null);
-  }
-
   return loading ? (
     <LoadingScreen>
       <CircularProgress color="inherit" aria-label="Loading…" />
@@ -383,7 +324,7 @@ export default function TemplateListPage({
         <ContentWrapper $admin={!showSidebar}>
           <PageDiv>
             <MainDiv>
-              <Heading3>Browse templates</Heading3>
+              <Heading3>{filterMode} templates</Heading3>
               <FilterPlusSearch>
                 <SearchBarStyled>
                   <SearchWrapper>

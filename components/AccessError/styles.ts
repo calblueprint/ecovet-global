@@ -78,3 +78,55 @@ export const ProfileContainer = styled.div`
   display: flex;
   justify-context: flex-grow;
 `;
+
+export const LayoutWrapper = styled.div`
+  display: flex;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+`;
+
+export const PageShell = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+`;
+export const ContentWrapper = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+`;
+
+export const Group = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 60vh;
+  gap: 0.75rem;
+  color: ${COLORS.black20};
+  text-align: center;
+  padding: 2rem;
+`;
+
+export const GroupTitle = styled.h2`
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 0;
+  color: ${COLORS.black40};
+`;
+
+export const GroupHint = styled.p`
+  font-size: 0.95rem;
+  margin: 0;
+  color: ${COLORS.black20};
+  max-width: 360px;
+  line-height: 1.5;
+`;

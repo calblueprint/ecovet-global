@@ -3,28 +3,27 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
+import Dropdown from "@/assets/images/dropdown.svg";
 import Plus from "@/assets/images/plus.svg";
 import { TagCreator } from "@/components/Tag/TagCreator";
 import WarningModal, {
   WarningAction,
 } from "@/components/WarningModal/WarningModal";
-import { Caption } from "@/styles/text";
 import { UUID } from "@/types/schema";
 import {
+  ManageCaption,
   SideNavButton,
   SideNavContainer,
   SideNavNewTemplateButton,
   SideNavTemplatesContainer,
   StyledAccordion,
-  TagsCaption,
 } from "./styles";
 
 interface TemplateSideBarProps {
-  filterMode: "all" | "your" | "browse";
-  setFilterMode: (val: "all" | "your" | "browse") => void;
+  filterMode: "All" | "Your" | "Browse";
+  setFilterMode: (val: "All" | "Your" | "Browse") => void;
   onDeleteConfirmed?: (tagId: UUID) => void;
   user_group_id: UUID;
   selectedTagIds: UUID[] | null;
@@ -77,31 +76,31 @@ export default function TemplateSideBar({
 
       <SideNavTemplatesContainer>
         <SideNavButton
-          selected={filterMode === "all"}
-          onClick={() => setFilterMode("all")}
+          selected={filterMode === "All"}
+          onClick={() => setFilterMode("All")}
         >
           All Templates
         </SideNavButton>
         <SideNavButton
-          selected={filterMode === "your"}
-          onClick={() => setFilterMode("your")}
+          selected={filterMode === "Your"}
+          onClick={() => setFilterMode("Your")}
         >
           Your Templates
         </SideNavButton>
         <SideNavButton
-          selected={filterMode === "browse"}
-          onClick={() => setFilterMode("browse")}
+          selected={filterMode === "Browse"}
+          onClick={() => setFilterMode("Browse")}
         >
           Browse Templates
         </SideNavButton>
 
         <StyledAccordion>
           <AccordionSummary
-            expandIcon={"+"}
+            expandIcon={<Image src={Dropdown} alt="^" width={10} height={10} />}
             aria-controls="panel1-content"
             id="panel1-header"
           >
-            <TagsCaption>Manage Tags</TagsCaption>
+            <ManageCaption>Manage Tags</ManageCaption>
           </AccordionSummary>
           <AccordionDetails sx={{ padding: 0 }}>
             <TagCreator

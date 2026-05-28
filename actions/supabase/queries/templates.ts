@@ -2,14 +2,7 @@
 
 import type { Template, UUID } from "@/types/schema";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
-import {
-  PhaseUpdatable,
-  PromptUpdatable,
-  RolePhaseUpdatable,
-  RoleUpdatable,
-  Tag,
-  TemplateUpdatable,
-} from "@/types/schema";
+import { Tag } from "@/types/schema";
 import { replacePromptOptions } from "./prompt";
 
 export async function createTemplates( // create templates with inputs, but lowk most can be null as well
@@ -43,30 +36,6 @@ export async function createTemplates( // create templates with inputs, but lowk
   return data.template_id;
 }
 
-export async function updateTemplates( // NOTE: not using anymore but didn't want to remove in case needed in future
-  template_id: UUID,
-  updates: Partial<TemplateUpdatable>,
-): Promise<void> {
-  const supabase = await getSupabaseServerClient();
-  const { error } = await supabase
-    .from("template")
-    .update(updates)
-    .eq("template_id", template_id);
-
-  if (error) throw error;
-}
-
-export async function deleteTemplates(template_id: UUID): Promise<void> {
-  // NOTE: not using anymore but didn't want to remove in case needed in future
-  const supabase = await getSupabaseServerClient();
-  const { error } = await supabase
-    .from("template")
-    .delete()
-    .eq("template_id", template_id);
-
-  if (error) throw error;
-}
-
 export async function createPhases(
   phase_id: UUID,
   template_id: UUID | null,
@@ -94,30 +63,6 @@ export async function createPhases(
   return data.phase_id;
 }
 
-export async function updatePhases( // NOTE: not using anymore but didn't want to remove in case needed in future
-  phase_id: UUID,
-  updates: Partial<PhaseUpdatable>,
-): Promise<void> {
-  const supabase = await getSupabaseServerClient();
-  const { error } = await supabase
-    .from("phase")
-    .update(updates)
-    .eq("phase_id", phase_id);
-
-  if (error) throw error;
-}
-
-export async function deletePhases(phase_id: UUID): Promise<void> {
-  // NOTE: not using anymore but didn't want to remove in case needed in future
-  const supabase = await getSupabaseServerClient();
-  const { error } = await supabase
-    .from("phase")
-    .delete()
-    .eq("phase_id", phase_id);
-
-  if (error) throw error;
-}
-
 export async function createRoles(
   role_id: UUID,
   template_id: UUID,
@@ -143,27 +88,6 @@ export async function createRoles(
   return data.role_id;
 }
 
-export async function updateRoles( // NOTE: not using anymore but didn't want to remove in case needed in future
-  role_id: UUID,
-  updates: Partial<RoleUpdatable>,
-): Promise<void> {
-  const supabase = await getSupabaseServerClient();
-  const { error } = await supabase
-    .from("role")
-    .update(updates)
-    .eq("role_id", role_id);
-
-  if (error) throw error;
-}
-
-export async function deleteRoles(role_id: UUID): Promise<void> {
-  // NOTE: not using anymore but didn't want to remove in case needed in future
-  const supabase = await getSupabaseServerClient();
-  const { error } = await supabase.from("role").delete().eq("role_id", role_id);
-
-  if (error) throw error;
-}
-
 export async function createRolePhases(
   role_phase_id: UUID,
   phase_id: UUID,
@@ -187,30 +111,6 @@ export async function createRolePhases(
 
   if (error) throw error;
   return data.role_phase_id;
-}
-
-export async function updateRolePhases( // NOTE: not using anymore but didn't want to remove in case needed in future
-  role_phase_id: UUID,
-  updates: Partial<RolePhaseUpdatable>,
-): Promise<void> {
-  const supabase = await getSupabaseServerClient();
-  const { error } = await supabase
-    .from("role_phase")
-    .update(updates)
-    .eq("role_phase_id", role_phase_id);
-
-  if (error) throw error;
-}
-
-export async function deleteRolePhase(role_phase_id: UUID): Promise<void> {
-  // NOTE: not using anymore but didn't want to remove in case needed in future
-  const supabase = await getSupabaseServerClient();
-  const { error } = await supabase
-    .from("role_phase")
-    .delete()
-    .eq("role_phase_id", role_phase_id);
-
-  if (error) throw error;
 }
 
 export async function createPrompts(
@@ -242,30 +142,6 @@ export async function createPrompts(
   return data.prompt_id;
 }
 
-export async function updatePrompts( // NOTE: not using anymore but didn't want to remove in case needed in future
-  prompt_id: UUID,
-  updates: Partial<PromptUpdatable>,
-): Promise<void> {
-  const supabase = await getSupabaseServerClient();
-  const { error } = await supabase
-    .from("prompt")
-    .update(updates)
-    .eq("prompt_id", prompt_id);
-
-  if (error) throw error;
-}
-
-export async function deletePrompts(prompt_id: UUID): Promise<void> {
-  // NOTE: not using anymore but didn't want to remove in case needed in future
-  const supabase = await getSupabaseServerClient();
-  const { error } = await supabase
-    .from("prompt")
-    .delete()
-    .eq("prompt_id", prompt_id);
-
-  if (error) throw error;
-}
-
 export async function fetchTemplate(
   template_id: string,
 ): Promise<Template | null> {
@@ -281,19 +157,6 @@ export async function fetchTemplate(
   }
 
   return data;
-}
-
-export async function fetchAllTemplates() {
-  try {
-    const supabase = await getSupabaseServerClient();
-    const { data, error } = await supabase.from("template").select("*");
-
-    if (error) throw error;
-
-    return data;
-  } catch (error) {
-    console.log("Error fetching templates from supabase API: ", error);
-  }
 }
 
 export async function fetchTemplatesWithTags(user_group_id: UUID) {

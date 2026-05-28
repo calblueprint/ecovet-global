@@ -1,10 +1,15 @@
 "use client";
 
-import type { SelectInstance } from "react-select";
+import type { ControlProps, SelectInstance } from "react-select";
 import { useCallback, useId, useMemo } from "react";
-import Select, { MultiValue, SingleValue, StylesConfig } from "react-select";
+import Select, {
+  components,
+  MultiValue,
+  SingleValue,
+  StylesConfig,
+} from "react-select";
 import { DropdownOption } from "@/types/schema";
-import { getSelectStyles, selectStyles } from "./styles";
+import { getSelectStyles } from "./styles";
 
 // for map: key is actual data stored, value is displayed
 interface CommonProps {
@@ -20,6 +25,8 @@ interface CommonProps {
   defaultValue?: string;
   isClearable?: boolean;
   outlined?: boolean;
+  noOptionsMessage?: string;
+  prefixIcon?: React.ReactNode;
 }
 
 interface MultiSelectProps extends CommonProps {
@@ -50,6 +57,8 @@ export default function InputDropdown(props: InputDropdownProps) {
     defaultValue,
     isClearable,
     outlined = true,
+    noOptionsMessage,
+    prefixIcon,
   } = props;
 
   const optionsArray = useMemo(
@@ -91,6 +100,26 @@ export default function InputDropdown(props: InputDropdownProps) {
     [multi, onChange],
   );
 
+  const CustomControl = (
+    controlProps: ControlProps<DropdownOption, boolean>,
+  ) => (
+    <components.Control {...controlProps}>
+      {prefixIcon && (
+        <span
+          style={{
+            display: "flex",
+            alignItems: "center",
+            paddingLeft: "0.5rem",
+            color: "#959492",
+          }}
+        >
+          {prefixIcon}
+        </span>
+      )}
+      {controlProps.children}
+    </components.Control>
+  );
+
   return (
     <Select
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -118,6 +147,8 @@ export default function InputDropdown(props: InputDropdownProps) {
       }}
       menuPortalTarget={typeof document !== "undefined" ? document.body : null}
       menuPosition="fixed"
+      noOptionsMessage={() => noOptionsMessage ?? "No options"}
+      components={prefixIcon ? { Control: CustomControl } : undefined}
     />
   );
 }

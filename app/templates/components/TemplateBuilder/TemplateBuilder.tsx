@@ -1,16 +1,12 @@
 import type { EditablePhase, RolePhase, UUID } from "@/types/schema";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { addNewOption } from "@/actions/supabase/queries/prompt";
 import {
   LocalStore,
-  Prompt,
   PromptType,
   Role,
   StagedOption,
   Template,
 } from "@/types/schema";
-import { useProfile } from "@/utils/ProfileProvider";
 import { ActiveIds } from "../../page";
 import QuestionBuilder from "../QuestionBuilder/QuestionBuilder";
 import TemplateOverviewForm from "../TemplateOverviewForm/TemplateOverviewForm";
@@ -20,7 +16,6 @@ export default function TemplateBuilder({
   activeIds,
   setActiveIds,
   localStore,
-  onFinish,
   update,
   saveTemplate,
   setSelectedPhaseId,
@@ -29,7 +24,6 @@ export default function TemplateBuilder({
   activeIds: ActiveIds;
   setActiveIds: React.Dispatch<React.SetStateAction<ActiveIds>>;
   localStore: LocalStore | null;
-  onFinish: () => void;
   update: (updater: (draft: LocalStore) => void) => void;
   saveTemplate: () => Promise<void>;
   setSelectedPhaseId: React.Dispatch<React.SetStateAction<string | null>>;
@@ -134,7 +128,7 @@ export default function TemplateBuilder({
       draft.phasesById[newPhaseId] = {
         phase_id: newPhaseId,
         template_id: draft.templateID,
-        phase_name: `Phase ${nextNumber}`,
+        phase_name: "",
         phase_description: "",
         phase_number: nextNumber,
       } as EditablePhase;
@@ -162,13 +156,12 @@ export default function TemplateBuilder({
 
     update(draft => {
       const newRoleId = crypto.randomUUID();
-      const nextNumber = draft.roleIds.length;
 
       draft.roleIds.push(newRoleId);
       draft.rolesById[newRoleId] = {
         role_id: newRoleId,
         template_id: draft.templateID,
-        role_name: `Role ${nextNumber}`,
+        role_name: "",
         role_description: "",
       } as Role;
 

@@ -7,7 +7,6 @@ import {
   AddInviteMain,
   ButtonPaddingDiv,
   EmailDiv,
-  EmailInput,
   EmailTextArea,
   ErrorMessage,
   ErrorMessageDiv,
@@ -19,6 +18,7 @@ import {
   FailedInvitesList,
   FailedReason,
   FormHeader,
+  FormSub,
   InviteTypeButton,
   ParticipantButton,
   SubmitButton,
@@ -30,7 +30,7 @@ type InviteFailure = {
 };
 
 const isEmailValid = (email: string) => {
-  const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
@@ -132,6 +132,10 @@ function InviteComponent({
     <AddInviteMain>
       <AddInviteFormDiv>
         <FormHeader>Invite a Participant or Facilitator</FormHeader>
+        <FormSub>
+          Promote a Participant to Facilitator by re-enterying their email and
+          selecting Facilitator.
+        </FormSub>
         {errorMessage && (
           <ErrorMessageDiv $hasError={errorMessage}>
             <ErrorMessage>{errorMessage}</ErrorMessage>

@@ -1,5 +1,7 @@
 import { useState } from "react";
+import Person from "@/assets/images/person.svg";
 import { ChatMessage as ChatMessageType } from "@/types/schema";
+import { ImageLogo } from "../styles";
 import {
   FullMessageContainer,
   MessageContent,
@@ -8,7 +10,6 @@ import {
   NameRoleSeparator,
   NameText,
   PfpMessageContentContainer,
-  ProfileColor,
   TimeLabel,
   TimeLabelContainer,
   TimeMessageContainer,
@@ -51,7 +52,15 @@ export default function ChatMessageBubble({
         $fromUser={fromUser}
         onClick={() => setShowTime(show => !show)}
       >
-        {!fromUser && <ProfileColor $color="#8E44AD" />}
+        {!fromUser && (
+          <ImageLogo
+            src={Person.src}
+            alt="Play"
+            width={12}
+            height={12}
+            style={{ width: "1rem", height: "1rem", borderRadius: "0.25rem" }}
+          />
+        )}
 
         <TimeMessageContainer $fromUser={fromUser}>
           <MessageContentBubble $fromUser={fromUser}>
@@ -66,7 +75,15 @@ export default function ChatMessageBubble({
           )}
         </TimeMessageContainer>
 
-        {fromUser && <ProfileColor $color="#8E44AD" />}
+        {fromUser && (
+          <ImageLogo
+            src={Person.src}
+            alt="Play"
+            width={12}
+            height={12}
+            style={{ width: "1rem", height: "1rem", borderRadius: "0.25rem" }}
+          />
+        )}
       </PfpMessageContentContainer>
     </FullMessageContainer>
   );

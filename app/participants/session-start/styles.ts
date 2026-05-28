@@ -25,7 +25,7 @@ export const Heading2 = styled.h2`
   font-family: ${Sans.style.fontFamily};
   font-size: 2rem;
   font-style: normal;
-  font-weight: 700;
+  font-weight: 500;
   line-height: normal;
 `;
 
@@ -33,7 +33,7 @@ export const Label = styled.div`
   font-family: ${Sans.style.fontFamily};
   font-size: 1.25rem;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 500;
   line-height: normal;
   color: ${COLORS.black70};
 `;
@@ -51,7 +51,8 @@ export const Button = styled.button`
   font-family: ${Sans.style.fontFamily};
   font-size: 1rem;
   font-style: normal;
-  font-weight: 700;
+
+  font-weight: 500;
   line-height: normal;
   color: white;
   cursor: pointer;
@@ -61,4 +62,9 @@ export const Button = styled.button`
   border: 0px ${COLORS.darkElectricBlue};
   opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+  a {
+    text-decoration: none;
+    color: inherit;
+    border-bottom: none;
+  }
 `;

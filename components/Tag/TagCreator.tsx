@@ -29,7 +29,6 @@ const TAG_COLOR_ORDER: ColorKey[] = ["tagYellow"];
 
 export function TagCreator({
   user_group_id,
-  selectedTagIds,
   onTagRenamed,
   onDeleteTag,
 }: TagCreatorProps) {

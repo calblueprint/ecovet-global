@@ -15,11 +15,13 @@ import {
   FollowUpItem,
   FollowUpList,
   PhaseHeading,
+  ProgressText,
   PromptCard,
   PromptQuestionNumber,
   PromptQuestionText,
   PromptText,
   PromptWrapper,
+  QuestionHeader,
   StyledTextArea,
 } from "../styles";
 import {
@@ -61,8 +63,6 @@ export default function PromptsRightPanel({
   answers,
   optionsByPromptId,
   completedPrompts,
-  phaseName,
-  isOverview,
   isLoading = false,
   onInputAnswer,
   onBlur,
@@ -179,12 +179,13 @@ export default function PromptsRightPanel({
 
   return (
     <ContentDiv>
-      <PhaseHeading>Questions</PhaseHeading>
+      <QuestionHeader>
+        <PhaseHeading>Questions</PhaseHeading>
 
-      <PromptQuestionText>
-        Progress: {completedCount} / {totalPrompts} completed (
-        {progressPercentage}%)
-      </PromptQuestionText>
+        <ProgressText>
+          {completedCount} / {totalPrompts} completed ({progressPercentage}%)
+        </ProgressText>
+      </QuestionHeader>
 
       <PromptCard>
         {isLoading ? (

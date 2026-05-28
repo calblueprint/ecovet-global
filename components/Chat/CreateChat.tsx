@@ -1,15 +1,16 @@
 import { Dispatch, SetStateAction, useMemo } from "react";
 import { StylesConfig } from "react-select";
+import Person from "@/assets/images/person.svg";
 import COLORS from "@/styles/colors";
 import { ChatParticipant, DropdownOption } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import InputDropdown from "../InputDropdown/InputDropdown";
+import { ImageLogo } from "../styles";
 import {
   ChatUserList,
   ClickableUser,
   ClickableUserText,
   CreateChatCancelButton,
-  ProfileColor,
   SelectUsersContainer,
 } from "./styles";
 
@@ -47,7 +48,7 @@ export default function CreateChat({
           )
           .map(p => [p.id, p.name]),
       ),
-    [newUserIds, participantOptions],
+    [newUserIds, participantOptions, profile?.id],
   );
 
   async function addUser(addUserId: string) {
@@ -63,7 +64,13 @@ export default function CreateChat({
   return (
     <SelectUsersContainer>
       <ChatUserList>
-        <ProfileColor $color="#8E44AD" $size={2} />
+        <ImageLogo
+          src={Person.src}
+          alt="Play"
+          width={12}
+          height={12}
+          style={{ width: "2rem", height: "2rem", borderRadius: "0.5rem" }}
+        />
         {currentParticipantSelections.map(({ id, name }) => {
           return (
             <ClickableUser key={id} onClick={() => removeUser(id)}>

@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Tabs } from "@mui/material";
 import { fetchSessionsbyUserGroup } from "@/actions/supabase/queries/sessions";
+import Pdf from "@/assets/images/pdf.svg";
+import Search from "@/assets/images/search.svg";
+import { ImageLogo } from "@/components/styles";
 import { UUID } from "@/types/schema";
 import { buildSessionDisplayName } from "@/utils/session-details";
 import {
@@ -17,7 +21,7 @@ import {
   SearchIcon,
   SearchInput,
   SearchWrapper,
-  TabButton,
+  StyledTab,
   TabsWrapper,
   Title,
   WarningText,
@@ -46,6 +50,13 @@ export default function UserGroupPDFs({ userGroup }: { userGroup: UUID }) {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<ActiveTab>("completed");
+
+  const handleTabChange = (
+    _event: React.SyntheticEvent,
+    newValue: ActiveTab,
+  ) => {
+    setActiveTab(newValue);
+  };
 
   useEffect(() => {
     if (!userGroup) return;
@@ -98,22 +109,20 @@ export default function UserGroupPDFs({ userGroup }: { userGroup: UUID }) {
       </Header>
 
       <TabsWrapper>
-        <TabButton
-          $active={activeTab === "active"}
-          onClick={() => setActiveTab("active")}
+        <Tabs
+          value={activeTab}
+          onChange={handleTabChange}
+          aria-label="session status tabs"
         >
-          Active ({activeFiles.length})
-        </TabButton>
-        <TabButton
-          $active={activeTab === "completed"}
-          onClick={() => setActiveTab("completed")}
-        >
-          Completed ({pastFiles.length})
-        </TabButton>
+          <StyledTab label="Active" value="active" />
+          <StyledTab label="Completed" value="completed" />
+        </Tabs>
       </TabsWrapper>
 
       <SearchWrapper>
-        <SearchIcon>+</SearchIcon>
+        <SearchIcon>
+          <ImageLogo src={Search.src} alt="Search" width={12} height={12} />
+        </SearchIcon>
         <SearchInput
           type="text"
           placeholder="Search file..."
@@ -130,7 +139,9 @@ export default function UserGroupPDFs({ userGroup }: { userGroup: UUID }) {
         ) : (
           filteredFiles.map(file => (
             <FileRow key={file.id} onClick={() => handleRowClick(file)}>
-              <FileIconWrapper>+</FileIconWrapper>
+              <FileIconWrapper>
+                <ImageLogo src={Pdf.src} alt="Pdf" width={12} height={12} />
+              </FileIconWrapper>
               <FileInfo>
                 <FileName>{file.displayName}</FileName>
                 <FileDate>{formatDate(file.created_at)}</FileDate>

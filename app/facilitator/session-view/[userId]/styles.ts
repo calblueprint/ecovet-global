@@ -45,8 +45,8 @@ export const RadioCircle = styled.span<{ $selected: boolean }>`
   border-radius: 50%;
   border: 1.5px solid
     ${({ $selected }) =>
-      $selected ? COLORS.darkElectricBlue : COLORS.oat_medium};
-  background-color: ${COLORS.white};
+      $selected ? COLORS.darkElectricBlue : COLORS.oat_dark};
+  background-color: ${COLORS.oat_medium};
   position: relative;
 
   ${({ $selected }) =>
@@ -164,6 +164,13 @@ export const InfoValue = styled.span`
   font-weight: 500;
 `;
 
+export const ParticipantHeader = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+`;
+
 export const ParticipantInformation = styled.div`
   display: flex;
   padding: 1rem 1.25rem;
@@ -198,8 +205,8 @@ export const PageLayout = styled.div`
 
 export const NudgeButton = styled.button<{ async?: boolean }>`
   display: ${({ async }) => (async ? "flex" : "none")};
-  width: 6rem;
-  padding: 0.5rem 0.75rem;
+  width: 4rem;
+  padding: 0.25rem 0.25rem;
   justify-content: center;
   align-items: center;
   gap: 0.625rem;

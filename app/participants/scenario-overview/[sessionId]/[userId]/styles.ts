@@ -65,7 +65,7 @@ export const OverviewHeader = styled.h2<{ $phase?: boolean }>`
   font-family: ${Sans.style.fontFamily};
   font-size: ${({ $phase }) => ($phase ? "2rem" : "1.5rem")};
   font-style: normal;
-  font-weight: 700;
+  font-weight: 500;
   line-height: normal;
 `;
 
@@ -74,16 +74,16 @@ export const PhaseHeader = styled.h2`
   font-family: ${Sans.style.fontFamily};
   font-size: 2rem;
   font-style: normal;
-  font-weight: 700;
+  font-weight: 500;
   line-height: normal;
 `;
 
 export const ContentBody40 = styled.p`
-  color: ${COLORS.black40};
+  color: ${COLORS.black100};
   font-family: ${Sans.style.fontFamily};
   font-size: 0.75rem;
   font-style: normal;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.125rem;
 `;
 
@@ -98,9 +98,9 @@ export const ContentBubble = styled.div`
 `;
 
 export const ContentHeader = styled.h3`
-  color: ${COLORS.black40};
+  color: ${COLORS.black70};
   font-family: ${Sans.style.fontFamily};
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
@@ -155,7 +155,7 @@ export const PhaseHeading = styled.h1`
   font-family: ${Sans.style.fontFamily};
   font-size: 2rem;
   font-style: normal;
-  font-weight: 700;
+  font-weight: 500;
   line-height: normal;
   color: ${COLORS.black};
   margin-top: 1.6rem;
@@ -170,7 +170,7 @@ export const PromptCard = styled.div`
 export const PromptText = styled.p`
   font-family: ${Sans.style.fontFamily};
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 400;
   color: ${COLORS.black};
   padding-bottom: 0.5rem;
 `;
@@ -210,6 +210,21 @@ export const PromptQuestionText = styled.p`
   font-family: ${Sans.style.fontFamily};
   font-size: 0.875rem;
   font-weight: 700;
+  color: ${COLORS.black70};
+  margin: 0;
+`;
+
+export const QuestionHeader = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+`;
+
+export const ProgressText = styled.p`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.875rem;
+  font-weight: 500;
   color: ${COLORS.black70};
   margin: 0;
 `;

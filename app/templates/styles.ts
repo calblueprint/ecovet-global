@@ -92,9 +92,9 @@ export const SettingsBlock = styled.button<{ $active: boolean }>`
   text-align: left;
   background-color: ${props =>
     props.$active ? `${COLORS.oat_medium}` : `${COLORS.oat_light}`};
-  padding: 0.6rem 1rem;
+  padding: 0.6rem 0.6rem;
   border-radius: 0.375rem;
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
   color: ${COLORS.black70};
   margin-bottom: 1rem;
@@ -102,6 +102,7 @@ export const SettingsBlock = styled.button<{ $active: boolean }>`
   cursor: pointer;
   display: flex;
   align-items: center;
+  gap: 0.7rem;
 
   &:hover {
     background-color: ${COLORS.oat_medium};
@@ -115,7 +116,7 @@ export const RolesListContainer = styled.div`
   background: ${COLORS.white};
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.25rem;
   margin-top: 1rem;
 `;
 
@@ -124,19 +125,29 @@ export const RolesTitle = styled.h3`
   color: ${COLORS.black40};
   margin: 0 0 0.1rem 0;
   font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 export const RoleItem = styled.button<{
   $isDisabled: boolean;
   $active: boolean;
 }>`
-  background: none;
+  background-color: ${({ $active }) =>
+    $active ? COLORS.oat_medium : "transparent"};
   border: none;
+  display: block;
+  width: calc(100% + 2rem); /* extend beyond the container's padding */
+  margin-left: -1rem; /* pull left edge outward by container's padding */
+  margin-right: -1rem; /* pull right edge outward */
+  padding: 0.5rem 0.25rem 0.5rem 1rem;
+  box-sizing: border-box;
   text-align: left;
-  padding: 0;
   font-size: 0.8rem;
   font-weight: ${props => (props.$active ? "700" : "500")};
   cursor: ${props => (props.$isDisabled ? "not-allowed" : "pointer")};
+
   color: ${props =>
     props.$isDisabled
       ? COLORS.black20

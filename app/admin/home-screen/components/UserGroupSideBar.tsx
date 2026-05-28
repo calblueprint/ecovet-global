@@ -14,7 +14,7 @@ import {
 } from "@/app/admin/styles";
 import Plus from "@/assets/images/plus.svg";
 import AddUserGroups from "./AddUserGroup";
-import { Buttons, Groups, Header, HeaderSide } from "./styles";
+import { Buttons } from "./styles";
 
 export default function UserGroupSideBar({
   selectedUserGroupId,

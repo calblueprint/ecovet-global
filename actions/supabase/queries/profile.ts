@@ -78,45 +78,6 @@ export async function getProfilesByEmails(emails: string[]) {
   return data;
 }
 
-export async function markInviteAccepted(email: string) {
-  const lowerCaseEmail = email.toLowerCase();
-
-  const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("invite")
-    .update({ status: "Accepted" })
-    .eq("email", lowerCaseEmail)
-    .select();
-
-  if (error) {
-    console.error("Error updating invite status: ", error.message);
-    throw new Error("Failed to mark invite as accepted");
-  }
-
-  if (!data) {
-    throw new Error("No invite found for email " + email);
-  }
-
-  return true;
-}
-
-export async function makeAdmin(userId: string, email: string) {
-  const lowerCaseEmail = email.toLowerCase();
-
-  const supabase = await getSupabaseServerClient();
-  const { error } = await supabase.from("profile").upsert({
-    id: userId,
-    user_type: "Admin",
-    email: lowerCaseEmail,
-    user_group_id: "0b73ed2d-61c3-472e-b361-edaa88f27622",
-  });
-
-  if (error) {
-    console.error("Error creating profile: ", error.message);
-    throw new Error("Failed to make profile an Admin");
-  }
-}
-
 export async function fetchProfileByUserId(user_id: UUID) {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
@@ -147,13 +108,6 @@ export async function fetchEmailByUserId(user_id: UUID) {
   return data;
 }
 
-export async function fetchExpandedProfileByUserId(user_id: UUID) {
-  const profile = await fetchProfileByUserId(user_id);
-  if (profile == null) {
-    return null;
-  }
-}
-
 export async function fetchUserGroupById(user_group_id: UUID) {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
@@ -169,36 +123,6 @@ export async function fetchUserGroupById(user_group_id: UUID) {
   return data;
 }
 
-export async function fetchPhaseById(phase_id: UUID) {
-  const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("phase")
-    .select("*")
-    .eq("phase_id", phase_id)
-    .single();
-  if (error) {
-    console.error("Error fetching phase by phase_id:", error.message);
-    return null;
-  }
-
-  return data;
-}
-
-export async function fetchRoleById(role_id: UUID) {
-  const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("role")
-    .select("*")
-    .eq("role_id", role_id)
-    .single();
-  if (error) {
-    console.error("Error fetching role by role_id:", error.message);
-    return null;
-  }
-
-  return data;
-}
-
 export async function fetchSessionById(userId: string) {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
@@ -207,7 +131,6 @@ export async function fetchSessionById(userId: string) {
     .eq("user_id", userId)
     .eq("session.is_finished", false)
     .order("created_at", { ascending: false });
-  console.log(data);
   //order by most recent session added
   if (error) {
     console.error("Error fetching active session for user:", error.message);
@@ -290,17 +213,4 @@ export async function deleteProfile(user_id: UUID): Promise<void> {
   if (error) {
     console.error("Error deleting profile:", error.message);
   }
-}
-
-export async function fetchProfilesByUserIds(user_ids: UUID[]) {
-  const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("profile")
-    .select("id, first_name, last_name")
-    .in("id", user_ids);
-  if (error) {
-    console.error("Error fetching profiles: ", error);
-    return [];
-  }
-  return data;
 }

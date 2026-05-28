@@ -1,8 +1,4 @@
-import type {
-  Tables,
-  TablesInsert,
-  TablesUpdate,
-} from "@/types/database.types";
+import type { Tables, TablesUpdate } from "@/types/database.types";
 
 // ENUM for Emails.user_email
 export type EmailType = "PLACEHOLDER";

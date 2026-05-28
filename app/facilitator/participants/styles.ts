@@ -55,6 +55,17 @@ export const StyledTableRow = styled.tr`
   }
 `;
 
+export const TabControlsWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid ${COLORS.oat_medium};
+
+  .MuiTabs-indicator {
+    background-color: ${COLORS.darkElectricBlue};
+  }
+`;
+
 export const StyledTd = styled.td`
   padding: 0 1rem 0 0;
   color: ${COLORS.black70};
@@ -84,8 +95,13 @@ export const ParticipantsSearchInput = styled(SearchInput)`
 export const StyledTab = styled(Tab)`
   && {
     text-transform: none;
-    font-weight: 600;
-    font-size: 0.75rem;
+    font-weight: 500;
+    font-size: 0.8rem;
+    font-family: ${Sans.style.fontFamily};
+
+    &.Mui-selected {
+      color: ${COLORS.darkElectricBlue};
+    }
   }
 `;
 

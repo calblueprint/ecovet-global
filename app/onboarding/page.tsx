@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import supabase from "@/actions/supabase/client";
 import { handleProfileSubmit } from "@/actions/supabase/queries/profile";
+import { getHomePath } from "@/utils/HomePage";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
   Button,
@@ -21,6 +22,7 @@ import {
 
 function OnboardingPage() {
   const { userId, profile, loading: profileLoading } = useProfile();
+  const homepage = getHomePath(profile);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -67,7 +69,7 @@ function OnboardingPage() {
             .eq("user_group_id", profile?.user_group_id);
         }
         await refetch();
-        router.push("/test-page");
+        router.push(homepage);
       } catch (err) {
         console.error("Error incrementing num_users:", err);
       }

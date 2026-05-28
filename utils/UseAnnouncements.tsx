@@ -83,7 +83,7 @@ export function useAnnouncements({
       (a, b) =>
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     );
-  }, [userAnnouncements, roleAnnouncements, everyoneAnnouncements]);
+  }, [userAnnouncements, roleAnnouncements, everyoneAnnouncements, roleName]);
 
   return {
     announcements,

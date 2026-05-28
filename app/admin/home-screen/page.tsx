@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { UUID } from "crypto";
 import { fetchUserGroupById } from "@/actions/supabase/queries/profile";
+import AccessError from "@/components/AccessError/AccessError";
 import InviteComponent from "@/components/InviteComponent/InviteComponent";
 import NavBar from "@/components/NavBar/NavBar";
 import { UserGroup } from "@/types/schema";
+import { useProfile } from "@/utils/ProfileProvider";
 import {
   CenterColumn,
   ContentWrapper,
@@ -25,6 +27,7 @@ import UserGroupPDFs from "./components/UserGroupPDFs";
 import UserGroupSideBar from "./components/UserGroupSideBar";
 
 export default function AdminPage() {
+  const { profile } = useProfile();
   const [selectedUserGroupId, setSelectedUserGroupId] = useState<string | null>(
     null,
   );
@@ -45,6 +48,12 @@ export default function AdminPage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const adminAccess = profile?.user_type === "Admin";
+
+  if (!adminAccess) {
+    return <AccessError />;
+  }
 
   return (
     <PageShell>
@@ -71,9 +80,6 @@ export default function AdminPage() {
                 <RightColumnStack>
                   <InviteComponent
                     user_group_id={selectedUserGroupId}
-                    onInvitesChange={() => {
-                      console.log("Invites changed!");
-                    }}
                     isAdminDashboard={true}
                   />
                   <AdminParticipants user_group_id={selectedUserGroupId} />
@@ -84,7 +90,7 @@ export default function AdminPage() {
             <SelectGroup>
               <SelectGroupTitle>No user group selected</SelectGroupTitle>
               <SelectGroupHint>
-                Choose a group from the sidebar to view its excercises and
+                Choose a group from the sidebar to view its exercises and
                 participants.
               </SelectGroupHint>
             </SelectGroup>

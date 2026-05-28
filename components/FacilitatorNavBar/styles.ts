@@ -39,7 +39,7 @@ export const ButtonContainer = styled.div`
 `;
 
 export const TopNavButton = styled.button<{ $active?: boolean }>`
-  width: auto;
+  white-space: nowrap;
   padding: 0.75rem 1.5rem;
   text-align: center;
   gap: 0.5rem;

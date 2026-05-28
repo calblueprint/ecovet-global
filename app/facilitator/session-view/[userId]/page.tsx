@@ -9,7 +9,6 @@ import type {
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { CircularProgress } from "@mui/material";
-import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import supabase from "@/actions/supabase/client";
 import {
@@ -17,6 +16,7 @@ import {
   sessionParticipants,
 } from "@/actions/supabase/queries/sessions";
 import { sendEmailReminder } from "@/actions/supabase/send-email";
+import AccessError from "@/components/AccessError/AccessError";
 import Announcements from "@/components/Chat/Announcements";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import NudgeWarningModal from "@/components/NudgeWarningModal/NudgeWarningModal";
@@ -34,6 +34,7 @@ import {
   OptionList,
   OptionRow,
   PageLayout,
+  ParticipantHeader,
   ParticipantInformation,
   PhaseList,
   PromptAnswer,
@@ -54,7 +55,7 @@ type PhasePromptData = {
 
 export default function ParticipantDetailView() {
   const { userId } = useParams<{ userId: string }>();
-  const { userId: facilitatorUserId } = useProfile();
+  const { userId: facilitatorUserId, profile } = useProfile();
 
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId") as UUID | null;
@@ -67,7 +68,6 @@ export default function ParticipantDetailView() {
   const [phasePrompts, setPhasePrompts] = useState<PhasePromptData[]>([]);
   const [selectedPhaseId, setSelectedPhaseId] = useState<UUID | null>(null);
   const [openWarning, setOpenWarning] = useState(false);
-  const [sending, setSending] = useState(false);
   const userSelectedRef = useRef(false);
 
   function buildPhasePrompts(b: ParticipantDetailBundle): PhasePromptData[] {
@@ -126,7 +126,7 @@ export default function ParticipantDetailView() {
     return () => {
       cancelled = true;
     };
-  }, [sessionId, userId]);
+  }, [sessionId, userId, facilitatorUserId]);
 
   useEffect(() => {
     if (!bundle || !sessionId || !userId) return;
@@ -193,13 +193,11 @@ export default function ParticipantDetailView() {
   const handleNudgeConfirm = async () => {
     if (!sessionId || !bundle) return;
     try {
-      setSending(true);
       setOpenWarning(false);
       await sendEmailReminder(bundle.email, sessionId);
     } catch (err) {
       console.error("Error sending nudge:", err);
     } finally {
-      setSending(false);
     }
   };
 
@@ -209,6 +207,12 @@ export default function ParticipantDetailView() {
         <CircularProgress color="inherit" aria-label="Loading…" />
       </LoadingScreen>
     );
+
+  const facAccess = profile?.user_type === "Facilitator";
+
+  if (!facAccess) {
+    return <AccessError />;
+  }
 
   return (
     <>
@@ -250,17 +254,23 @@ export default function ParticipantDetailView() {
             <Heading3>
               {name}, {roleName} <SilverHeading3>(Responses)</SilverHeading3>
             </Heading3>
-            <NudgeButton
-              async={bundle.isAsync}
-              onClick={() => setOpenWarning(true)}
-              disabled={sending}
-            >
-              {sending ? "Sending..." : "Nudge"}
-            </NudgeButton>
           </Header>
 
           <ParticipantInformation>
-            <b>Participant Information</b>
+            <ParticipantHeader>
+              <b>Participant Information</b>
+              <NudgeButton
+                className="nudge-button"
+                onClick={e => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setOpenWarning(true);
+                }}
+                async={bundle.isAsync}
+              >
+                Nudge
+              </NudgeButton>
+            </ParticipantHeader>
             <InfoGrid>
               <InfoLabel>Email</InfoLabel>
               <InfoValue>{bundle.email}</InfoValue>

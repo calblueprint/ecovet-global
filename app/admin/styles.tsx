@@ -177,7 +177,7 @@ export const SideNavButton = styled.button<{ $selected: boolean }>`
 
 export const SideNavNewTemplateButton = styled.button`
   width: 100%;
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem 0.75rem;
   text-align: center;
   background-color: ${COLORS.darkElectricBlue};
   border-radius: 0.3rem;
@@ -186,6 +186,15 @@ export const SideNavNewTemplateButton = styled.button`
   font-size: 12px;
   font-weight: 500;
   color: ${COLORS.white};
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+
+  img {
+    display: block;
+  }
 
   &:hover {
     cursor: pointer;

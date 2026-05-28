@@ -45,6 +45,7 @@ export function TagAutocomplete({
     <Autocomplete
       multiple
       freeSolo
+      disableClearable
       disableCloseOnSelect
       filterSelectedOptions
       inputValue={inputValue}
