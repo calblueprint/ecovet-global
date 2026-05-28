@@ -39,7 +39,6 @@ import {
   RoleDescriptionTemplate,
   RoleHeader,
   RoleHeaderContainer,
-  RolePhaseDescriptionInput,
   RoleTemplateName,
   TextFieldStyled,
 } from "./styles";

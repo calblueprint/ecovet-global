@@ -1,4 +1,4 @@
-import { PromptType, UUID } from "@/types/schema";
+import { UUID } from "@/types/schema";
 import supabase from "../client";
 
 export async function fetchOptionsForPrompts(prompt_ids: UUID[]) {

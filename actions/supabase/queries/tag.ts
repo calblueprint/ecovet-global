@@ -1,6 +1,6 @@
 "use server";
 
-import type { Tag, Template, UUID } from "@/types/schema";
+import type { Tag, UUID } from "@/types/schema";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 export type CreateTagParams = {

@@ -6,7 +6,6 @@ import { ImageLogo } from "@/components/styles";
 import { EditablePhase, Role, Template, UUID } from "@/types/schema";
 import { AutoGrowBigInput } from "./AutoGrow";
 import {
-  BigInput,
   CardTitle,
   DeleteIconButton,
   DummyInput,

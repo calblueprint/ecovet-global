@@ -16,7 +16,6 @@ export default function TemplateBuilder({
   activeIds,
   setActiveIds,
   localStore,
-  onFinish,
   update,
   saveTemplate,
   setSelectedPhaseId,
@@ -25,7 +24,6 @@ export default function TemplateBuilder({
   activeIds: ActiveIds;
   setActiveIds: React.Dispatch<React.SetStateAction<ActiveIds>>;
   localStore: LocalStore | null;
-  onFinish: () => void;
   update: (updater: (draft: LocalStore) => void) => void;
   saveTemplate: () => Promise<void>;
   setSelectedPhaseId: React.Dispatch<React.SetStateAction<string | null>>;
@@ -158,7 +156,6 @@ export default function TemplateBuilder({
 
     update(draft => {
       const newRoleId = crypto.randomUUID();
-      const nextNumber = draft.roleIds.length;
 
       draft.roleIds.push(newRoleId);
       draft.rolesById[newRoleId] = {

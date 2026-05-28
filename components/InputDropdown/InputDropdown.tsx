@@ -9,7 +9,7 @@ import Select, {
   StylesConfig,
 } from "react-select";
 import { DropdownOption } from "@/types/schema";
-import { getSelectStyles, selectStyles } from "./styles";
+import { getSelectStyles } from "./styles";
 
 // for map: key is actual data stored, value is displayed
 interface CommonProps {

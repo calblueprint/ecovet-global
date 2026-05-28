@@ -2,14 +2,7 @@
 
 import type { Template, UUID } from "@/types/schema";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
-import {
-  PhaseUpdatable,
-  PromptUpdatable,
-  RolePhaseUpdatable,
-  RoleUpdatable,
-  Tag,
-  TemplateUpdatable,
-} from "@/types/schema";
+import { Tag } from "@/types/schema";
 import { replacePromptOptions } from "./prompt";
 
 export async function createTemplates( // create templates with inputs, but lowk most can be null as well

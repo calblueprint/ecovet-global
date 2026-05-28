@@ -10,7 +10,6 @@ import {
   NameRoleSeparator,
   NameText,
   PfpMessageContentContainer,
-  ProfileColor,
   TimeLabel,
   TimeLabelContainer,
   TimeMessageContainer,

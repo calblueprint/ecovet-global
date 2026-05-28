@@ -7,7 +7,6 @@ import {
   AddInviteMain,
   ButtonPaddingDiv,
   EmailDiv,
-  EmailInput,
   EmailTextArea,
   ErrorMessage,
   ErrorMessageDiv,

@@ -16,18 +16,14 @@ import {
   copyTemplate,
   fetchTemplatesWithTags,
 } from "@/actions/supabase/queries/templates";
-import Pencil from "@/assets/images/pencil.svg";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
-import { ImageLogo } from "@/components/styles";
 import { Tag } from "@/components/Tag/TagCreator";
 import { TagAutocomplete } from "@/components/TagAutoComplete/TagAutoComplete";
 import WarningModal, {
   WarningAction,
 } from "@/components/WarningModal/WarningModal";
-import COLORS from "@/styles/colors";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
-  GeneralList,
   GeneralTitle,
   Heading3,
   LayoutWrapper,
@@ -38,7 +34,6 @@ import {
   SideNavContainer,
   SortButton,
 } from "../../app/facilitator/styles";
-import AccessError from "../AccessError/AccessError";
 import {
   AssociatedTags,
   ContentWrapper,
@@ -80,9 +75,6 @@ export default function TemplateListPage({
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const [selectedTagIds, setSelectedTagIds] = useState<UUID[] | null>([]);
-  const [openTagDropdownFor, setOpenTagDropdownFor] = useState<UUID | null>(
-    null,
-  );
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [tagVersion, setTagVersion] = useState(0);
 
@@ -231,18 +223,6 @@ export default function TemplateListPage({
     return true;
   }
 
-  async function addNewTag(template_id: UUID) {
-    if (openTagDropdownFor === template_id) {
-      setOpenTagDropdownFor(null);
-      return;
-    }
-
-    const allTags = await getAllTags(user_group_id);
-
-    setAvailableTags(allTags);
-    setOpenTagDropdownFor(template_id);
-  }
-
   async function handleCreateAndAssign(template_id: UUID, name: string) {
     const newTagId = await createTag({
       name,
@@ -273,22 +253,6 @@ export default function TemplateListPage({
       await handleMultiTagChange(template_id, nextIds);
       setTagVersion(v => v + 1);
     }
-  }
-
-  async function handleClearAllTags(template_id: UUID) {
-    const currentTemplate = templates.find(t => t.template_id === template_id);
-    if (!currentTemplate) return;
-
-    const deletePromises = currentTemplate.associated_tags.map(tag =>
-      removeTagFromTemplate(template_id, tag.tag_id),
-    );
-    await Promise.all(deletePromises);
-
-    setTemplates(prev =>
-      prev.map(t =>
-        t.template_id === template_id ? { ...t, associated_tags: [] } : t,
-      ),
-    );
   }
 
   async function handleMultiTagChange(
@@ -333,30 +297,6 @@ export default function TemplateListPage({
     } finally {
       setPdfLoading(null);
     }
-  }
-
-  // NO LONGER USING, REPLACED WITH handleMultiTagChange()
-  async function handleSelectTag(
-    template_id: UUID,
-    tag_id: UUID,
-    passedTag?: Tag,
-  ) {
-    const success = await assignTagToTemplate(template_id, tag_id);
-    if (!success) return;
-
-    const tag = passedTag || availableTags.find(t => t.tag_id === tag_id);
-
-    if (!tag) return;
-
-    setTemplates(prev =>
-      prev.map(t =>
-        t.template_id === template_id
-          ? { ...t, associated_tags: [...t.associated_tags, tag] }
-          : t,
-      ),
-    );
-
-    setOpenTagDropdownFor(null);
   }
 
   return loading ? (

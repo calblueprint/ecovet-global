@@ -1,13 +1,8 @@
 "use client";
 
 import type { UUID } from "@/types/schema";
-import { useEffect, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import {
-  advancePhaseForSingleUser,
-  backPhaseForSingleUser,
-  setIsFinished,
-} from "@/actions/supabase/queries/sessions";
+import { useTransition } from "react";
+import { backPhaseForSingleUser } from "@/actions/supabase/queries/sessions";
 import { Button } from "@/app/participants/styles";
 import { Clickable } from "../styles";
 

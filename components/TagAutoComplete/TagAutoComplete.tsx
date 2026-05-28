@@ -1,12 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Chip } from "@mui/material";
-import Autocomplete, {
-  AutocompleteProps,
-  AutocompleteRenderGetTagProps,
-  createFilterOptions,
-} from "@mui/material/Autocomplete";
+import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";

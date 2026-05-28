@@ -2,7 +2,7 @@ import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Flex } from "@/styles/containers";
 import { Sans } from "@/styles/fonts";
-import { B2, Caption, H3 } from "@/styles/text";
+import { B2, H3 } from "@/styles/text";
 
 export const FieldCard = styled.div`
   display: flex;

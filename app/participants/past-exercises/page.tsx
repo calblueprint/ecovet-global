@@ -1,6 +1,6 @@
 "use client";
 
-import type { PDFSession, Session } from "@/types/schema";
+import type { PDFSession } from "@/types/schema";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CircularProgress } from "@mui/material";
@@ -49,7 +49,6 @@ export default function ParticipantPastSessionsPage() {
 
   useEffect(() => {
     if (!profile?.user_group_id) return;
-    const userGroupId = profile.user_group_id;
 
     (async () => {
       if (!profile.user_group_id) return;

@@ -4,14 +4,7 @@ import React, { useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { RxExit } from "react-icons/rx";
 import { useRouter } from "next/navigation";
-import {
-  ClickAwayListener,
-  Fade,
-  MenuItem,
-  MenuList,
-  Paper,
-  Popper,
-} from "@mui/material";
+import { ClickAwayListener, Fade, Popper } from "@mui/material";
 import supabase from "@/actions/supabase/client";
 import { IconSvgs, IconType } from "@/lib/icons";
 import COLORS from "@/styles/colors";

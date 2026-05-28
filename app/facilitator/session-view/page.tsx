@@ -25,7 +25,6 @@ import Announcements from "@/components/Chat/Announcements";
 import TopNavBar from "@/components/NavBar/NavBar";
 import NudgeWarningModal from "@/components/NudgeWarningModal/NudgeWarningModal";
 import { useProfile } from "@/utils/ProfileProvider";
-import { AnnouncementRoom, sendAnnouncement } from "@/utils/UseAnnouncements";
 import { LoadingScreen } from "./[userId]/styles";
 import {
   Button,
@@ -72,17 +71,7 @@ export default function FacilitatorSessionView() {
   const [isAdvancing, setIsAdvancing] = useState(false);
 
   const [openWarning, setOpenWarning] = useState(false);
-  const [sending, setSending] = useState(false);
   const [selectedUID, setSelectedUID] = useState<string>("");
-
-  const [announcementMessage, setAnnouncementMessage] = useState<string>("");
-  const [announcementType, setAnnouncementType] = useState<
-    "everyone" | "role" | "user" | null
-  >("everyone");
-  const [announcementRoom, setAnnouncementRoom] = useState<AnnouncementRoom>({
-    to: "everyone",
-    sessionId: sessionId ?? "unknown session",
-  });
 
   function applyBundle(b: FacilitatorSessionBundle) {
     setBundle(b);
@@ -276,7 +265,6 @@ export default function FacilitatorSessionView() {
   const handleConfirm = async () => {
     if (!selectedUID || !sessionId) return;
     try {
-      setSending(true);
       const data = await fetchEmailByUserId(selectedUID);
       const em = data?.email as string;
       if (!isEmailValid(em)) {
@@ -288,7 +276,6 @@ export default function FacilitatorSessionView() {
     } catch (error) {
       console.error("Error sending nudge:", error);
     } finally {
-      setSending(false);
     }
   };
 

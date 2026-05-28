@@ -4,10 +4,7 @@ import COLORS from "@/styles/colors";
 import { DropdownOption } from "@/types/schema";
 import { AnnouncementRoom } from "@/utils/UseAnnouncements";
 import InputDropdown from "../InputDropdown/InputDropdown";
-import {
-  SelectAnnouncementRoomContainer,
-  SelectUsersContainer,
-} from "./styles";
+import { SelectAnnouncementRoomContainer } from "./styles";
 
 export default function AnnouncementSelector({
   options,

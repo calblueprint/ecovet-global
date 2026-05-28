@@ -1,13 +1,12 @@
 "use client";
 
-import type { PDFSession, Session } from "@/types/schema";
+import type { PDFSession } from "@/types/schema";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import CircularProgress from "@mui/material/CircularProgress";
 import Tabs from "@mui/material/Tabs";
 import { fetchSessionsbyUserGroup } from "@/actions/supabase/queries/sessions";
 import Play from "@/assets/images/play.svg";
-import Error from "@/components/AccessError/AccessError";
 import AccessError from "@/components/AccessError/AccessError";
 import FacilitatorNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import { ImageLogo } from "@/components/styles";

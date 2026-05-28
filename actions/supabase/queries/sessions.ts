@@ -5,12 +5,9 @@ import type {
   Phase,
   Prompt,
   PromptAnswer,
-  PromptOption,
-  PromptOptionsSelected,
   PromptWithResponse,
   Role,
   RolePhase,
-  Session,
   SessionWithTemplate,
   UUID,
 } from "@/types/schema";

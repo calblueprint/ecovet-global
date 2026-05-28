@@ -63,8 +63,6 @@ export default function PromptsRightPanel({
   answers,
   optionsByPromptId,
   completedPrompts,
-  phaseName,
-  isOverview,
   isLoading = false,
   onInputAnswer,
   onBlur,

@@ -18,7 +18,6 @@ import TemplateBuilder from "@/app/templates/components/TemplateBuilder/Template
 import {
   LayoutWrapper,
   TemplateMainBox,
-  TitleInput,
   TitleRow,
 } from "@/app/templates/styles";
 import Clock from "@/assets/images/clock.svg";
@@ -315,13 +314,6 @@ export default function TemplateBuilderPage() {
     setLocalStore(prev => produce(prev, updater));
   };
 
-  const handleBackConfirm = (shouldLeave: boolean) => {
-    setShowBackWarning(false);
-    if (shouldLeave) {
-      router.push(`/facilitator/template-list`);
-    }
-  };
-
   const handleStartExercise = () => {
     saveTemplate();
     if (!localStore) return;
@@ -338,12 +330,6 @@ export default function TemplateBuilderPage() {
     updateLocalStore(draft => {
       (draft.rolesById[1] as Template).template_name = newName;
     });
-  };
-
-  const resetTemplate = () => {
-    setLocalStore(createInitialStore());
-    setActiveIds({ roleId: 1, rolePhaseId: null });
-    setSelectedPhaseId(null);
   };
 
   const phaseOptionsMap = useMemo(() => {
@@ -500,7 +486,6 @@ export default function TemplateBuilderPage() {
             activeIds={activeIds}
             setActiveIds={setActiveIds}
             localStore={localStore}
-            onFinish={resetTemplate}
             update={updateLocalStore}
             saveTemplate={saveTemplate}
             setSelectedPhaseId={setSelectedPhaseId}

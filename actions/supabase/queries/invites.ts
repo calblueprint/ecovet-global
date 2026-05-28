@@ -3,7 +3,7 @@
 import type { UUID } from "@/types/schema";
 import supabase from "@/app/api/supabase/createClient";
 import { getSupabaseAdminClient } from "@/lib/supabase/server";
-import { Invite, Profile, UserType } from "@/types/schema";
+import { Profile, UserType } from "@/types/schema";
 import { sendInviteEmail } from "./auth";
 
 async function getProfileByEmail(

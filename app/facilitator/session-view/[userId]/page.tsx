@@ -68,7 +68,6 @@ export default function ParticipantDetailView() {
   const [phasePrompts, setPhasePrompts] = useState<PhasePromptData[]>([]);
   const [selectedPhaseId, setSelectedPhaseId] = useState<UUID | null>(null);
   const [openWarning, setOpenWarning] = useState(false);
-  const [sending, setSending] = useState(false);
   const userSelectedRef = useRef(false);
 
   function buildPhasePrompts(b: ParticipantDetailBundle): PhasePromptData[] {
@@ -127,7 +126,7 @@ export default function ParticipantDetailView() {
     return () => {
       cancelled = true;
     };
-  }, [sessionId, userId]);
+  }, [sessionId, userId, facilitatorUserId]);
 
   useEffect(() => {
     if (!bundle || !sessionId || !userId) return;
@@ -194,13 +193,11 @@ export default function ParticipantDetailView() {
   const handleNudgeConfirm = async () => {
     if (!sessionId || !bundle) return;
     try {
-      setSending(true);
       setOpenWarning(false);
       await sendEmailReminder(bundle.email, sessionId);
     } catch (err) {
       console.error("Error sending nudge:", err);
     } finally {
-      setSending(false);
     }
   };
 

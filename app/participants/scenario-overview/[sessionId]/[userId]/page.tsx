@@ -10,7 +10,6 @@ import type {
 } from "@/types/schema";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { CircularProgress } from "@mui/material";
 import supabase from "@/actions/supabase/client";
 import { fetchOptionsForPrompts } from "@/actions/supabase/queries/prompt";
 import {
@@ -31,7 +30,6 @@ import AccessError from "@/components/AccessError/AccessError";
 import Chat from "@/components/Chat/Chat";
 import { PromptOption } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
-import { useAnnouncements } from "@/utils/UseAnnouncements";
 import {
   readLocalAnswers,
   updateLocalAnswer,
@@ -41,7 +39,7 @@ import NextPhaseButton from "./components/NextPhaseButton";
 import PrevPhaseButton from "./components/PrevPhaseButton";
 import PromptsRightPanel from "./components/PromptsRightPanel";
 import ScenarioLeftPanel from "./components/ScenarioLeftPanel";
-import { LoadingScreen, Main } from "./styles";
+import { Main } from "./styles";
 
 export default function SessionFlowPage() {
   const { userId: profileUserId, profile } = useProfile();
@@ -68,7 +66,6 @@ export default function SessionFlowPage() {
     new Set(),
   );
   const [isForceAdvance, setIsForceAdvance] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   const [dbPhaseIndex, setDbPhaseIndex] = useState(0); // 1-indexed in supabase (start at 0 for overview)
 
@@ -81,7 +78,6 @@ export default function SessionFlowPage() {
 
   const loadData = useCallback(async () => {
     if (!userId || !sessionIdStr) return;
-    setLoading(true);
     try {
       const templateId = await fetchTemplateId(sessionIdStr);
       const template = await fetchTemplate(
@@ -110,8 +106,6 @@ export default function SessionFlowPage() {
       setDbPhaseIndex(mostRecentPhaseIndex);
     } catch (err) {
       console.error("Error loading session data:", err);
-    } finally {
-      setLoading(false);
     }
   }, [userId, sessionIdStr]);
 

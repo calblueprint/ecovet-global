@@ -6,11 +6,7 @@ import Carousel from "react-material-ui-carousel";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  checkProfileExists,
-  fetchProfileByUserId,
-  fetchSessionById,
-} from "@/actions/supabase/queries/profile";
+import { fetchProfileByUserId } from "@/actions/supabase/queries/profile";
 import ChildVaccination from "@/app/public/images/ChildVaccination.png";
 import Seal from "@/app/public/images/Seal.png";
 import WildfireResponse from "@/app/public/images/WildfireResponse.png";

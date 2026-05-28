@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { fetchPDFName } from "@/actions/supabase/queries/sessions";
-import AccessError from "@/components/AccessError/AccessError";
 import { getHomePath } from "@/utils/HomePage";
 import { useProfile } from "@/utils/ProfileProvider";
 import { buildSessionDisplayName } from "@/utils/session-details";
@@ -105,7 +104,7 @@ export default function SessionFinish() {
   // Load existing report on page load, generate if none exists
   useEffect(() => {
     fetchOrGenerateReport();
-  }, [sessionId]);
+  }, [sessionId, fetchOrGenerateReport]);
 
   async function handleSave() {
     await regenerateReportWithComments(comments.trim() || null);

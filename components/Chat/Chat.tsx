@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CircularProgress } from "@mui/material";
 import {
   addUserToChatRoom,
@@ -101,7 +101,7 @@ export default function Chat({
         new Set(notifs).add(announcementRoom.roomId),
       );
     }
-  }, [announcements]);
+  }, [announcements, currentRoomId]);
 
   useEffect(() => {
     async function loadParticipants() {
@@ -169,7 +169,7 @@ export default function Chat({
       chatRoomChannel.unsubscribe();
       notificationsChannel.unsubscribe();
     };
-  }, []);
+  }, [loadRooms, sessionId, userId]);
 
   useEffect(() => {
     const checkRoom = async () => {
@@ -180,7 +180,7 @@ export default function Chat({
     };
 
     checkRoom();
-  }, [newChatUserIds]);
+  }, [newChatUserIds, sessionId, userId]);
 
   async function loadRooms() {
     if (!userId) return;

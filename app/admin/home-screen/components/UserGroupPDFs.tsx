@@ -22,7 +22,6 @@ import {
   SearchInput,
   SearchWrapper,
   StyledTab,
-  TabButton,
   TabsWrapper,
   Title,
   WarningText,

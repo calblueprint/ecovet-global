@@ -11,7 +11,6 @@ import {
   ClickableUser,
   ClickableUserText,
   CreateChatCancelButton,
-  ProfileColor,
   SelectUsersContainer,
 } from "./styles";
 
@@ -49,7 +48,7 @@ export default function CreateChat({
           )
           .map(p => [p.id, p.name]),
       ),
-    [newUserIds, participantOptions],
+    [newUserIds, participantOptions, profile?.id],
   );
 
   async function addUser(addUserId: string) {

@@ -19,7 +19,6 @@ import {
   SideNavNewTemplateButton,
   SideNavTemplatesContainer,
   StyledAccordion,
-  TagsCaption,
 } from "./styles";
 
 interface TemplateSideBarProps {
