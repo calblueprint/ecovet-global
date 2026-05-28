@@ -11,6 +11,6 @@ export function getHomePath(profile: Profile | null): string {
     case "Facilitator":
       return "/facilitator/template-list";
     default:
-      return "/test-page";
+      return "/";
   }
 }

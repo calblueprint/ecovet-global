@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { checkIfUserExists } from "@/actions/supabase/queries/auth";
 import { useSession } from "@/utils/AuthProvider";
+import { getHomePath } from "@/utils/HomePage";
+import { useProfile } from "@/utils/ProfileProvider";
 import {
   Button,
   EmailAddressDiv,
@@ -20,6 +22,8 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const sessionHandler = useSession();
+  const { profile } = useProfile();
+  const homepage = getHomePath(profile);
 
   const handleSignUp = async () => {
     if (await checkIfUserExists(email)) {
@@ -40,7 +44,7 @@ export default function Login() {
       return;
     }
 
-    router.push("/test-page");
+    router.push(homepage);
   };
 
   const signInWithEmail = async () => {
@@ -60,7 +64,7 @@ export default function Login() {
     if (!data.user) {
       throw new Error("User not found after sign in");
     }
-    router.push("/test-page");
+    router.push(homepage);
   };
 
   const signOut = async () => {

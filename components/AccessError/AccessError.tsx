@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import ecovetGlobal from "@/assets/images/ecovet-global-new.svg";
+import { getHomePath } from "@/utils/HomePage";
+import { useProfile } from "@/utils/ProfileProvider";
 import ProfileBar from "../ProfileBar/ProfileBar";
 import {
   ContentWrapper,
@@ -17,11 +19,13 @@ import {
 } from "./styles";
 
 const AccessError = () => {
+  const { profile } = useProfile();
+  const homepage = getHomePath(profile);
   return (
     <PageShell>
       <TopNavContainer>
         <LogoContainer>
-          <Link href="/test-page" aria-label="Go to home">
+          <Link href={homepage} aria-label="Go to home">
             <ImageLogo src={ecovetGlobal} alt="Ecovet Global Logo" />
           </Link>
         </LogoContainer>

@@ -25,6 +25,7 @@ import Clock from "@/assets/images/clock.svg";
 import Gear from "@/assets/images/gear.svg";
 import Pencil from "@/assets/images/pencil.svg";
 import Play from "@/assets/images/play.svg";
+import AccessError from "@/components/AccessError/AccessError";
 import InfoComponent from "@/components/InfoComponent/InfoComponent";
 import InputDropdown from "@/components/InputDropdown/InputDropdown";
 import { ImageLogo } from "@/components/styles";
@@ -385,6 +386,12 @@ export default function TemplateBuilderPage() {
   </LoadingScreen>;
   if (!localStore)
     return <LoadingMessages>Template not found.</LoadingMessages>;
+
+  const parAcesss = profile?.user_type === "Participant";
+
+  if (parAcesss) {
+    return <AccessError />;
+  }
 
   return (
     <>

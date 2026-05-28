@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { CircularProgress } from "@mui/material";
 import Tabs from "@mui/material/Tabs";
 import { fetchSessionsbyUserGroup } from "@/actions/supabase/queries/sessions";
+import AccessError from "@/components/AccessError/AccessError";
 import ParticipantNavBar from "@/components/ParticipantsNavBar/ParticipantsNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
@@ -107,6 +108,12 @@ export default function ParticipantPastSessionsPage() {
     } finally {
       setPdfLoading(null);
     }
+  }
+
+  const parAcesss = profile?.user_type === "Participant";
+
+  if (!parAcesss) {
+    return <AccessError />;
   }
 
   return (

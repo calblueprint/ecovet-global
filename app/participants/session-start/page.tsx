@@ -9,6 +9,7 @@ import {
   fetchSessionById,
 } from "@/actions/supabase/queries/profile";
 import { fetchTemplateNameBySession } from "@/actions/supabase/queries/sessions";
+import AccessError from "@/components/AccessError/AccessError";
 import ParticipantsNavBar from "@/components/ParticipantsNavBar/ParticipantsNavBar";
 import { useProfile } from "@/utils/ProfileProvider";
 import { Button, Container, Heading2, Label, Main } from "./styles";
@@ -91,6 +92,12 @@ export default function ParticipantWaitingPage() {
       supabase.removeChannel(channel);
     };
   }, [profile?.id, profile]);
+
+  const parAcesss = profile?.user_type === "Participant";
+
+  if (!parAcesss) {
+    return <AccessError />;
+  }
 
   return (
     <div>

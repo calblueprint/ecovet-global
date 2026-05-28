@@ -19,6 +19,7 @@ import {
   FailedInvitesList,
   FailedReason,
   FormHeader,
+  FormSub,
   InviteTypeButton,
   ParticipantButton,
   SubmitButton,
@@ -132,6 +133,10 @@ function InviteComponent({
     <AddInviteMain>
       <AddInviteFormDiv>
         <FormHeader>Invite a Participant or Facilitator</FormHeader>
+        <FormSub>
+          Promote a Participant to Facilitator by re-enterying their email and
+          selecting Facilitator.
+        </FormSub>
         {errorMessage && (
           <ErrorMessageDiv $hasError={errorMessage}>
             <ErrorMessage>{errorMessage}</ErrorMessage>

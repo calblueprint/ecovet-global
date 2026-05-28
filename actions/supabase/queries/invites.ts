@@ -4,7 +4,7 @@ import type { UUID } from "@/types/schema";
 import supabase from "@/app/api/supabase/createClient";
 import { getSupabaseAdminClient } from "@/lib/supabase/server";
 import { Invite, Profile, UserType } from "@/types/schema";
-import { sendInviteEmail, signInWithMagicLink } from "./auth";
+import { sendInviteEmail } from "./auth";
 
 async function getProfileByEmail(
   email: string,
@@ -98,90 +98,6 @@ export async function submitNewInvite(
   return { error: false, message: "Invite sent successfully" };
 }
 
-/* updates a pending invite status to cancelled given an invite_id */
-export async function cancelInvite(invite_id: UUID): Promise<void> {
-  const { data, error } = await supabase
-    .from("invite")
-    .select("*")
-    .eq("invite_id", invite_id)
-    .single();
-  if (error) {
-    console.error("Error fetching invite by invite_id:", error.message);
-    return;
-  }
-  const invite_data: Invite = data as Invite;
-  if (invite_data.status == "Accepted") {
-    console.error("Invite has already been accepted.");
-    return;
-  }
-  const { error: updateError } = await supabase
-    .from("invite")
-    .update({ status: "Cancelled" })
-    .match({ invite_id: invite_id });
-
-  if (updateError) {
-    console.error(
-      "Error updating invite status to cancelled:",
-      updateError.message,
-    );
-    return;
-  }
-}
-
-//Returns true if user is a facilitator in the user group given their email
-export async function isFacilitatorInUserGroup(
-  email: string,
-  user_group_id: string,
-): Promise<boolean> {
-  const { data, error } = await supabase
-    .from("profile")
-    .select("user_type")
-    .eq("email", email)
-    .eq("user_group_id", user_group_id)
-    .maybeSingle();
-
-  if (error) {
-    console.error("Profile lookup failed:", error.message);
-    return false;
-  }
-
-  return data?.user_type === "Facilitator";
-}
-
-//Returns true if user is in the user group given their email
-export async function isInUserGroup(
-  email: string,
-  user_group_id: string,
-): Promise<boolean> {
-  const { data, error } = await supabase
-    .from("profile")
-    .select("email")
-    .eq("email", email)
-    .eq("user_group_id", user_group_id)
-    .maybeSingle();
-
-  if (error) {
-    console.error("Profile lookup error:", error.message);
-    return false;
-  }
-
-  return !!data;
-}
-
-export async function changeToParticipant(user_id: UUID): Promise<void> {
-  const { error } = await supabase
-    .from("profile")
-    .update({ user_type: "Participant" })
-    .match({ id: user_id });
-
-  if (error) {
-    console.error(
-      "Error updating profile user_type to Participant:",
-      error.message,
-    );
-  }
-}
-
 export async function changeToFacilitator(user_id: UUID): Promise<void> {
   const { error } = await supabase
     .from("profile")
@@ -207,6 +123,7 @@ export async function deleteInvite(invite_id: UUID): Promise<void> {
   }
 }
 
+// deletes the Auth Row in Supabase - seperate from the invites and profile table
 export async function deleteAuthUserByEmail(email: string): Promise<void> {
   const adminClient = getSupabaseAdminClient();
   const lowerCaseEmail = email.toLowerCase();

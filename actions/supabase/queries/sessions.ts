@@ -31,21 +31,6 @@ export async function fetchRoles(templateId: string) {
     : [];
 }
 
-export async function fetchParticipants(userGroupId: string) {
-  const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("profile")
-    .select("first_name, last_name, id")
-    .eq("user_group_id", userGroupId);
-  if (error) throw error;
-  return data
-    ? data.map(p => ({
-        id: String(p.id),
-        name: String(p.first_name + " " + p.last_name),
-      }))
-    : [];
-}
-
 export async function fetchChatUserOptions(
   userGroupId: string,
   sessionId: string,
@@ -208,6 +193,7 @@ export async function assignParticipantToSession(
   }
 }
 
+// for a force advance game
 export async function fetchSessionGlobalPhaseIndex(sessionId: string) {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
@@ -316,45 +302,6 @@ export async function sessionParticipants(
   if (error) throw error;
 
   return data ?? [];
-}
-
-export async function sessionParticipantsBulk(
-  session_ids: UUID[],
-): Promise<ParticipantSessionWithProfile[]> {
-  const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("participant_session")
-    .select(
-      `
-      user_id,
-      role_id,
-      session_id,
-      phase_index,
-      is_finished,
-      profile!fk_participant_profile (
-      first_name,
-      last_name
-      )
-    `,
-    )
-    .in("session_id", session_ids)
-    .returns<ParticipantSessionWithProfile[]>();
-
-  if (error) throw error;
-  return data ?? [];
-}
-
-export async function getAllPhaseIds(templateId: UUID): Promise<UUID[] | null> {
-  const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("phase")
-    .select("phase_id")
-    .eq("template_id", templateId)
-    .order("phase_number", { ascending: true });
-
-  if (error) throw error;
-
-  return data?.map(p => p.phase_id) ?? null;
 }
 
 export async function advancePhaseForSingleUser(
@@ -513,7 +460,6 @@ export async function fetchPhases(sessionId: string) {
   return phases ?? [];
 }
 
-// Can merge with fetchRole so that we dont have to call twice.
 export async function fetchParticipantPhaseIndex(
   userId: string,
   sessionId: string,
@@ -540,7 +486,7 @@ export async function fetchParticipantPhaseIndex(
     throw new Error(`No phase index`);
   }
 
-  return data.phase_index; //remove -1
+  return data.phase_index;
 }
 
 export async function fetchRolePhases(
@@ -723,219 +669,6 @@ export async function fetchPromptResponses(
   return data ?? [];
 }
 
-export async function fetchSessionsByParticipantId(
-  userId: string,
-): Promise<Session[]> {
-  const supabase = await getSupabaseServerClient();
-
-  const { data: participantSessions, error: psError } = await supabase
-    .from("participant_session")
-    .select("session_id")
-    .eq("user_id", userId);
-
-  if (psError || !participantSessions?.length) return [];
-
-  const sessionIds = participantSessions.map(ps => ps.session_id);
-
-  const { data, error } = await supabase
-    .from("session")
-    .select("*")
-    .in("session_id", sessionIds);
-
-  if (error) {
-    console.error("Error fetching sessions by participant:", error);
-    return [];
-  }
-
-  return data ?? [];
-}
-
-export async function getPhaseId(sessionId: UUID): Promise<UUID | null> {
-  const supabase = await getSupabaseServerClient();
-
-  const { data: sessionData, error: sessionError } = await supabase
-    .from("session")
-    .select("template_id")
-    .eq("session_id", sessionId)
-    .single();
-
-  if (sessionError) {
-    console.error("Session error:", sessionError);
-    throw sessionError;
-  }
-
-  const templateId = sessionData.template_id;
-
-  if (!templateId) {
-    throw new Error(`No session template`);
-  }
-
-  const { data: phaseData, error: phaseError } = await supabase
-    .from("phase")
-    .select("phase_id")
-    .eq("template_id", templateId)
-    .limit(1)
-    .single();
-
-  if (phaseError) {
-    console.error("Phase error:", phaseError);
-    throw phaseError;
-  }
-
-  return phaseData.phase_id ?? null;
-}
-
-export async function getPromptIdByRolePhase(
-  rolePhaseId: UUID,
-): Promise<string[] | null> {
-  // DT: Effectively, this gives us the number of Prompt questions because the promptId is unique for each Prompt.
-  //DT: This works because each PromptId is unique for each combination of Role + Phase.
-  const supabase = await getSupabaseServerClient();
-
-  const { data, error } = await supabase
-    .from("prompt")
-    .select("*")
-    .eq("role_phase_id", rolePhaseId);
-
-  if (error) {
-    console.error("Error getting prompt_id:", error);
-    throw error;
-  }
-
-  return data?.map(d => d.prompt_id) ?? null;
-}
-
-// DEPRECATED - query moved into fetchPromptsWithResponses
-// kept for future use
-export async function getRespondedPromptsByRolePhase(
-  promptIds: UUID[],
-  sessionId: UUID,
-  rolePhaseId: UUID,
-): Promise<string[] | null> {
-  // DT: This gives us the number of Prompt questions that have been answered by the user for a particular Role + Phase in a particular Session.
-  // DT: We have to use userId and sessionId because the same RolePhaseId can be present in multiple sessions and we want to know how many prompts
-  // the user has answered for that RolePhaseId in that particular session.
-  const supabase = await getSupabaseServerClient();
-
-  const { data, error } = await supabase
-    .from("prompt_response")
-    .select("*")
-    .in("prompt_id", promptIds)
-    .eq("session_id", sessionId)
-    .eq("role_phase_id", rolePhaseId);
-
-  if (error) {
-    console.error("Error counting responded prompts:", error);
-    throw error;
-  }
-
-  return data?.map(d => d.prompt_id) ?? null;
-}
-
-export async function fetchPromptsWithResponses(
-  rolePhaseId: UUID,
-  userId: UUID,
-  sessionId: UUID,
-): Promise<PromptWithResponse[]> {
-  const supabase = await getSupabaseServerClient();
-
-  // 1. Prompts for this role_phase
-  const { data: prompts, error: promptsError } = await supabase
-    .from("prompt")
-    .select("*")
-    .eq("role_phase_id", rolePhaseId)
-    .order("prompt_number");
-
-  if (promptsError) {
-    console.error("Error fetching prompts:", promptsError);
-    throw promptsError;
-  }
-
-  // 2. This user's responses for this session/role_phase
-  const { data: responses, error: responsesError } = await supabase
-    .from("prompt_response")
-    .select("*")
-    .eq("user_id", userId)
-    .eq("session_id", sessionId)
-    .eq("role_phase_id", rolePhaseId);
-
-  if (responsesError) {
-    console.error("Error fetching responses:", responsesError);
-    throw responsesError;
-  }
-
-  // 3. All options for these prompts (not only selected ones)
-  const promptIds = (prompts ?? []).map(p => p.prompt_id);
-  const optionsByPrompt = new Map<UUID, PromptOptionsSelected[]>();
-
-  if (promptIds.length > 0) {
-    const { data: options, error: optionsError } = await supabase
-      .from("prompt_option")
-      .select("option_id, prompt_id, option_text")
-      .in("prompt_id", promptIds);
-
-    if (optionsError) {
-      console.error("Error fetching options:", optionsError);
-      throw optionsError;
-    }
-
-    const selectedOptionIds = new Set(
-      (responses ?? [])
-        .map(r => r.prompt_option_id)
-        .filter((id): id is UUID => Boolean(id)),
-    );
-
-    for (const o of options ?? []) {
-      if (!o.option_text) continue;
-      const list = optionsByPrompt.get(o.prompt_id) ?? [];
-      list.push({
-        optionId: o.option_id,
-        text: o.option_text,
-        selected: selectedOptionIds.has(o.option_id),
-      });
-      optionsByPrompt.set(o.prompt_id, list);
-    }
-  }
-
-  // 4. Free-text answers keyed by prompt_id
-  const textAnswerByPrompt = new Map<UUID, string>();
-  for (const r of responses ?? []) {
-    if (r.prompt_answer) {
-      textAnswerByPrompt.set(r.prompt_id, r.prompt_answer);
-    }
-  }
-
-  // 5. Merge into UI shape
-  return (prompts ?? []).map(p => {
-    const options = optionsByPrompt.get(p.prompt_id) ?? null;
-    return {
-      promptId: p.prompt_id,
-      question: p.prompt_text ?? "Missing Question",
-      answer: textAnswerByPrompt.get(p.prompt_id) ?? null,
-      options,
-    };
-  });
-}
-
-export async function fetchRolePhasesBatch(
-  roleIds: UUID[],
-  phaseId: UUID,
-): Promise<Map<UUID, RolePhase>> {
-  const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("role_phase")
-    .select("*")
-    .eq("phase_id", phaseId)
-    .in("role_id", roleIds);
-
-  if (error) {
-    console.error("Error fetching role phases:", error);
-    throw error;
-  }
-
-  return new Map(data?.map(rp => [rp.role_id, rp]) ?? []);
-}
-
 export async function fetchRoleName(roleId: UUID): Promise<Role> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
@@ -952,81 +685,6 @@ export async function fetchRoleName(roleId: UUID): Promise<Role> {
   return data;
 }
 
-export async function fetchSessionName(
-  session_id: UUID,
-): Promise<string | null> {
-  const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("session")
-    .select("session_name")
-    .eq("session_id", session_id)
-    .single();
-
-  if (error) {
-    console.error("Error fetching session name:", error);
-    throw error;
-  }
-
-  return data?.session_name ?? null;
-}
-
-export async function fetchIsSessionAsync(
-  session_id: string,
-): Promise<boolean | null> {
-  const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("session")
-    .select("is_async")
-    .eq("session_id", session_id)
-    .single();
-  if (error) {
-    console.error("Error fetching whether session is async:", error);
-    throw error;
-  }
-  return data?.is_async ?? null;
-}
-
-export async function fetchSessionCreatedAt(
-  session_id: UUID,
-): Promise<string | null> {
-  const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("session")
-    .select("created_at")
-    .eq("session_id", session_id)
-    .single();
-
-  if (error) {
-    console.error("Error fetching session name:", error);
-    throw error;
-  }
-
-  return data?.created_at;
-}
-
-// all role phases for one role - mapped by phaseid
-export async function fetchRolePhasesByRoleAndPhases(
-  roleId: UUID,
-  phaseIds: UUID[],
-): Promise<Map<UUID, RolePhase>> {
-  if (phaseIds.length === 0) return new Map();
-
-  const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("role_phase")
-    .select("*")
-    .eq("role_id", roleId)
-    .in("phase_id", phaseIds);
-
-  if (error) {
-    console.error("Error fetching role_phases by role and phases:", error);
-    throw error;
-  }
-
-  return new Map(
-    (data ?? []).map(rp => [rp.phase_id as UUID, rp as RolePhase]),
-  );
-}
 export type ParticipantDetailBundle = {
   participant: ParticipantSessionWithProfile;
   email: string;

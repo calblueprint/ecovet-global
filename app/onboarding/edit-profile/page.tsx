@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { handleProfileSubmit } from "@/actions/supabase/queries/profile";
+import { getHomePath } from "@/utils/HomePage";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
   Button,
@@ -20,6 +21,7 @@ import {
 
 export default function EditProfilePage() {
   const { userId, profile, loading: profileLoading } = useProfile();
+  const homepage = getHomePath(profile);
   const [formData, setFormData] = useState({
     id: "",
     first_name: "",
@@ -80,7 +82,7 @@ export default function EditProfilePage() {
     <Main>
       <form onSubmit={handleSubmit}>
         <Container>
-          <Link href={`/test-page`} style={{ textDecoration: "none" }}>
+          <Link href={homepage} style={{ textDecoration: "none" }}>
             <Heading3>← Back</Heading3>
           </Link>
           <IntroText>

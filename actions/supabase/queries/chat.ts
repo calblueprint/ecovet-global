@@ -1,50 +1,7 @@
 "use server";
 
-import { UUID } from "crypto";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { ChatMessage, Profile } from "@/types/schema";
-
-export async function getChatParticipants(roomId: string) {
-  const supabase = await getSupabaseServerClient();
-
-  const { data, error } = await supabase
-    .from("chat_room")
-    .select("user_id")
-    .eq("room_id", roomId);
-
-  if (error) {
-    console.error("Error getting chat rooms users: ", error.message);
-    throw new Error("Failed to get chat rooms users.");
-  }
-
-  const userIds = data
-    .filter(({ user_id }) => user_id)
-    .map(({ user_id }) => user_id);
-
-  return userIds as string[];
-}
-
-export async function getChatRoomSessionId(roomId: string) {
-  const supabase = await getSupabaseServerClient();
-
-  const { data, error } = await supabase
-    .from("chat_room")
-    .select("session_id")
-    .eq("room_id", roomId)
-    .limit(1);
-
-  if (error) {
-    console.error("Error getting chat room session id: ", error.message);
-    throw new Error("Failed to get chat room session id.");
-  }
-
-  if (data?.length == 0) {
-    console.error("Tried getting session for chat room that doesn't exist");
-    throw new Error("Tried getting session for chat room that doesn't exist");
-  }
-
-  return data[0].session_id;
-}
 
 export async function getUserChatRooms(userId: string, sessionId: string) {
   const supabase = await getSupabaseServerClient();
@@ -135,22 +92,6 @@ export async function getMessageHistory(
   }
 
   return data as ChatMessage[];
-}
-
-export async function removeUserFromChatRoom(roomId: string, userId: string) {
-  const supabase = await getSupabaseServerClient();
-
-  const { error } = await supabase
-    .from("chat_room")
-    .delete()
-    .eq("room_id", roomId)
-    .eq("user_id", userId)
-    .limit(1);
-
-  if (error) {
-    console.log("Error removing user from chat room.", error.message);
-    throw new Error("Failed to remove user from chat room.");
-  }
 }
 
 export async function addUserToChatRoom(

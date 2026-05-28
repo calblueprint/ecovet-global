@@ -1,16 +1,12 @@
 import type { EditablePhase, RolePhase, UUID } from "@/types/schema";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { addNewOption } from "@/actions/supabase/queries/prompt";
 import {
   LocalStore,
-  Prompt,
   PromptType,
   Role,
   StagedOption,
   Template,
 } from "@/types/schema";
-import { useProfile } from "@/utils/ProfileProvider";
 import { ActiveIds } from "../../page";
 import QuestionBuilder from "../QuestionBuilder/QuestionBuilder";
 import TemplateOverviewForm from "../TemplateOverviewForm/TemplateOverviewForm";

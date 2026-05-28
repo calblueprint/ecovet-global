@@ -27,6 +27,7 @@ import {
   isSessionForceAdvance,
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
+import AccessError from "@/components/AccessError/AccessError";
 import Chat from "@/components/Chat/Chat";
 import { PromptOption } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
@@ -385,6 +386,12 @@ export default function SessionFlowPage() {
           .map(p => p.prompt_id),
       ),
     );
+  }
+
+  const parAcesss = profile?.user_type === "Participant";
+
+  if (!parAcesss) {
+    return <AccessError />;
   }
 
   return (
