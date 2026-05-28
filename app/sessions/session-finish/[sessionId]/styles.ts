@@ -1,19 +1,50 @@
 import styled from "styled-components";
 import COLORS from "@/styles/colors";
 import { Sans } from "@/styles/fonts";
-import { Button as BaseButton, Container as BaseContainer } from "../../styles";
 
-export const Container = styled(BaseContainer)`
-  gap: 0;
+export const Main = styled.main`
+  display: flex;
+  height: 100vh;
+  min-height: 100vh;
+  padding: 2rem;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background-color: ${COLORS.white};
+  background: ${COLORS.white};
 `;
 
-export const Button = styled(BaseButton)`
+export const Container = styled.div`
+  background-color: ${COLORS.white};
+  width: stretch;
+  width: 20rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+`;
+
+export const Button = styled.button`
   width: 100%;
   font-size: 12px;
   font-style: normal;
   font-weight: 500;
   line-height: 150%;
   color: ${COLORS.white};
+  height: 45px;
+  border-radius: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  align-self: stretch;
+  background-color: ${COLORS.darkElectricBlue};
+  font-family: ${Sans.style.fontFamily};
+  &:hover {
+    background-color: ${COLORS.darkElectricBlue};
+  }
+  border: 0px ${COLORS.darkElectricBlue};
+  opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 `;
 
 export const Title = styled.h1`
@@ -27,14 +58,6 @@ export const Title = styled.h1`
   margin-bottom: 0.5rem;
   text-align: center;
   width: 100%;
-`;
-
-export const SubHeader = styled.h2`
-  font-family: ${Sans.style.fontFamily};
-  font-size: 1rem;
-  font-weight: 500;
-  color: ${COLORS.black70};
-  margin-bottom: 0.75rem;
 `;
 
 export const Section = styled.div`
@@ -87,13 +110,6 @@ export const FileSize = styled.span`
   font-family: ${Sans.style.fontFamily};
   font-size: 0.75rem;
   color: ${COLORS.black40};
-`;
-
-export const Divider = styled.div`
-  height: 1px;
-  background: ${COLORS.black20};
-  width: 100%;
-  margin: 0.5rem 0;
 `;
 
 export const DownloadButton = styled.button`

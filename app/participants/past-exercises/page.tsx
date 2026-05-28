@@ -109,9 +109,9 @@ export default function ParticipantPastSessionsPage() {
     }
   }
 
-  const parAcesss = profile?.user_type === "Participant";
+  const parAccess = profile?.user_type === "Participant";
 
-  if (!parAcesss) {
+  if (!parAccess) {
     return <AccessError />;
   }
 

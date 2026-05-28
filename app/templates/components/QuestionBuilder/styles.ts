@@ -299,7 +299,6 @@ export const BigInput = styled(TextField).attrs({
     }
   }
 `;
-// TODO: placeholder color not working
 
 export const RolePhaseDescriptionInput = styled.input.attrs({ type: "text" })`
   width: 100%;
@@ -377,14 +376,12 @@ export const McqOptionStyled = styled.div`
 export const DeleteMcqOptionButton = styled.div`
   margin-left: auto;
   padding: 0 2rem 0 1rem;
-  color: ${COLORS.black40}
+  color: ${COLORS.black40};
   cursor: pointer;
 
   &:hover {
     color: ${COLORS.tagRed};
   }
-
-  
 `;
 
 export const CheckboxPromptStyled = styled.div`
@@ -394,7 +391,6 @@ export const CheckboxPromptStyled = styled.div`
 export const AddNewOptionStyled = styled.div`
   display: flex;
   align-items: center;
-  justify-contet: space-between;
   gap: 8px;
   align-self: stretch;
 `;

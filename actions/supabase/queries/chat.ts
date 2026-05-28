@@ -44,7 +44,6 @@ export async function persistChatMessage(chatMessage: ChatMessage) {
   const { error } = await supabase.from("chat_message").insert(chatMessage);
 
   if (error) {
-    console.log("Error saving chat message: ", error.message);
     throw new Error("Failed to save chat message");
   }
 }
@@ -108,14 +107,10 @@ export async function addUserToChatRoom(
     .limit(1);
 
   if (error) {
-    console.log("Error adding user to chat room.", error.message);
     throw new Error("Failed to add user to chat room.");
   }
 
   if (!data) {
-    console.log(
-      `Trying to add user to a chat room that doesn't exist. (room_id: ${roomId})`,
-    );
     throw new Error(
       `Trying to add user to a chat room that doesn't exist. (room_id: ${roomId})`,
     );
@@ -157,14 +152,10 @@ export async function createChatRoom(
     .limit(1);
 
   if (error) {
-    console.log("Error creating chat room.", error.message);
     throw new Error("Failed to create new chat room.");
   }
 
   if (data.length > 0) {
-    console.log(
-      `Trying to create a chat room that already exists. (room_id: ${roomId})`,
-    );
     throw new Error(
       `Trying to create a chat room that already exists. (room_id: ${roomId})`,
     );
@@ -187,7 +178,6 @@ async function addChatRoomEntry(
   });
 
   if (error) {
-    console.log("Error creating chat room.", error.message);
     throw new Error("Failed to create new chat room.");
   }
 }

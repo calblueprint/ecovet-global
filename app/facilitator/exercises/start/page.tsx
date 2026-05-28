@@ -133,7 +133,6 @@ export default function Page() {
       if (validAssignments.length === 0) {
         throw new Error("Please assign at least one participant with a role.");
       }
-      console.log(isAsync);
       const sessionId = (await createSession(
         selectedTemplateId as UUID,
         profile.user_group_id as UUID,
@@ -141,8 +140,6 @@ export default function Page() {
         isAsync,
         exerciseName || undefined,
       )) as UUID;
-
-      console.log(sessionId);
 
       // await assignParticipantToSession(profile.id as UUID, sessionId, null);
 
@@ -215,9 +212,9 @@ export default function Page() {
     setParticipants(prev => prev.filter((_, i) => i !== index));
   };
 
-  const facAcesss = profile?.user_type === "Facilitator";
+  const facAccess = profile?.user_type === "Facilitator";
 
-  if (!facAcesss) {
+  if (!facAccess) {
     return <AccessError />;
   }
 
@@ -265,7 +262,7 @@ export default function Page() {
               </ToggleButton>
               <InfoComponent
                 infoText={
-                  "Asynchronous games allow the facilitator to 'Nudge' the participant and remind them to finish the excercise."
+                  "Asynchronous games allow the facilitator to 'Nudge' the participant and remind them to finish the exercise."
                 }
               ></InfoComponent>
             </ToggleGroup>

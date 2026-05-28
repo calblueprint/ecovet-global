@@ -258,7 +258,7 @@ export default function FacilitatorSessionView() {
   }
 
   const isEmailValid = (email: string) => {
-    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
@@ -268,7 +268,6 @@ export default function FacilitatorSessionView() {
       const data = await fetchEmailByUserId(selectedUID);
       const em = data?.email as string;
       if (!isEmailValid(em)) {
-        console.log("No valid email entered.");
         return;
       }
       setOpenWarning(false);
@@ -286,9 +285,9 @@ export default function FacilitatorSessionView() {
       </LoadingScreen>
     );
 
-  const facAcesss = profile?.user_type === "Facilitator";
+  const facAccess = profile?.user_type === "Facilitator";
 
-  if (!facAcesss) {
+  if (!facAccess) {
     return <AccessError />;
   }
 

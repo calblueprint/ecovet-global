@@ -166,16 +166,12 @@ export default function SessionFlowPage() {
       prompts,
     );
 
-    console.log(cached);
-
     if (cached) {
       setAnswers(cached.answers);
       setCompletedPrompts(cached.completed);
 
       return;
     }
-
-    console.log("using db instead of cache");
 
     let cancelled = false;
     (async () => {
@@ -313,15 +309,11 @@ export default function SessionFlowPage() {
   }
 
   async function handleBlur(index: number, rawAnswer: string) {
-    console.log("raw", rawAnswer);
-
     if (!userId || !sessionIdStr || !currentPhase || !rolePhase?.role_phase_id)
       return;
 
     const promptType = prompts[index].prompt_type;
     const promptId = prompts[index].prompt_id;
-
-    console.log("raw", rawAnswer);
 
     if (isAnswerEmpty(rawAnswer, promptType)) {
       setCompletedPrompts(prev => {
@@ -352,7 +344,6 @@ export default function SessionFlowPage() {
   }
 
   async function submitAnswers() {
-    console.log("tyring to submut");
     if (!userId || !sessionIdStr || !currentPhase || !rolePhase) return;
 
     const promises = answers

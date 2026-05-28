@@ -53,7 +53,6 @@ export default function EditProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(userId);
     if (!userId) return;
 
     setSaving(true);

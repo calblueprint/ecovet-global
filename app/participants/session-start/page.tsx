@@ -44,13 +44,12 @@ export default function ParticipantWaitingPage() {
       );
 
       const role_name = role_data?.role_name ?? "participant";
-      setStatus(`You were invited as a  ${role_name} in:`);
+      setStatus(`You were invited as a ${role_name} in:`);
       setSessionExists(true);
     }
 
     async function initialLoad() {
       if (!profile) return;
-      console.log(profile.id);
       const data = await fetchSessionById(profile.id);
 
       if (data) {
@@ -71,8 +70,6 @@ export default function ParticipantWaitingPage() {
           filter: `user_id=eq.${profile.id}`,
         },
         payload => {
-          console.log(payload);
-
           const newSessionId = payload.new.session_id;
 
           if (!newSessionId) {
@@ -92,7 +89,7 @@ export default function ParticipantWaitingPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [profile?.id, profile]);
+  }, [profile]);
 
   const parAccess = profile?.user_type === "Participant";
   const facAccess = profile?.user_type === "Facilitator";

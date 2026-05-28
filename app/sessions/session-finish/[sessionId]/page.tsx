@@ -7,7 +7,6 @@ import { fetchPDFName } from "@/actions/supabase/queries/sessions";
 import { getHomePath } from "@/utils/HomePage";
 import { useProfile } from "@/utils/ProfileProvider";
 import { buildSessionDisplayName } from "@/utils/session-details";
-import { Main } from "../../styles";
 import {
   Button,
   Container,
@@ -16,6 +15,7 @@ import {
   FileName,
   FileSize,
   HomeLink,
+  Main,
   Section,
   TextArea,
   Title,
@@ -31,7 +31,6 @@ export default function SessionFinish() {
   const { profile } = useProfile();
 
   const isParticipant = profile?.user_type == "Participant";
-  console.log(profile?.user_type);
 
   const { sessionId } = useParams() as { sessionId: string };
 
@@ -123,8 +122,6 @@ export default function SessionFinish() {
     document.body.removeChild(link);
     URL.revokeObjectURL(objectUrl);
   }
-
-  console.log(profile?.user_type);
 
   return (
     <Main>

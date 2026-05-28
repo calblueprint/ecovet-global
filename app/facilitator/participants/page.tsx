@@ -49,7 +49,6 @@ export default function ParticipantsPage() {
     try {
       const result = await resendInvite(participant.email);
       if (result.success) {
-        // swap for your toast/snackbar if you have one
         alert(`Invite resent to ${participant.email}`);
       } else {
         alert(`Failed to resend: ${result.error}`);
@@ -131,12 +130,10 @@ export default function ParticipantsPage() {
     if (action === "confirm" && pendingDelete) {
       // Only delete profile is invite accepted and there is one
       if (pendingDelete.invite_accepted && pendingDelete.id) {
-        console.log("deleting profile: ", pendingDelete);
         await deleteProfile(pendingDelete.id as UUID);
       }
 
       // Always delete invite for both cases
-      console.log("deleting invite: ", pendingDelete);
       await deleteInvite(pendingDelete.invite_id as UUID);
 
       await deleteAuthUserByEmail(pendingDelete.email as UUID);
@@ -146,9 +143,9 @@ export default function ParticipantsPage() {
     setPendingDelete(null);
   };
 
-  const facAcesss = profile?.user_type === "Facilitator";
+  const facAccess = profile?.user_type === "Facilitator";
 
-  if (!facAcesss) {
+  if (!facAccess) {
     return <AccessError />;
   }
 

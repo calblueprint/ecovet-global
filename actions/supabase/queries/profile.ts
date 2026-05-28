@@ -131,7 +131,6 @@ export async function fetchSessionById(userId: string) {
     .eq("user_id", userId)
     .eq("session.is_finished", false)
     .order("created_at", { ascending: false });
-  console.log(data);
   //order by most recent session added
   if (error) {
     console.error("Error fetching active session for user:", error.message);

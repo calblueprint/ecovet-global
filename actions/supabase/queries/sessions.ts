@@ -213,7 +213,6 @@ export async function setSessionGlobalPhaseIndex(
   sessionId: string,
   newPhaseIndex: number,
 ) {
-  console.log(`set session global phase index ${newPhaseIndex}`);
   const supabase = await getSupabaseServerClient();
   const { error } = await supabase
     .from("session")
@@ -252,7 +251,6 @@ export async function createSession(
     throw error;
   }
 
-  console.log("Created session row:", data);
   return data.session_id;
 }
 
@@ -323,7 +321,6 @@ export async function changePhaseForSingleUser(
   sessionId: UUID,
   phaseChange: number,
 ): Promise<void> {
-  console.log("Changing phase for user:", { userId, roleId, sessionId });
   const supabase = await getSupabaseServerClient();
 
   const { data: currentData, error: fetchError } = await supabase
@@ -395,7 +392,6 @@ export async function setIsFinished(
   sessionId: UUID,
 ): Promise<void> {
   const supabase = await getSupabaseServerClient();
-  console.log(userId, roleId, sessionId);
 
   const { data, error } = await supabase
     .from("participant_session")
@@ -461,7 +457,6 @@ export async function fetchParticipantPhaseIndex(
   userId: string,
   sessionId: string,
 ): Promise<number> {
-  console.log("userId", userId, "sessionId", sessionId);
   const supabase = await getSupabaseServerClient();
 
   const { data, error } = await supabase

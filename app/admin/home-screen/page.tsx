@@ -49,9 +49,9 @@ export default function AdminPage() {
     loadData();
   }, [loadData]);
 
-  const adminAcesss = profile?.user_type === "Admin";
+  const adminAccess = profile?.user_type === "Admin";
 
-  if (!adminAcesss) {
+  if (!adminAccess) {
     return <AccessError />;
   }
 
@@ -80,9 +80,6 @@ export default function AdminPage() {
                 <RightColumnStack>
                   <InviteComponent
                     user_group_id={selectedUserGroupId}
-                    onInvitesChange={() => {
-                      console.log("Invites changed!");
-                    }}
                     isAdminDashboard={true}
                   />
                   <AdminParticipants user_group_id={selectedUserGroupId} />
@@ -93,7 +90,7 @@ export default function AdminPage() {
             <SelectGroup>
               <SelectGroupTitle>No user group selected</SelectGroupTitle>
               <SelectGroupHint>
-                Choose a group from the sidebar to view its excercises and
+                Choose a group from the sidebar to view its exercises and
                 participants.
               </SelectGroupHint>
             </SelectGroup>

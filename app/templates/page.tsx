@@ -84,7 +84,6 @@ const createInitialStore = (): LocalStore => {
         template_name: "New Template",
         accessible_to_all: null,
         user_group_id: null,
-        objective: "",
         summary: "",
         setting: "",
         current_activity: "",
@@ -212,7 +211,6 @@ export default function TemplateBuilderPage() {
       }
 
       for (const phaseID of saveStore.phaseIds) {
-        console.log("saving phase:", saveStore.phasesById[phaseID]);
         await createPhases(
           phaseID,
           saveStore.phasesById[phaseID].template_id,
@@ -366,16 +364,18 @@ export default function TemplateBuilderPage() {
     setActiveIds({ roleId: 1, rolePhaseId: null });
   };
 
-  if (loading) return;
-  <LoadingScreen>
-    <CircularProgress color="inherit" aria-label="Loading…" />
-  </LoadingScreen>;
+  if (loading)
+    return (
+      <LoadingScreen>
+        <CircularProgress color="inherit" aria-label="Loading…" />
+      </LoadingScreen>
+    );
   if (!localStore)
     return <LoadingMessages>Template not found.</LoadingMessages>;
 
-  const parAcesss = profile?.user_type === "Participant";
+  const parAccess = profile?.user_type === "Participant";
 
-  if (parAcesss) {
+  if (parAccess) {
     return <AccessError />;
   }
 

@@ -118,9 +118,9 @@ export default function FacilitatorExercisesPage() {
     }
   }
 
-  const facAcesss = profile?.user_type === "Facilitator";
+  const facAccess = profile?.user_type === "Facilitator";
 
-  if (!facAcesss) {
+  if (!facAccess) {
     return <AccessError />;
   }
 

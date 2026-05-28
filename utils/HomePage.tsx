@@ -1,7 +1,7 @@
 import type { Profile } from "@/types/schema";
 
 export function getHomePath(profile: Profile | null): string {
-  if (!profile) return "auth/sign-up";
+  if (!profile) return "/";
 
   switch (profile.user_type) {
     case "Admin":

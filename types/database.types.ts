@@ -104,21 +104,21 @@ export type Database = {
           invite_id: string;
           status: string | null;
           user_group_id: string;
-          user_type: string | null;
+          user_type: Database["public"]["Enums"]["user_type"] | null;
         };
         Insert: {
           email?: string | null;
           invite_id?: string;
           status?: string | null;
           user_group_id: string;
-          user_type?: string | null;
+          user_type?: Database["public"]["Enums"]["user_type"] | null;
         };
         Update: {
           email?: string | null;
           invite_id?: string;
           status?: string | null;
           user_group_id?: string;
-          user_type?: string | null;
+          user_type?: Database["public"]["Enums"]["user_type"] | null;
         };
         Relationships: [
           {
@@ -227,7 +227,7 @@ export type Database = {
           last_name: string | null;
           org_role: string | null;
           user_group_id: string | null;
-          user_type: string | null;
+          user_type: Database["public"]["Enums"]["user_type"] | null;
         };
         Insert: {
           country?: string | null;
@@ -237,7 +237,7 @@ export type Database = {
           last_name?: string | null;
           org_role?: string | null;
           user_group_id?: string | null;
-          user_type?: string | null;
+          user_type?: Database["public"]["Enums"]["user_type"] | null;
         };
         Update: {
           country?: string | null;
@@ -247,7 +247,7 @@ export type Database = {
           last_name?: string | null;
           org_role?: string | null;
           user_group_id?: string | null;
-          user_type?: string | null;
+          user_type?: Database["public"]["Enums"]["user_type"] | null;
         };
         Relationships: [
           {
@@ -538,7 +538,6 @@ export type Database = {
         Row: {
           accessible_to_all: boolean | null;
           current_activity: string | null;
-          objective: string | null;
           setting: string | null;
           summary: string | null;
           template_id: string;
@@ -549,7 +548,6 @@ export type Database = {
         Insert: {
           accessible_to_all?: boolean | null;
           current_activity?: string | null;
-          objective?: string | null;
           setting?: string | null;
           summary?: string | null;
           template_id?: string;
@@ -560,7 +558,6 @@ export type Database = {
         Update: {
           accessible_to_all?: boolean | null;
           current_activity?: string | null;
-          objective?: string | null;
           setting?: string | null;
           summary?: string | null;
           template_id?: string;
@@ -648,6 +645,7 @@ export type Database = {
     };
     Enums: {
       prompt_type: "text" | "multiple_choice" | "checkbox";
+      user_type: "Admin" | "Facilitator" | "Participant";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -779,6 +777,7 @@ export const Constants = {
   public: {
     Enums: {
       prompt_type: ["text", "multiple_choice", "checkbox"],
+      user_type: ["Admin", "Facilitator", "Participant"],
     },
   },
 } as const;

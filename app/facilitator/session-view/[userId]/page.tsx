@@ -208,9 +208,9 @@ export default function ParticipantDetailView() {
       </LoadingScreen>
     );
 
-  const facAcesss = profile?.user_type === "Facilitator";
+  const facAccess = profile?.user_type === "Facilitator";
 
-  if (!facAcesss) {
+  if (!facAccess) {
     return <AccessError />;
   }
 

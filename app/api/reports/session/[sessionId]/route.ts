@@ -200,9 +200,6 @@ export async function GET(
     .eq("session_id", sessionId)
     .single();
 
-  console.log(sessionError);
-  console.log(session);
-
   if (sessionError || !session) {
     return Response.json({ error: "Session not found" }, { status: 404 });
   }
@@ -546,8 +543,6 @@ export async function POST(
     )
     .eq("session_id", sessionId)
     .single();
-  console.log(sessionError);
-  console.log(session);
 
   if (sessionError || !session) {
     return Response.json({ error: "Session not found" }, { status: 404 });
