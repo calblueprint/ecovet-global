@@ -23,6 +23,7 @@ import {
   fetchRolePhases,
   fetchSessionGlobalPhaseIndex,
   fetchTemplateId,
+  isSessionFinished,
   isSessionForceAdvance,
 } from "@/actions/supabase/queries/sessions";
 import { fetchTemplate } from "@/actions/supabase/queries/templates";
@@ -48,11 +49,16 @@ export default function SessionFlowPage() {
   const userId = (profileUserId ?? paramUserId) as UUID;
   const sessionIdStr = sessionId as UUID;
 
+  const Access =
+    profile?.user_type === "Participant" ||
+    profile?.user_type === "Facilitator";
+
   const [templateInfo, setTemplateInfo] = useState<Template | null>(null);
   const [phases, setPhases] = useState<Phase[]>([]);
 
   // only used for force advance sessions
   const [maxPhaseIndex, setMaxPhaseIndex] = useState(0);
+  const [sessionFinished, setSessionFinished] = useState<boolean | null>(null);
 
   const [roleId, setRoleId] = useState<string>("");
   const [rolePhase, setRolePhase] = useState<RolePhase | null>(null);
@@ -78,6 +84,11 @@ export default function SessionFlowPage() {
 
   const loadData = useCallback(async () => {
     if (!userId || !sessionIdStr) return;
+    const finished = await isSessionFinished(sessionIdStr);
+    if (finished) {
+      setSessionFinished(true);
+      return;
+    }
     try {
       const templateId = await fetchTemplateId(sessionIdStr);
       const template = await fetchTemplate(
@@ -373,7 +384,9 @@ export default function SessionFlowPage() {
     );
   }
 
-  const Access = profile?.user_type === "Participant" || "Facilitator";
+  if (sessionFinished) {
+    return <AccessError />;
+  }
 
   if (!Access) {
     return <AccessError />;

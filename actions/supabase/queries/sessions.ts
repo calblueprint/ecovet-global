@@ -528,6 +528,22 @@ export async function finishSession(sessionId: string) {
   }
 }
 
+export async function isSessionFinished(sessionId: string): Promise<boolean> {
+  const supabase = await getSupabaseServerClient();
+  if (!sessionId) throw new Error("Missing sessionId");
+
+  const { data, error: sessionError } = await supabase
+    .from("session")
+    .select("is_finished")
+    .eq("session_id", sessionId);
+
+  if (sessionError) {
+    console.error("Error finishing session:", sessionError.message);
+    throw sessionError;
+  }
+  return data[0].is_finished;
+}
+
 export async function fetchRole(
   userId: string,
   sessionId: string,
