@@ -7,13 +7,12 @@ export type CreateTagParams = {
   name: string;
   user_group_id: string;
   number: number;
-  color: string;
 };
 
 export async function createTag(params: CreateTagParams): Promise<UUID> {
   const supabase = await getSupabaseServerClient();
   // inserts a new tag into the tag table, returns the tag_id
-  const { name, user_group_id, number, color } = params;
+  const { name, user_group_id, number } = params;
 
   const { data, error } = await supabase
     .from("tag")
@@ -21,7 +20,6 @@ export async function createTag(params: CreateTagParams): Promise<UUID> {
       name,
       user_group_id,
       number,
-      color,
     })
     .select("tag_id")
     .single();

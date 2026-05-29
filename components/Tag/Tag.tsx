@@ -5,10 +5,7 @@ import cross from "@/assets/images/DeleteTagCross.svg";
 import COLORS from "@/styles/colors";
 import { ColorDot, DeleteButton, StyledTag, StyledTagName } from "./styles";
 
-type ColorKey = keyof typeof COLORS;
-
 type TagComponentProps = {
-  color: ColorKey;
   name: string;
   tag_id: UUID;
   sidebar: boolean;
@@ -19,7 +16,6 @@ type TagComponentProps = {
 };
 
 export function TagComponent({
-  color,
   name,
   tag_id,
   sidebar,
@@ -42,7 +38,7 @@ export function TagComponent({
       onClick={sidebar ? onClick : undefined}
       onDoubleClick={() => sidebar && setEditing(true)}
     >
-      <ColorDot $color={color} />
+      <ColorDot $color="tagYellow" />
 
       {editing ? (
         <input

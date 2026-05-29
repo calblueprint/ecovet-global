@@ -48,7 +48,6 @@ export function TagCreator({
       name: "New tag",
       user_group_id: user_group_id,
       number: 10,
-      color: nextColor,
     });
 
     // Construct the full Tag manually
@@ -57,7 +56,6 @@ export function TagCreator({
       name: "New tag",
       user_group_id: user_group_id,
       number: 10,
-      color: nextColor,
     };
 
     // Add returned tag to UI state
@@ -105,7 +103,6 @@ export function TagCreator({
       {tags.map(tag => (
         <SidebarTag key={tag.tag_id}>
           <TagComponent
-            color={tag.color as ColorKey}
             name={tag.name ?? "No name"}
             tag_id={tag.tag_id}
             sidebar={true}

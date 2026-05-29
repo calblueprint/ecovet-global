@@ -25,46 +25,6 @@ export async function getProfileById(uid: string) {
   );
 }
 
-async function getInviteByEmail(email: string) {
-  const lowerCaseEmail = email.toLowerCase();
-
-  const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("invite")
-    .select("user_group_id, user_type")
-    .eq("email", lowerCaseEmail)
-    .single();
-
-  if (error) {
-    console.error("Error fetching invite: ", error.message);
-    throw new Error("Failed to fetch invite");
-  }
-
-  if (!data) {
-    throw new Error(`No invite found for email ${email}`);
-  }
-
-  return data;
-}
-
-export async function addInviteInfoToProfile(userId: string, email: string) {
-  const lowerCaseEmail = email.toLowerCase();
-  const invite = await getInviteByEmail(lowerCaseEmail);
-  const supabase = await getSupabaseServerClient();
-
-  const { error } = await supabase.from("profile").insert({
-    id: userId,
-    user_group_id: invite.user_group_id,
-    user_type: invite.user_type,
-    email: lowerCaseEmail,
-  });
-
-  if (error) {
-    console.error("Error creating profile: ", error.message);
-    throw new Error("Failed to create user profile");
-  }
-}
-
 export async function getProfilesByEmails(emails: string[]) {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
@@ -149,7 +109,7 @@ export async function handleProfileSubmit(profile: {
 }) {
   const supabase = await getSupabaseServerClient();
   try {
-    const { error } = await supabase.from("profile").upsert(profile);
+    const { error } = await supabase.from("profile").update(profile);
 
     if (error) {
       return { success: false, error: error.message };

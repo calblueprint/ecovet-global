@@ -7,12 +7,12 @@ import { replacePromptOptions } from "./prompt";
 
 export async function createTemplates( // create templates with inputs, but lowk most can be null as well
   templateID: UUID,
-  template_name: string | null = null,
+  template_name: string,
   accessible_to_all: boolean | null = null,
   summary: string | null = null,
   setting: string | null = null,
   current_activity: string | null = null,
-  user_group_id: UUID | null = null,
+  user_group_id: UUID,
 ): Promise<UUID> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
@@ -38,11 +38,14 @@ export async function createTemplates( // create templates with inputs, but lowk
 
 export async function createPhases(
   phase_id: UUID,
-  template_id: UUID | null,
+  template_id: UUID,
   phase_name: string | null,
   phase_description: string | null = null,
   phase_number: number,
 ): Promise<UUID> {
+  if (!phase_name) {
+    phase_name = "Phase " + phase_number;
+  }
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("phase")
@@ -66,7 +69,7 @@ export async function createPhases(
 export async function createRoles(
   role_id: UUID,
   template_id: UUID,
-  role_name: string | null = null,
+  role_name: string,
   role_description: string | null = null,
 ): Promise<UUID> {
   const supabase = await getSupabaseServerClient();
@@ -118,8 +121,8 @@ export async function createPrompts(
   role_phase_id: UUID,
   prompt_text: string | null,
   prompt_follow_ups: string | null,
-  prompt_type: "text" | "multiple_choice" | "checkbox" | null,
-  prompt_number: number | null,
+  prompt_type: "text" | "multiple_choice" | "checkbox",
+  prompt_number: number,
 ): Promise<UUID> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
@@ -170,7 +173,6 @@ export async function fetchTemplatesWithTags(user_group_id: UUID) {
         tag (
           tag_id,
           name,
-          color,
           number,
           user_group_id
         )

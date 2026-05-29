@@ -22,7 +22,7 @@ export type Database = {
           message: string;
           phase_sent_at: number | null;
           room_id: string | null;
-          sender: string | null;
+          sender: string;
           sender_name: string | null;
           session_id: string;
         };
@@ -33,7 +33,7 @@ export type Database = {
           message: string;
           phase_sent_at?: number | null;
           room_id?: string | null;
-          sender?: string | null;
+          sender?: string;
           sender_name?: string | null;
           session_id: string;
         };
@@ -44,7 +44,7 @@ export type Database = {
           message?: string;
           phase_sent_at?: number | null;
           room_id?: string | null;
-          sender?: string | null;
+          sender?: string;
           sender_name?: string | null;
           session_id?: string;
         };
@@ -68,17 +68,17 @@ export type Database = {
       chat_room: {
         Row: {
           room_id: string;
-          session_id: string | null;
+          session_id: string;
           user_id: string;
         };
         Insert: {
           room_id?: string;
-          session_id?: string | null;
+          session_id?: string;
           user_id?: string;
         };
         Update: {
           room_id?: string;
-          session_id?: string | null;
+          session_id?: string;
           user_id?: string;
         };
         Relationships: [
@@ -100,25 +100,25 @@ export type Database = {
       };
       invite: {
         Row: {
-          email: string | null;
+          email: string;
           invite_id: string;
-          status: string | null;
+          status: string;
           user_group_id: string;
-          user_type: Database["public"]["Enums"]["user_type"] | null;
+          user_type: Database["public"]["Enums"]["user_type"];
         };
         Insert: {
-          email?: string | null;
+          email: string;
           invite_id?: string;
-          status?: string | null;
+          status: string;
           user_group_id: string;
-          user_type?: Database["public"]["Enums"]["user_type"] | null;
+          user_type: Database["public"]["Enums"]["user_type"];
         };
         Update: {
-          email?: string | null;
+          email?: string;
           invite_id?: string;
-          status?: string | null;
+          status?: string;
           user_group_id?: string;
-          user_type?: Database["public"]["Enums"]["user_type"] | null;
+          user_type?: Database["public"]["Enums"]["user_type"];
         };
         Relationships: [
           {
@@ -132,7 +132,7 @@ export type Database = {
       };
       participant_session: {
         Row: {
-          created_at: string | null;
+          created_at: string;
           is_finished: boolean;
           phase_index: number;
           role_id: string | null;
@@ -140,7 +140,7 @@ export type Database = {
           user_id: string;
         };
         Insert: {
-          created_at?: string | null;
+          created_at?: string;
           is_finished: boolean;
           phase_index?: number;
           role_id?: string | null;
@@ -148,7 +148,7 @@ export type Database = {
           user_id?: string;
         };
         Update: {
-          created_at?: string | null;
+          created_at?: string;
           is_finished?: boolean;
           phase_index?: number;
           role_id?: string | null;
@@ -190,23 +190,23 @@ export type Database = {
         Row: {
           phase_description: string | null;
           phase_id: string;
-          phase_name: string | null;
+          phase_name: string;
           phase_number: number;
-          template_id: string | null;
+          template_id: string;
         };
         Insert: {
           phase_description?: string | null;
           phase_id?: string;
-          phase_name?: string | null;
+          phase_name: string;
           phase_number: number;
-          template_id?: string | null;
+          template_id: string;
         };
         Update: {
           phase_description?: string | null;
           phase_id?: string;
-          phase_name?: string | null;
+          phase_name?: string;
           phase_number?: number;
-          template_id?: string | null;
+          template_id?: string;
         };
         Relationships: [
           {
@@ -221,33 +221,33 @@ export type Database = {
       profile: {
         Row: {
           country: string | null;
-          email: string | null;
+          email: string;
           first_name: string | null;
           id: string;
           last_name: string | null;
           org_role: string | null;
-          user_group_id: string | null;
-          user_type: Database["public"]["Enums"]["user_type"] | null;
+          user_group_id: string;
+          user_type: Database["public"]["Enums"]["user_type"];
         };
         Insert: {
           country?: string | null;
-          email?: string | null;
+          email: string;
           first_name?: string | null;
           id?: string;
           last_name?: string | null;
           org_role?: string | null;
-          user_group_id?: string | null;
-          user_type?: Database["public"]["Enums"]["user_type"] | null;
+          user_group_id: string;
+          user_type: Database["public"]["Enums"]["user_type"];
         };
         Update: {
           country?: string | null;
-          email?: string | null;
+          email?: string;
           first_name?: string | null;
           id?: string;
           last_name?: string | null;
           org_role?: string | null;
-          user_group_id?: string | null;
-          user_type?: Database["public"]["Enums"]["user_type"] | null;
+          user_group_id?: string;
+          user_type?: Database["public"]["Enums"]["user_type"];
         };
         Relationships: [
           {
@@ -263,26 +263,26 @@ export type Database = {
         Row: {
           prompt_follow_ups: string | null;
           prompt_id: string;
-          prompt_number: number | null;
+          prompt_number: number;
           prompt_text: string | null;
-          prompt_type: Database["public"]["Enums"]["prompt_type"] | null;
-          role_phase_id: string | null;
+          prompt_type: Database["public"]["Enums"]["prompt_type"];
+          role_phase_id: string;
         };
         Insert: {
           prompt_follow_ups?: string | null;
           prompt_id?: string;
-          prompt_number?: number | null;
+          prompt_number: number;
           prompt_text?: string | null;
-          prompt_type?: Database["public"]["Enums"]["prompt_type"] | null;
-          role_phase_id?: string | null;
+          prompt_type: Database["public"]["Enums"]["prompt_type"];
+          role_phase_id: string;
         };
         Update: {
           prompt_follow_ups?: string | null;
           prompt_id?: string;
-          prompt_number?: number | null;
+          prompt_number?: number;
           prompt_text?: string | null;
-          prompt_type?: Database["public"]["Enums"]["prompt_type"] | null;
-          role_phase_id?: string | null;
+          prompt_type?: Database["public"]["Enums"]["prompt_type"];
+          role_phase_id?: string;
         };
         Relationships: [
           {
@@ -390,19 +390,19 @@ export type Database = {
         Row: {
           role_description: string | null;
           role_id: string;
-          role_name: string | null;
+          role_name: string;
           template_id: string;
         };
         Insert: {
           role_description?: string | null;
           role_id?: string;
-          role_name?: string | null;
+          role_name: string;
           template_id: string;
         };
         Update: {
           role_description?: string | null;
           role_id?: string;
-          role_name?: string | null;
+          role_name?: string;
           template_id?: string;
         };
         Relationships: [
@@ -453,37 +453,37 @@ export type Database = {
       };
       session: {
         Row: {
-          created_at: string | null;
+          created_at: string;
           force_advance: boolean;
           is_async: boolean;
           is_finished: boolean;
           phase_index: number | null;
           session_id: string;
           session_name: string | null;
-          template_id: string | null;
-          user_group_id: string | null;
+          template_id: string;
+          user_group_id: string;
         };
         Insert: {
-          created_at?: string | null;
+          created_at?: string;
           force_advance?: boolean;
           is_async?: boolean;
           is_finished?: boolean;
           phase_index?: number | null;
           session_id?: string;
           session_name?: string | null;
-          template_id?: string | null;
-          user_group_id?: string | null;
+          template_id: string;
+          user_group_id: string;
         };
         Update: {
-          created_at?: string | null;
+          created_at?: string;
           force_advance?: boolean;
           is_async?: boolean;
           is_finished?: boolean;
           phase_index?: number | null;
           session_id?: string;
           session_name?: string | null;
-          template_id?: string | null;
-          user_group_id?: string | null;
+          template_id?: string;
+          user_group_id?: string;
         };
         Relationships: [
           {
@@ -504,23 +504,20 @@ export type Database = {
       };
       tag: {
         Row: {
-          color: string | null;
           name: string;
-          number: number | null;
+          number: number;
           tag_id: string;
           user_group_id: string;
         };
         Insert: {
-          color?: string | null;
           name: string;
-          number?: number | null;
+          number: number;
           tag_id?: string;
           user_group_id: string;
         };
         Update: {
-          color?: string | null;
           name?: string;
-          number?: number | null;
+          number?: number;
           tag_id?: string;
           user_group_id?: string;
         };
@@ -541,7 +538,7 @@ export type Database = {
           setting: string | null;
           summary: string | null;
           template_id: string;
-          template_name: string | null;
+          template_name: string;
           timestamp: string;
           user_group_id: string | null;
         };
@@ -551,7 +548,7 @@ export type Database = {
           setting?: string | null;
           summary?: string | null;
           template_id?: string;
-          template_name?: string | null;
+          template_name: string;
           timestamp?: string;
           user_group_id?: string | null;
         };
@@ -561,7 +558,7 @@ export type Database = {
           setting?: string | null;
           summary?: string | null;
           template_id?: string;
-          template_name?: string | null;
+          template_name?: string;
           timestamp?: string;
           user_group_id?: string | null;
         };
