@@ -456,7 +456,7 @@ export type Database = {
           created_at: string | null;
           force_advance: boolean;
           is_async: boolean;
-          is_finished: boolean | null;
+          is_finished: boolean;
           phase_index: number | null;
           session_id: string;
           session_name: string | null;
@@ -467,7 +467,7 @@ export type Database = {
           created_at?: string | null;
           force_advance?: boolean;
           is_async?: boolean;
-          is_finished?: boolean | null;
+          is_finished?: boolean;
           phase_index?: number | null;
           session_id?: string;
           session_name?: string | null;
@@ -478,7 +478,7 @@ export type Database = {
           created_at?: string | null;
           force_advance?: boolean;
           is_async?: boolean;
-          is_finished?: boolean | null;
+          is_finished?: boolean;
           phase_index?: number | null;
           session_id?: string;
           session_name?: string | null;
