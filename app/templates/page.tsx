@@ -189,6 +189,10 @@ export default function TemplateBuilderPage() {
     try {
       const saveStore: LocalStore = structuredClone(localStore);
 
+      if (!profile) {
+        return;
+      }
+
       const realtemplateID = await createTemplates(
         saveStore.templateID,
         (saveStore.rolesById[1] as Template).template_name,

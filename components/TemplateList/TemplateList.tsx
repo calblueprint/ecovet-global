@@ -227,7 +227,6 @@ export default function TemplateListPage({
     const newTagId = await createTag({
       name,
       user_group_id,
-      color: "yellow",
       number: 0,
     });
 
@@ -235,7 +234,6 @@ export default function TemplateListPage({
       const newlyCreatedTag: Tag = {
         tag_id: newTagId as UUID,
         name: name ?? "No Name",
-        color: "yellow",
         number: 0,
         user_group_id: user_group_id,
       };
