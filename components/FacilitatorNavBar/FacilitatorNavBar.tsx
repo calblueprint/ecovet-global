@@ -48,12 +48,12 @@ const TopNavBar = () => {
           <TopNavButton
             $active={pathname.startsWith("/participants/session-start")}
           >
-            Participant in a Session
+            Participate in a Session
           </TopNavButton>
         </Link>
         <Link href="/facilitator/exercises">
           <TopNavButton $active={pathname.startsWith("/facilitator/exercises")}>
-            Exercises
+            Past Exercises
           </TopNavButton>
         </Link>
       </ButtonContainer>
