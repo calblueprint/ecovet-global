@@ -41,10 +41,10 @@ export async function sendEmailReminder(email: string, sessionId: string) {
 
   const htmlContent = `
     <p>Hi, this is a reminder that you have an ongoing game. 
-    <a href="${loginUrl}">Click here to log in and re-join the current excercise</a>.</p>
+    <a href="${loginUrl}">Click here to log in and re-join the current exercise</a>.</p>
   `;
 
-  const textContent = `Hi,\nThis is a reminder that you have an ongoing game. Go to ${loginUrl} to login to join the current excercise.`;
+  const textContent = `Hi,\nThis is a reminder that you have an ongoing game. Go to ${loginUrl} to login to join the current exercise.`;
 
   await autoEmailSender(
     htmlContent,

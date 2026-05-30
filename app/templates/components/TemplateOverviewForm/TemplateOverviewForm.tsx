@@ -84,7 +84,7 @@ export default function TemplateOverviewForm({
           Summary
           <InfoComponent
             infoText={
-              "Describe a summary of the template. This will be visible to participants when they start the excercise."
+              "Describe a summary of the template. This will be visible to participants when they start the exercise."
             }
           ></InfoComponent>
         </FieldLegend>

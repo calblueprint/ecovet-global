@@ -106,7 +106,7 @@ export default function ParticipantWaitingPage() {
         <Container>
           <Heading2>{status}</Heading2>
 
-          {sessionName && <Label>{"Excercise: " + sessionName}</Label>}
+          {sessionName && <Label>{"Exercise: " + sessionName}</Label>}
 
           {sessionExists && profile?.id && (
             <Link
