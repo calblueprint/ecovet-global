@@ -57,7 +57,9 @@ export default function SignIn() {
     setErrorMessage(null);
 
     try {
+      console.time("auth");
       const { data, error } = await signInWithEmail(email, password);
+      console.timeEnd("auth");
 
       if (error) {
         setErrorMessage("Incorrect email or password. Please try again.");
@@ -77,7 +79,9 @@ export default function SignIn() {
         return;
       }
 
+      console.time("profile");
       const profile = await fetchProfileByUserId(userId);
+      console.timeEnd("profile");
 
       const hasProfile = profile !== null;
       if (searchParams.get("fromNudge") == "true") {
@@ -88,7 +92,6 @@ export default function SignIn() {
       } else {
         router.push(hasProfile ? getHomePath(profile) : "/onboarding");
       }
-      router.refresh();
     } catch {
       setErrorMessage("An unexpected error occurred. Please try again.");
       setLoading(false);
