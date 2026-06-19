@@ -4,6 +4,7 @@ import type { Phase, RolePhase, Template, UUID } from "@/types/schema";
 import { useEffect, useState } from "react";
 import CircularProgress from "@mui/material/CircularProgress";
 import { fetchRoleName } from "@/actions/supabase/queries/sessions";
+import LinkedText from "@/components/Linki/Linkify";
 import {
   ContentBody,
   ContentBody40,
@@ -70,14 +71,20 @@ export default function ScenarioLeftPanel({
         <ContentBubble>
           <ContentHeader>Context</ContentHeader>
           <ContentBody>
-            {currentPhase ? currentPhase.phase_description : "No description"}
+            {currentPhase ? (
+              <LinkedText text={currentPhase.phase_description} />
+            ) : (
+              "No description"
+            )}
           </ContentBody>
         </ContentBubble>
 
         {rolePhase?.role_phase_description && (
           <ContentBubble>
             <ContentHeader>Your Role</ContentHeader>
-            <ContentBody>{rolePhase.role_phase_description}</ContentBody>
+            <ContentBody>
+              <LinkedText text={rolePhase.role_phase_description} />
+            </ContentBody>
           </ContentBubble>
         )}
       </PhaseDescriptionWrapper>
@@ -93,7 +100,7 @@ export default function ScenarioLeftPanel({
             <ContentHeader>Summary</ContentHeader>
             <ContentBody>
               {templateInfo ? (
-                templateInfo.summary
+                <LinkedText text={templateInfo.summary} />
               ) : (
                 <LoadingScreen>
                   <CircularProgress color="inherit" aria-label="Loading…" />
@@ -106,7 +113,7 @@ export default function ScenarioLeftPanel({
             <ContentHeader>Setting</ContentHeader>
             <ContentBody>
               {templateInfo ? (
-                templateInfo.setting
+                <LinkedText text={templateInfo.setting} />
               ) : (
                 <CircularProgress color="inherit" aria-label="Loading…" />
               )}
@@ -115,8 +122,12 @@ export default function ScenarioLeftPanel({
 
           <ContentBubble>
             <ContentHeader>Your Role</ContentHeader>
-            <ContentBody>{roleName}</ContentBody>
-            <ContentBody>{roleDescription}</ContentBody>
+            <ContentBody>
+              <LinkedText text={roleName} />
+            </ContentBody>
+            <ContentBody>
+              <LinkedText text={roleDescription} />
+            </ContentBody>
           </ContentBubble>
         </>
       )}

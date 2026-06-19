@@ -266,6 +266,7 @@ export default function QuestionBuilder({
                       onChange(promptID, "prompt_text", e.target.value)
                     }
                   />
+
                   <PromptTypeDropdownStyled>
                     <InputDropdown
                       label=""

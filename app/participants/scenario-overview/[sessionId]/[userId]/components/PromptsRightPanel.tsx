@@ -9,6 +9,7 @@ import {
   Radio,
   RadioGroup,
 } from "@mui/material";
+import LinkedText from "@/components/Linki/Linkify";
 import {
   ContentDiv,
   ContinueButtonDiv,
@@ -81,7 +82,9 @@ export default function PromptsRightPanel({
     return (
       <FollowUpList>
         {lines.map((line, i) => (
-          <FollowUpItem key={i}>{line}</FollowUpItem>
+          <FollowUpItem key={i}>
+            <LinkedText text={line} />
+          </FollowUpItem>
         ))}
       </FollowUpList>
     );
@@ -200,7 +203,9 @@ export default function PromptsRightPanel({
               prompts.map((prompt, index) => (
                 <PromptWrapper key={prompt.prompt_id}>
                   <PromptQuestionNumber>{index + 1} →</PromptQuestionNumber>
-                  <PromptQuestionText>{prompt.prompt_text}</PromptQuestionText>
+                  <PromptQuestionText>
+                    <LinkedText text={prompt.prompt_text} />
+                  </PromptQuestionText>
                   {renderFollowUps(prompt.prompt_follow_ups)}
                   {renderAnswerInput(prompt, index)}
                 </PromptWrapper>
