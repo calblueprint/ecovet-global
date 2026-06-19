@@ -19,6 +19,7 @@ import { sendEmailReminder } from "@/actions/supabase/send-email";
 import AccessError from "@/components/AccessError/AccessError";
 import Announcements from "@/components/Chat/Announcements";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
+import LinkedText from "@/components/Linki/Linkify";
 import NudgeWarningModal from "@/components/NudgeWarningModal/NudgeWarningModal";
 import { useProfile } from "@/utils/ProfileProvider";
 import { Heading3, SilverHeading3, SilverText } from "../styles";
@@ -317,7 +318,11 @@ export default function ParticipantDetailView() {
                     </OptionList>
                   ) : (
                     <PromptAnswer>
-                      {prompt.answer ?? "No response"}
+                      {prompt.answer ? (
+                        <LinkedText text={prompt.answer} />
+                      ) : (
+                        "No response"
+                      )}
                     </PromptAnswer>
                   )}
                 </PromptWrapper>
