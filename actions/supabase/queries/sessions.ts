@@ -304,7 +304,7 @@ export async function advancePhaseForSingleUser(
   roleId: UUID,
   sessionId: UUID,
 ): Promise<void> {
-  changePhaseForSingleUser(userId, roleId, sessionId, 1);
+  return changePhaseForSingleUser(userId, roleId, sessionId, 1);
 }
 
 export async function backPhaseForSingleUser(
@@ -312,7 +312,7 @@ export async function backPhaseForSingleUser(
   roleId: UUID,
   sessionId: UUID,
 ): Promise<void> {
-  changePhaseForSingleUser(userId, roleId, sessionId, -1);
+  return changePhaseForSingleUser(userId, roleId, sessionId, -1);
 }
 
 export async function changePhaseForSingleUser(
@@ -458,7 +458,7 @@ export async function fetchParticipantPhaseIndex(
   sessionId: string,
 ): Promise<number> {
   const supabase = await getSupabaseServerClient();
-
+  console.log("fetchParticipantPhaseIndex hit");
   const { data, error } = await supabase
     .from("participant_session")
     .select("phase_index")
@@ -485,6 +485,7 @@ export async function fetchRolePhases(
   roleId: UUID,
   phaseId: UUID,
 ): Promise<RolePhase | null> {
+  console.log("fetchRolePhases hit", roleId, phaseId);
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("role_phase")

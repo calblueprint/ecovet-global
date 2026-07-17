@@ -106,7 +106,7 @@ export const ContentHeader = styled.h3`
   line-height: normal;
 `;
 
-export const ContentBody = styled.p`
+export const ContentBody = styled.div`
   color: ${COLORS.black70};
   font-family: ${Sans.style.fontFamily};
   font-size: 0.75rem;

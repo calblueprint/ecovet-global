@@ -71,7 +71,7 @@ export default function ParticipantsPage() {
     const formattedData: Participant[] = data.map((item: Invite) => {
       const p = profileByEmail[item.email ?? ""];
       return {
-        id: p.id,
+        id: p?.id ?? null,
         invite_id: item.invite_id,
         name: p
           ? `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || null

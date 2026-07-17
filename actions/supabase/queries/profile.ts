@@ -109,7 +109,15 @@ export async function handleProfileSubmit(profile: {
 }) {
   const supabase = await getSupabaseServerClient();
   try {
-    const { error } = await supabase.from("profile").update(profile);
+    const { error } = await supabase
+      .from("profile")
+      .update({
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        country: profile.country,
+        org_role: profile.org_role,
+      })
+      .eq("id", profile.id);
 
     if (error) {
       return { success: false, error: error.message };
