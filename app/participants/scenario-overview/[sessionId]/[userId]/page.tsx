@@ -114,6 +114,7 @@ export default function SessionFlowPage() {
           userId,
           sessionIdStr,
         );
+        console.log("Mostrecent", mostRecentPhaseIndex);
       } catch {
         mostRecentPhaseIndex = -1;
       }
@@ -149,7 +150,6 @@ export default function SessionFlowPage() {
         const p = rp ? await fetchPrompts(rp.role_phase_id) : [];
         console.log("p", p);
         setPrompts(p);
-        console.log(prompts);
 
         const nonTextPromptIds = p
           .filter(pr => pr.prompt_type !== "text")

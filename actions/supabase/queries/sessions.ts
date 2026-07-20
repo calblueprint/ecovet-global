@@ -304,7 +304,7 @@ export async function advancePhaseForSingleUser(
   roleId: UUID,
   sessionId: UUID,
 ): Promise<void> {
-  return changePhaseForSingleUser(userId, roleId, sessionId, 1);
+  changePhaseForSingleUser(userId, roleId, sessionId, 1);
 }
 
 export async function backPhaseForSingleUser(
@@ -312,7 +312,7 @@ export async function backPhaseForSingleUser(
   roleId: UUID,
   sessionId: UUID,
 ): Promise<void> {
-  return changePhaseForSingleUser(userId, roleId, sessionId, -1);
+  changePhaseForSingleUser(userId, roleId, sessionId, -1);
 }
 
 export async function changePhaseForSingleUser(
@@ -322,6 +322,7 @@ export async function changePhaseForSingleUser(
   phaseChange: number,
 ): Promise<void> {
   const supabase = await getSupabaseServerClient();
+  console.log(userId, roleId, sessionId, phaseChange);
 
   const { data: currentData, error: fetchError } = await supabase
     .from("participant_session")
@@ -464,6 +465,7 @@ export async function fetchParticipantPhaseIndex(
     .select("phase_index")
     .eq("session_id", sessionId)
     .eq("user_id", userId)
+    .abortSignal(AbortSignal.timeout(8000))
     .maybeSingle();
 
   if (error) {
@@ -485,17 +487,26 @@ export async function fetchRolePhases(
   roleId: UUID,
   phaseId: UUID,
 ): Promise<RolePhase | null> {
-  console.log("fetchRolePhases hit", roleId, phaseId);
+  console.log("fetchRolePhases hit", { roleId, phaseId });
   const supabase = await getSupabaseServerClient();
+  console.log("client created");
+
   const { data, error } = await supabase
     .from("role_phase")
     .select("*")
     .eq("phase_id", phaseId)
     .eq("role_id", roleId)
+    .abortSignal(AbortSignal.timeout(8000))
     .single();
+
+  console.log("role_phase query result:", { data, error });
+
   if (error) {
     console.error("Error fetching role phases:", error);
+    // Log what we were looking for
+    console.error("Looked for role_id:", roleId, "phase_id:", phaseId);
   }
+
   return data;
 }
 
@@ -555,6 +566,7 @@ export async function fetchRole(
     .select("role_id")
     .eq("session_id", sessionId)
     .eq("user_id", userId)
+    .abortSignal(AbortSignal.timeout(8000))
     .single();
   if (error) {
     throw error;
