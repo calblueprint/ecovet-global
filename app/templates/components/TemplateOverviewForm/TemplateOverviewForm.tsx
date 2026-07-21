@@ -14,6 +14,7 @@ import {
   FormStack,
   HeaderButtonDark,
   ListCard,
+  PhaseRoleTitle,
   PhaseTemplateHeader,
   RoleHeader,
   RoleHeaderContainer,
@@ -154,7 +155,14 @@ export default function TemplateOverviewForm({
           {phases.map((phase, index) => (
             <ListCard key={phase.phase_id}>
               <CardTitle>
-                {phase.phase_name || `Phase ${index + 1}`}
+                <PhaseRoleTitle>
+                  {phase.phase_name || `Phase ${index + 1}`}
+                  <InfoComponent
+                    infoText={
+                      "This will be visible to participants at each phase."
+                    }
+                  ></InfoComponent>
+                </PhaseRoleTitle>
                 <DeleteIconButton
                   type="button"
                   aria-label={`Delete ${phase.phase_name || `Phase ${index + 1}`}`}
@@ -198,7 +206,14 @@ export default function TemplateOverviewForm({
           {roles.map((role, index) => (
             <ListCard key={role.role_id as string}>
               <CardTitle>
-                {role.role_name || `Role ${index + 1}`}
+                <PhaseRoleTitle>
+                  {role.role_name || `Role ${index + 1}`}
+                  <InfoComponent
+                    infoText={
+                      "This will be visible to participants at each phase."
+                    }
+                  ></InfoComponent>
+                </PhaseRoleTitle>
 
                 <DeleteIconButton
                   type="button"
