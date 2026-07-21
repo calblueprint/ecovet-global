@@ -124,6 +124,15 @@ export const CardTitle = styled.h4`
   margin: 0 0 0.5rem 0;
 `;
 
+export const PhaseRoleTitle = styled.h4`
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${COLORS.black};
+  margin: 0 0 0.5rem 0;
+`;
+
 export const DummyInput = styled.input.attrs({
   type: "text",
 })`
