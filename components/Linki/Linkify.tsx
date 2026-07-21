@@ -1,3 +1,5 @@
+"use client";
+
 import DOMPurify from "dompurify";
 
 DOMPurify.addHook("afterSanitizeAttributes", node => {

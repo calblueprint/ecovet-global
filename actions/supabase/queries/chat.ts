@@ -1,9 +1,9 @@
 "use server";
 
 import { getSupabaseServerClient } from "@/lib/supabase/server";
-import { ChatMessage, Profile } from "@/types/schema";
+import { ChatMessage, Profile, UUID } from "@/types/schema";
 
-export async function getUserChatRooms(userId: string, sessionId: string) {
+export async function getUserChatRooms(userId: UUID, sessionId: UUID) {
   const supabase = await getSupabaseServerClient();
   const { data: userRooms, error: roomsError } = await supabase
     .from("chat_room")
@@ -71,7 +71,7 @@ export async function getSessionAnnouncements(
 }
 
 export async function getMessageHistory(
-  roomId: string,
+  roomId: UUID,
   before: Date | null,
   limit: number = 50,
 ) {
@@ -94,9 +94,9 @@ export async function getMessageHistory(
 }
 
 export async function addUserToChatRoom(
-  roomId: string,
-  userId: string,
-  sessionId: string,
+  roomId: UUID,
+  userId: UUID,
+  sessionId: UUID,
 ) {
   const supabase = await getSupabaseServerClient();
 

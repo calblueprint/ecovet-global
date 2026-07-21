@@ -95,15 +95,12 @@ export default function SessionFlowPage() {
         templateId.template_id as unknown as UUID,
       );
       setTemplateInfo(template);
-      console.log("template", template);
 
       const phaseData = await fetchPhases(sessionIdStr);
       setPhases(phaseData);
-      console.log("phase", phaseData);
 
       const fetchedRoleId = await fetchRole(userId, sessionIdStr);
       setRoleId(fetchedRoleId as string);
-      console.log("roleId", fetchedRoleId);
 
       const isForce = await isSessionForceAdvance(sessionIdStr);
       setIsForceAdvance(isForce);
@@ -128,28 +125,18 @@ export default function SessionFlowPage() {
   }, [loadData]);
 
   useEffect(() => {
-    console.log("currentphase", currentPhase);
     if (!currentPhase || !roleId) return;
-    console.log("in!");
 
     async function loadPhaseContent() {
       setPromptsLoading(true);
       try {
-        console.log(
-          "calling fetchRolePhases with",
-          roleId,
-          currentPhase!.phase_id,
-        );
         const rp = await fetchRolePhases(
           roleId as UUID,
           currentPhase!.phase_id,
         );
         setRolePhase(rp);
-        console.log(rp);
         const p = rp ? await fetchPrompts(rp.role_phase_id) : [];
-        console.log("p", p);
         setPrompts(p);
-        console.log(prompts);
 
         const nonTextPromptIds = p
           .filter(pr => pr.prompt_type !== "text")

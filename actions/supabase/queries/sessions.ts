@@ -304,7 +304,7 @@ export async function advancePhaseForSingleUser(
   roleId: UUID,
   sessionId: UUID,
 ): Promise<void> {
-  return changePhaseForSingleUser(userId, roleId, sessionId, 1);
+  changePhaseForSingleUser(userId, roleId, sessionId, 1);
 }
 
 export async function backPhaseForSingleUser(
@@ -312,7 +312,7 @@ export async function backPhaseForSingleUser(
   roleId: UUID,
   sessionId: UUID,
 ): Promise<void> {
-  return changePhaseForSingleUser(userId, roleId, sessionId, -1);
+  changePhaseForSingleUser(userId, roleId, sessionId, -1);
 }
 
 export async function changePhaseForSingleUser(
@@ -454,11 +454,10 @@ export async function fetchPhases(sessionId: string) {
 }
 
 export async function fetchParticipantPhaseIndex(
-  userId: string,
-  sessionId: string,
+  userId: UUID,
+  sessionId: UUID,
 ): Promise<number> {
   const supabase = await getSupabaseServerClient();
-  console.log("fetchParticipantPhaseIndex hit");
   const { data, error } = await supabase
     .from("participant_session")
     .select("phase_index")
@@ -485,17 +484,19 @@ export async function fetchRolePhases(
   roleId: UUID,
   phaseId: UUID,
 ): Promise<RolePhase | null> {
-  console.log("fetchRolePhases hit", roleId, phaseId);
   const supabase = await getSupabaseServerClient();
+
   const { data, error } = await supabase
     .from("role_phase")
     .select("*")
     .eq("phase_id", phaseId)
     .eq("role_id", roleId)
     .single();
+
   if (error) {
     console.error("Error fetching role phases:", error);
   }
+
   return data;
 }
 
@@ -546,8 +547,8 @@ export async function isSessionFinished(sessionId: string): Promise<boolean> {
 }
 
 export async function fetchRole(
-  userId: string,
-  sessionId: string,
+  userId: UUID,
+  sessionId: UUID,
 ): Promise<string | null> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase

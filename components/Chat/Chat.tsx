@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CircularProgress } from "@mui/material";
 import {
   addUserToChatRoom,
@@ -117,6 +117,33 @@ export default function Chat({
     loadParticipants();
   }, [profile?.user_group_id, sessionId]);
 
+  const loadRooms = useCallback(async () => {
+    if (!userId) return;
+
+    try {
+      const rooms = await getUserChatRooms(userId, sessionId);
+      const entries = [...rooms.entries()];
+      const newRooms = entries.map(([roomId, users]) => {
+        const otherUsers = users.filter(user => user.id !== userId);
+        const firstUser =
+          otherUsers.length > 0
+            ? truncateText(
+                `${otherUsers[0].first_name} ${otherUsers[0].last_name}`,
+              )
+            : "Unknown";
+        let chatName = firstUser;
+        if (otherUsers.length > 1) chatName += ` + ${otherUsers.length - 1}`;
+
+        return { roomId, chatName };
+      });
+
+      setChatRooms([announcementRoom, ...newRooms]);
+      return entries;
+    } catch {
+      console.log("Error loading chat rooms.");
+    }
+  }, [userId, sessionId]);
+
   useEffect(() => {
     if (!userId) return;
     const initializeRooms = async () => {
@@ -181,33 +208,6 @@ export default function Chat({
 
     checkRoom();
   }, [newChatUserIds, sessionId, userId]);
-
-  async function loadRooms() {
-    if (!userId) return;
-
-    try {
-      const rooms = await getUserChatRooms(userId, sessionId);
-      const entries = [...rooms.entries()];
-      const newRooms = entries.map(([roomId, users]) => {
-        const otherUsers = users.filter(user => user.id !== userId);
-        const firstUser =
-          otherUsers.length > 0
-            ? truncateText(
-                `${otherUsers[0].first_name} ${otherUsers[0].last_name}`,
-              )
-            : "Unknown";
-        let chatName = firstUser;
-        if (otherUsers.length > 1) chatName += ` + ${otherUsers.length - 1}`;
-
-        return { roomId, chatName };
-      });
-
-      setChatRooms([announcementRoom, ...newRooms]);
-      return entries;
-    } catch {
-      console.log("Error loading chat rooms.");
-    }
-  }
 
   async function onSendMessage(message: string) {
     let newRoomId: string | null = currentRoomId;
