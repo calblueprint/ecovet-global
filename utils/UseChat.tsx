@@ -43,13 +43,10 @@ export function useRealtimeChat({
   }, [isConnected, channel, roomId, initializingMessages]);
 
   useEffect(() => {
-    if (channel) {
-      channel.unsubscribe();
-      setChannel(null);
-    }
     if (!roomId || roomId === "announcements") {
       setChatMessages([]);
       setIsConnected(false);
+      setChannel(null);
       return;
     }
 
@@ -83,8 +80,9 @@ export function useRealtimeChat({
 
     return () => {
       supabase.removeChannel(newChannel);
+      setIsConnected(false);
     };
-  }, [roomId, username, channel]);
+  }, [roomId, username]);
 
   const sendMessageObject = useCallback(
     async (chatMessage: ChatMessage) => {
