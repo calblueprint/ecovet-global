@@ -119,14 +119,13 @@ export default function TemplateListPage({
     let updated = [...templates];
 
     if (filterMode === "Archived") {
-      // Only archived templates the viewer is allowed to see/restore.
       updated = updated.filter(
         t =>
           t.archived &&
-          (t.accessible_to_all || t.user_group_id === user_group_id),
+          (t.user_group_id === user_group_id ||
+            (adminAccess && Boolean(t.accessible_to_all))),
       );
     } else {
-      // Every non-archived view hides archived templates by default.
       updated = updated.filter(t => !t.archived);
 
       if (filterMode === "All") {
@@ -173,6 +172,7 @@ export default function TemplateListPage({
     sortKey,
     sortOrder,
     user_group_id,
+    adminAccess,
   ]);
 
   const toggleSort = (key: "name" | "date") => {
