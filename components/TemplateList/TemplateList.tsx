@@ -186,14 +186,25 @@ export default function TemplateListPage({
 
   const isAdminTemplate = (t: TemplateWithTags) => Boolean(t.accessible_to_all);
 
-  // Owning group can archive its own templates; admins can archive shared ones.
-  const canArchive = (t: TemplateWithTags) =>
+  // You manage a template if your group owns it, or you're an admin
+  const canManageTemplate = (t: TemplateWithTags) =>
     t.user_group_id === user_group_id ||
     (adminAccess && Boolean(t.accessible_to_all));
 
+  // A shared template you don't manage stays copy-to-edit only
+  const isLockedTemplate = (t: TemplateWithTags) =>
+    isAdminTemplate(t) && !canManageTemplate(t);
+
   const handleOpenTemplate = (t: TemplateWithTags) => {
-    if (isAdminTemplate(t)) return;
-    router.push(`/templates?templateId=${t.template_id}&fromTemplateList=true`);
+    if (isLockedTemplate(t)) return;
+
+    const params = new URLSearchParams({
+      templateId: t.template_id,
+      fromTemplateList: "true",
+    });
+    if (t.accessible_to_all) params.set("isAdmin", "true");
+
+    router.push(`/templates?${params.toString()}`);
   };
 
   const handleCopyConfirm = async (action: WarningAction) => {
@@ -486,15 +497,15 @@ export default function TemplateListPage({
               )}
 
               {filteredTemplates.map(t => {
-                const isAdmin = isAdminTemplate(t);
+                const isLocked = isLockedTemplate(t);
 
                 return (
-                  <TemplateRow key={t.template_id} $disabled={isAdmin}>
+                  <TemplateRow key={t.template_id} $disabled={isLocked}>
                     <NameColumn
                       onClick={() => handleOpenTemplate(t)}
                       title={
-                        isAdmin
-                          ? "Shared template — make a copy to edit"
+                        isLocked
+                          ? "You cannot edit this template. View content through downloading the PDF."
                           : undefined
                       }
                     >
@@ -617,7 +628,7 @@ export default function TemplateListPage({
                         </svg>
                       </EditIconWrapper>
 
-                      {canArchive(t) && (
+                      {canManageTemplate(t) && (
                         <EditIconWrapper
                           onClick={e => {
                             e.stopPropagation();
