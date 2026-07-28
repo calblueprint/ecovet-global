@@ -194,7 +194,8 @@ export const fetchTemplatesExercise = async (userGroup: string) => {
   const { data, error } = await supabase
     .from("template")
     .select("*")
-    .or(`user_group_id.eq.${userGroup},accessible_to_all.eq.true`);
+    .or(`user_group_id.eq.${userGroup},accessible_to_all.eq.true`)
+    .eq("archived", false);
 
   if (error) {
     console.error("Error fetching templates:", error);
@@ -202,6 +203,50 @@ export const fetchTemplatesExercise = async (userGroup: string) => {
   }
   return data;
 };
+
+// archive or delete a template
+// can only do if from the right user_group (or if admin)
+// no data is deleted (for PDFs and sessions)
+export async function setTemplateArchived(
+  template_id: UUID,
+  archived: boolean,
+  requester_group_id: UUID,
+  is_admin: boolean,
+): Promise<boolean> {
+  const supabase = await getSupabaseServerClient();
+
+  const { data: tmpl, error: fetchErr } = await supabase
+    .from("template")
+    .select("user_group_id, accessible_to_all")
+    .eq("template_id", template_id)
+    .single();
+
+  if (fetchErr || !tmpl) {
+    console.error("Error loading template for archive:", fetchErr);
+    return false;
+  }
+
+  const ownsTemplate = tmpl.user_group_id === requester_group_id;
+  const canArchive =
+    ownsTemplate || (is_admin && Boolean(tmpl.accessible_to_all));
+
+  if (!canArchive) {
+    console.error("Not authorized to archive template:", template_id);
+    return false;
+  }
+
+  const { error } = await supabase
+    .from("template")
+    .update({ archived })
+    .eq("template_id", template_id);
+
+  if (error) {
+    console.error("Error archiving template:", error);
+    return false;
+  }
+
+  return true;
+}
 
 export async function fetchFullTemplate(template_id: string) {
   const supabase = await getSupabaseServerClient();

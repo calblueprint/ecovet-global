@@ -10,7 +10,10 @@ import {
   createSession,
   fetchRoles,
 } from "@/actions/supabase/queries/sessions";
-import { fetchTemplatesExercise } from "@/actions/supabase/queries/templates";
+import {
+  fetchTemplate,
+  fetchTemplatesExercise,
+} from "@/actions/supabase/queries/templates";
 import { fetchUserGroupMembers } from "@/actions/supabase/queries/user-groups";
 import Play from "@/assets/images/play.svg";
 import AccessError from "@/components/AccessError/AccessError";
@@ -81,13 +84,22 @@ export default function Page() {
     setTemplatesLoading(true);
     try {
       const data = await fetchTemplatesExercise(profile.user_group_id as UUID);
-      setTemplates(data || []);
+      let list = data || [];
 
       if (preselectedTemplateId) {
+        // The list is decluttered (archived templates dropped), but if we were
+        // sent here with a specific template, make sure it's an option so the
+        // dropdown populates instead of showing blank.
+        if (!list.some(t => t.template_id === preselectedTemplateId)) {
+          const preselected = await fetchTemplate(preselectedTemplateId);
+          if (preselected) list = [preselected, ...list];
+        }
         setSelectedTemplateId(preselectedTemplateId);
         const rolesData = await fetchRoles(preselectedTemplateId);
         setRoles((rolesData as Role[]) || []);
       }
+
+      setTemplates(list);
     } finally {
       setTemplatesLoading(false);
     }

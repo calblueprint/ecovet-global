@@ -4,7 +4,13 @@ import type { Template, UUID } from "@/types/schema";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CircularProgress } from "@mui/material";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import {
+  Archive,
+  ArchiveRestore,
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+} from "lucide-react";
 import {
   assignTagToTemplate,
   createTag,
@@ -15,6 +21,7 @@ import {
 import {
   copyTemplate,
   fetchTemplatesWithTags,
+  setTemplateArchived,
 } from "@/actions/supabase/queries/templates";
 import TopNavBar from "@/components/FacilitatorNavBar/FacilitatorNavBar";
 import { Tag } from "@/components/Tag/TagCreator";
@@ -35,6 +42,7 @@ import {
   SortButton,
 } from "../../app/facilitator/styles";
 import {
+  ArchivedToggle,
   AssociatedTags,
   ContentWrapper,
   DateColumn,
@@ -62,10 +70,11 @@ export default function TemplateListPage({
   const router = useRouter();
   const { profile } = useProfile();
   const user_group_id = profile?.user_group_id as UUID;
+  const adminAccess = profile?.user_type === "Admin";
   const loading = !user_group_id;
-  const [filterMode, setFilterMode] = useState<"All" | "Your" | "Browse">(
-    "All",
-  );
+  const [filterMode, setFilterMode] = useState<
+    "All" | "Your" | "Browse" | "Archived"
+  >("All");
   const [searchInput, setSearchInput] = useState("");
   const [templates, setTemplates] = useState<TemplateWithTags[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState(true);
@@ -80,6 +89,11 @@ export default function TemplateListPage({
 
   const [copyConfirm, setCopyConfirm] = useState<TemplateWithTags | null>(null);
   const [copying, setCopying] = useState(false);
+
+  const [archiveConfirm, setArchiveConfirm] = useState<TemplateWithTags | null>(
+    null,
+  );
+  const [archiving, setArchiving] = useState(false);
 
   useEffect(() => {
     if (!user_group_id) return;
@@ -104,14 +118,25 @@ export default function TemplateListPage({
   const filteredTemplates = useMemo(() => {
     let updated = [...templates];
 
-    if (filterMode === "All") {
+    if (filterMode === "Archived") {
       updated = updated.filter(
-        t => t.accessible_to_all || t.user_group_id === user_group_id,
+        t =>
+          t.archived &&
+          (t.user_group_id === user_group_id ||
+            (adminAccess && Boolean(t.accessible_to_all))),
       );
-    } else if (filterMode === "Your") {
-      updated = updated.filter(t => t.user_group_id === user_group_id);
     } else {
-      updated = updated.filter(t => t.accessible_to_all);
+      updated = updated.filter(t => !t.archived);
+
+      if (filterMode === "All") {
+        updated = updated.filter(
+          t => t.accessible_to_all || t.user_group_id === user_group_id,
+        );
+      } else if (filterMode === "Your") {
+        updated = updated.filter(t => t.user_group_id === user_group_id);
+      } else {
+        updated = updated.filter(t => t.accessible_to_all);
+      }
     }
 
     if (selectedTagIds) {
@@ -147,6 +172,7 @@ export default function TemplateListPage({
     sortKey,
     sortOrder,
     user_group_id,
+    adminAccess,
   ]);
 
   const toggleSort = (key: "name" | "date") => {
@@ -160,9 +186,25 @@ export default function TemplateListPage({
 
   const isAdminTemplate = (t: TemplateWithTags) => Boolean(t.accessible_to_all);
 
+  // You manage a template if your group owns it, or you're an admin
+  const canManageTemplate = (t: TemplateWithTags) =>
+    t.user_group_id === user_group_id ||
+    (adminAccess && Boolean(t.accessible_to_all));
+
+  // A shared template you don't manage stays copy-to-edit only
+  const isLockedTemplate = (t: TemplateWithTags) =>
+    isAdminTemplate(t) && !canManageTemplate(t);
+
   const handleOpenTemplate = (t: TemplateWithTags) => {
-    if (isAdminTemplate(t)) return;
-    router.push(`/templates?templateId=${t.template_id}&fromTemplateList=true`);
+    if (isLockedTemplate(t)) return;
+
+    const params = new URLSearchParams({
+      templateId: t.template_id,
+      fromTemplateList: "true",
+    });
+    if (t.accessible_to_all) params.set("isAdmin", "true");
+
+    router.push(`/templates?${params.toString()}`);
   };
 
   const handleCopyConfirm = async (action: WarningAction) => {
@@ -182,6 +224,40 @@ export default function TemplateListPage({
     } finally {
       setCopying(false);
       setCopyConfirm(null);
+    }
+  };
+
+  const handleArchiveConfirm = async (action: WarningAction) => {
+    if (action === "cancel" || !archiveConfirm) {
+      setArchiveConfirm(null);
+      return;
+    }
+
+    const target = archiveConfirm;
+    const nextArchived = !target.archived;
+
+    setArchiving(true);
+    try {
+      const ok = await setTemplateArchived(
+        target.template_id,
+        nextArchived,
+        user_group_id,
+        adminAccess,
+      );
+      if (ok) {
+        setTemplates(prev =>
+          prev.map(t =>
+            t.template_id === target.template_id
+              ? { ...t, archived: nextArchived }
+              : t,
+          ),
+        );
+      }
+    } catch (err) {
+      console.error("Archive failed", err);
+    } finally {
+      setArchiving(false);
+      setArchiveConfirm(null);
     }
   };
 
@@ -363,6 +439,21 @@ export default function TemplateListPage({
                   }
                   showBorder={true}
                 />
+
+                {!showSidebar && (
+                  <ArchivedToggle
+                    $active={filterMode === "Archived"}
+                    onClick={() =>
+                      setFilterMode(prev =>
+                        prev === "Archived" ? "All" : "Archived",
+                      )
+                    }
+                  >
+                    {filterMode === "Archived"
+                      ? "Active templates"
+                      : "Archived"}
+                  </ArchivedToggle>
+                )}
               </FilterPlusSearch>
               {templatesLoading ? (
                 <LoadingScreen>
@@ -406,15 +497,15 @@ export default function TemplateListPage({
               )}
 
               {filteredTemplates.map(t => {
-                const isAdmin = isAdminTemplate(t);
+                const isLocked = isLockedTemplate(t);
 
                 return (
-                  <TemplateRow key={t.template_id} $disabled={isAdmin}>
+                  <TemplateRow key={t.template_id} $disabled={isLocked}>
                     <NameColumn
                       onClick={() => handleOpenTemplate(t)}
                       title={
-                        isAdmin
-                          ? "Shared template — make a copy to edit"
+                        isLocked
+                          ? "You cannot edit this template. View content through downloading the PDF."
                           : undefined
                       }
                     >
@@ -536,6 +627,22 @@ export default function TemplateListPage({
                           </defs>
                         </svg>
                       </EditIconWrapper>
+
+                      {canManageTemplate(t) && (
+                        <EditIconWrapper
+                          onClick={e => {
+                            e.stopPropagation();
+                            setArchiveConfirm(t);
+                          }}
+                          title={t.archived ? "Unarchive" : "Archive"}
+                        >
+                          {t.archived ? (
+                            <ArchiveRestore size={18} />
+                          ) : (
+                            <Archive size={18} />
+                          )}
+                        </EditIconWrapper>
+                      )}
                     </RowActions>
                   </TemplateRow>
                 );
@@ -553,6 +660,22 @@ export default function TemplateListPage({
         noCancel={false}
         confirmLabel="Make a copy"
         loading={copying}
+      />
+
+      <WarningModal
+        open={archiveConfirm !== null}
+        onClose={handleArchiveConfirm}
+        title={
+          archiveConfirm?.archived ? "Unarchive template" : "Archive template"
+        }
+        caption={
+          archiveConfirm?.archived
+            ? `Restore "${archiveConfirm?.template_name ?? "this template"}" to your active templates?`
+            : `Archive "${archiveConfirm?.template_name ?? "this template"}"? It will be hidden from your template lists. You can restore it from Archived.`
+        }
+        noCancel={false}
+        confirmLabel={archiveConfirm?.archived ? "Unarchive" : "Archive"}
+        loading={archiving}
       />
     </>
   );

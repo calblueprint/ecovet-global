@@ -108,6 +108,26 @@ export const EditIconWrapper = styled.div`
   }
 `;
 
+export const ArchivedToggle = styled.button<{ $active: boolean }>`
+  flex-shrink: 0;
+  padding: 0 1rem;
+  height: 50%;
+  white-space: nowrap;
+  border-radius: 0.25rem;
+  border: 1px solid ${COLORS.oat_medium};
+  background-color: ${({ $active }) =>
+    $active ? COLORS.lightEletricBlue : "transparent"};
+  font-family: ${Sans.style.fontFamily};
+  font-size: 12px;
+  font-weight: 500;
+  color: ${COLORS.black70};
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${COLORS.lightEletricBlue};
+  }
+`;
+
 export const FilterPlusSearch = styled.main`
   display: flex;
   justify-content: space-between;
