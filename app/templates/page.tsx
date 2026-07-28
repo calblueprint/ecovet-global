@@ -83,6 +83,7 @@ const createInitialStore = (): LocalStore => {
         template_id: templateID,
         template_name: "New Template",
         accessible_to_all: null,
+        archived: false,
         user_group_id: null,
         summary: "",
         setting: "",

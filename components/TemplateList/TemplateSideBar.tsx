@@ -22,8 +22,8 @@ import {
 } from "./styles";
 
 interface TemplateSideBarProps {
-  filterMode: "All" | "Your" | "Browse";
-  setFilterMode: (val: "All" | "Your" | "Browse") => void;
+  filterMode: "All" | "Your" | "Browse" | "Archived";
+  setFilterMode: (val: "All" | "Your" | "Browse" | "Archived") => void;
   onDeleteConfirmed?: (tagId: UUID) => void;
   user_group_id: UUID;
   selectedTagIds: UUID[] | null;
@@ -92,6 +92,12 @@ export default function TemplateSideBar({
           onClick={() => setFilterMode("Browse")}
         >
           Browse Templates
+        </SideNavButton>
+        <SideNavButton
+          selected={filterMode === "Archived"}
+          onClick={() => setFilterMode("Archived")}
+        >
+          Archived
         </SideNavButton>
 
         <StyledAccordion>

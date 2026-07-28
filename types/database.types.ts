@@ -534,6 +534,7 @@ export type Database = {
       template: {
         Row: {
           accessible_to_all: boolean | null;
+          archived: boolean;
           current_activity: string | null;
           setting: string | null;
           summary: string | null;
@@ -544,6 +545,7 @@ export type Database = {
         };
         Insert: {
           accessible_to_all?: boolean | null;
+          archived?: boolean;
           current_activity?: string | null;
           setting?: string | null;
           summary?: string | null;
@@ -554,6 +556,7 @@ export type Database = {
         };
         Update: {
           accessible_to_all?: boolean | null;
+          archived?: boolean;
           current_activity?: string | null;
           setting?: string | null;
           summary?: string | null;
