@@ -95,8 +95,6 @@ export default function SessionFlowPage() {
     }
     setIsOverviewLoading(true);
     try {
-      // these are independent of each other, so fire them together instead of
-      // chaining round trips (the role used to land several requests late)
       const [template, phaseData, participantRole, isForce, phaseIndex] =
         await Promise.all([
           fetchTemplateId(sessionIdStr).then(templateId =>
