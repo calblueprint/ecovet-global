@@ -4,6 +4,7 @@ import type {
   Phase,
   Prompt,
   PromptAnswer,
+  Role,
   RolePhase,
   Template,
   UUID,
@@ -19,7 +20,7 @@ import {
   fetchPhases,
   fetchPromptResponses,
   fetchPrompts,
-  fetchRole,
+  fetchRoleForParticipant,
   fetchRolePhases,
   fetchSessionGlobalPhaseIndex,
   fetchTemplateId,
@@ -61,6 +62,8 @@ export default function SessionFlowPage() {
   const [sessionFinished, setSessionFinished] = useState<boolean | null>(null);
 
   const [roleId, setRoleId] = useState<string>("");
+  const [role, setRole] = useState<Role | null>(null);
+  const [isOverviewLoading, setIsOverviewLoading] = useState(true);
   const [rolePhase, setRolePhase] = useState<RolePhase | null>(null);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [promptsLoading, setPromptsLoading] = useState(false);
@@ -72,6 +75,7 @@ export default function SessionFlowPage() {
     new Set(),
   );
   const [isForceAdvance, setIsForceAdvance] = useState(false);
+  const [isAdvancing, setIsAdvancing] = useState(false);
 
   const [dbPhaseIndex, setDbPhaseIndex] = useState(0); // 1-indexed in supabase (start at 0 for overview)
 
@@ -89,34 +93,29 @@ export default function SessionFlowPage() {
       setSessionFinished(true);
       return;
     }
+    setIsOverviewLoading(true);
     try {
-      const templateId = await fetchTemplateId(sessionIdStr);
-      const template = await fetchTemplate(
-        templateId.template_id as unknown as UUID,
-      );
+      const [template, phaseData, participantRole, isForce, phaseIndex] =
+        await Promise.all([
+          fetchTemplateId(sessionIdStr).then(templateId =>
+            fetchTemplate(templateId.template_id as unknown as UUID),
+          ),
+          fetchPhases(sessionIdStr),
+          fetchRoleForParticipant(userId, sessionIdStr),
+          isSessionForceAdvance(sessionIdStr),
+          fetchParticipantPhaseIndex(userId, sessionIdStr).catch(() => -1),
+        ]);
+
       setTemplateInfo(template);
-
-      const phaseData = await fetchPhases(sessionIdStr);
       setPhases(phaseData);
-
-      const fetchedRoleId = await fetchRole(userId, sessionIdStr);
-      setRoleId(fetchedRoleId as string);
-
-      const isForce = await isSessionForceAdvance(sessionIdStr);
+      setRole(participantRole);
+      setRoleId((participantRole?.role_id as string) ?? "");
       setIsForceAdvance(isForce);
-
-      let mostRecentPhaseIndex: number;
-      try {
-        mostRecentPhaseIndex = await fetchParticipantPhaseIndex(
-          userId,
-          sessionIdStr,
-        );
-      } catch {
-        mostRecentPhaseIndex = -1;
-      }
-      setDbPhaseIndex(mostRecentPhaseIndex);
+      setDbPhaseIndex(phaseIndex);
     } catch (err) {
       console.error("Error loading session data:", err);
+    } finally {
+      setIsOverviewLoading(false);
     }
   }, [userId, sessionIdStr]);
 
@@ -274,6 +273,24 @@ export default function SessionFlowPage() {
     };
   }, [userId, sessionIdStr]);
 
+  const handleContinue = useCallback(async () => {
+    if (!userId || !roleId || !sessionIdStr || isAdvancing) return;
+
+    const prevPhaseIndex = dbPhaseIndex;
+    setIsAdvancing(true);
+    // move the UI forward immediately; the realtime update will confirm it
+    setDbPhaseIndex(prevPhaseIndex + 1);
+
+    try {
+      await advancePhaseForSingleUser(userId, roleId as UUID, sessionIdStr);
+    } catch (err) {
+      console.error("Failed to advance phase:", err);
+      setDbPhaseIndex(prevPhaseIndex);
+    } finally {
+      setIsAdvancing(false);
+    }
+  }, [userId, roleId, sessionIdStr, dbPhaseIndex, isAdvancing]);
+
   function sortResponsesByPromptOrder(
     prompts: Prompt[],
     responses: PromptAnswer[],
@@ -399,11 +416,10 @@ export default function SessionFlowPage() {
         phases={phases}
         phaseInd={arrayIdx} // used to get the actual phaseId from phase[]
         rolePhase={rolePhase}
-        onContinue={() =>
-          advancePhaseForSingleUser(userId, roleId as UUID, sessionIdStr)
-        }
+        onContinue={handleContinue}
         isOverview={isOverview}
-        roleId={roleId}
+        role={role}
+        isRoleLoading={isOverviewLoading}
         isLoading={promptsLoading}
       />
 
