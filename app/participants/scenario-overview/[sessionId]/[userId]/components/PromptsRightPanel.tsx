@@ -70,7 +70,6 @@ export default function PromptsRightPanel({
   backButton,
   nextButton,
 }: PromptsRightPanelProps) {
-  console.log(prompts);
   const totalPrompts = prompts.length;
   const completedCount = Math.min(completedPrompts.size, totalPrompts);
   const progressPercentage =

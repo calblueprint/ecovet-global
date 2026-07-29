@@ -1,9 +1,7 @@
 "use client";
 
-import type { Phase, RolePhase, Template, UUID } from "@/types/schema";
-import { useEffect, useState } from "react";
+import type { Phase, Role, RolePhase, Template } from "@/types/schema";
 import CircularProgress from "@mui/material/CircularProgress";
-import { fetchRoleName } from "@/actions/supabase/queries/sessions";
 import LinkedText from "@/components/Linki/Linkify";
 import {
   ContentBody,
@@ -26,7 +24,8 @@ interface ScenarioLeftPanelProps {
   rolePhase: RolePhase | null;
   onContinue: () => void;
   isOverview: boolean;
-  roleId: UUID;
+  role: Role | null;
+  isRoleLoading: boolean;
   isLoading: boolean;
 }
 
@@ -37,28 +36,11 @@ export default function ScenarioLeftPanel({
   rolePhase,
   onContinue,
   isOverview,
-  roleId,
+  role,
+  isRoleLoading = false,
   isLoading = false,
 }: ScenarioLeftPanelProps) {
   const currentPhase = phases[phaseInd] ?? null;
-  const [roleDescription, setRoleDescription] = useState<string | null>(null);
-  const [roleName, setRoleName] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!roleId) return;
-
-    async function loadRoleName() {
-      try {
-        const name = await fetchRoleName(roleId);
-        setRoleDescription(name.role_description);
-        setRoleName(name.role_name);
-      } catch (err) {
-        console.error("Failed to load role name:", err);
-      }
-    }
-
-    loadRoleName();
-  }, [roleId]);
 
   return (
     <ContentDiv $isOverview={isOverview}>
@@ -122,12 +104,20 @@ export default function ScenarioLeftPanel({
 
           <ContentBubble>
             <ContentHeader>Your Role</ContentHeader>
-            <ContentBody>
-              <LinkedText text={roleName} />
-            </ContentBody>
-            <ContentBody>
-              <LinkedText text={roleDescription} />
-            </ContentBody>
+            {isRoleLoading ? (
+              <LoadingScreen>
+                <CircularProgress color="inherit" aria-label="Loading…" />
+              </LoadingScreen>
+            ) : (
+              <>
+                <ContentBody>
+                  <LinkedText text={role?.role_name ?? null} />
+                </ContentBody>
+                <ContentBody>
+                  <LinkedText text={role?.role_description ?? null} />
+                </ContentBody>
+              </>
+            )}
           </ContentBubble>
         </>
       )}

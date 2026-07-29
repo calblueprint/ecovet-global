@@ -304,7 +304,7 @@ export async function advancePhaseForSingleUser(
   roleId: UUID,
   sessionId: UUID,
 ): Promise<void> {
-  changePhaseForSingleUser(userId, roleId, sessionId, 1);
+  return changePhaseForSingleUser(userId, roleId, sessionId, 1);
 }
 
 export async function backPhaseForSingleUser(
@@ -312,7 +312,7 @@ export async function backPhaseForSingleUser(
   roleId: UUID,
   sessionId: UUID,
 ): Promise<void> {
-  changePhaseForSingleUser(userId, roleId, sessionId, -1);
+  return changePhaseForSingleUser(userId, roleId, sessionId, -1);
 }
 
 export async function changePhaseForSingleUser(
@@ -546,21 +546,23 @@ export async function isSessionFinished(sessionId: string): Promise<boolean> {
   return data[0].is_finished;
 }
 
-export async function fetchRole(
+export async function fetchRoleForParticipant(
   userId: UUID,
   sessionId: UUID,
-): Promise<string | null> {
+): Promise<Role | null> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
     .from("participant_session")
-    .select("role_id")
+    .select("role(*)")
     .eq("session_id", sessionId)
     .eq("user_id", userId)
-    .single();
+    .single<{ role: Role | null }>();
+
   if (error) {
     throw error;
   }
-  return data.role_id;
+
+  return data.role;
 }
 
 export async function createPromptAnswer(
@@ -677,22 +679,6 @@ export async function fetchPromptResponses(
   }
 
   return data ?? [];
-}
-
-export async function fetchRoleName(roleId: UUID): Promise<Role> {
-  const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("role")
-    .select("*")
-    .eq("role_id", roleId)
-    .single();
-
-  if (error) {
-    console.error("Error fetching role name:", error);
-    throw error;
-  }
-
-  return data;
 }
 
 export type ParticipantDetailBundle = {
