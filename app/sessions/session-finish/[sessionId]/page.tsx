@@ -100,10 +100,10 @@ export default function SessionFinish() {
     }
   }
 
-  // Load existing report on page load, generate if none exists
+  // Load existing report on page load, generate if none exists.
   useEffect(() => {
     fetchOrGenerateReport();
-  }, [sessionId, fetchOrGenerateReport]);
+  }, [sessionId]);
 
   async function handleSave() {
     await regenerateReportWithComments(comments.trim() || null);
