@@ -63,6 +63,10 @@ export const RoleTemplateName = styled(B2)`
 
 export const RoleDescriptionTemplate = styled(B2)`
   color: ${COLORS.black40};
+  textarea {
+    max-height: 6.5rem;
+    overflow-y: auto;
+  }
 `;
 
 export const QuestionRowStyled = styled.div`
