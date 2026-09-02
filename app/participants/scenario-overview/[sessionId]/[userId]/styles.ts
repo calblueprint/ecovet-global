@@ -85,6 +85,8 @@ export const ContentBody40 = styled.p`
   font-style: normal;
   font-weight: 400;
   line-height: 1.125rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 `;
 
 export const ContentBubble = styled.div`
@@ -114,6 +116,8 @@ export const ContentBody = styled.div`
   font-weight: 500;
   line-height: 1.125rem;
   width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 `;
 
 export const ContinueButtonDiv = styled.div`
