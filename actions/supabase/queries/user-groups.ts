@@ -49,3 +49,15 @@ export async function submitNewUserGroup(user_group: string) {
   }
   return id;
 }
+
+export async function deleteUserGroup(user_group: UUID): Promise<void> {
+  const supabase = await getSupabaseServerClient();
+  const { error } = await supabase
+    .from("user_group")
+    .delete()
+    .eq("user_group_id", user_group);
+
+  if (error) {
+    console.error("Error deleting user_group:", error.message);
+  }
+}

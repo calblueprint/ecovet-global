@@ -460,3 +460,17 @@ export const StyledTab = styled(Tab)`
     }
   }
 `;
+
+export const DeleteButton = styled.button`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+  border: 0;
+  cursor: pointer;
+`;
+
+export const UserGroupArea = styled.div`
+  display: flex;
+  flex-direction: row;
+`;

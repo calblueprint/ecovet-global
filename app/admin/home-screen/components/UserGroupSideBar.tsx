@@ -4,7 +4,11 @@ import type { UserGroup } from "@/types/schema";
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { fetchUserGroups } from "@/actions/supabase/queries/user-groups";
+import { Tooltip } from "@mui/material";
+import {
+  deleteUserGroup,
+  fetchUserGroups,
+} from "@/actions/supabase/queries/user-groups";
 import {
   Heading3,
   SearchInput2,
@@ -12,9 +16,13 @@ import {
   SideNavNewTemplateButton,
   SideNavTemplatesContainer,
 } from "@/app/admin/styles";
+import cross from "@/assets/images/DeleteTagCross.svg";
 import Plus from "@/assets/images/plus.svg";
+import WarningModal, {
+  WarningAction,
+} from "@/components/WarningModal/WarningModal";
 import AddUserGroups from "./AddUserGroup";
-import { Buttons } from "./styles";
+import { Buttons, DeleteButton, UserGroupArea } from "./styles";
 
 export default function UserGroupSideBar({
   selectedUserGroupId,
@@ -27,6 +35,25 @@ export default function UserGroupSideBar({
   const [search, setSearch] = useState("");
   const [isAddGroupOpen, setIsAddGroupOpen] = useState(false);
   const router = useRouter();
+  const [groupToDelete, setGroupToDelete] = useState<string | null>(null);
+
+  const handleDelete = (id: string) => {
+    setGroupToDelete(id);
+  };
+
+  const handleWarningClose = async (action: WarningAction) => {
+    const id = groupToDelete;
+    setGroupToDelete(null);
+
+    if (action !== "confirm" || !id) return;
+
+    try {
+      await deleteUserGroup(id);
+      setUserGroups(prev => prev.filter(g => g.user_group_id !== id));
+    } catch (err) {
+      console.error("Failed to delete user group:", err);
+    }
+  };
 
   useEffect(() => {
     async function loadUserGroups() {
@@ -55,13 +82,20 @@ export default function UserGroupSideBar({
       />
 
       {filteredGroups.map(group => (
-        <SideNavButton
-          key={group.user_group_id}
-          $selected={selectedUserGroupId === group.user_group_id}
-          onClick={() => setSelectedUserGroupId(group.user_group_id)}
-        >
-          {group.user_group_name}
-        </SideNavButton>
+        <UserGroupArea key={group.user_group_id}>
+          <SideNavButton
+            $selected={selectedUserGroupId === group.user_group_id}
+            onClick={() => setSelectedUserGroupId(group.user_group_id)}
+          >
+            {group.user_group_name}
+          </SideNavButton>
+          <DeleteButton
+            aria-label={`Delete ${group.user_group_name}`}
+            onClick={() => handleDelete(group.user_group_id)}
+          >
+            <Image src={cross} alt="cross" />
+          </DeleteButton>
+        </UserGroupArea>
       ))}
 
       <Buttons>
@@ -84,6 +118,10 @@ export default function UserGroupSideBar({
           }}
         />
       )}
+      <WarningModal
+        open={groupToDelete !== null}
+        onClose={handleWarningClose}
+      />
     </SideNavTemplatesContainer>
   );
 }
