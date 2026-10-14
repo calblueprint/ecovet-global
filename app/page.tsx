@@ -6,12 +6,13 @@ import Carousel from "react-material-ui-carousel";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { checkInviteStatus } from "@/actions/supabase/queries/auth";
 import { fetchProfileByUserId } from "@/actions/supabase/queries/profile";
 import ChildVaccination from "@/app/public/images/ChildVaccination.png";
 import Seal from "@/app/public/images/Seal.png";
 import WildfireResponse from "@/app/public/images/WildfireResponse.png";
 import { useSession } from "@/utils/AuthProvider";
-import { getHomePath } from "@/utils/HomePage";
+import { getHomePath, hasCompletedOnboarding } from "@/utils/HomePage";
 import {
   BrandingText,
   CarouselImage,
@@ -42,7 +43,7 @@ const carouselImages = [
 export default function SignIn() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { signInWithEmail } = useSession();
+  const { signInWithEmail, signOut } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -84,13 +85,33 @@ export default function SignIn() {
       console.timeEnd("profile");
 
       const hasProfile = profile !== null;
+
+      // A profile is only created once the invite link is used, so a user
+      // without one would otherwise be bounced from onboarding back to "/"
+      if (!hasProfile) {
+        const { status } = await checkInviteStatus(data.user.email ?? email);
+        await signOut();
+        setErrorMessage(
+          status === "pending"
+            ? "Your account setup isn't finished. Please ask your facilitator to resend your invite, then use the link in that email."
+            : "We couldn't find an account for this email. Please contact your facilitator.",
+        );
+        setLoading(false);
+        return;
+      }
+      // Admin accounts are created without a name, so they skip this
+      if (profile.user_type !== "Admin" && !hasCompletedOnboarding(profile)) {
+        router.push("/onboarding?incomplete=true");
+        return;
+      }
+
       if (searchParams.get("fromNudge") == "true") {
         const session_id = searchParams.get("sessionId");
         router.push(
           "/participants/scenario-overview/" + session_id + "/" + data.user.id,
         );
       } else {
-        router.push(hasProfile ? getHomePath(profile) : "/onboarding");
+        router.push(getHomePath(profile));
       }
     } catch {
       setErrorMessage("An unexpected error occurred. Please try again.");

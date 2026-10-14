@@ -14,3 +14,8 @@ export function getHomePath(profile: Profile | null): string {
       return "/";
   }
 }
+
+// Onboarding requires a first name, so a profile without one never finished it
+export function hasCompletedOnboarding(profile: Profile | null): boolean {
+  return !!profile?.first_name?.trim();
+}

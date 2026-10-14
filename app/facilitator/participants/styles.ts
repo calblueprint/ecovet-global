@@ -73,6 +73,10 @@ export const StyledTd = styled.td`
   font-size: 0.75rem;
 `;
 
+export const OnboardingNote = styled.div`
+  font-size: 0.6rem;
+`;
+
 export const ListControlsWrapper = styled.div`
   border-bottom: 1px solid ${COLORS.oat_medium};
   margin-top: 2rem;

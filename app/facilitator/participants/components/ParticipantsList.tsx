@@ -10,6 +10,7 @@ import { Participant } from "@/types/schema";
 import { SortButton } from "../../styles";
 import {
   LoadingScreen,
+  OnboardingNote,
   ResendInviteButton,
   StyledTable,
   StyledTableHead,
@@ -26,8 +27,12 @@ export default function ParticipantsList({
   onDeleteRow,
   onResendInvite,
   resendingEmail,
+  loading,
+  emptyMessage,
 }: {
   participants: Participant[];
+  loading: boolean;
+  emptyMessage: string;
   onDeleteRow: (participant: Participant) => void;
   onResendInvite: (p: Participant) => void;
   resendingEmail: string | null;
@@ -77,10 +82,12 @@ export default function ParticipantsList({
 
   return (
     <Box>
-      {participants.length === 0 ? (
+      {loading ? (
         <LoadingScreen>
           <CircularProgress size="2rem" color="inherit" aria-label="Loading…" />
         </LoadingScreen>
+      ) : participants.length === 0 ? (
+        <LoadingScreen>{emptyMessage}</LoadingScreen>
       ) : (
         <StyledTable>
           <colgroup>
@@ -115,7 +122,14 @@ export default function ParticipantsList({
           <tbody>
             {sorted.map((p, index) => (
               <StyledTableRow key={p.id || index}>
-                <StyledTd>{p.name ?? "—"}</StyledTd>
+                <StyledTd>
+                  {p.name ?? "—"}
+                  {p.invite_accepted && !p.onboarding_complete && (
+                    <OnboardingNote>
+                      Didn&apos;t complete onboarding
+                    </OnboardingNote>
+                  )}
+                </StyledTd>
                 <StyledTd>{p.email}</StyledTd>
                 <StyledTd>{p.role}</StyledTd>
                 <StyledTd>

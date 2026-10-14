@@ -109,7 +109,7 @@ export async function handleProfileSubmit(profile: {
 }) {
   const supabase = await getSupabaseServerClient();
   try {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("profile")
       .update({
         first_name: profile.first_name,
@@ -117,10 +117,19 @@ export async function handleProfileSubmit(profile: {
         country: profile.country,
         org_role: profile.org_role,
       })
-      .eq("id", profile.id);
+      .eq("id", profile.id)
+      .select("id");
 
     if (error) {
       return { success: false, error: error.message };
+    }
+    // an update that matches no rows doesn't error, so check explicitly
+    if (!data || data.length === 0) {
+      return {
+        success: false,
+        error:
+          "No profile found for this account. Please use the link from your invite email.",
+      };
     }
 
     return { success: true, error: null };

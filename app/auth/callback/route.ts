@@ -5,7 +5,7 @@ import { getSupabaseServerClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/auth/sign-in";
+  const next = searchParams.get("next") ?? "/";
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin;
 
   if (code) {
@@ -15,7 +15,13 @@ export async function GET(request: NextRequest) {
     if (!error) {
       return NextResponse.redirect(new URL(next, baseUrl));
     }
+    return NextResponse.redirect(
+      new URL(
+        `/auth/auth-error?error=${encodeURIComponent(error.message)}`,
+        baseUrl,
+      ),
+    );
   }
 
-  return NextResponse.redirect(new URL("/auth/sign-in", baseUrl));
+  return NextResponse.redirect(new URL("/auth/auth-error", baseUrl));
 }
