@@ -55,16 +55,12 @@ export async function markInviteAccepted(invite_id: string) {
 export async function addInviteInfoToProfile(userId: string, invite: Invite) {
   const supabase = await getSupabaseServerClient();
 
-  // upsert so retrying a sign-up that failed partway doesn't hit a duplicate
-  const { error } = await supabase.from("profile").upsert(
-    {
-      id: userId,
-      user_group_id: invite.user_group_id,
-      user_type: invite.user_type,
-      email: invite.email.toLowerCase(),
-    },
-    { onConflict: "id" },
-  );
+  const { error } = await supabase.from("profile").insert({
+    id: userId,
+    user_group_id: invite.user_group_id,
+    user_type: invite.user_type,
+    email: invite.email.toLowerCase(),
+  });
 
   if (error) {
     console.error("Error creating profile:", error.message);

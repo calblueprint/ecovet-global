@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import supabase from "@/actions/supabase/client";
 import { handleProfileSubmit } from "@/actions/supabase/queries/profile";
-import { refreshUserGroupMemberCount } from "@/actions/supabase/queries/user-groups";
 import { getHomePath } from "@/utils/HomePage";
 import { useProfile } from "@/utils/ProfileProvider";
 import {
@@ -60,13 +60,22 @@ function OnboardingPage() {
     } else {
       setFormMessage("Profile saved");
       try {
-        if (profile?.user_group_id) {
-          await refreshUserGroupMemberCount(profile.user_group_id);
+        const { data } = await supabase
+          .from("user_group")
+          .select("num_users")
+          .eq("user_group_id", profile?.user_group_id)
+          .single();
+
+        if (data) {
+          await supabase
+            .from("user_group")
+            .update({ num_users: (data.num_users ?? 0) + 1 })
+            .eq("user_group_id", profile?.user_group_id);
         }
         await refetch();
         router.push(homepage);
       } catch (err) {
-        console.error("Error updating num_users:", err);
+        console.error("Error incrementing num_users:", err);
       }
     }
     setSave(false);

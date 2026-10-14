@@ -99,27 +99,3 @@ export async function deleteUserGroup(user_group: UUID): Promise<void> {
     if (!remaining) await deleteAuthUserByEmail(email);
   }
 }
-
-// Recount instead of incrementing so concurrent onboardings can't lose a count
-export async function refreshUserGroupMemberCount(user_group_id: UUID) {
-  const adminClient = getSupabaseAdminClient();
-  const { count, error } = await adminClient
-    .from("profile")
-    .select("id", { count: "exact", head: true })
-    .eq("user_group_id", user_group_id)
-    .not("first_name", "is", null);
-
-  if (error) {
-    console.error("Error counting user_group members:", error.message);
-    return;
-  }
-
-  const { error: updateError } = await adminClient
-    .from("user_group")
-    .update({ num_users: count ?? 0 })
-    .eq("user_group_id", user_group_id);
-
-  if (updateError) {
-    console.error("Error updating num_users:", updateError.message);
-  }
-}
