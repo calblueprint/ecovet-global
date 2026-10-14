@@ -77,7 +77,6 @@ export async function deleteUserGroup(user_group: UUID): Promise<void> {
     console.error("Error deleting user_group invites:", inviteError.message);
     throw inviteError;
   }
-
   const { error } = await supabase
     .from("user_group")
     .delete()
@@ -97,5 +96,8 @@ export async function deleteUserGroup(user_group: UUID): Promise<void> {
       .limit(1)
       .maybeSingle();
     if (!remaining) await deleteAuthUserByEmail(email);
+
+  if (error) {
+    console.error("Error deleting user_group:", error.message);
   }
 }
