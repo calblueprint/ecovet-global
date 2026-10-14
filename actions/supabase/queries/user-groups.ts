@@ -97,7 +97,8 @@ export async function deleteUserGroup(user_group: UUID): Promise<void> {
       .maybeSingle();
     if (!remaining) await deleteAuthUserByEmail(email);
 
-  if (error) {
-    console.error("Error deleting user_group:", error.message);
+    if (error) {
+      console.error("Error deleting user_group");
+    }
   }
 }
