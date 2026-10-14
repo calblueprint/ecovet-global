@@ -20,6 +20,7 @@ import InviteComponent from "@/components/InviteComponent/InviteComponent";
 import WarningModal, {
   WarningAction,
 } from "@/components/WarningModal/WarningModal";
+import { hasCompletedOnboarding } from "@/utils/HomePage";
 import { useProfile } from "@/utils/ProfileProvider";
 import ParticipantsList from "./components/ParticipantsList";
 import {
@@ -37,6 +38,7 @@ import {
 export default function ParticipantsPage() {
   const [status, setStatus] = useState<"Accepted" | "Pending">("Accepted");
   const [participants, setParticipants] = useState<Participant[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [warningModalOpen, setWarningModalOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Participant | null>(null);
@@ -62,7 +64,10 @@ export default function ParticipantsPage() {
     if (!profile?.user_group_id) return;
 
     const data = await fetchInvites(profile.user_group_id as UUID);
-    if (!data) return;
+    if (!data) {
+      setLoading(false);
+      return;
+    }
 
     const emails = data.map(item => item.email).filter(Boolean) as string[];
     const profiles = await getProfilesByEmails(emails);
@@ -80,10 +85,12 @@ export default function ParticipantsPage() {
         role: item.user_type,
         last_active: null,
         invite_accepted: item.status === "Accepted",
+        onboarding_complete: hasCompletedOnboarding(p ?? null),
       };
     });
 
     setParticipants(formattedData);
+    setLoading(false);
   }, [profile?.user_group_id]);
 
   useEffect(() => {
@@ -136,7 +143,9 @@ export default function ParticipantsPage() {
       // Always delete invite for both cases
       await deleteInvite(pendingDelete.invite_id as UUID);
 
-      await deleteAuthUserByEmail(pendingDelete.email as UUID);
+      if (pendingDelete.email) {
+        await deleteAuthUserByEmail(pendingDelete.email);
+      }
 
       await loadData();
     }
@@ -185,6 +194,14 @@ export default function ParticipantsPage() {
             onDeleteRow={handleDeleteRow}
             onResendInvite={handleResendInvite}
             resendingEmail={resendingEmail}
+            loading={loading}
+            emptyMessage={
+              searchQuery
+                ? "No matching participants"
+                : status === "Pending"
+                  ? "No pending invites"
+                  : "No accepted participants yet"
+            }
           />
         </ContentWrapper>
       </LayoutWrapper>

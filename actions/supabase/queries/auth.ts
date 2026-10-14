@@ -1,6 +1,7 @@
 "use server";
 
 import {
+  findAuthUserByEmail,
   getSupabaseAdminClient,
   getSupabaseServerClient,
 } from "@/lib/supabase/server";
@@ -15,6 +16,7 @@ export async function checkInviteStatus(email: string) {
     .select("*")
     .eq("email", lowerCaseEmail)
     .eq("status", "Pending")
+    .limit(1)
     .maybeSingle();
 
   if (error) {
@@ -29,14 +31,13 @@ export async function checkInviteStatus(email: string) {
   return { status: "pending" as const, invite: data };
 }
 
-export async function markInviteAccepted(email: string) {
+export async function markInviteAccepted(invite_id: string) {
   const supabase = await getSupabaseServerClient();
-  const lowerCaseEmail = email.toLowerCase();
 
   const { data, error } = await supabase
     .from("invite")
     .update({ status: "Accepted" })
-    .eq("email", lowerCaseEmail)
+    .eq("invite_id", invite_id)
     .select();
 
   if (error) {
@@ -45,33 +46,20 @@ export async function markInviteAccepted(email: string) {
   }
 
   if (!data || data.length === 0) {
-    throw new Error("No invite found for email " + email);
+    throw new Error("No invite found with id " + invite_id);
   }
 
   return true;
 }
 
-export async function addInviteInfoToProfile(userId: string, email: string) {
+export async function addInviteInfoToProfile(userId: string, invite: Invite) {
   const supabase = await getSupabaseServerClient();
-  const lowerCaseEmail = email.toLowerCase();
-
-  const { data: invite, error: inviteError } = await supabase
-    .from("invite")
-    .select("user_group_id, user_type")
-    .eq("email", lowerCaseEmail)
-    .limit(1)
-    .single();
-
-  if (inviteError || !invite) {
-    console.error("Error fetching invite:", inviteError?.message);
-    throw new Error("Failed to find invite for profile creation");
-  }
 
   const { error } = await supabase.from("profile").insert({
     id: userId,
     user_group_id: invite.user_group_id,
     user_type: invite.user_type,
-    email: lowerCaseEmail,
+    email: invite.email.toLowerCase(),
   });
 
   if (error) {
@@ -102,22 +90,47 @@ export async function resendInvite(email: string) {
   const adminClient = getSupabaseAdminClient();
   const lowerCaseEmail = email.toLowerCase();
 
-  const { status } = await checkInviteStatus(lowerCaseEmail);
-  if (status !== "pending") {
+  const { status, invite } = await checkInviteStatus(lowerCaseEmail);
+  if (status !== "pending" || !invite) {
     return { success: false, error: "No pending invite for this email" };
   }
 
-  const { data: listData, error: listError } =
-    await adminClient.auth.admin.listUsers();
-  if (listError) {
-    return { success: false, error: listError.message };
+  let existingUser;
+  try {
+    existingUser = await findAuthUserByEmail(lowerCaseEmail);
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Failed to look up user",
+    };
   }
 
-  const existingUser = listData.users.find(
-    u => u.email?.toLowerCase() === lowerCaseEmail,
-  );
-
   if (existingUser) {
+    const { data: existingProfile } = await adminClient
+      .from("profile")
+      .select("user_group_id")
+      .eq("id", existingUser.id)
+      .maybeSingle();
+
+    if (existingProfile) {
+      // never delete the login of someone who is active in another group
+      if (existingProfile.user_group_id !== invite.user_group_id) {
+        return {
+          success: false,
+          error: "User already belongs to another user group",
+        };
+      }
+      // a profile in this group with a pending invite means sign-up failed
+      // partway, so clear it out along with the login
+      const { error: profileError } = await adminClient
+        .from("profile")
+        .delete()
+        .eq("id", existingUser.id);
+      if (profileError) {
+        return { success: false, error: profileError.message };
+      }
+    }
+
     const { error: deleteError } = await adminClient.auth.admin.deleteUser(
       existingUser.id,
     );
@@ -167,40 +180,6 @@ export async function checkIfUserExists(email: string): Promise<boolean> {
   return data !== null && data.length > 0;
 }
 
-/* returns True if there is an unaccepted invite given an email*/
-export async function checkInvites(email: string) {
-  const supabase = await getSupabaseServerClient();
-  const lowerCaseEmail = email.toLowerCase();
-
-  const { data, error } = await supabase
-    .from("invite")
-    .select("*")
-    .eq("email", lowerCaseEmail)
-    .maybeSingle();
-
-  if (error) {
-    console.error("Error fetching invite from email:", error.message);
-    return "error";
-  }
-
-  if (!data) {
-    return "no_invite";
-  }
-
-  const invite_data: Invite = data as Invite;
-
-  switch (invite_data.status) {
-    case "Pending":
-      return "pending";
-    case "Accepted":
-      return "accepted";
-    case "Cancelled":
-      return "cancelled";
-    default:
-      return "unknown_status";
-  }
-}
-
 export async function completeInvitedSignUp(password: string) {
   const supabase = await getSupabaseServerClient();
 
@@ -219,11 +198,24 @@ export async function completeInvitedSignUp(password: string) {
 
   const lowerCaseEmail = user.email.toLowerCase();
 
-  const { status } = await checkInviteStatus(lowerCaseEmail);
-  if (status !== "pending") {
+  const { status, invite } = await checkInviteStatus(lowerCaseEmail);
+  if (status !== "pending" || !invite) {
     return {
       success: false,
       error: "No pending invitation found for this account.",
+      userId: null,
+    };
+  }
+
+  // Create the profile before setting the password. If this fails the user
+  // has no password yet, so they can't log in without a profile and get stuck.
+  try {
+    await addInviteInfoToProfile(user.id, invite);
+  } catch (err) {
+    console.error("Error creating profile during sign-up:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Failed to finalize sign-up",
       userId: null,
     };
   }
@@ -239,8 +231,7 @@ export async function completeInvitedSignUp(password: string) {
   }
 
   try {
-    await addInviteInfoToProfile(user.id, lowerCaseEmail);
-    await markInviteAccepted(lowerCaseEmail);
+    await markInviteAccepted(invite.invite_id);
     return { success: true, error: null, userId: user.id };
   } catch (err) {
     console.error("Error finalizing sign-up:", err);

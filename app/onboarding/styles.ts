@@ -121,3 +121,11 @@ export const Button = styled.button`
   opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 `;
+
+export const OnboardingNote = styled.p`
+  font-family: ${Sans.style.fontFamily};
+  color: ${COLORS.tagRed};
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+`;

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import supabase from "@/actions/supabase/client";
 import { handleProfileSubmit } from "@/actions/supabase/queries/profile";
 import { getHomePath } from "@/utils/HomePage";
@@ -17,6 +18,7 @@ import {
   IntroText,
   Label,
   Main,
+  OnboardingNote,
   WelcomeTag,
 } from "./styles";
 
@@ -32,6 +34,8 @@ function OnboardingPage() {
   const [formMessage, setFormMessage] = useState("");
   const { refetch } = useProfile();
   const router = useRouter();
+  // set by the sign-in page when someone skipped onboarding after sign-up
+  const incomplete = useSearchParams().get("incomplete") === "true";
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -81,6 +85,23 @@ function OnboardingPage() {
     return <p>Loading your profile…</p>;
   }
 
+  // Profiles are created when the invite link is used. Without one there is
+  // nothing to save, so explain instead of letting submit bounce them to "/"
+  if (!profile) {
+    return (
+      <Main>
+        <Container>
+          <Heading2>Account setup isn&apos;t finished</Heading2>
+          <Heading3>
+            Please ask your facilitator to resend your invite, then use the link
+            in that email to finish setting up your account.
+          </Heading3>
+          <Link href="/">Return to sign in</Link>
+        </Container>
+      </Main>
+    );
+  }
+
   return (
     <div>
       <Main>
@@ -93,6 +114,12 @@ function OnboardingPage() {
                 <Heading3>
                   Fill out these questions to tell us more about you.
                 </Heading3>
+                {incomplete && (
+                  <OnboardingNote>
+                    You didn&apos;t finish onboarding when you signed up. Please
+                    complete your profile to continue.
+                  </OnboardingNote>
+                )}
               </WelcomeTag>
             </IntroText>
             <InputFields>

@@ -2,32 +2,30 @@
 
 import type { UUID } from "@/types/schema";
 import supabase from "@/app/api/supabase/createClient";
-import { getSupabaseAdminClient } from "@/lib/supabase/server";
-import { Profile, UserType } from "@/types/schema";
+import {
+  findAuthUserByEmail,
+  getSupabaseAdminClient,
+} from "@/lib/supabase/server";
+import { UserType } from "@/types/schema";
 import { sendInviteEmail } from "./auth";
 
-async function getProfileByEmail(
-  email: string,
-  user_group_id: string,
-): Promise<Profile | null> {
-  const { data, error } = await supabase
-    .from("profile")
-    .select("*")
-    .eq("email", email)
-    .eq("user_group_id", user_group_id)
-    .maybeSingle();
-
-  if (error || !data) return null;
-  return data;
-}
-
 export async function submitNewInvite(
-  email: string,
+  rawEmail: string,
   user_group_id: string,
   user_type: UserType,
 ) {
+  // every lookup lowercases the email, so store it that way too
+  const email = rawEmail.trim().toLowerCase();
   const id = crypto.randomUUID();
-  const profile = await getProfileByEmail(email, user_group_id);
+  // admin client so RLS doesn't hide rows from other user groups
+  const adminClient = getSupabaseAdminClient();
+
+  const { data: profile } = await adminClient
+    .from("profile")
+    .select("*")
+    .eq("email", email)
+    .limit(1)
+    .maybeSingle();
 
   // Exists in the profile table
   if (profile) {
@@ -39,42 +37,43 @@ export async function submitNewInvite(
       };
     }
 
-    const currentType = profile.user_type;
+    // Promote participant to facilitator
+    if (user_type === "Facilitator" && profile.user_type === "Participant") {
+      await changeToFacilitator(profile.id);
+      return {
+        error: false,
+        message: "User was a participant and is now a facilitator",
+      };
+    }
 
-    // Inviting a facilitator
-    if (user_type === "Facilitator") {
-      if (currentType === "Facilitator") {
-        return { error: true, message: "User already is a facilitator" };
-      }
-      // Promote participant to facilitator
-      if (currentType === "Participant") {
-        await changeToFacilitator(profile.id);
-        return {
-          error: false,
-          message: "User was a participant and is now a facilitator",
-        };
-      }
+    if (profile.user_type === "Facilitator") {
+      return { error: true, message: "User already is a facilitator" };
     }
-    // Inviting a participant
-    if (user_type === "Participant") {
-      return { error: true, message: "User already in the user group" };
-    }
+    return { error: true, message: "User already in the user group" };
   }
-  // check if there is an existing invite
-  const { data: existingInvite } = await supabase
+
+  // only one pending invite per email, across all user groups
+  const { data: existingInvite } = await adminClient
     .from("invite")
-    .select("invite_id")
+    .select("user_group_id")
     .eq("email", email)
-    .eq("user_group_id", user_group_id)
     .eq("status", "Pending")
+    .limit(1)
     .maybeSingle();
 
   if (existingInvite) {
     return {
       error: true,
-      message: "An invite has already been sent to this email",
+      message:
+        existingInvite.user_group_id === user_group_id
+          ? "An invite has already been sent to this email"
+          : "User already has a pending invite to another user group",
     };
   }
+
+  // An auth user with no profile is a leftover login (e.g. their profile was
+  // deleted). It would make inviteUserByEmail fail, so remove it first.
+  await deleteAuthUserByEmail(email);
 
   // create a row in invite table
   const { error } = await supabase.from("invite").upsert(
@@ -94,7 +93,18 @@ export async function submitNewInvite(
       message: "Error inserting new invite: " + error.message,
     };
   }
-  await sendInviteEmail(email);
+  try {
+    await sendInviteEmail(email);
+  } catch (err) {
+    // don't leave a pending invite behind for an email that was never sent
+    await deleteInvite(id as UUID);
+    return {
+      error: true,
+      message:
+        "Error sending invite email: " +
+        (err instanceof Error ? err.message : String(err)),
+    };
+  }
   return { error: false, message: "Invite sent successfully" };
 }
 
@@ -125,20 +135,12 @@ export async function deleteInvite(invite_id: UUID): Promise<void> {
 
 // deletes the Auth Row in Supabase - seperate from the invites and profile table
 export async function deleteAuthUserByEmail(email: string): Promise<void> {
-  const adminClient = getSupabaseAdminClient();
-  const lowerCaseEmail = email.toLowerCase();
-
-  const { data, error: listError } = await adminClient.auth.admin.listUsers();
-  if (listError) {
-    console.error("Error listing users:", listError.message);
-    throw listError;
-  }
-
-  const user = data.users.find(u => u.email?.toLowerCase() === lowerCaseEmail);
-
+  const user = await findAuthUserByEmail(email);
   if (!user) return;
 
-  const { error } = await adminClient.auth.admin.deleteUser(user.id);
+  const { error } = await getSupabaseAdminClient().auth.admin.deleteUser(
+    user.id,
+  );
   if (error) {
     console.error("Error deleting auth user:", error.message);
     throw error;

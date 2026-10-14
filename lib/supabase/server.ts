@@ -62,3 +62,24 @@ export function getSupabaseAdminClient() {
     },
   );
 }
+
+// listUsers is paginated (50 per page by default), so walk every page
+export async function findAuthUserByEmail(email: string) {
+  const adminClient = getSupabaseAdminClient();
+  const lowerCaseEmail = email.toLowerCase();
+  const perPage = 1000;
+
+  for (let page = 1; ; page++) {
+    const { data, error } = await adminClient.auth.admin.listUsers({
+      page,
+      perPage,
+    });
+    if (error) throw error;
+
+    const user = data.users.find(
+      u => u.email?.toLowerCase() === lowerCaseEmail,
+    );
+    if (user) return user;
+    if (data.users.length < perPage) return null;
+  }
+}
