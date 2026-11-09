@@ -1,16 +1,17 @@
 "use server";
 
+import { IMAGES_BUCKET as BUCKET } from "@/lib/storage";
 import {
   getSupabaseAdminClient,
   getSupabaseServerClient,
 } from "@/lib/supabase/server";
 
 // Private bucket: every read goes through a signed URL
-const BUCKET = "images";
 const MAX_BYTES = 4 * 1024 * 1024; // matches serverActions.bodySizeLimit
 const SIGNED_URL_SECONDS = 2 * 60 * 60;
+// JPEG/PNG only: the PDF renderer can't embed WebP. The browser converts
+// picked files to JPEG before upload (utils/resizeImage.ts).
 const EXTENSION_BY_TYPE: Record<string, string> = {
-  "image/webp": "webp",
   "image/jpeg": "jpg",
   "image/png": "png",
 };
@@ -59,7 +60,7 @@ export async function uploadTemplateImage(
   }
 
   const extension = EXTENSION_BY_TYPE[file.type];
-  if (!extension) return { error: "Please use a JPEG, PNG, or WebP image." };
+  if (!extension) return { error: "Please use a JPEG or PNG image." };
   if (file.size > MAX_BYTES) return { error: "Image must be under 4 MB." };
 
   // Random suffix so a replaced image never collides with the old file.

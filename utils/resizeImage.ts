@@ -1,18 +1,14 @@
 // Browser-only: shrinks an image before upload so uploads stay small
-// (~200–400 KB) and well under the server action size limit.
+// (~300–500 KB) and well under the server action size limit.
 // Re-encoding also strips EXIF data such as GPS location.
+
+// Output is always JPEG (not WebP): the PDF renderer (@react-pdf) only
+// supports JPEG and PNG, and report PDFs embed these images.
 
 export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 const MAX_DIMENSION = 1600; // longest side, in px
 const QUALITY = 0.8;
-
-function canvasToBlob(
-  canvas: HTMLCanvasElement,
-  type: string,
-): Promise<Blob | null> {
-  return new Promise(resolve => canvas.toBlob(resolve, type, QUALITY));
-}
 
 export async function resizeImage(file: File): Promise<Blob> {
   if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
@@ -30,14 +26,6 @@ export async function resizeImage(file: File): Promise<Blob> {
 
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Could not process this image.");
-  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-
-  // Browsers without WebP encoding silently return PNG instead.
-  const webp = await canvasToBlob(canvas, "image/webp");
-  if (webp?.type === "image/webp") {
-    bitmap.close();
-    return webp;
-  }
 
   // JPEG has no transparency, so put transparent areas on white.
   ctx.fillStyle = "#ffffff";
@@ -45,7 +33,9 @@ export async function resizeImage(file: File): Promise<Blob> {
   ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
   bitmap.close();
 
-  const jpeg = await canvasToBlob(canvas, "image/jpeg");
+  const jpeg = await new Promise<Blob | null>(resolve =>
+    canvas.toBlob(resolve, "image/jpeg", QUALITY),
+  );
   if (!jpeg) throw new Error("Could not process this image.");
   return jpeg;
 }

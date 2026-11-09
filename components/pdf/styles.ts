@@ -439,6 +439,28 @@ export const styles = StyleSheet.create({
     marginBottom: 14,
     paddingLeft: 8,
   },
+
+  // Image blocks (template images between questions)
+  imageBlock: {
+    marginBottom: 14,
+    paddingLeft: 8,
+    gap: 4,
+  },
+  promptImage: {
+    width: "100%",
+    maxHeight: 260,
+    objectFit: "contain",
+    objectPositionX: 0,
+  },
+  imageCaption: {
+    fontSize: 9,
+    color: COLORS.black70,
+    lineHeight: 1.4,
+  },
+  imageUnavailable: {
+    fontSize: 9,
+    color: COLORS.black40,
+  },
   questionRow: {
     flexDirection: "row",
     alignItems: "flex-start",

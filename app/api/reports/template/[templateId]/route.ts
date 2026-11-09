@@ -4,6 +4,7 @@ import type {
 } from "@/components/pdf/SessionReport";
 import { createClient } from "@supabase/supabase-js";
 import { generateSessionReport } from "@/lib/pdf/generate";
+import { loadPdfImages } from "@/lib/pdf/images";
 
 export const dynamic = "force-dynamic";
 
@@ -81,12 +82,19 @@ export async function GET(
   const { data: prompts } = rolePhaseIds.length
     ? await supabase
         .from("prompt")
-        .select("prompt_id, prompt_text, role_phase_id")
+        .select(
+          "prompt_id, prompt_text, role_phase_id, prompt_type, image_path",
+        )
         .eq("archived", false)
-        .neq("prompt_type", "image") // images aren't included in PDFs yet
         .in("role_phase_id", rolePhaseIds)
         .order("prompt_number")
     : { data: [] };
+
+  // Image blocks are embedded in the PDF (downloaded with the service role).
+  const imagesByPath = await loadPdfImages(
+    supabase,
+    (prompts ?? []).map(p => p.image_path),
+  );
 
   // Prompt options (for multiple-choice prompts)
   const promptIds = (prompts ?? []).map(p => p.prompt_id);
@@ -114,9 +122,15 @@ export async function GET(
 
   const promptsByRolePhase: Record<
     string,
-    { prompt_id: string; prompt_text: string | null }[]
+    {
+      prompt_id: string;
+      prompt_text: string | null;
+      prompt_type: string;
+      image_path: string | null;
+    }[]
   > = {};
   for (const p of prompts ?? []) {
+    if (p.prompt_type === "image" && !p.image_path) continue;
     const rpId = p.role_phase_id!;
     if (!promptsByRolePhase[rpId]) promptsByRolePhase[rpId] = [];
     promptsByRolePhase[rpId].push(p);
@@ -134,11 +148,20 @@ export async function GET(
         rolePhaseDescription: rolePhaseId
           ? (rolePhaseDescById[rolePhaseId] ?? null)
           : null,
-        prompts: phasePrompts.map(prompt => ({
-          question: prompt.prompt_text ?? "",
-          options: optionsByPromptId[prompt.prompt_id],
-          responses: [],
-        })),
+        prompts: phasePrompts.map(prompt =>
+          prompt.prompt_type === "image"
+            ? {
+                question: prompt.prompt_text ?? "",
+                responses: [],
+                isImage: true,
+                image: imagesByPath[prompt.image_path!] ?? null,
+              }
+            : {
+                question: prompt.prompt_text ?? "",
+                options: optionsByPromptId[prompt.prompt_id],
+                responses: [],
+              },
+        ),
       };
     });
 

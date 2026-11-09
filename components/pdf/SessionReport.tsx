@@ -1,4 +1,13 @@
-import { Circle, Document, Page, Svg, Text, View } from "@react-pdf/renderer";
+import type { PdfImage } from "@/lib/pdf/images";
+import {
+  Circle,
+  Document,
+  Image,
+  Page,
+  Svg,
+  Text,
+  View,
+} from "@react-pdf/renderer";
 import { styles } from "./styles";
 
 export type ParticipantSummary = {
@@ -20,9 +29,13 @@ export type PhaseReportData = {
     roleName: string;
     rolePhaseDescription: string | null;
     prompts: {
+      // For image blocks this is the caption.
       question: string;
       responses: PromptResponse[];
       options?: string[];
+      isImage?: boolean;
+      // null when the image couldn't be loaded.
+      image?: PdfImage | null;
     }[];
   }[];
   communicationMatrix?: CommunicationMatrix;
@@ -227,110 +240,148 @@ export function SessionSummaryReport({
             </Text>
           )}
 
-          {phase.roles.map((role, ri) => (
-            <View key={ri} style={styles.roleBlock}>
-              <Text style={styles.roleLabel}>Role: {role.roleName}</Text>
+          {phase.roles.map((role, ri) => {
+            // Image blocks don't count toward question numbers.
+            const questionNumbers: number[] = [];
+            let questionCount = 0;
+            for (const p of role.prompts) {
+              questionNumbers.push(p.isImage ? 0 : ++questionCount);
+            }
 
-              {role.rolePhaseDescription && (
-                <Text style={styles.rolePhaseDescription}>
-                  {role.rolePhaseDescription}
-                </Text>
-              )}
+            return (
+              <View key={ri} style={styles.roleBlock}>
+                <Text style={styles.roleLabel}>Role: {role.roleName}</Text>
 
-              {role.prompts.map((prompt, qi) => {
-                const isMC = prompt.options && prompt.options.length > 0;
-                const hasResponses = prompt.responses.length > 0;
+                {role.rolePhaseDescription && (
+                  <Text style={styles.rolePhaseDescription}>
+                    {role.rolePhaseDescription}
+                  </Text>
+                )}
 
-                return (
-                  <View key={qi} style={styles.promptBlock}>
-                    <View style={styles.questionRow}>
-                      <Text style={styles.questionBadge}>Q{qi + 1}</Text>
-                      <Text style={styles.questionText}>{prompt.question}</Text>
-                    </View>
-
-                    {/* Template preview: show options with no responses */}
-                    {/* Template preview: show options with no responses */}
-                    {!hasResponses && isMC && (
-                      <View style={styles.templateOptionsList}>
-                        {prompt.options!.map((opt, oi) => (
-                          <View key={oi} style={styles.optionRow}>
-                            <View
-                              style={{
-                                width: 8,
-                                height: 8,
-                                borderRadius: 4,
-                                borderWidth: 1,
-                                borderColor: "#959492",
-                                backgroundColor: "transparent",
-                                flexShrink: 0,
-                              }}
-                            />
-                            <Text style={styles.optionUnselected}>{opt}</Text>
-                          </View>
-                        ))}
-                      </View>
-                    )}
-
-                    {/* Session report: show responses, with selected option highlighted for MC */}
-                    {prompt.responses.map((res, ri2) => {
-                      const noResponse = res.answer === "(no response)";
-                      return (
-                        <View key={ri2} style={styles.responseRow}>
-                          <Text style={styles.responseName}>
-                            {res.participantName}
+                {role.prompts.map((prompt, qi) => {
+                  if (prompt.isImage) {
+                    return (
+                      <View key={qi} style={styles.imageBlock} wrap={false}>
+                        {prompt.image ? (
+                          // eslint-disable-next-line jsx-a11y/alt-text -- @react-pdf <Image> has no alt prop
+                          <Image
+                            src={prompt.image}
+                            style={styles.promptImage}
+                          />
+                        ) : (
+                          <Text style={styles.imageUnavailable}>
+                            (image unavailable)
                           </Text>
+                        )}
+                        {prompt.question && (
+                          <Text style={styles.imageCaption}>
+                            {prompt.question}
+                          </Text>
+                        )}
+                      </View>
+                    );
+                  }
 
-                          {noResponse ? (
-                            <Text style={styles.noResponse}>(no response)</Text>
-                          ) : isMC ? (
-                            <View style={styles.optionsList}>
-                              {prompt.options!.map((opt, oi) => {
-                                const selected = opt === res.answer;
-                                return (
-                                  <View key={oi} style={styles.optionRow}>
-                                    <Svg
-                                      width={10}
-                                      height={10}
-                                      viewBox="0 0 10 10"
-                                      style={styles.optionBullet}
-                                    >
-                                      <Circle
-                                        cx={5}
-                                        cy={5}
-                                        r={3.5}
-                                        stroke={
-                                          selected ? "#0f0f0f" : "#959492"
-                                        }
-                                        strokeWidth={1}
-                                        fill={selected ? "#0f0f0f" : "white"}
-                                      />
-                                    </Svg>
-                                    <Text
-                                      style={
-                                        selected
-                                          ? styles.optionSelected
-                                          : styles.optionUnselected
-                                      }
-                                    >
-                                      {opt}
-                                    </Text>
-                                  </View>
-                                );
-                              })}
+                  const isMC = prompt.options && prompt.options.length > 0;
+                  const hasResponses = prompt.responses.length > 0;
+
+                  return (
+                    <View key={qi} style={styles.promptBlock}>
+                      <View style={styles.questionRow}>
+                        <Text style={styles.questionBadge}>
+                          Q{questionNumbers[qi]}
+                        </Text>
+                        <Text style={styles.questionText}>
+                          {prompt.question}
+                        </Text>
+                      </View>
+
+                      {/* Template preview: show options with no responses */}
+                      {/* Template preview: show options with no responses */}
+                      {!hasResponses && isMC && (
+                        <View style={styles.templateOptionsList}>
+                          {prompt.options!.map((opt, oi) => (
+                            <View key={oi} style={styles.optionRow}>
+                              <View
+                                style={{
+                                  width: 8,
+                                  height: 8,
+                                  borderRadius: 4,
+                                  borderWidth: 1,
+                                  borderColor: "#959492",
+                                  backgroundColor: "transparent",
+                                  flexShrink: 0,
+                                }}
+                              />
+                              <Text style={styles.optionUnselected}>{opt}</Text>
                             </View>
-                          ) : (
-                            <Text style={styles.responseAnswer}>
-                              {res.answer}
-                            </Text>
-                          )}
+                          ))}
                         </View>
-                      );
-                    })}
-                  </View>
-                );
-              })}
-            </View>
-          ))}
+                      )}
+
+                      {/* Session report: show responses, with selected option highlighted for MC */}
+                      {prompt.responses.map((res, ri2) => {
+                        const noResponse = res.answer === "(no response)";
+                        return (
+                          <View key={ri2} style={styles.responseRow}>
+                            <Text style={styles.responseName}>
+                              {res.participantName}
+                            </Text>
+
+                            {noResponse ? (
+                              <Text style={styles.noResponse}>
+                                (no response)
+                              </Text>
+                            ) : isMC ? (
+                              <View style={styles.optionsList}>
+                                {prompt.options!.map((opt, oi) => {
+                                  const selected = opt === res.answer;
+                                  return (
+                                    <View key={oi} style={styles.optionRow}>
+                                      <Svg
+                                        width={10}
+                                        height={10}
+                                        viewBox="0 0 10 10"
+                                        style={styles.optionBullet}
+                                      >
+                                        <Circle
+                                          cx={5}
+                                          cy={5}
+                                          r={3.5}
+                                          stroke={
+                                            selected ? "#0f0f0f" : "#959492"
+                                          }
+                                          strokeWidth={1}
+                                          fill={selected ? "#0f0f0f" : "white"}
+                                        />
+                                      </Svg>
+                                      <Text
+                                        style={
+                                          selected
+                                            ? styles.optionSelected
+                                            : styles.optionUnselected
+                                        }
+                                      >
+                                        {opt}
+                                      </Text>
+                                    </View>
+                                  );
+                                })}
+                              </View>
+                            ) : (
+                              <Text style={styles.responseAnswer}>
+                                {res.answer}
+                              </Text>
+                            )}
+                          </View>
+                        );
+                      })}
+                    </View>
+                  );
+                })}
+              </View>
+            );
+          })}
 
           {phase.communicationMatrix &&
             phase.communicationMatrix.headers.length > 1 && (
