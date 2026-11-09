@@ -34,6 +34,7 @@ export async function GET(
   const { data: phases, error: phasesError } = await supabase
     .from("phase")
     .select("phase_id, phase_name, phase_number, phase_description")
+    .eq("archived", false)
     .eq("template_id", templateId)
     .order("phase_number", { ascending: true });
 
@@ -47,6 +48,7 @@ export async function GET(
     ? await supabase
         .from("role_phase")
         .select("role_phase_id, role_id, phase_id, role_phase_description")
+        .eq("archived", false)
         .in("phase_id", phaseIds)
     : { data: [] };
 
@@ -61,6 +63,7 @@ export async function GET(
   const { data: rolesData } = await supabase
     .from("role")
     .select("role_id, role_name, role_description")
+    .eq("archived", false)
     .eq("template_id", templateId);
 
   const roleNameById: Record<string, string> = {};
@@ -79,6 +82,7 @@ export async function GET(
     ? await supabase
         .from("prompt")
         .select("prompt_id, prompt_text, role_phase_id")
+        .eq("archived", false)
         .in("role_phase_id", rolePhaseIds)
     : { data: [] };
 
@@ -90,6 +94,8 @@ export async function GET(
         .from("prompt_option")
         .select("option_id, prompt_id, option_text")
         .in("prompt_id", promptIds)
+        .eq("archived", false)
+        .order("option_number", { nullsFirst: false })
     : { data: [] };
 
   const optionsByPromptId: Record<string, string[]> = {};

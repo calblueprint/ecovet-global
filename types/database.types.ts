@@ -122,6 +122,13 @@ export type Database = {
         };
         Relationships: [
           {
+            foreignKeyName: "fk_parent";
+            columns: ["user_group_id"];
+            isOneToOne: false;
+            referencedRelation: "user_group";
+            referencedColumns: ["user_group_id"];
+          },
+          {
             foreignKeyName: "invite_user_group_id_fkey";
             columns: ["user_group_id"];
             isOneToOne: false;
@@ -188,6 +195,7 @@ export type Database = {
       };
       phase: {
         Row: {
+          archived: boolean;
           phase_description: string | null;
           phase_id: string;
           phase_name: string;
@@ -195,6 +203,7 @@ export type Database = {
           template_id: string;
         };
         Insert: {
+          archived?: boolean;
           phase_description?: string | null;
           phase_id?: string;
           phase_name: string;
@@ -202,6 +211,7 @@ export type Database = {
           template_id: string;
         };
         Update: {
+          archived?: boolean;
           phase_description?: string | null;
           phase_id?: string;
           phase_name?: string;
@@ -251,6 +261,13 @@ export type Database = {
         };
         Relationships: [
           {
+            foreignKeyName: "fk_parent";
+            columns: ["user_group_id"];
+            isOneToOne: false;
+            referencedRelation: "user_group";
+            referencedColumns: ["user_group_id"];
+          },
+          {
             foreignKeyName: "profile_user_group_id_fkey";
             columns: ["user_group_id"];
             isOneToOne: false;
@@ -261,6 +278,8 @@ export type Database = {
       };
       prompt: {
         Row: {
+          archived: boolean;
+          image_path: string | null;
           prompt_follow_ups: string | null;
           prompt_id: string;
           prompt_number: number;
@@ -269,6 +288,8 @@ export type Database = {
           role_phase_id: string;
         };
         Insert: {
+          archived?: boolean;
+          image_path?: string | null;
           prompt_follow_ups?: string | null;
           prompt_id?: string;
           prompt_number: number;
@@ -277,6 +298,8 @@ export type Database = {
           role_phase_id: string;
         };
         Update: {
+          archived?: boolean;
+          image_path?: string | null;
           prompt_follow_ups?: string | null;
           prompt_id?: string;
           prompt_number?: number;
@@ -296,17 +319,23 @@ export type Database = {
       };
       prompt_option: {
         Row: {
+          archived: boolean;
           option_id: string;
+          option_number: number | null;
           option_text: string | null;
           prompt_id: string;
         };
         Insert: {
+          archived?: boolean;
           option_id?: string;
+          option_number?: number | null;
           option_text?: string | null;
           prompt_id: string;
         };
         Update: {
+          archived?: boolean;
           option_id?: string;
+          option_number?: number | null;
           option_text?: string | null;
           prompt_id?: string;
         };
@@ -388,18 +417,21 @@ export type Database = {
       };
       role: {
         Row: {
+          archived: boolean;
           role_description: string | null;
           role_id: string;
           role_name: string;
           template_id: string;
         };
         Insert: {
+          archived?: boolean;
           role_description?: string | null;
           role_id?: string;
           role_name: string;
           template_id: string;
         };
         Update: {
+          archived?: boolean;
           role_description?: string | null;
           role_id?: string;
           role_name?: string;
@@ -417,18 +449,21 @@ export type Database = {
       };
       role_phase: {
         Row: {
+          archived: boolean;
           phase_id: string;
           role_id: string;
           role_phase_description: string | null;
           role_phase_id: string;
         };
         Insert: {
+          archived?: boolean;
           phase_id: string;
           role_id: string;
           role_phase_description?: string | null;
           role_phase_id?: string;
         };
         Update: {
+          archived?: boolean;
           phase_id?: string;
           role_id?: string;
           role_phase_description?: string | null;
@@ -487,6 +522,13 @@ export type Database = {
         };
         Relationships: [
           {
+            foreignKeyName: "fk_parent";
+            columns: ["user_group_id"];
+            isOneToOne: false;
+            referencedRelation: "user_group";
+            referencedColumns: ["user_group_id"];
+          },
+          {
             foreignKeyName: "session_template_id_fkey";
             columns: ["template_id"];
             isOneToOne: false;
@@ -522,6 +564,13 @@ export type Database = {
           user_group_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "fk_parent";
+            columns: ["user_group_id"];
+            isOneToOne: false;
+            referencedRelation: "user_group";
+            referencedColumns: ["user_group_id"];
+          },
           {
             foreignKeyName: "tag_user_group_id_fkey";
             columns: ["user_group_id"];
@@ -566,6 +615,13 @@ export type Database = {
           user_group_id?: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: "fk_parent";
+            columns: ["user_group_id"];
+            isOneToOne: false;
+            referencedRelation: "user_group";
+            referencedColumns: ["user_group_id"];
+          },
           {
             foreignKeyName: "template_user_group_id_fkey";
             columns: ["user_group_id"];
@@ -644,7 +700,7 @@ export type Database = {
       };
     };
     Enums: {
-      prompt_type: "text" | "multiple_choice" | "checkbox";
+      prompt_type: "text" | "multiple_choice" | "checkbox" | "image";
       user_type: "Admin" | "Facilitator" | "Participant";
     };
     CompositeTypes: {
@@ -776,7 +832,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      prompt_type: ["text", "multiple_choice", "checkbox"],
+      prompt_type: ["text", "multiple_choice", "checkbox", "image"],
       user_type: ["Admin", "Facilitator", "Participant"],
     },
   },

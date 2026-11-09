@@ -233,6 +233,7 @@ export async function GET(
   const { data: phases, error: phasesError } = await supabase
     .from("phase")
     .select("phase_id, phase_name, phase_number, phase_description")
+    .eq("archived", false)
     .eq("template_id", session.template_id)
     .order("phase_number", { ascending: true });
 
@@ -268,6 +269,7 @@ export async function GET(
     ? await supabase
         .from("role_phase")
         .select("role_phase_id, role_id, phase_id, role_phase_description")
+        .eq("archived", false)
         .in("phase_id", phaseIds)
     : { data: [] };
 
@@ -280,6 +282,7 @@ export async function GET(
   const { data: rolesData } = await supabase
     .from("role")
     .select("role_id, role_name, role_description")
+    .eq("archived", false)
     .eq("template_id", session.template_id);
 
   const roleNameById: Record<string, string> = {};
@@ -299,6 +302,7 @@ export async function GET(
     ? await supabase
         .from("prompt")
         .select("prompt_id, prompt_text, role_phase_id")
+        .eq("archived", false)
         .in("role_phase_id", rolePhaseIds)
     : { data: [] };
 
@@ -308,15 +312,18 @@ export async function GET(
   const { data: promptOptions } = promptIds.length
     ? await supabase
         .from("prompt_option")
-        .select("option_id, prompt_id, option_text")
+        .select("option_id, prompt_id, option_text, archived")
         .in("prompt_id", promptIds)
+        .order("option_number", { nullsFirst: false })
     : { data: [] };
 
+  // Archived (removed) options still resolve answer text, but aren't listed.
   const optionTextById: Record<string, string> = {};
   const optionsByPromptId: Record<string, string[]> = {};
   for (const o of promptOptions ?? []) {
     const text = o.option_text ?? "";
     optionTextById[o.option_id] = text;
+    if (o.archived) continue;
     if (!optionsByPromptId[o.prompt_id]) optionsByPromptId[o.prompt_id] = [];
     optionsByPromptId[o.prompt_id].push(text);
   }
@@ -554,6 +561,7 @@ export async function POST(
   const { data: phases, error: phasesError } = await supabase
     .from("phase")
     .select("phase_id, phase_name, phase_number, phase_description")
+    .eq("archived", false)
     .eq("template_id", session.template_id)
     .order("phase_number", { ascending: true });
 
@@ -589,6 +597,7 @@ export async function POST(
     ? await supabase
         .from("role_phase")
         .select("role_phase_id, role_id, phase_id, role_phase_description")
+        .eq("archived", false)
         .in("phase_id", phaseIds)
     : { data: [] };
 
@@ -600,6 +609,7 @@ export async function POST(
   const { data: rolesData } = await supabase
     .from("role")
     .select("role_id, role_name, role_description")
+    .eq("archived", false)
     .eq("template_id", session.template_id);
 
   const roleNameById: Record<string, string> = {};
@@ -618,6 +628,7 @@ export async function POST(
     ? await supabase
         .from("prompt")
         .select("prompt_id, prompt_text, role_phase_id")
+        .eq("archived", false)
         .in("role_phase_id", rolePhaseIds)
     : { data: [] };
 
@@ -627,15 +638,18 @@ export async function POST(
   const { data: promptOptions } = promptIds.length
     ? await supabase
         .from("prompt_option")
-        .select("option_id, prompt_id, option_text")
+        .select("option_id, prompt_id, option_text, archived")
         .in("prompt_id", promptIds)
+        .order("option_number", { nullsFirst: false })
     : { data: [] };
 
+  // Archived (removed) options still resolve answer text, but aren't listed.
   const optionTextById: Record<string, string> = {};
   const optionsByPromptId: Record<string, string[]> = {};
   for (const o of promptOptions ?? []) {
     const text = o.option_text ?? "";
     optionTextById[o.option_id] = text;
+    if (o.archived) continue;
     if (!optionsByPromptId[o.prompt_id]) optionsByPromptId[o.prompt_id] = [];
     optionsByPromptId[o.prompt_id].push(text);
   }

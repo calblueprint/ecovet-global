@@ -18,6 +18,7 @@ export async function fetchRoles(templateId: string) {
   const { data, error } = await supabase
     .from("role")
     .select("role_name, role_id")
+    .eq("archived", false)
     .eq("template_id", templateId);
   if (error) throw error;
   return data
@@ -352,6 +353,7 @@ export async function changePhaseForSingleUser(
   const { count: phaseCount, error: countError } = await supabase
     .from("phase")
     .select("*", { count: "exact", head: true })
+    .eq("archived", false)
     .eq("template_id", templateId);
 
   if (countError || phaseCount == null) {
@@ -443,6 +445,7 @@ export async function fetchPhases(sessionId: string) {
   const { data: phases, error: phasesError } = await supabase
     .from("phase")
     .select("*")
+    .eq("archived", false)
     .eq("template_id", session.template_id)
     .order("phase_number", { ascending: true });
 
@@ -489,6 +492,7 @@ export async function fetchRolePhases(
   const { data, error } = await supabase
     .from("role_phase")
     .select("*")
+    .eq("archived", false)
     .eq("phase_id", phaseId)
     .eq("role_id", roleId)
     .single();
@@ -505,6 +509,7 @@ export async function fetchPrompts(rolePhaseId: UUID): Promise<Prompt[]> {
   const { data, error } = await supabase
     .from("prompt")
     .select("*")
+    .eq("archived", false)
     .eq("role_phase_id", rolePhaseId)
     .order("prompt_number");
   if (error) {
@@ -730,6 +735,7 @@ export async function fetchParticipantDetailBundle(
         return await supabase
           .from("phase")
           .select("*")
+          .eq("archived", false)
           .eq("template_id", session.template_id)
           .order("phase_number", { ascending: true });
       })(),
@@ -765,6 +771,7 @@ export async function fetchParticipantDetailBundle(
     const { data: rpData, error: rpError } = await supabase
       .from("role_phase")
       .select("*")
+      .eq("archived", false)
       .eq("role_id", participant.role_id)
       .in("phase_id", phaseIds);
     if (rpError) {
@@ -780,6 +787,7 @@ export async function fetchParticipantDetailBundle(
       ? supabase
           .from("prompt")
           .select("*")
+          .eq("archived", false)
           .in("role_phase_id", rolePhaseIds)
           .order("prompt_number")
       : Promise.resolve({ data: [], error: null }),
@@ -810,12 +818,14 @@ export async function fetchParticipantDetailBundle(
     option_id: UUID;
     prompt_id: UUID;
     option_text: string;
+    archived: boolean;
   }> = [];
   if (promptIds.length > 0) {
     const { data: optData, error: optError } = await supabase
       .from("prompt_option")
-      .select("option_id, prompt_id, option_text")
-      .in("prompt_id", promptIds);
+      .select("option_id, prompt_id, option_text, archived")
+      .in("prompt_id", promptIds)
+      .order("option_number", { nullsFirst: false });
     if (optError) {
       console.error("Failed to fetch options:", optError);
       return { error: "Failed to load options" };
@@ -843,6 +853,8 @@ export async function fetchParticipantDetailBundle(
     Array<{ optionId: UUID; text: string; selected: boolean }>
   >();
   for (const o of options) {
+    // Removed options only show if this participant picked them.
+    if (o.archived && !selectedOptionIds.has(o.option_id)) continue;
     const list = optionsByPrompt.get(o.prompt_id) ?? [];
     list.push({
       optionId: o.option_id,
@@ -948,6 +960,7 @@ export async function fetchFacilitatorSessionBundle(
   const { data: phasesData, error: phasesError } = await supabase
     .from("phase")
     .select("*")
+    .eq("archived", false)
     .eq("template_id", templateId)
     .order("phase_number", { ascending: true });
 
@@ -977,6 +990,7 @@ export async function fetchFacilitatorSessionBundle(
     const { data, error } = await supabase
       .from("role_phase")
       .select("role_phase_id, role_id, phase_id")
+      .eq("archived", false)
       .in("role_id", uniqueRoleIds)
       .in("phase_id", uniquePhaseIds);
     if (error) return { error: "Failed to load role_phases" };
@@ -1006,6 +1020,7 @@ export async function fetchFacilitatorSessionBundle(
       ? supabase
           .from("prompt")
           .select("*")
+          .eq("archived", false)
           .in("role_phase_id", allRolePhaseIds)
           .order("prompt_number")
       : Promise.resolve({ data: [], error: null }),
@@ -1025,13 +1040,18 @@ export async function fetchFacilitatorSessionBundle(
   const allResponses = responsesResult.data ?? [];
 
   const promptIds = allPrompts.map(p => p.prompt_id);
-  let allOptions: { option_id: UUID; prompt_id: UUID; option_text: string }[] =
-    [];
+  let allOptions: {
+    option_id: UUID;
+    prompt_id: UUID;
+    option_text: string;
+    archived: boolean;
+  }[] = [];
   if (promptIds.length > 0) {
     const { data, error } = await supabase
       .from("prompt_option")
-      .select("option_id, prompt_id, option_text")
-      .in("prompt_id", promptIds);
+      .select("option_id, prompt_id, option_text, archived")
+      .in("prompt_id", promptIds)
+      .order("option_number", { nullsFirst: false });
     if (error) return { error: "Failed to load options" };
     allOptions = (data ?? []).filter(
       o => o.option_text != null,
@@ -1062,7 +1082,12 @@ export async function fetchFacilitatorSessionBundle(
     }
 
     const merged: PromptWithResponse[] = userPrompts.map(p => {
-      const opts = allOptions.filter(o => o.prompt_id === p.prompt_id);
+      // Removed options only show if this participant picked them.
+      const opts = allOptions.filter(
+        o =>
+          o.prompt_id === p.prompt_id &&
+          (!o.archived || selectedOptionIds.has(o.option_id)),
+      );
       return {
         promptId: p.prompt_id as UUID,
         question: p.prompt_text ?? "Missing Question",

@@ -1,4 +1,4 @@
-import { UUID } from "@/types/schema";
+import { StagedOption, UUID } from "@/types/schema";
 import supabase from "../client";
 
 export async function fetchOptionsForPrompts(prompt_ids: UUID[]) {
@@ -7,7 +7,9 @@ export async function fetchOptionsForPrompts(prompt_ids: UUID[]) {
   const { data, error } = await supabase
     .from("prompt_option")
     .select("*")
-    .in("prompt_id", prompt_ids);
+    .in("prompt_id", prompt_ids)
+    .eq("archived", false)
+    .order("option_number", { nullsFirst: false });
 
   if (error) {
     throw new Error(`Error fetching data: ${error.message}`);
@@ -16,33 +18,76 @@ export async function fetchOptionsForPrompts(prompt_ids: UUID[]) {
   return data ?? [];
 }
 
-export async function replacePromptOptions(
-  prompt_id: string,
-  options: { option_text: string }[],
+// Options are updated in place by option_number
+// options can be archived
+export async function savePromptOptions(
+  prompt_id: UUID,
+  options: StagedOption[],
 ) {
-  const { error: deleteError } = await supabase
-    .from("prompt_option")
-    .delete()
-    .eq("prompt_id", prompt_id);
-
-  if (deleteError) {
-    console.error("Error deleting prompt options:", deleteError);
-    throw deleteError;
+  if (options.length > 0) {
+    const { error: upsertError } = await supabase.from("prompt_option").upsert(
+      options.map((opt, i) => ({
+        option_id: opt.option_id,
+        prompt_id,
+        option_text: opt.option_text ?? "",
+        option_number: i + 1,
+        archived: false,
+      })),
+      { onConflict: "option_id" },
+    );
+    if (upsertError) {
+      console.error("Error saving prompt options:", upsertError);
+      throw upsertError;
+    }
   }
 
-  if (options.length === 0) return;
-
-  const rows = options.map(opt => ({
-    prompt_id,
-    option_text: opt.option_text ?? "",
-  }));
-
-  const { error: insertError } = await supabase
+  const { data: existing, error: fetchError } = await supabase
     .from("prompt_option")
-    .insert(rows);
+    .select("option_id")
+    .eq("prompt_id", prompt_id)
+    .eq("archived", false);
+  if (fetchError) {
+    console.error("Error fetching prompt options:", fetchError);
+    throw fetchError;
+  }
 
-  if (insertError) {
-    console.error("Error inserting prompt options:", insertError);
-    throw insertError;
+  const keep = new Set(options.map(o => o.option_id));
+  const removed = (existing ?? [])
+    .map(o => o.option_id)
+    .filter(id => !keep.has(id));
+  if (removed.length === 0) return;
+
+  const { data: picked, error: pickedError } = await supabase
+    .from("prompt_response")
+    .select("prompt_option_id")
+    .in("prompt_option_id", removed);
+  if (pickedError) {
+    console.error("Error checking option responses:", pickedError);
+    throw pickedError;
+  }
+
+  const pickedIds = new Set((picked ?? []).map(r => r.prompt_option_id));
+  const toArchive = removed.filter(id => pickedIds.has(id));
+  const toDelete = removed.filter(id => !pickedIds.has(id));
+
+  if (toArchive.length > 0) {
+    const { error } = await supabase
+      .from("prompt_option")
+      .update({ archived: true })
+      .in("option_id", toArchive);
+    if (error) {
+      console.error("Error archiving prompt options:", error);
+      throw error;
+    }
+  }
+  if (toDelete.length > 0) {
+    const { error } = await supabase
+      .from("prompt_option")
+      .delete()
+      .in("option_id", toDelete);
+    if (error) {
+      console.error("Error deleting prompt options:", error);
+      throw error;
+    }
   }
 }

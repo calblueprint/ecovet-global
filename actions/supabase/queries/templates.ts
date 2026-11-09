@@ -1,9 +1,9 @@
 "use server";
 
-import type { Template, UUID } from "@/types/schema";
+import type { PromptType, Template, UUID } from "@/types/schema";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { Tag } from "@/types/schema";
-import { replacePromptOptions } from "./prompt";
+import { savePromptOptions } from "./prompt";
 
 export async function createTemplates( // create templates with inputs, but lowk most can be null as well
   templateID: UUID,
@@ -121,7 +121,7 @@ export async function createPrompts(
   role_phase_id: UUID,
   prompt_text: string | null,
   prompt_follow_ups: string | null,
-  prompt_type: "text" | "multiple_choice" | "checkbox",
+  prompt_type: PromptType,
   prompt_number: number,
 ): Promise<UUID> {
   const supabase = await getSupabaseServerClient();
@@ -270,8 +270,17 @@ export async function fetchFullTemplate(template_id: string) {
     `,
     )
     .eq("template_id", template_id)
+    .eq("roles.archived", false)
+    .eq("phases.archived", false)
+    .eq("phases.role_phases.archived", false)
+    .eq("phases.role_phases.prompts.archived", false)
+    .eq("phases.role_phases.prompts.options.archived", false)
     .order("phase_number", { referencedTable: "phases" })
     .order("prompt_number", { referencedTable: "phases.role_phases.prompts" })
+    .order("option_number", {
+      referencedTable: "phases.role_phases.prompts.options",
+      nullsFirst: false,
+    })
     .single();
 
   if (error) {
@@ -361,13 +370,216 @@ export async function copyTemplate(
           i + 1,
         );
 
-        const options = (prompt.options ?? []).map(o => ({
-          ...o,
-        }));
-        await replacePromptOptions(newPromptId, options ? [] : options);
+        // New option IDs: reusing the originals would move them to the copy.
+        await savePromptOptions(
+          newPromptId,
+          (prompt.options ?? []).map(o => ({
+            option_id: crypto.randomUUID() as UUID,
+            option_text: o.option_text ?? "",
+          })),
+        );
       }
     }
   }
 
   return newTemplateId;
+}
+
+// used for archiving vs deleting templates -
+// only delete if no one has anwsered or played a session
+type KeptTemplateIds = {
+  roleIds: UUID[];
+  phaseIds: UUID[];
+  rolePhaseIds: UUID[];
+  promptIds: UUID[];
+};
+
+async function must<T>(
+  query: PromiseLike<{ data: T | null; error: unknown }>,
+): Promise<T> {
+  const { data, error } = await query;
+  if (error) throw error;
+  return data as T;
+}
+
+function notIn(ids: UUID[], keep: UUID[]): UUID[] {
+  const keepSet = new Set(keep);
+  return ids.filter(id => !keepSet.has(id));
+}
+
+function splitByUse(ids: UUID[], usedIds: string[]) {
+  const used = new Set(usedIds);
+  return {
+    inUse: ids.filter(id => used.has(id)),
+    unused: ids.filter(id => !used.has(id)),
+  };
+}
+
+export async function removeDeletedTemplateItems(
+  template_id: UUID,
+  kept: KeptTemplateIds,
+): Promise<void> {
+  const supabase = await getSupabaseServerClient();
+
+  const [phaseRows, roleRows] = await Promise.all([
+    must(
+      supabase
+        .from("phase")
+        .select("phase_id")
+        .eq("template_id", template_id)
+        .eq("archived", false),
+    ),
+    must(
+      supabase
+        .from("role")
+        .select("role_id")
+        .eq("template_id", template_id)
+        .eq("archived", false),
+    ),
+  ]);
+  const phaseIds = phaseRows.map(p => p.phase_id);
+  const roleIds = roleRows.map(r => r.role_id);
+
+  const rolePhaseRows = phaseIds.length
+    ? await must(
+        supabase
+          .from("role_phase")
+          .select("role_phase_id")
+          .in("phase_id", phaseIds)
+          .eq("archived", false),
+      )
+    : [];
+  const rolePhaseIds = rolePhaseRows.map(rp => rp.role_phase_id);
+
+  const promptRows = rolePhaseIds.length
+    ? await must(
+        supabase
+          .from("prompt")
+          .select("prompt_id")
+          .in("role_phase_id", rolePhaseIds)
+          .eq("archived", false),
+      )
+    : [];
+
+  // Prompts: in use if anyone has answered them.
+  const removedPrompts = notIn(
+    promptRows.map(p => p.prompt_id),
+    kept.promptIds,
+  );
+  if (removedPrompts.length) {
+    const answered = await must(
+      supabase
+        .from("prompt_response")
+        .select("prompt_id")
+        .in("prompt_id", removedPrompts),
+    );
+    const { inUse, unused } = splitByUse(
+      removedPrompts,
+      answered.map(r => r.prompt_id),
+    );
+    if (inUse.length) {
+      await must(
+        supabase
+          .from("prompt")
+          .update({ archived: true })
+          .in("prompt_id", inUse),
+      );
+    }
+    if (unused.length) {
+      await must(
+        supabase.from("prompt_option").delete().in("prompt_id", unused),
+      );
+      await must(supabase.from("prompt").delete().in("prompt_id", unused));
+    }
+  }
+
+  // Role phases: in use if they have answers or still hold (archived) prompts.
+  const removedRolePhases = notIn(rolePhaseIds, kept.rolePhaseIds);
+  if (removedRolePhases.length) {
+    const [answered, remainingPrompts] = await Promise.all([
+      must(
+        supabase
+          .from("prompt_response")
+          .select("role_phase_id")
+          .in("role_phase_id", removedRolePhases),
+      ),
+      must(
+        supabase
+          .from("prompt")
+          .select("role_phase_id")
+          .in("role_phase_id", removedRolePhases),
+      ),
+    ]);
+    const { inUse, unused } = splitByUse(removedRolePhases, [
+      ...answered.map(r => r.role_phase_id),
+      ...remainingPrompts.map(p => p.role_phase_id),
+    ]);
+    if (inUse.length) {
+      await must(
+        supabase
+          .from("role_phase")
+          .update({ archived: true })
+          .in("role_phase_id", inUse),
+      );
+    }
+    if (unused.length) {
+      await must(
+        supabase.from("role_phase").delete().in("role_phase_id", unused),
+      );
+    }
+  }
+
+  // Phases: in use if they still hold (archived) role phases.
+  const removedPhases = notIn(phaseIds, kept.phaseIds);
+  if (removedPhases.length) {
+    const remaining = await must(
+      supabase
+        .from("role_phase")
+        .select("phase_id")
+        .in("phase_id", removedPhases),
+    );
+    const { inUse, unused } = splitByUse(
+      removedPhases,
+      remaining.map(rp => rp.phase_id),
+    );
+    if (inUse.length) {
+      await must(
+        supabase.from("phase").update({ archived: true }).in("phase_id", inUse),
+      );
+    }
+    if (unused.length) {
+      await must(supabase.from("phase").delete().in("phase_id", unused));
+    }
+  }
+
+  // Roles: in use if a participant was assigned them or they still hold (archived) role phases.
+  const removedRoles = notIn(roleIds, kept.roleIds);
+  if (removedRoles.length) {
+    const [assigned, remaining] = await Promise.all([
+      must(
+        supabase
+          .from("participant_session")
+          .select("role_id")
+          .in("role_id", removedRoles),
+      ),
+      must(
+        supabase
+          .from("role_phase")
+          .select("role_id")
+          .in("role_id", removedRoles),
+      ),
+    ]);
+    const { inUse, unused } = splitByUse(removedRoles, [
+      ...assigned.map(p => p.role_id).filter((id): id is UUID => Boolean(id)),
+      ...remaining.map(rp => rp.role_id),
+    ]);
+    if (inUse.length) {
+      await must(
+        supabase.from("role").update({ archived: true }).in("role_id", inUse),
+      );
+    }
+    if (unused.length) {
+      await must(supabase.from("role").delete().in("role_id", unused));
+    }
+  }
 }
