@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CircularProgress } from "@mui/material";
 import { produce } from "immer";
+import { removeUnusedTemplateImages } from "@/actions/supabase/queries/images";
 import { savePromptOptions } from "@/actions/supabase/queries/prompt";
 import {
   createPhases,
@@ -266,6 +267,7 @@ export default function TemplateBuilderPage() {
             prompt.prompt_follow_ups,
             prompt.prompt_type,
             i + 1,
+            prompt.image_path,
           );
           const options = saveStore.optionsByPromptId[promptID] ?? [];
           await savePromptOptions(promptID, options);
@@ -280,6 +282,9 @@ export default function TemplateBuilderPage() {
         rolePhaseIds: Object.keys(saveStore.rolePhasesById) as UUID[],
         promptIds: Object.values(saveStore.promptIndex).flat(),
       });
+
+      // Runs last: only files no saved prompt points to get deleted.
+      await removeUnusedTemplateImages(realtemplateID);
     } catch (err) {
       console.error("Save failed", err);
       throw err; // re-throw so callers can react

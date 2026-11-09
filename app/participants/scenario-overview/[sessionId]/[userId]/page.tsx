@@ -12,6 +12,7 @@ import type {
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import supabase from "@/actions/supabase/client";
+import { getSignedImageUrls } from "@/actions/supabase/queries/images";
 import { fetchOptionsForPrompts } from "@/actions/supabase/queries/prompt";
 import {
   advancePhaseForSingleUser,
@@ -32,6 +33,7 @@ import AccessError from "@/components/AccessError/AccessError";
 import Chat from "@/components/Chat/Chat";
 import { PromptOption } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
+import { hasOptions, isAnswerable } from "@/utils/prompts";
 import {
   readLocalAnswers,
   updateLocalAnswer,
@@ -70,6 +72,8 @@ export default function SessionFlowPage() {
   const [optionsByPromptId, setOptionsByPromptId] = useState<
     Record<string, PromptOption[]>
   >({});
+  // image_path -> signed URL (valid ~2h; refetched whenever the phase loads)
+  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
   const [answers, setAnswers] = useState<string[]>([]);
   const [completedPrompts, setCompletedPrompts] = useState<Set<string>>(
     new Set(),
@@ -134,15 +138,25 @@ export default function SessionFlowPage() {
           currentPhase!.phase_id,
         );
         setRolePhase(rp);
-        const p = rp ? await fetchPrompts(rp.role_phase_id) : [];
+        // Image blocks with no image uploaded have nothing to show.
+        const p = (rp ? await fetchPrompts(rp.role_phase_id) : []).filter(
+          pr => pr.prompt_type !== "image" || pr.image_path,
+        );
         setPrompts(p);
 
-        const nonTextPromptIds = p
-          .filter(pr => pr.prompt_type !== "text")
+        const imagePaths = p
+          .map(pr => pr.image_path)
+          .filter((path): path is string => Boolean(path));
+        setImageUrls(
+          imagePaths.length > 0 ? await getSignedImageUrls(imagePaths) : {},
+        );
+
+        const optionPromptIds = p
+          .filter(pr => hasOptions(pr.prompt_type))
           .map(pr => pr.prompt_id);
 
-        if (nonTextPromptIds.length > 0) {
-          const options = await fetchOptionsForPrompts(nonTextPromptIds);
+        if (optionPromptIds.length > 0) {
+          const options = await fetchOptionsForPrompts(optionPromptIds);
           const grouped: Record<string, PromptOption[]> = {};
           for (const opt of options) {
             (grouped[opt.prompt_id] ||= []).push(opt);
@@ -376,7 +390,7 @@ export default function SessionFlowPage() {
 
     const promises = answers
       .map((answer, i) => {
-        if (!answer.trim()) return null;
+        if (!answer.trim() || !isAnswerable(prompts[i])) return null;
         const promptType = prompts[i].prompt_type;
         if (isAnswerEmpty(answer, promptType)) return null;
         const promptId = prompts[i].prompt_id;
@@ -429,6 +443,7 @@ export default function SessionFlowPage() {
             prompts={prompts}
             answers={answers}
             optionsByPromptId={optionsByPromptId}
+            imageUrls={imageUrls}
             completedPrompts={completedPrompts}
             phaseName={phases[arrayIdx]?.phase_name ?? "Unnamed Phase"}
             isOverview={isOverview}
@@ -459,7 +474,10 @@ export default function SessionFlowPage() {
                   sessionId={sessionIdStr}
                   isForceAdvance={isForceAdvance}
                   forceAdvanceMaxPhaseIndex={maxPhaseIndex}
-                  promptsCompleted={completedPrompts.size == prompts.length}
+                  promptsCompleted={
+                    completedPrompts.size ===
+                    prompts.filter(isAnswerable).length
+                  }
                   isLastPhase={isLastPhase}
                   currentPhaseIndex={dbPhaseIndex} // using actual phase number
                   phaseId={currentPhase.phase_id as UUID}

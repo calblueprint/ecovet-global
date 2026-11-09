@@ -11,6 +11,8 @@ import {
   StagedOption,
   UUID,
 } from "@/types/schema";
+import { isAnswerable } from "@/utils/prompts";
+import ImageBlockEditor from "../ImageBlockEditor/ImageBlockEditor";
 import { AutoGrowBigInput } from "../TemplateOverviewForm/AutoGrow";
 import {
   AddNewOptionStyled,
@@ -44,6 +46,7 @@ import {
 } from "./styles";
 
 export default function QuestionBuilder({
+  templateId,
   value,
   rolePhaseId,
   phase,
@@ -55,6 +58,7 @@ export default function QuestionBuilder({
   onSaveAndExit,
   saving,
 }: {
+  templateId: UUID;
   value: RoleFormInput;
   rolePhaseId: UUID;
   phase: EditablePhase;
@@ -106,12 +110,11 @@ export default function QuestionBuilder({
     onChange(promptID, "options", updated);
   }
 
-  function insertAfter(index: number) {
-    const newId = onChange(
-      rolePhase.role_phase_id,
-      "insert_prompt_at",
-      index + 1,
-    );
+  function insertAfter(
+    index: number,
+    field: "insert_prompt_at" | "insert_image_at" = "insert_prompt_at",
+  ) {
+    const newId = onChange(rolePhase.role_phase_id, field, index + 1);
     if (newId) focusAndScrollTo(newId);
   }
 
@@ -126,6 +129,15 @@ export default function QuestionBuilder({
   }
 
   const promptIds = value.promptIndex[rolePhase.role_phase_id] ?? [];
+
+  // Image blocks don't count toward question numbers.
+  const questionNumbers: Record<string, number> = {};
+  let questionCount = 0;
+  for (const id of promptIds) {
+    if (isAnswerable(value.promptById[id])) {
+      questionNumbers[id] = ++questionCount;
+    }
+  }
 
   return (
     <FormStack>
@@ -148,6 +160,18 @@ export default function QuestionBuilder({
               }}
             >
               + Question
+            </HeaderButtonLight>
+            <HeaderButtonLight
+              onClick={() => {
+                const newId = onChange(
+                  rolePhase.role_phase_id,
+                  "insert_image_at",
+                  promptIds.length,
+                );
+                if (newId) focusAndScrollTo(newId);
+              }}
+            >
+              + Image
             </HeaderButtonLight>
             <NextButtons onClick={onPrev} disabled={isFirstStep}>
               <svg
@@ -235,7 +259,11 @@ export default function QuestionBuilder({
                 $focused={isFocused}
               >
                 <LegendFlex>
-                  <FieldLegend>Question {j + 1}</FieldLegend>
+                  <FieldLegend>
+                    {promptType === "image"
+                      ? "Image"
+                      : `Question ${questionNumbers[promptID]}`}
+                  </FieldLegend>
                   <DeleteButton
                     onClick={e => {
                       e.stopPropagation();
@@ -251,136 +279,153 @@ export default function QuestionBuilder({
                   </DeleteButton>
                 </LegendFlex>
 
-                <QuestionRowStyled>
-                  <BigInput
-                    name="prompt"
-                    placeholder="Question Title"
-                    value={prompt.prompt_text ?? ""}
-                    onChange={e =>
-                      onChange(promptID, "prompt_text", e.target.value)
+                {promptType === "image" ? (
+                  <ImageBlockEditor
+                    templateId={templateId}
+                    promptId={promptID}
+                    imagePath={prompt.image_path}
+                    caption={prompt.prompt_text ?? ""}
+                    onImagePathChange={path =>
+                      onChange(promptID, "image_path", path ?? "")
+                    }
+                    onCaptionChange={text =>
+                      onChange(promptID, "prompt_text", text)
                     }
                   />
+                ) : (
+                  <>
+                    <QuestionRowStyled>
+                      <BigInput
+                        name="prompt"
+                        placeholder="Question Title"
+                        value={prompt.prompt_text ?? ""}
+                        onChange={e =>
+                          onChange(promptID, "prompt_text", e.target.value)
+                        }
+                      />
 
-                  <PromptTypeDropdownStyled>
-                    <InputDropdown
-                      label=""
-                      options={
-                        new Map([
-                          ["text", "Short Answer"],
-                          ["multiple_choice", "Multiple Choice"],
-                          ["checkbox", "Checkbox"],
-                        ])
-                      }
-                      value={promptType}
-                      defaultValue="text"
-                      isClearable={false}
-                      customStyles={compactSelectStyles}
-                      onChange={value => {
-                        if (value)
-                          handleTypeChange(promptID, value as PromptType);
-                      }}
-                    />
-                  </PromptTypeDropdownStyled>
-                </QuestionRowStyled>
-
-                <BigInput
-                  name="prompt_follow_ups"
-                  placeholder="Type question follow ups (Use Shift+Return to add more lines)..."
-                  value={prompt.prompt_follow_ups ?? ""}
-                  onChange={e =>
-                    onChange(promptID, "prompt_follow_ups", e.target.value)
-                  }
-                />
-
-                {promptType === "multiple_choice" && (
-                  <MultipleChoicePromptStyled>
-                    <RadioGroup name={`mcq-${promptID}`}>
-                      {options.map(opt => (
-                        <McqOptionStyled key={opt.option_id}>
-                          <Radio value={opt.option_id} disabled />
-                          <TextFieldStyled
-                            size="small"
-                            placeholder="Enter option text"
-                            value={opt.option_text}
-                            onChange={e =>
-                              updateOptionText(
-                                promptID,
-                                opt.option_id,
-                                e.target.value,
-                              )
-                            }
-                          />
-                          <DeleteMcqOptionButton
-                            onClick={e => {
-                              e.stopPropagation();
-                              deleteOption(promptID, opt.option_id);
-                            }}
-                          >
-                            x
-                          </DeleteMcqOptionButton>
-                        </McqOptionStyled>
-                      ))}
-                    </RadioGroup>
-                    <Button
-                      onClick={e => {
-                        e.stopPropagation();
-                        addOption(promptID);
-                      }}
-                      sx={{ textTransform: "none" }}
-                    >
-                      <AddNewOptionStyled>
-                        <AddNewOptionTextStyled>
-                          + Add Option
-                        </AddNewOptionTextStyled>
-                      </AddNewOptionStyled>
-                    </Button>
-                  </MultipleChoicePromptStyled>
-                )}
-
-                {promptType === "checkbox" && (
-                  <CheckboxPromptStyled>
-                    {options.map(opt => (
-                      <McqOptionStyled key={opt.option_id}>
-                        <Checkbox disabled />
-                        <TextFieldStyled
-                          size="small"
-                          placeholder="Enter option text"
-                          value={opt.option_text}
-                          onChange={e =>
-                            updateOptionText(
-                              promptID,
-                              opt.option_id,
-                              e.target.value,
-                            )
+                      <PromptTypeDropdownStyled>
+                        <InputDropdown
+                          label=""
+                          options={
+                            new Map([
+                              ["text", "Short Answer"],
+                              ["multiple_choice", "Multiple Choice"],
+                              ["checkbox", "Checkbox"],
+                            ])
                           }
+                          value={promptType}
+                          defaultValue="text"
+                          isClearable={false}
+                          customStyles={compactSelectStyles}
+                          onChange={value => {
+                            if (value)
+                              handleTypeChange(promptID, value as PromptType);
+                          }}
                         />
-                        <DeleteMcqOptionButton>
-                          <Button
-                            color="error"
-                            onClick={e => {
-                              e.stopPropagation();
-                              deleteOption(promptID, opt.option_id);
-                            }}
-                          >
-                            x
-                          </Button>
-                        </DeleteMcqOptionButton>
-                      </McqOptionStyled>
-                    ))}
-                    <Button
-                      onClick={e => {
-                        e.stopPropagation();
-                        addOption(promptID);
-                      }}
-                      sx={{ textTransform: "none" }}
-                    >
-                      <AddNewOptionStyled>
-                        <AddNewOptionTextStyled>
-                          + Add Option
-                        </AddNewOptionTextStyled>
-                      </AddNewOptionStyled>
-                    </Button>
-                  </CheckboxPromptStyled>
+                      </PromptTypeDropdownStyled>
+                    </QuestionRowStyled>
+
+                    <BigInput
+                      name="prompt_follow_ups"
+                      placeholder="Type question follow ups (Use Shift+Return to add more lines)..."
+                      value={prompt.prompt_follow_ups ?? ""}
+                      onChange={e =>
+                        onChange(promptID, "prompt_follow_ups", e.target.value)
+                      }
+                    />
+
+                    {promptType === "multiple_choice" && (
+                      <MultipleChoicePromptStyled>
+                        <RadioGroup name={`mcq-${promptID}`}>
+                          {options.map(opt => (
+                            <McqOptionStyled key={opt.option_id}>
+                              <Radio value={opt.option_id} disabled />
+                              <TextFieldStyled
+                                size="small"
+                                placeholder="Enter option text"
+                                value={opt.option_text}
+                                onChange={e =>
+                                  updateOptionText(
+                                    promptID,
+                                    opt.option_id,
+                                    e.target.value,
+                                  )
+                                }
+                              />
+                              <DeleteMcqOptionButton
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  deleteOption(promptID, opt.option_id);
+                                }}
+                              >
+                                x
+                              </DeleteMcqOptionButton>
+                            </McqOptionStyled>
+                          ))}
+                        </RadioGroup>
+                        <Button
+                          onClick={e => {
+                            e.stopPropagation();
+                            addOption(promptID);
+                          }}
+                          sx={{ textTransform: "none" }}
+                        >
+                          <AddNewOptionStyled>
+                            <AddNewOptionTextStyled>
+                              + Add Option
+                            </AddNewOptionTextStyled>
+                          </AddNewOptionStyled>
+                        </Button>
+                      </MultipleChoicePromptStyled>
+                    )}
+
+                    {promptType === "checkbox" && (
+                      <CheckboxPromptStyled>
+                        {options.map(opt => (
+                          <McqOptionStyled key={opt.option_id}>
+                            <Checkbox disabled />
+                            <TextFieldStyled
+                              size="small"
+                              placeholder="Enter option text"
+                              value={opt.option_text}
+                              onChange={e =>
+                                updateOptionText(
+                                  promptID,
+                                  opt.option_id,
+                                  e.target.value,
+                                )
+                              }
+                            />
+                            <DeleteMcqOptionButton>
+                              <Button
+                                color="error"
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  deleteOption(promptID, opt.option_id);
+                                }}
+                              >
+                                x
+                              </Button>
+                            </DeleteMcqOptionButton>
+                          </McqOptionStyled>
+                        ))}
+                        <Button
+                          onClick={e => {
+                            e.stopPropagation();
+                            addOption(promptID);
+                          }}
+                          sx={{ textTransform: "none" }}
+                        >
+                          <AddNewOptionStyled>
+                            <AddNewOptionTextStyled>
+                              + Add Option
+                            </AddNewOptionTextStyled>
+                          </AddNewOptionStyled>
+                        </Button>
+                      </CheckboxPromptStyled>
+                    )}
+                  </>
                 )}
               </FieldCard>
 
@@ -393,6 +438,14 @@ export default function QuestionBuilder({
                     }}
                   >
                     + Add question
+                  </InsertQuestionButton>
+                  <InsertQuestionButton
+                    onClick={e => {
+                      e.stopPropagation();
+                      insertAfter(j, "insert_image_at");
+                    }}
+                  >
+                    + Add image
                   </InsertQuestionButton>
                 </InsertQuestionRow>
               )}

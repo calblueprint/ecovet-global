@@ -261,3 +261,41 @@ export const PromptWrapper = styled.div`
 export const Clickable = styled.div`
   cursor: pointer;
 `;
+
+export const ImageBlockFigure = styled.figure`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding-left: 2.5rem;
+`;
+
+export const ImageBlockImage = styled.img`
+  display: block;
+  max-width: 100%;
+  max-height: 24rem;
+  object-fit: contain;
+  align-self: flex-start;
+  border-radius: 0.5rem;
+  border: 1px solid ${COLORS.oat_medium};
+`;
+
+export const ImageBlockPlaceholder = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 9rem;
+  border-radius: 0.5rem;
+  background: ${COLORS.oat_light};
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.8rem;
+  color: ${COLORS.black40};
+`;
+
+export const ImageBlockCaption = styled.figcaption`
+  font-family: ${Sans.style.fontFamily};
+  font-size: 0.8rem;
+  color: ${COLORS.black70};
+  line-height: 1.4;
+  white-space: pre-wrap;
+`;

@@ -41,7 +41,11 @@ export default function TemplateBuilder({
         .map(id => localStore.rolesById[id] as Role)
     : [];
 
-  function insertPromptAt(rolePhaseId: UUID, index: number): UUID | null {
+  function insertPromptAt(
+    rolePhaseId: UUID,
+    index: number,
+    promptType: PromptType = "text",
+  ): UUID | null {
     if (localStore == null) return null;
 
     const newPromptID = crypto.randomUUID() as UUID;
@@ -52,7 +56,7 @@ export default function TemplateBuilder({
         prompt_text: "",
         prompt_number: index + 1,
         prompt_follow_ups: "",
-        prompt_type: "text",
+        prompt_type: promptType,
         image_path: null,
         archived: false,
       };
@@ -248,6 +252,14 @@ export default function TemplateBuilder({
         return addPrompt(id as UUID);
       } else if (field === "insert_prompt_at") {
         return insertPromptAt(id as UUID, next as number);
+      } else if (field === "insert_image_at") {
+        return insertPromptAt(id as UUID, next as number, "image");
+      } else if (field === "image_path") {
+        // "" clears it. Storage files are cleaned up on save, not here, so
+        // leaving without saving never breaks the saved template.
+        update(draft => {
+          draft.promptById[id as UUID].image_path = (next as string) || null;
+        });
       } else if (field === "remove_prompt") {
         removePrompt(next as UUID, id as UUID);
       } else if (field === "role_description") {
@@ -272,6 +284,7 @@ export default function TemplateBuilder({
         update(draft => {
           draft.promptById[id as UUID].prompt_type = next as PromptType;
           draft.optionsByPromptId[id as UUID] = [];
+          if (next !== "image") draft.promptById[id as UUID].image_path = null;
         });
       } else if (field === "options") {
         update(draft => {
@@ -384,6 +397,7 @@ export default function TemplateBuilder({
               />
             ) : (
               <QuestionBuilder
+                templateId={localStore.templateID}
                 value={{
                   role: localStore.rolesById[activeIds.roleId] as Role,
                   rolePhases: localStore.rolePhasesById,

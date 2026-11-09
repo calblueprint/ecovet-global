@@ -788,6 +788,7 @@ export async function fetchParticipantDetailBundle(
           .from("prompt")
           .select("*")
           .eq("archived", false)
+          .neq("prompt_type", "image") // facilitator views list answers only
           .in("role_phase_id", rolePhaseIds)
           .order("prompt_number")
       : Promise.resolve({ data: [], error: null }),
@@ -1021,6 +1022,7 @@ export async function fetchFacilitatorSessionBundle(
           .from("prompt")
           .select("*")
           .eq("archived", false)
+          .neq("prompt_type", "image") // facilitator views list answers only
           .in("role_phase_id", allRolePhaseIds)
           .order("prompt_number")
       : Promise.resolve({ data: [], error: null }),

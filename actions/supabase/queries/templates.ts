@@ -3,6 +3,7 @@
 import type { PromptType, Template, UUID } from "@/types/schema";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { Tag } from "@/types/schema";
+import { copyTemplateImage } from "./images";
 import { savePromptOptions } from "./prompt";
 
 export async function createTemplates( // create templates with inputs, but lowk most can be null as well
@@ -123,6 +124,7 @@ export async function createPrompts(
   prompt_follow_ups: string | null,
   prompt_type: PromptType,
   prompt_number: number,
+  image_path: string | null = null,
 ): Promise<UUID> {
   const supabase = await getSupabaseServerClient();
   const { data, error } = await supabase
@@ -135,6 +137,7 @@ export async function createPrompts(
         prompt_follow_ups: prompt_follow_ups,
         prompt_type: prompt_type,
         prompt_number: prompt_number,
+        image_path: image_path,
       },
       { onConflict: "prompt_id" },
     )
@@ -361,6 +364,16 @@ export async function copyTemplate(
         const prompt = rp.prompts![i];
         const newPromptId = remap(prompt.prompt_id);
 
+        // Each template gets its own copy of the file, so deleting an image
+        // in one template never breaks the other.
+        const imagePath = prompt.image_path
+          ? await copyTemplateImage(
+              prompt.image_path,
+              newTemplateId,
+              newPromptId,
+            )
+          : null;
+
         await createPrompts(
           newPromptId,
           remap(rp.role_phase_id),
@@ -368,6 +381,7 @@ export async function copyTemplate(
           prompt.prompt_follow_ups,
           prompt.prompt_type,
           i + 1,
+          imagePath,
         );
 
         // New option IDs: reusing the originals would move them to the copy.
