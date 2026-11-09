@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CircularProgress } from "@mui/material";
 import { produce } from "immer";
-import { replacePromptOptions } from "@/actions/supabase/queries/prompt";
+import { savePromptOptions } from "@/actions/supabase/queries/prompt";
 import {
   createPhases,
   createPrompts,
@@ -13,6 +13,7 @@ import {
   createRoles,
   createTemplates,
   fetchFullTemplate,
+  removeDeletedTemplateItems,
 } from "@/actions/supabase/queries/templates";
 import TemplateBuilder from "@/app/templates/components/TemplateBuilder/TemplateBuilder";
 import {
@@ -35,6 +36,7 @@ import {
   EditablePhase,
   LocalStore,
   Prompt,
+  PromptOption,
   Role,
   RolePhase,
   StagedOption,
@@ -63,7 +65,7 @@ interface FullTemplateResponse extends Template {
   roles: Role[];
   phases: (EditablePhase & {
     role_phases: (RolePhase & {
-      prompts: (Prompt & { options?: StagedOption[] })[];
+      prompts: (Prompt & { options?: PromptOption[] })[];
     })[];
   })[];
 }
@@ -106,7 +108,7 @@ interface FullTemplateResponse extends Template {
   roles: Role[];
   phases: (EditablePhase & {
     role_phases: (RolePhase & {
-      prompts: (Prompt & { options?: StagedOption[] })[];
+      prompts: (Prompt & { options?: PromptOption[] })[];
     })[];
   })[];
 }
@@ -140,7 +142,10 @@ function transformToLocalStore(data: FullTemplateResponse): LocalStore {
       rp.prompts?.forEach(p => {
         promptById[p.prompt_id] = p;
         promptIndex[rp.role_phase_id].push(p.prompt_id);
-        optionsByPromptId[p.prompt_id] = p.options ?? [];
+        optionsByPromptId[p.prompt_id] = (p.options ?? []).map(o => ({
+          option_id: o.option_id,
+          option_text: o.option_text ?? "",
+        }));
       });
     });
   });
@@ -263,9 +268,18 @@ export default function TemplateBuilderPage() {
             i + 1,
           );
           const options = saveStore.optionsByPromptId[promptID] ?? [];
-          await replacePromptOptions(promptID, options);
+          await savePromptOptions(promptID, options);
         }
       }
+
+      await removeDeletedTemplateItems(realtemplateID, {
+        roleIds: saveStore.roleIds.filter(
+          (id): id is UUID => typeof id !== "number",
+        ),
+        phaseIds: saveStore.phaseIds,
+        rolePhaseIds: Object.keys(saveStore.rolePhasesById) as UUID[],
+        promptIds: Object.values(saveStore.promptIndex).flat(),
+      });
     } catch (err) {
       console.error("Save failed", err);
       throw err; // re-throw so callers can react

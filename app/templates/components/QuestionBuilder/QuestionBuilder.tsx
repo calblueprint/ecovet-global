@@ -87,27 +87,21 @@ export default function QuestionBuilder({
     const current = value.optionsByPromptId[promptID] ?? [];
     const updated: StagedOption[] = [
       ...current,
-      { option_number: current.length + 1, option_text: "" },
+      { option_id: crypto.randomUUID() as UUID, option_text: "" },
     ];
     onChange(promptID, "options", updated);
   }
 
-  function deleteOption(promptID: UUID, option_number: number) {
+  function deleteOption(promptID: UUID, option_id: UUID) {
     const current = value.optionsByPromptId[promptID] ?? [];
-    const updated = current
-      .filter(o => o.option_number !== option_number)
-      .map((o, i) => ({ ...o, option_number: i + 1 }));
+    const updated = current.filter(o => o.option_id !== option_id);
     onChange(promptID, "options", updated);
   }
 
-  function updateOptionText(
-    promptID: UUID,
-    option_number: number,
-    text: string,
-  ) {
+  function updateOptionText(promptID: UUID, option_id: UUID, text: string) {
     const current = value.optionsByPromptId[promptID] ?? [];
     const updated = current.map(o =>
-      o.option_number === option_number ? { ...o, option_text: text } : o,
+      o.option_id === option_id ? { ...o, option_text: text } : o,
     );
     onChange(promptID, "options", updated);
   }
@@ -301,9 +295,9 @@ export default function QuestionBuilder({
                 {promptType === "multiple_choice" && (
                   <MultipleChoicePromptStyled>
                     <RadioGroup name={`mcq-${promptID}`}>
-                      {options.map((opt, idx) => (
-                        <McqOptionStyled key={opt.option_number ?? idx}>
-                          <Radio value={opt.option_number} disabled />
+                      {options.map(opt => (
+                        <McqOptionStyled key={opt.option_id}>
+                          <Radio value={opt.option_id} disabled />
                           <TextFieldStyled
                             size="small"
                             placeholder="Enter option text"
@@ -311,7 +305,7 @@ export default function QuestionBuilder({
                             onChange={e =>
                               updateOptionText(
                                 promptID,
-                                opt.option_number,
+                                opt.option_id,
                                 e.target.value,
                               )
                             }
@@ -319,7 +313,7 @@ export default function QuestionBuilder({
                           <DeleteMcqOptionButton
                             onClick={e => {
                               e.stopPropagation();
-                              deleteOption(promptID, opt.option_number);
+                              deleteOption(promptID, opt.option_id);
                             }}
                           >
                             x
@@ -345,8 +339,8 @@ export default function QuestionBuilder({
 
                 {promptType === "checkbox" && (
                   <CheckboxPromptStyled>
-                    {options.map((opt, idx) => (
-                      <McqOptionStyled key={opt.option_number ?? idx}>
+                    {options.map(opt => (
+                      <McqOptionStyled key={opt.option_id}>
                         <Checkbox disabled />
                         <TextFieldStyled
                           size="small"
@@ -355,7 +349,7 @@ export default function QuestionBuilder({
                           onChange={e =>
                             updateOptionText(
                               promptID,
-                              opt.option_number,
+                              opt.option_id,
                               e.target.value,
                             )
                           }
@@ -365,7 +359,7 @@ export default function QuestionBuilder({
                             color="error"
                             onClick={e => {
                               e.stopPropagation();
-                              deleteOption(promptID, opt.option_number);
+                              deleteOption(promptID, opt.option_id);
                             }}
                           >
                             x

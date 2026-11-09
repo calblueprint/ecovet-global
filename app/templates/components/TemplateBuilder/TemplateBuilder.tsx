@@ -53,6 +53,8 @@ export default function TemplateBuilder({
         prompt_number: index + 1,
         prompt_follow_ups: "",
         prompt_type: "text",
+        image_path: null,
+        archived: false,
       };
       if (!draft.promptIndex[rolePhaseId]) {
         draft.promptIndex[rolePhaseId] = [];

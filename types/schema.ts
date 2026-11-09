@@ -10,7 +10,7 @@ export type UserType = "Admin" | "Facilitator" | "Participant";
 export type StatusType = "Pending" | "Accepted" | "Cancelled";
 
 // ENUM for prompt_type
-export type PromptType = "text" | "multiple_choice" | "checkbox";
+export type PromptType = "text" | "multiple_choice" | "checkbox" | "image";
 
 export type UUID = string;
 
@@ -89,8 +89,9 @@ export type PromptWithResponse = {
   options: PromptOptionsSelected[] | null;
 };
 
+// Order is the array position; it is saved as prompt_option.option_number.
 export type StagedOption = {
-  option_number: number;
+  option_id: UUID;
   option_text: string;
 };
 
