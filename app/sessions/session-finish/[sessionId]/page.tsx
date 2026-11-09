@@ -90,8 +90,7 @@ export default function SessionFinish() {
       }
 
       const data = await res.json();
-      // Append cache-buster so the CDN doesn't serve the previous version
-      setPdfUrl(`${data.url}?t=${Date.now()}`);
+      setPdfUrl(data.url);
       setPdfSize(data.sizeBytes ?? null);
     } catch (err) {
       console.error(err);

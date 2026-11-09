@@ -5,6 +5,12 @@ import type {
 import { createClient } from "@supabase/supabase-js";
 import { generateSessionReport } from "@/lib/pdf/generate";
 import { loadPdfImages } from "@/lib/pdf/images";
+import {
+  accessDenied,
+  getReportViewer,
+  isStaffForGroup,
+  signedReportUrl,
+} from "@/lib/reports";
 
 export const dynamic = "force-dynamic";
 
@@ -23,13 +29,25 @@ export async function GET(
 
   const { data: template, error: templateError } = await supabase
     .from("template")
-    .select("template_id, template_name, summary, setting, current_activity")
+    .select(
+      "template_id, template_name, summary, setting, current_activity, user_group_id, accessible_to_all",
+    )
     .eq("template_id", templateId)
     .single();
 
   if (templateError || !template) {
     console.error("Template fetch error:", templateError?.message);
     return Response.json({ error: "Template not found" }, { status: 404 });
+  }
+
+  // Admins, or facilitators who can see this template in their list.
+  const viewer = await getReportViewer();
+  const canView =
+    viewer &&
+    (isStaffForGroup(viewer, template.user_group_id) ||
+      (viewer.userType === "Facilitator" && template.accessible_to_all));
+  if (!viewer || !canView) {
+    return accessDenied(viewer);
   }
 
   const { data: phases, error: phasesError } = await supabase
@@ -212,12 +230,13 @@ export async function GET(
     );
   }
 
-  const { data: urlData } = supabase.storage
-    .from("reports")
-    .getPublicUrl(reportFileName);
+  const url = await signedReportUrl(supabase, reportFileName);
+  if (!url) {
+    return Response.json({ error: "Could not create link" }, { status: 500 });
+  }
 
   return Response.json(
-    { url: `${urlData.publicUrl}?t=${Date.now()}`, sizeBytes: pdfBytes.length },
+    { url, sizeBytes: pdfBytes.length },
     { headers: { "Cache-Control": "no-store" } },
   );
 }
