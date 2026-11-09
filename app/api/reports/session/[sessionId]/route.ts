@@ -303,7 +303,9 @@ export async function GET(
         .from("prompt")
         .select("prompt_id, prompt_text, role_phase_id")
         .eq("archived", false)
+        .neq("prompt_type", "image") // images aren't included in PDFs yet
         .in("role_phase_id", rolePhaseIds)
+        .order("prompt_number")
     : { data: [] };
 
   // Prompt options (for multiple-choice prompts)
@@ -629,7 +631,9 @@ export async function POST(
         .from("prompt")
         .select("prompt_id, prompt_text, role_phase_id")
         .eq("archived", false)
+        .neq("prompt_type", "image") // images aren't included in PDFs yet
         .in("role_phase_id", rolePhaseIds)
+        .order("prompt_number")
     : { data: [] };
 
   // Prompt options (for multiple-choice prompts)

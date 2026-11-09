@@ -10,11 +10,16 @@ import {
   RadioGroup,
 } from "@mui/material";
 import LinkedText from "@/components/Linki/Linkify";
+import { isAnswerable } from "@/utils/prompts";
 import {
   ContentDiv,
   ContinueButtonDiv,
   FollowUpItem,
   FollowUpList,
+  ImageBlockCaption,
+  ImageBlockFigure,
+  ImageBlockImage,
+  ImageBlockPlaceholder,
   PhaseHeading,
   ProgressText,
   PromptCard,
@@ -39,6 +44,7 @@ interface PromptsRightPanelProps {
   prompts: Prompt[];
   answers: string[];
   optionsByPromptId: Record<string, PromptOption[]>;
+  imageUrls: Record<string, string>;
   completedPrompts: Set<string>;
   phaseName: string;
   isOverview: boolean;
@@ -63,6 +69,7 @@ export default function PromptsRightPanel({
   prompts,
   answers,
   optionsByPromptId,
+  imageUrls,
   completedPrompts,
   isLoading = false,
   onInputAnswer,
@@ -70,7 +77,13 @@ export default function PromptsRightPanel({
   backButton,
   nextButton,
 }: PromptsRightPanelProps) {
-  const totalPrompts = prompts.length;
+  // Image blocks aren't questions: no number, no answer, not in progress.
+  const totalPrompts = prompts.filter(isAnswerable).length;
+  const questionNumbers: Record<string, number> = {};
+  let questionCount = 0;
+  for (const p of prompts) {
+    if (isAnswerable(p)) questionNumbers[p.prompt_id] = ++questionCount;
+  }
   const completedCount = Math.min(completedPrompts.size, totalPrompts);
   const progressPercentage =
     totalPrompts > 0 ? Math.round((completedCount / totalPrompts) * 100) : 0;
@@ -200,16 +213,38 @@ export default function PromptsRightPanel({
             {prompts.length === 0 ? (
               <PromptText>No prompts for this phase.</PromptText>
             ) : (
-              prompts.map((prompt, index) => (
-                <PromptWrapper key={prompt.prompt_id}>
-                  <PromptQuestionNumber>{index + 1} →</PromptQuestionNumber>
-                  <PromptQuestionText>
-                    <LinkedText text={prompt.prompt_text} />
-                  </PromptQuestionText>
-                  {renderFollowUps(prompt.prompt_follow_ups)}
-                  {renderAnswerInput(prompt, index)}
-                </PromptWrapper>
-              ))
+              prompts.map((prompt, index) =>
+                !isAnswerable(prompt) ? (
+                  <ImageBlockFigure key={prompt.prompt_id}>
+                    {prompt.image_path && imageUrls[prompt.image_path] ? (
+                      <ImageBlockImage
+                        src={imageUrls[prompt.image_path]}
+                        alt={prompt.prompt_text || "Scenario image"}
+                      />
+                    ) : (
+                      <ImageBlockPlaceholder>
+                        Image unavailable
+                      </ImageBlockPlaceholder>
+                    )}
+                    {prompt.prompt_text && (
+                      <ImageBlockCaption>
+                        <LinkedText text={prompt.prompt_text} />
+                      </ImageBlockCaption>
+                    )}
+                  </ImageBlockFigure>
+                ) : (
+                  <PromptWrapper key={prompt.prompt_id}>
+                    <PromptQuestionNumber>
+                      {questionNumbers[prompt.prompt_id]} →
+                    </PromptQuestionNumber>
+                    <PromptQuestionText>
+                      <LinkedText text={prompt.prompt_text} />
+                    </PromptQuestionText>
+                    {renderFollowUps(prompt.prompt_follow_ups)}
+                    {renderAnswerInput(prompt, index)}
+                  </PromptWrapper>
+                ),
+              )
             )}
           </>
         )}
