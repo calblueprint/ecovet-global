@@ -106,13 +106,23 @@ export default function FacilitatorExercisesPage() {
   }
 
   async function handleViewPdf(sessionId: string) {
+    // Open the tab right away, while this still counts as the user's click.
+    // Opening it after the PDF is generated (which can take a while) gets
+    // silently blocked as a pop-up.
+    const tab = window.open("", "_blank");
+    if (tab) tab.document.body.textContent = "Generating report…";
     setPdfLoading(sessionId);
     try {
       const res = await fetch(`/api/reports/session/${sessionId}`);
       const json = await res.json();
-      if (json.url) {
-        window.open(json.url, "_blank", "noopener,noreferrer");
+      if (json.url && tab) {
+        tab.opener = null;
+        tab.location.href = json.url;
+      } else {
+        tab?.close();
       }
+    } catch {
+      tab?.close();
     } finally {
       setPdfLoading(null);
     }
