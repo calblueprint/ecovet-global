@@ -294,6 +294,9 @@ export default function TemplateListPage({
       setSelectedTagIds(prev =>
         prev ? prev.filter(tag => tag !== tag_id) : null,
       );
+
+      // drop it from the tag dropdowns too
+      setAvailableTags(prev => prev.filter(tag => tag.tag_id !== tag_id));
     }
 
     return true;
@@ -391,6 +394,7 @@ export default function TemplateListPage({
               user_group_id={user_group_id}
               selectedTagIds={selectedTagIds}
               onTagRenamed={() => setTagVersion(v => v + 1)}
+              tagVersion={tagVersion}
             />
           </SideNavContainer>
         )}

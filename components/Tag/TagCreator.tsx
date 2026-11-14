@@ -21,6 +21,8 @@ type TagCreatorProps = {
   selectedTagIds: UUID[] | null;
   onTagRenamed?: () => void;
   onDeleteTag: (tag_id: UUID) => Promise<boolean>;
+  // bump to reload tags (e.g. after a tag is created elsewhere on the page)
+  refreshKey?: number;
 };
 
 type ColorKey = keyof typeof COLORS;
@@ -31,6 +33,7 @@ export function TagCreator({
   user_group_id,
   onTagRenamed,
   onDeleteTag,
+  refreshKey,
 }: TagCreatorProps) {
   // Switch to use Tag type from schema
   const [tags, setTags] = useState<Tag[]>([]);
@@ -60,6 +63,9 @@ export function TagCreator({
 
     // Add returned tag to UI state
     setTags(prev => [...prev, newTag]);
+
+    // let the template list pick up the new tag for its tag dropdowns
+    onTagRenamed?.();
   }
 
   async function handleRename(tag_id: UUID, newName: string) {
@@ -90,7 +96,7 @@ export function TagCreator({
     }
 
     getTags();
-  }, [user_group_id]);
+  }, [user_group_id, refreshKey]);
 
   return (
     <StyledTagCreator>

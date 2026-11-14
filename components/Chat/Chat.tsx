@@ -95,8 +95,13 @@ export default function Chat({
     currentRoomIdRef.current = currentRoomId;
   }, [currentRoomId]);
 
+  const seenAnnouncementCount = useRef(0);
   useEffect(() => {
-    if (currentRoomId !== announcementRoom.roomId) {
+    if (currentRoomId === announcementRoom.roomId) {
+      seenAnnouncementCount.current = announcements.length;
+      return;
+    }
+    if (announcements.length > seenAnnouncementCount.current) {
       setChatNotifications(notifs =>
         new Set(notifs).add(announcementRoom.roomId),
       );

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { handleProfileSubmit } from "@/actions/supabase/queries/profile";
 import { getHomePath } from "@/utils/HomePage";
 import { useProfile } from "@/utils/ProfileProvider";
@@ -20,7 +21,8 @@ import {
 } from "../styles";
 
 export default function EditProfilePage() {
-  const { userId, profile, loading: profileLoading } = useProfile();
+  const { userId, profile, loading: profileLoading, refetch } = useProfile();
+  const router = useRouter();
   const homepage = getHomePath(profile);
   const [formData, setFormData] = useState({
     id: "",
@@ -66,13 +68,15 @@ export default function EditProfilePage() {
       org_role: formData.org_role,
     });
 
-    if (result.success) {
-      setMessage("");
-    } else {
+    if (!result.success) {
       setMessage(`Error: ${result.error}`);
+      setSaving(false);
+      return;
     }
 
-    setSaving(false);
+    // reload the cached profile so the new name shows everywhere, then go home
+    await refetch();
+    router.push(homepage);
   };
 
   if (profileLoading) return <p></p>;

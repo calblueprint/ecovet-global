@@ -134,7 +134,7 @@ export default function TemplateBuilder({
       draft.phasesById[newPhaseId] = {
         phase_id: newPhaseId,
         template_id: draft.templateID,
-        phase_name: "",
+        phase_name: `Phase ${nextNumber}`,
         phase_description: "",
         phase_number: nextNumber,
       } as EditablePhase;
@@ -162,12 +162,14 @@ export default function TemplateBuilder({
 
     update(draft => {
       const newRoleId = crypto.randomUUID();
+      // roleIds also holds the template itself under id 1, so skip it
+      const nextNumber = draft.roleIds.filter(id => id !== 1).length + 1;
 
       draft.roleIds.push(newRoleId);
       draft.rolesById[newRoleId] = {
         role_id: newRoleId,
         template_id: draft.templateID,
-        role_name: "",
+        role_name: `Role ${nextNumber}`,
         role_description: "",
       } as Role;
 

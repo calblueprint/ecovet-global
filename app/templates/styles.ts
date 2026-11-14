@@ -43,6 +43,34 @@ export const SideNavContainer = styled.div`
   z-index: 10;
 `;
 
+export const DraftBanner = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: ${COLORS.lightEletricBlue};
+  color: ${COLORS.darkElectricBlue};
+  font-size: 0.875rem;
+`;
+
+export const DraftBannerButton = styled.button`
+  background: none;
+  border: none;
+  color: ${COLORS.darkElectricBlue};
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 export const BackLink = styled.button`
   background: none;
   border: none;

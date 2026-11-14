@@ -399,7 +399,9 @@ export async function GET(
     const answer = r.prompt_option_id
       ? (optionTextById[r.prompt_option_id] ?? "")
       : (r.prompt_answer ?? "");
-    responseMap[r.user_id][r.prompt_id!] = answer;
+    // checkbox prompts store one row per ticked box, so join them
+    const prev = responseMap[r.user_id][r.prompt_id!];
+    responseMap[r.user_id][r.prompt_id!] = prev ? `${prev}, ${answer}` : answer;
   }
 
   // Participant name lookup
@@ -748,7 +750,9 @@ export async function POST(
     const answer = r.prompt_option_id
       ? (optionTextById[r.prompt_option_id] ?? "")
       : (r.prompt_answer ?? "");
-    responseMap[r.user_id][r.prompt_id!] = answer;
+    // checkbox prompts store one row per ticked box, so join them
+    const prev = responseMap[r.user_id][r.prompt_id!];
+    responseMap[r.user_id][r.prompt_id!] = prev ? `${prev}, ${answer}` : answer;
   }
 
   const nameByUserId: Record<string, string> = {};
