@@ -2,8 +2,8 @@
 
 import { useMemo } from "react";
 import { v5 as uuidv5 } from "uuid";
+import supabase from "@/actions/supabase/client";
 import { persistChatMessage } from "@/actions/supabase/queries/chat";
-import { supabase } from "@/lib/supabase/client";
 import { ChatMessage } from "@/types/schema";
 import { EVENT_MESSAGE_TYPE, useRealtimeChat } from "./UseChat";
 

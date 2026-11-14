@@ -164,10 +164,12 @@ export async function sendInviteEmail(email: string) {
 }
 
 export async function checkIfUserExists(email: string): Promise<boolean> {
-  const supabase = await getSupabaseServerClient();
+  // called from reset-password before anyone is logged in, so RLS would
+  // hide every profile; use the admin client
+  const adminClient = getSupabaseAdminClient();
   const lowerCaseEmail = email.toLowerCase();
 
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from("profile")
     .select("*")
     .eq("email", lowerCaseEmail)
