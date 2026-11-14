@@ -1,10 +1,11 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { StagedOption, UUID } from "@/types/schema";
-import supabase from "../client";
+import browserClient from "../client";
 
 export async function fetchOptionsForPrompts(prompt_ids: UUID[]) {
   if (prompt_ids.length === 0) return [];
 
-  const { data, error } = await supabase
+  const { data, error } = await browserClient
     .from("prompt_option")
     .select("*")
     .in("prompt_id", prompt_ids)
@@ -23,6 +24,7 @@ export async function fetchOptionsForPrompts(prompt_ids: UUID[]) {
 export async function savePromptOptions(
   prompt_id: UUID,
   options: StagedOption[],
+  supabase: SupabaseClient = browserClient,
 ) {
   if (options.length > 0) {
     const { error: upsertError } = await supabase.from("prompt_option").upsert(

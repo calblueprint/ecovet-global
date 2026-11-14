@@ -46,11 +46,19 @@ import {
 } from "@/types/schema";
 import { getHomePath } from "@/utils/HomePage";
 import { useProfile } from "@/utils/ProfileProvider";
+import {
+  clearTemplateDraft,
+  readTemplateDraft,
+  templateDraftKey,
+  writeTemplateDraft,
+} from "@/utils/templateDraft";
 import { LoadingScreen } from "../facilitator/participants/styles";
 import {
   ActionRow,
   ActionText,
   BackLink,
+  DraftBanner,
+  DraftBannerButton,
   HeaderButtonDark,
   LoadingMessages,
   RoleItem,
@@ -190,6 +198,12 @@ export default function TemplateBuilderPage() {
 
   const [showBackWarning, setShowBackWarning] = useState(false);
 
+  // Unsaved edits are cached in localStorage so a reload doesn't lose them
+  const draftKey = templateDraftKey(isFromTemplateList ? templateId : null);
+  const [dirty, setDirty] = useState(false);
+  // when a cached draft was restored on load: the time it was cached
+  const [restoredDraftAt, setRestoredDraftAt] = useState<number | null>(null);
+
   async function saveTemplate(): Promise<void> {
     if (!localStore) return;
     setSaving(true);
@@ -285,9 +299,14 @@ export default function TemplateBuilderPage() {
 
       // Runs last: only files no saved prompt points to get deleted.
       await removeUnusedTemplateImages(realtemplateID);
+
+      // everything is in the database now, so the cached draft isn't needed
+      clearTemplateDraft(draftKey);
+      setDirty(false);
+      setRestoredDraftAt(null);
     } catch (err) {
       console.error("Save failed", err);
-      throw err; // re-throw so callers can react
+      throw err;
     } finally {
       setSaving(false);
     }
@@ -310,30 +329,65 @@ export default function TemplateBuilderPage() {
         return;
       }
     }
+    if (action === "confirm") {
+      // "Leave without saving": they chose to drop these edits
+      clearTemplateDraft(draftKey);
+    }
     setShowBackWarning(false);
     router.push(getHomePath(profile));
   };
 
-  useEffect(() => {
-    async function load() {
-      if (isFromTemplateList && templateId) {
-        try {
-          const data = (await fetchFullTemplate(
-            templateId,
-          )) as FullTemplateResponse | null;
-          if (data) setLocalStore(transformToLocalStore(data));
-        } catch (err) {
-          console.error("Load failed", err);
-        } finally {
-          setLoading(false);
-        }
-      }
+  async function loadFromDatabase(id: UUID) {
+    setLoading(true);
+    try {
+      const data = (await fetchFullTemplate(id)) as FullTemplateResponse | null;
+      if (data) setLocalStore(transformToLocalStore(data));
+    } catch (err) {
+      console.error("Load failed", err);
+    } finally {
+      setLoading(false);
     }
-    load();
-  }, [isFromTemplateList, templateId]);
+  }
+
+  useEffect(() => {
+    // Unsaved edits from a previous visit win over the database copy
+    const draft = readTemplateDraft(draftKey);
+    if (draft) {
+      setLocalStore(draft.store);
+      setRestoredDraftAt(draft.savedAt);
+      setDirty(true);
+      setLoading(false);
+      return;
+    }
+    if (isFromTemplateList && templateId) loadFromDatabase(templateId);
+  }, [isFromTemplateList, templateId, draftKey]);
+
+  // Cache edits shortly after they happen (debounced so typing stays fast)
+  useEffect(() => {
+    if (!dirty) return;
+    const timer = setTimeout(
+      () => writeTemplateDraft(draftKey, localStore),
+      500,
+    );
+    return () => clearTimeout(timer);
+  }, [dirty, localStore, draftKey]);
+
+  const discardDraft = async () => {
+    clearTemplateDraft(draftKey);
+    setDirty(false);
+    setRestoredDraftAt(null);
+    setActiveIds({ roleId: 1, rolePhaseId: null });
+    setSelectedPhaseId(null);
+    if (isFromTemplateList && templateId) {
+      await loadFromDatabase(templateId);
+    } else {
+      setLocalStore(createInitialStore());
+    }
+  };
 
   const updateLocalStore = (updater: (draft: LocalStore) => void) => {
     setLocalStore(prev => produce(prev, updater));
+    setDirty(true);
   };
 
   const handleStartExercise = () => {
@@ -506,6 +560,21 @@ export default function TemplateBuilderPage() {
         </SideNavContainer>
 
         <TemplateMainBox>
+          {restoredDraftAt && (
+            <DraftBanner>
+              <span>
+                Restored unsaved changes from{" "}
+                {new Date(restoredDraftAt).toLocaleString([], {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })}
+                . Save to keep them.
+              </span>
+              <DraftBannerButton onClick={discardDraft}>
+                Discard changes
+              </DraftBannerButton>
+            </DraftBanner>
+          )}
           <TemplateBuilder
             activeIds={activeIds}
             setActiveIds={setActiveIds}

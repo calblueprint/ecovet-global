@@ -312,6 +312,7 @@ export async function copyTemplate(
   };
 
   const newTemplateId = crypto.randomUUID() as UUID;
+  const supabase = await getSupabaseServerClient();
 
   data.roles?.forEach(r => remap(r.role_id));
   data.phases?.forEach(p => {
@@ -391,6 +392,7 @@ export async function copyTemplate(
             option_id: crypto.randomUUID() as UUID,
             option_text: o.option_text ?? "",
           })),
+          supabase,
         );
       }
     }
