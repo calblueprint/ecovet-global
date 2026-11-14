@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { CircularProgress } from "@mui/material";
+import { checkSessionReportAccess } from "@/actions/supabase/queries/reports";
 import { fetchPDFName } from "@/actions/supabase/queries/sessions";
+import { LoadingScreen } from "@/app/facilitator/participants/styles";
+import AccessError from "@/components/AccessError/AccessError";
 import { getHomePath } from "@/utils/HomePage";
 import { useProfile } from "@/utils/ProfileProvider";
 import { buildSessionDisplayName } from "@/utils/session-details";
@@ -39,6 +43,9 @@ export default function SessionFinish() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfSize, setPdfSize] = useState<number | null>(null);
   const [pdfName, setPDFName] = useState<string | null>(null);
+  const [access, setAccess] = useState<"checking" | "allowed" | "denied">(
+    "checking",
+  );
 
   async function fetchOrGenerateReport() {
     if (!sessionId) return;
@@ -53,6 +60,11 @@ export default function SessionFinish() {
 
     try {
       const res = await fetch(`/api/reports/session/${sessionId}`);
+
+      if (res.status === 401 || res.status === 403 || res.status === 404) {
+        setAccess("denied");
+        return;
+      }
 
       if (!res.ok) {
         const errBody = await res.json().catch(() => ({}));
@@ -90,8 +102,7 @@ export default function SessionFinish() {
       }
 
       const data = await res.json();
-      // Append cache-buster so the CDN doesn't serve the previous version
-      setPdfUrl(`${data.url}?t=${Date.now()}`);
+      setPdfUrl(data.url);
       setPdfSize(data.sizeBytes ?? null);
     } catch (err) {
       console.error(err);
@@ -100,9 +111,20 @@ export default function SessionFinish() {
     }
   }
 
-  // Load existing report on page load, generate if none exists.
+  // Check access first, then load the existing report (or generate one).
   useEffect(() => {
-    fetchOrGenerateReport();
+    if (!sessionId) return;
+    let cancelled = false;
+    checkSessionReportAccess(sessionId)
+      .catch(() => "denied" as const)
+      .then(result => {
+        if (cancelled) return;
+        setAccess(result);
+        if (result === "allowed") fetchOrGenerateReport();
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [sessionId]);
 
   async function handleSave() {
@@ -121,6 +143,18 @@ export default function SessionFinish() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(objectUrl);
+  }
+
+  if (access === "denied") {
+    return <AccessError />;
+  }
+
+  if (access === "checking") {
+    return (
+      <LoadingScreen>
+        <CircularProgress color="inherit" aria-label="Loading…" />
+      </LoadingScreen>
+    );
   }
 
   return (

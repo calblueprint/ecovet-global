@@ -7,6 +7,13 @@ import type {
 import { createClient } from "@supabase/supabase-js";
 import { generateSessionReport } from "@/lib/pdf/generate";
 import { loadPdfImages } from "@/lib/pdf/images";
+import {
+  accessDenied,
+  canViewSessionReport,
+  getReportViewer,
+  isStaffForGroup,
+  signedReportUrl,
+} from "@/lib/reports";
 import { buildSessionDisplayName } from "@/utils/session-details";
 
 export const dynamic = "force-dynamic";
@@ -195,6 +202,7 @@ export async function GET(
       created_at,
       is_finished,
       template_id,
+      user_group_id,
       template ( template_name, summary, setting, current_activity )
     `,
     )
@@ -203,6 +211,19 @@ export async function GET(
 
   if (sessionError || !session) {
     return Response.json({ error: "Session not found" }, { status: 404 });
+  }
+
+  const viewer = await getReportViewer();
+  if (
+    !viewer ||
+    !(await canViewSessionReport(
+      supabase,
+      viewer,
+      sessionId,
+      session.user_group_id,
+    ))
+  ) {
+    return accessDenied(viewer);
   }
 
   // Only use the cached file if the session is finished — in-progress PDFs
@@ -214,17 +235,17 @@ export async function GET(
       .list(folderPath);
 
     if (existingFiles && existingFiles.length > 0) {
-      const existing = existingFiles[0];
-      const { data: urlData } = supabase.storage
-        .from("reports")
-        .getPublicUrl(`${folderPath}/${existing.name}`);
-      const updatedAt =
-        existingFiles[0].updated_at ?? existingFiles[0].created_at;
-      const bust = updatedAt ? new Date(updatedAt).getTime() : Date.now();
-      return Response.json(
-        { url: `${urlData.publicUrl}?t=${bust}` },
-        { headers: { "Cache-Control": "no-store" } },
+      const url = await signedReportUrl(
+        supabase,
+        `${folderPath}/${existingFiles[0].name}`,
       );
+      if (url) {
+        return Response.json(
+          { url },
+          { headers: { "Cache-Control": "no-store" } },
+        );
+      }
+      // Couldn't sign the cached file: fall through and regenerate it.
     }
   }
 
@@ -540,14 +561,12 @@ export async function GET(
     );
   }
 
-  const { data: urlData } = supabase.storage
-    .from("reports")
-    .getPublicUrl(fileName);
+  const url = await signedReportUrl(supabase, fileName);
+  if (!url) {
+    return Response.json({ error: "Could not create link" }, { status: 500 });
+  }
 
-  return Response.json(
-    { url: `${urlData.publicUrl}?t=${Date.now()}` },
-    { headers: { "Cache-Control": "no-store" } },
-  );
+  return Response.json({ url }, { headers: { "Cache-Control": "no-store" } });
 }
 
 export async function POST(
@@ -571,6 +590,7 @@ export async function POST(
       session_name,
       created_at,
       template_id,
+      user_group_id,
       template ( template_name, summary, setting, current_activity )
     `,
     )
@@ -579,6 +599,12 @@ export async function POST(
 
   if (sessionError || !session) {
     return Response.json({ error: "Session not found" }, { status: 404 });
+  }
+
+  // Only staff can regenerate the report (it adds facilitator comments).
+  const viewer = await getReportViewer();
+  if (!viewer || !isStaffForGroup(viewer, session.user_group_id)) {
+    return accessDenied(viewer);
   }
 
   const template = session.template as unknown as NestedTemplate | null;
@@ -879,9 +905,13 @@ export async function POST(
     );
   }
 
-  const { data: urlData } = supabase.storage
-    .from("reports")
-    .getPublicUrl(fileName);
+  const url = await signedReportUrl(supabase, fileName);
+  if (!url) {
+    return Response.json({ error: "Could not create link" }, { status: 500 });
+  }
 
-  return Response.json({ url: urlData.publicUrl, sizeBytes: pdfBytes.length });
+  return Response.json(
+    { url, sizeBytes: pdfBytes.length },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }
