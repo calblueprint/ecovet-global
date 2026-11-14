@@ -10,7 +10,7 @@ import {
   fetchChatUserOptions,
   fetchParticipantPhaseIndex,
 } from "@/actions/supabase/queries/sessions";
-import { supabase } from "@/lib/supabase/client";
+import supabase from "@/actions/supabase/client";
 import { ChatMessage, ChatParticipant, UUID } from "@/types/schema";
 import { useProfile } from "@/utils/ProfileProvider";
 import { useAnnouncements } from "@/utils/UseAnnouncements";

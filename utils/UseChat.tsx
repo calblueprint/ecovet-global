@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import supabase from "@/actions/supabase/client";
 import {
   getMessageHistory,
   persistChatMessage,
 } from "@/actions/supabase/queries/chat";
-import { supabase } from "@/lib/supabase/client";
 import { ChatMessage } from "@/types/schema";
 
 export const EVENT_MESSAGE_TYPE = "message";

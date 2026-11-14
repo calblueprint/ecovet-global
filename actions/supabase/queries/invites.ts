@@ -1,10 +1,10 @@
 "use server";
 
 import type { UUID } from "@/types/schema";
-import supabase from "@/app/api/supabase/createClient";
 import {
   findAuthUserByEmail,
   getSupabaseAdminClient,
+  getSupabaseServerClient,
 } from "@/lib/supabase/server";
 import { UserType } from "@/types/schema";
 import { sendInviteEmail } from "./auth";
@@ -75,7 +75,9 @@ export async function submitNewInvite(
   // deleted). It would make inviteUserByEmail fail, so remove it first.
   await deleteAuthUserByEmail(email);
 
-  // create a row in invite table
+  // create a row in invite table (as the logged-in user, so RLS checks they
+  // are staff of this user group)
+  const supabase = await getSupabaseServerClient();
   const { error } = await supabase.from("invite").upsert(
     {
       invite_id: id,
@@ -109,7 +111,7 @@ export async function submitNewInvite(
 }
 
 export async function changeToFacilitator(user_id: UUID): Promise<void> {
-  const { error } = await supabase
+  const { error } = await getSupabaseAdminClient()
     .from("profile")
     .update({ user_type: "Facilitator" })
     .match({ id: user_id });
@@ -123,6 +125,7 @@ export async function changeToFacilitator(user_id: UUID): Promise<void> {
 }
 
 export async function deleteInvite(invite_id: UUID): Promise<void> {
+  const supabase = await getSupabaseServerClient();
   const { error } = await supabase
     .from("invite")
     .delete()
@@ -149,6 +152,7 @@ export async function deleteAuthUserByEmail(email: string): Promise<void> {
 
 export async function fetchInvites(user_group_id: UUID) {
   try {
+    const supabase = await getSupabaseServerClient();
     const { data, error } = await supabase
       .from("invite")
       .select("*")
