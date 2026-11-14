@@ -8,6 +8,7 @@ import {
   checkInviteStatus,
   completeInvitedSignUp,
 } from "@/actions/supabase/queries/auth";
+import { useProfile } from "@/utils/ProfileProvider";
 import {
   Button,
   Container,
@@ -31,6 +32,7 @@ import {
 
 export default function SignUp() {
   const router = useRouter();
+  const { refetch } = useProfile();
   const [email, setEmail] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(true);
   const [password, setPassword] = useState("");
@@ -116,6 +118,7 @@ export default function SignUp() {
         return;
       }
 
+      await refetch();
       router.push("/onboarding");
     } catch (error: unknown) {
       setErrorMessage(
