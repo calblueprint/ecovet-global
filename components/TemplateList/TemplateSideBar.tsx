@@ -28,6 +28,7 @@ interface TemplateSideBarProps {
   user_group_id: UUID;
   selectedTagIds: UUID[] | null;
   onTagRenamed: () => void;
+  tagVersion: number;
 }
 
 export default function TemplateSideBar({
@@ -37,6 +38,7 @@ export default function TemplateSideBar({
   user_group_id,
   selectedTagIds,
   onTagRenamed,
+  tagVersion,
 }: TemplateSideBarProps) {
   const router = useRouter();
 
@@ -114,6 +116,7 @@ export default function TemplateSideBar({
               selectedTagIds={selectedTagIds}
               onTagRenamed={onTagRenamed}
               onDeleteTag={handleRequestDelete}
+              refreshKey={tagVersion}
             />
           </AccordionDetails>
         </StyledAccordion>
